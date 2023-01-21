@@ -1,6 +1,6 @@
-package com.synoriq.synofin.lms.reportsservice.flyway;
+package com.synoriq.synofin.collection.collectionservice.flyway;
 
-import com.synoriq.synofin.lms.reportsservice.config.datasource.CustomDBRouting;
+import com.synoriq.synofin.collection.collectionservice.config.datasource.CustomDBRouting;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
@@ -42,6 +42,7 @@ public class FlywayService {
                 ((CustomDBRouting) flywayProps.getDataSource()).getResolvedDataSources().entrySet())
         ) {
             String clientId = (String) entry.getKey();
+            log.info("Migrate database through flyway for client = " + clientId);
             executeFlyway(clientId, entry, getConfigurations(clientId, false));
         }
     }
@@ -60,6 +61,7 @@ public class FlywayService {
         try {
             log.info("Migrating Schema For Client Id : {}", clientId);
             for (FluentConfiguration config : configurationList) {
+                log.info("config and dataSource + {} {}", config, dataSource);
                 flyway = loadFlywayConfig(config, dataSource);
                 flyway.migrate();
                 closeConnection(dataSource, flyway);

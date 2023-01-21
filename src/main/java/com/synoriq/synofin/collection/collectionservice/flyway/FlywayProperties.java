@@ -1,4 +1,4 @@
-package com.synoriq.synofin.lms.reportsservice.flyway;
+package com.synoriq.synofin.collection.collectionservice.flyway;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

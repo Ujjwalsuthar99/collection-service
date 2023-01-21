@@ -1,9 +1,20 @@
 package com.synoriq.synofin.collection.collectionservice;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class})
+@ComponentScan("com.synoriq.synofin.collection.collectionservice.common")
+@ComponentScan("com.synoriq.synofin.collection.collectionservice.config")
+@ComponentScan("com.synoriq.synofin.collection.collectionservice.controller")
+@ComponentScan("com.synoriq.synofin.collection.collectionservice.entity")
+@ComponentScan("com.synoriq.synofin.collection.collectionservice.flyway")
+@ComponentScan("com.synoriq.synofin.collection.collectionservice.repository")
+@ComponentScan("com.synoriq.synofin.collection.collectionservice.service")
 public class CollectionServiceApplication {
 
 	public static void main(String[] args) {
