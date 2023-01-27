@@ -41,5 +41,6 @@ public class FollowUpEntity {
     @Column(name = "followup_datetime")
     protected Date followUpDateTime;
 
+    @Column(name = "remarks")
     protected String remarks;
 }

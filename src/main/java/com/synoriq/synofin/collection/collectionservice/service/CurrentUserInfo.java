@@ -6,7 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
-import static com.synoriq.synofin.collection.collectionservice.constant.GlobalVariables.tokenClients;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.tokenClients;
 
 @Service
 @Slf4j

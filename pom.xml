@@ -115,11 +115,11 @@
 			<version>1.6.11</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.synovision.accounting</groupId>
-			<artifactId>accounts-persistence</artifactId>
-			<version>0.0.1</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.synovision.accounting</groupId>-->
+<!--			<artifactId>accounts-persistence</artifactId>-->
+<!--			<version>0.0.1</version>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.flywaydb</groupId>
