@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class AppUpdateService {
+public class AppService {
 
     //return type boolean
     public void checkAppVersion(Long userAppVersion){

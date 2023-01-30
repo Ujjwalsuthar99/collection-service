@@ -8,6 +8,7 @@ import java.util.List;
 
 @Repository
 public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> {
+
     List<FollowUpEntity>  findByLoanId(Long loanId);
     List<FollowUpEntity> findByCreatedBy(Long userId);
 
