@@ -11,7 +11,7 @@ import java.util.Date;
 @Setter
 @Transactional
 @Entity
-@Table(name = "additional_contact_details")
+@Table(name = "additional_contact_details",schema = "collection")
 public class AdditionalContactDetailsEntity {
 
     @Id

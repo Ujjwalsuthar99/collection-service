@@ -161,17 +161,18 @@ public enum ErrorCode {
     INVALID_RECEIPT_REJECT_REQUEST(1016021, "Please act on already initiated deposit request first"),
     INVALID_ACTION_DATE_DUE_TO_BUSINESS_DATE(1016022, "%s date should not be greater than business date"),
     INVALID_ACTION_DATE_DUE_TO_REPO_DATE(1016023, "%s date should not be less than repo date"),
-    INVALID_RECEIPT_ACTION(1016024, "Action is already taken on this receipt");
+    INVALID_RECEIPT_ACTION(1016024, "Action is already taken on this receipt"),
+    CONFIGURATION_NOT_FOUND(1016025,"Configuration not found in the database");
 
     private Integer codeValue;
     private String responseMessage;
 
-    private ErrorCode(int codeValue) {
+    ErrorCode(int codeValue) {
         this.codeValue = codeValue;
         this.responseMessage = "Something went wrong. Please try again after some time.";
     }
 
-    private ErrorCode(int codeValue, String message) {
+    ErrorCode(int codeValue, String message) {
         this.codeValue = codeValue;
         this.responseMessage = message;
     }
