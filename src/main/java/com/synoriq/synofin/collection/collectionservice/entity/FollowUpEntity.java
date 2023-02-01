@@ -11,7 +11,7 @@ import java.util.Date;
 @Setter
 @Transactional
 @Entity
-@Table(name = "followup", schema = "collection")
+@Table(name = "followups", schema = "collection")
 public class FollowUpEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

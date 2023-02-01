@@ -7,9 +7,9 @@ import java.util.Map;
 
 public enum ErrorCode {
 
-//    DEFAULT_ERROR_CODE(1015000),
-//    DATA_FETCH_ERROR(1017000, "An Exception occurred in fetching data"),
-//    DATA_SAVE_ERROR(1017001, "An Exception occurred in saving data"),
+    //    DEFAULT_ERROR_CODE(1015000),
+    DATA_FETCH_ERROR(1017000, "An Exception occurred in fetching data"),
+        DATA_SAVE_ERROR(1017001, "An Exception occurred in saving data"),
 //    CREDENTIALS_ERROR(1017002, "Incorrect username or password"),
 //    LOGIN_ERROR(1017003, "An Exception occurred in login. Please try again"),
 //    LOGIN_SUCCESS_CODE(1017004, "Login successfully"),
@@ -35,11 +35,11 @@ public enum ErrorCode {
 //    LIST_CANNOT_NULL(1017024, "INPUT LIST DATA CANNOT BE NULL"),
 //    LOAN_APPLICATION_NUMBER_INVALID(1017025, "Invalid Loan Application Number"),
 //    DATA_SAVE_OK(1017026, "Data Save Success"),
-////    ALLOCATED_AMOUNT_INVALID(1017001, "Total amount is not equal to total allocated amount"),
-////    ALLOCATED_AMOUNT_GREATER_THAN_PAYABLE_AMOUNT(1017001, "Allocated_amount_greater_than_payable_amount"),
-////    TOTAL_PAYABLE_AMOUNT_GREATER_THAN_PAYMENT_AMOUNT(1017001, "Total_payable_amount_greater_than_payment_amount"),
-////    RECEIPT_NUMBER_ALREADY_USED(1017001, "Receipt number is already used"),
-////    TOTAL_PAYABLE_NOT_EQUAL_TO_TOTAL_RECEIVABLE(1017001, "Total payable amount is not equal to total receivable amount"),
+//    ALLOCATED_AMOUNT_INVALID(1017001, "Total amount is not equal to total allocated amount"),
+//    ALLOCATED_AMOUNT_GREATER_THAN_PAYABLE_AMOUNT(1017001, "Allocated_amount_greater_than_payable_amount"),
+//    TOTAL_PAYABLE_AMOUNT_GREATER_THAN_PAYMENT_AMOUNT(1017001, "Total_payable_amount_greater_than_payment_amount"),
+//    RECEIPT_NUMBER_ALREADY_USED(1017001, "Receipt number is already used"),
+//    TOTAL_PAYABLE_NOT_EQUAL_TO_TOTAL_RECEIVABLE(1017001, "Total payable amount is not equal to total receivable amount"),
 //    LOAN_NOT_ACTIVE(1017032, "Loan is not active"),
 //    TOTAL_PAYABLE_IS_LESS_THAN_TOTAL_DUES(1017033, "Total payable is less than total dues"),
 //    NET_CLOSURE_IS_INVALID(1017034, "Net closure amount should not be greater than 0"),
@@ -123,7 +123,7 @@ public enum ErrorCode {
 //    PAYMENT_DATE_LESS_DISBURSAL_DATE(101808, "Payment Date cannot be less than Disbursal Date."),
 //    DEBIT_FREEZE_REQUEST_ERROR(101805, "Cannot raise the debit freeze and lien marking request as Payment request is not yet approved or reject"),
 //    TOTAL_FREEZE_REQUEST_ERROR(101806, "Cannot raise the request for total freeze as payment and receipt request is not approved or reject"),
-//    REQUESTED_PARAM_CANNOT_BE_NULL(101809, "Requested parameter Cannot be null to fetch the requested data"),
+    REQUESTED_PARAM_CANNOT_BE_NULL(101809, "Requested parameter Cannot be null to fetch the requested data"),
 //    SCHEME_CODE_INVALID(100807, "Scheme Code Not Found or Invalid"),
 //    MARITAL_STATUS(100808, "Marital Status Not Found or Invalid"),
 //    REPAYMENT_ALREADY_BILLED(101809, " Tranche cannot be cancelled after installment has been billed"),
@@ -166,18 +166,20 @@ public enum ErrorCode {
 //    INVALID_RECEIPT_REJECT_REQUEST(1016021, "Please act on already initiated deposit request first"),
 //    INVALID_ACTION_DATE_DUE_TO_BUSINESS_DATE(1016022, "%s date should not be greater than business date"),
 //    INVALID_ACTION_DATE_DUE_TO_REPO_DATE(1016023, "%s date should not be less than repo date"),
-    INVALID_RECEIPT_ACTION(1016024, "%s date should not be less than repo date"),
-    NO_ACTIVITY_DEVICE(1016025, "No activity since long time!, Please contact IT support for your device activation");
+//    INVALID_RECEIPT_ACTION(1016024, "Action is already taken on this receipt"),
+    CONFIGURATION_NOT_FOUND(1016025, "Configuration not found in the database"),
+    NO_ACTIVITY_DEVICE(1016026, "No activity since long time!, Please contact IT support for your device activation"),
+    DEVICE_ALREADY_ACTIVE(1016027, "You are already active with one device!, Please contact IT support for new device registration");
 
     private Integer codeValue;
     private String responseMessage;
 
-    private ErrorCode(int codeValue) {
+    ErrorCode(int codeValue) {
         this.codeValue = codeValue;
         this.responseMessage = "Something went wrong. Please try again after some time.";
     }
 
-    private ErrorCode(int codeValue, String message) {
+    ErrorCode(int codeValue, String message) {
         this.codeValue = codeValue;
         this.responseMessage = message;
     }

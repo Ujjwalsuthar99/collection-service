@@ -85,11 +85,11 @@ public class RegisteredDeviceInfoService {
                     break;
                 } else if (status.equals(registeredDeviceInfoDtoRequest.getStatus()) && !deviceId.equals(registeredDeviceInfoDtoRequest.getDeviceUniqueId())) {
                     log.info("You are already active with one device!, Please contact IT support for new device registration");
-                    throw new Exception("1016024");
+                    throw new Exception("1016027");
 //                    response = new BaseDTOResponse<>("You are already active with one device!, Please contact IT support for new device registration");
                 } else if (status.equals(registeredDeviceInfoDtoRequest.getStatus()) && deviceId.equals(registeredDeviceInfoDtoRequest.getDeviceUniqueId())) {
                     log.info("No activity since long time!, Please contact IT support for your device activation");
-                    throw new Exception("1016025");
+                    throw new Exception("1016026");
 //                    response = new BaseDTOResponse<>("No activity since long time!, Please contact IT support for your device activation");
                 } else {
                     log.info("No Device Found");

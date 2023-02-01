@@ -1,13 +1,15 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.FollowUpDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.RegisteredDeviceInfoDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.CheckAppUpdateResponse;
+import com.synoriq.synofin.collection.collectionservice.service.AppService;
 import com.synoriq.synofin.collection.collectionservice.service.FollowUpService;
 import com.synoriq.synofin.collection.collectionservice.service.RegisteredDeviceInfoService;
 import com.synoriq.synofin.lms.commondto.dto.collection.FollowUpDTO;
 import com.synoriq.synofin.lms.commondto.dto.collection.RegisteredDeviceInfoDTO;
-import com.synoriq.synofin.lms.commondto.rest.constants.ErrorCode;
 import com.synoriq.synofin.lms.commondto.rest.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +31,12 @@ public class CollectionRestController {
 
     @Autowired
     DataSource dataSource;
+
     @Autowired
     RegisteredDeviceInfoService registeredDeviceInfoService;
+
+    @Autowired
+    AppService appService;
 
     @RequestMapping(value = "/getFollowUpDetailsByLoanId", method = RequestMethod.GET)
     public ResponseEntity<Object> getFollowUpByLoanId(@RequestParam("loanId") Long loanId) {
@@ -68,18 +74,18 @@ public class CollectionRestController {
     }
 
     @RequestMapping(value = "/createFollowup", method = RequestMethod.POST)
-    public ResponseEntity<Object> createFollowUpLoan(@RequestBody FollowUpDtoRequest followUpDtoRequest){
+    public ResponseEntity<Object> createFollowUpLoan(@RequestBody FollowUpDtoRequest followUpDtoRequest) {
 
         BaseResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
-        try{
+        try {
             followUpService.createFollowUp(followUpDtoRequest);
             log.info(" Followup created for loan id {}", followUpDtoRequest.getLoanId());
             baseResponse = new BaseResponse<>(true);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-        }catch (Exception e){
-            baseResponse = new BaseResponse<>(ErrorCode.DATA_SAVE_ERROR);
+        } catch (Exception e) {
+            baseResponse = new BaseResponse<>(ErrorCode.DATA_FETCH_ERROR);
             response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
         }
 
@@ -87,27 +93,34 @@ public class CollectionRestController {
 
     }
 
-    // General APIs and functions structure
 
-    // On application startup, all basic configurations are loaded in Redis db from database
-    // A mechanism should be there to refresh or reload a certain configuration if the same is not there.
-    // Proper error handling and error reporting mechanism should be there.
-    // A seperate utility service can be made for all REDIS operations.
+    @RequestMapping(value = "/check-update", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<Object> checkAppUpdates(@RequestParam("platform") String platform, @RequestParam("version") String version) throws SQLException {
 
-    @RequestMapping(value = "/checkAppUpdates", method = RequestMethod.GET)
-    public void checkAppUpdates(@RequestParam("current_app_version") Long currentAppVersion) {
+        BaseResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        CheckAppUpdateResponse appUpdateResponse;
 
-        // Get the current device version in the argument from front end
-        // Load the device configurations from db and place it in Redis
-        // Check if the current version is compatible with the required version
+//        HashMap<String, CheckAppUpdateResponse> initialResponse = new HashMap<>(){{put("data", new CheckAppUpdateResponse());}};
+        try {
+            appUpdateResponse = appService.checkAppVersion(platform, version);
 
-        // two fields are maintained in the config with current version and force update version and logic is maintained
-        // backend accordingly
+            baseResponse = new BaseResponse<>(appUpdateResponse);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            baseResponse = new BaseResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        return response;
+
     }
 
 
     @RequestMapping(value = "/users/{userId}/device-info", method = RequestMethod.GET)
-    public ResponseEntity<Object> getDeviceInfoByUserId (@PathVariable("userId") Long userId) throws SQLException {
+    public ResponseEntity<Object> getDeviceInfoByUserId(@PathVariable("userId") Long userId) throws SQLException {
 
         BaseResponse<Object> baseResponse;
         ResponseEntity<Object> response;
@@ -128,20 +141,20 @@ public class CollectionRestController {
 
 
     @RequestMapping(value = "/users/{userId}/device-register", method = RequestMethod.POST)
-    public ResponseEntity<Object> createRegisteredDeviceInfo(@RequestBody RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, @PathVariable("userId") String userId){
+    public ResponseEntity<Object> createRegisteredDeviceInfo(@RequestBody RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, @PathVariable("userId") String userId) {
         log.info("my request body {}", registeredDeviceInfoDtoRequest);
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
-        try{
+        try {
             BaseDTOResponse result = registeredDeviceInfoService.createRegisteredDeviceInfo(registeredDeviceInfoDtoRequest, userId);
             baseResponse = new BaseDTOResponse<>(result.getData());
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-        }catch (Exception e){
-            if(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null){
+        } catch (Exception e) {
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
-            }else {
+            } else {
                 baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
             }
             response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
