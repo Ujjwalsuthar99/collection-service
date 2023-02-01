@@ -1,10 +1,12 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.rest.request.AdditionalContactDetailsDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.FollowUpDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.RegisteredDeviceInfoDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.CheckAppUpdateResponse;
+import com.synoriq.synofin.collection.collectionservice.service.AdditionalContactDetailsService;
 import com.synoriq.synofin.collection.collectionservice.service.AppService;
 import com.synoriq.synofin.collection.collectionservice.service.FollowUpService;
 import com.synoriq.synofin.collection.collectionservice.service.RegisteredDeviceInfoService;
@@ -37,6 +39,9 @@ public class CollectionRestController {
 
     @Autowired
     AppService appService;
+
+    @Autowired
+    AdditionalContactDetailsService additionalContactDetailsService;
 
     @RequestMapping(value = "/getFollowUpDetailsByLoanId", method = RequestMethod.GET)
     public ResponseEntity<Object> getFollowUpByLoanId(@RequestParam("loanId") Long loanId) {
@@ -151,6 +156,7 @@ public class CollectionRestController {
             BaseDTOResponse result = registeredDeviceInfoService.createRegisteredDeviceInfo(registeredDeviceInfoDtoRequest, userId);
             baseResponse = new BaseDTOResponse<>(result.getData());
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
         } catch (Exception e) {
             if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
@@ -162,6 +168,17 @@ public class CollectionRestController {
 
         return response;
 
+    }
+
+
+    //    @GetMapping(value = "/loans/{loanId}/additional-contacts")
+//    public ResponseEntity<List<AdditionalContactDetailsEntity>> getAdditionalContactDetailsByLoanId(@PathVariable(value = "loanId") Long loanId) {
+//        return additionalContactService.getAdditionalContactDetailsByLoanId(loanId);
+//    }
+
+    @GetMapping(value = "/loans/{loanId}/additional-contacts")
+    public ResponseEntity<List<AdditionalContactDetailsDtoRequest>> getAdditionalContactDetailsByLoanId(@PathVariable(value = "loanId") Long loanId) {
+        return additionalContactDetailsService.getAdditionalContactDetailsByLoanId(loanId);
     }
 
 
