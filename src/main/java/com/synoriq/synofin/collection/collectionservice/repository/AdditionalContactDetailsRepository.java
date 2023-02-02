@@ -4,6 +4,8 @@ import com.synoriq.synofin.collection.collectionservice.entity.AdditionalContact
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 @Repository
 public interface AdditionalContactDetailsRepository extends JpaRepository<AdditionalContactDetailsEntity, Long> {
+    List<AdditionalContactDetailsEntity> findAllByLoanId(Long loanId);
 }

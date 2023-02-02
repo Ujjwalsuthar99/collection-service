@@ -11,7 +11,7 @@ import java.util.Date;
 @Setter
 @Transactional
 @Entity
-@Table(name = "additional_contact_details",schema = "collection")
+@Table(name = "additional_contact_details", schema = "collection")
 public class AdditionalContactDetailsEntity {
 
     @Id
@@ -36,17 +36,17 @@ public class AdditionalContactDetailsEntity {
     private String contactName;
 
     @Column(name = "mobile_no")
-    private Integer mobileNumber;
+    private Long mobileNumber;
 
     @Column(name = "alt_mobile_no")
-    private Integer altMobileNumber;
+    private Long altMobileNumber;
 
     @Column(name = "email")
     private String email;
 
     @Column(name = "relation_with_applicant")
-    private String relationWithApplication;
+    private String relationWithApplicant;
 
-    
+
 
 }
