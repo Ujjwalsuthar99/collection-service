@@ -64,13 +64,17 @@ public class DBInitialization {
                 connectionProperty.setProperty("maxActive", "100");
                 connectionProperty.setProperty("maxIdle", "10");
                 log.info("Datbase driver = " + getDbDriver());
-                dataSource.setDriverClassName(getDbDriver());
-                dataSource.setUrl(getDbUrl() + client + (getDbConnectionProperties() != null ? getDbConnectionProperties() : ""));
-                dataSource.setUsername(getDbUserName());
-                dataSource.setPassword(getDbPassword());
-                dataSource.setConnectionProperties(connectionProperty);
-                log.info("client datasource url = " + dataSource.getUrl());
-                hashMap.put(client, dataSource);
+                if(client.equals("synoriq")) {
+
+                    dataSource.setDriverClassName(getDbDriver());
+                    dataSource.setUrl(getDbUrl() + client + (getDbConnectionProperties() != null ? getDbConnectionProperties() : ""));
+                    dataSource.setUsername(getDbUserName());
+                    dataSource.setPassword(getDbPassword());
+                    dataSource.setConnectionProperties(connectionProperty);
+                    log.info("client datasource url = " + dataSource.getUrl());
+
+                    hashMap.put(client, dataSource);
+                }
             }
         } else {
             throw new NullPointerException("Client Array not defined");
