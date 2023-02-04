@@ -169,7 +169,8 @@ public enum ErrorCode {
 //    INVALID_RECEIPT_ACTION(1016024, "Action is already taken on this receipt"),
     CONFIGURATION_NOT_FOUND(1016025, "Configuration not found in the database"),
     NO_ACTIVITY_DEVICE(1016026, "No activity since long time!, Please contact IT support for your device activation"),
-    DEVICE_ALREADY_ACTIVE(1016027, "You are already active with one device!, Please contact IT support for new device registration");
+    DEVICE_ALREADY_ACTIVE(1016027, "You are already active with one device!, Please contact IT support for new device registration"),
+    CHECK_THE_REQUEST_BODY(1016028, "Please check the values passed from your end!");
 
     private Integer codeValue;
     private String responseMessage;

@@ -32,9 +32,6 @@ public class CollectionRestController {
     FollowUpService followUpService;
 
     @Autowired
-    DataSource dataSource;
-
-    @Autowired
     RegisteredDeviceInfoService registeredDeviceInfoService;
 
     @Autowired
@@ -130,8 +127,6 @@ public class CollectionRestController {
         BaseResponse<Object> baseResponse;
         ResponseEntity<Object> response;
         List<RegisteredDeviceInfoDTO> result;
-
-        log.info(" URL {}", dataSource.getConnection().getMetaData().getURL());
         try {
             result = registeredDeviceInfoService.findDeviceInfoByUserId(userId);
             baseResponse = new BaseResponse<>(result);
