@@ -10,6 +10,7 @@ public enum ErrorCode {
     //    DEFAULT_ERROR_CODE(1015000),
     DATA_FETCH_ERROR(1017000, "An Exception occurred in fetching data"),
         DATA_SAVE_ERROR(1017001, "An Exception occurred in saving data"),
+    NO_DATA_FOUND(1017002, "No Data Found"),
 //    CREDENTIALS_ERROR(1017002, "Incorrect username or password"),
 //    LOGIN_ERROR(1017003, "An Exception occurred in login. Please try again"),
 //    LOGIN_SUCCESS_CODE(1017004, "Login successfully"),

@@ -177,8 +177,73 @@ public class CollectionRestController {
 //    }
 
     @GetMapping(value = "/loans/{loanId}/additional-contacts")
-    public ResponseEntity<List<AdditionalContactDetailsDtoRequest>> getAdditionalContactDetailsByLoanId(@PathVariable(value = "loanId") Long loanId) {
-        return additionalContactDetailsService.getAdditionalContactDetailsByLoanId(loanId);
+    public ResponseEntity<Object> getAdditionalContactDetailsByLoanId(@PathVariable(value = "loanId") Long loanId) throws SQLException {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        List<AdditionalContactDetailsDtoRequest> result;
+
+        log.info(" URL {}", dataSource.getConnection().getMetaData().getURL());
+        try{
+            result = additionalContactDetailsService.getAdditionalContactDetailsByLoanId(loanId);
+            baseResponse = new BaseDTOResponse<>(result);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+            log.info("Get Additional Contact Details By Loan Id API response success | loanId=[{}]", loanId);
+        } catch (Exception e){
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @GetMapping(value = "additional-contacts/{id}")
+    public ResponseEntity<Object> getAdditionalContactDetailsById(@PathVariable(value = "id") Long id) throws SQLException {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        AdditionalContactDetailsDtoRequest result;
+
+        try{
+            result = additionalContactDetailsService.getAdditionalContactDetailsById(id);
+            baseResponse = new BaseDTOResponse<>(result);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+            log.info("Get Additional Contact Details By Id API response success | loanId=[{}]", id);
+        } catch (Exception e){
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "additional-contact", method = RequestMethod.POST)
+    public ResponseEntity<Object> createAdditionalContactDetail(@RequestBody AdditionalContactDetailsDtoRequest additionalContactDetailsDtoRequest) {
+        log.info("my request body {}", additionalContactDetailsDtoRequest);
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+
+        try {
+            BaseDTOResponse result = additionalContactDetailsService.createAdditionalContactDetail(additionalContactDetailsDtoRequest);
+            baseResponse = new BaseDTOResponse<>(result.getData());
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+        } catch (Exception e) {
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        return response;
+
     }
 
 
