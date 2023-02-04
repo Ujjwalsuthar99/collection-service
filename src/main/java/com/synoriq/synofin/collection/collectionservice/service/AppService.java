@@ -4,6 +4,7 @@ import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCo
 import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
 import com.synoriq.synofin.collection.collectionservice.constant.PlatformTypeEnum;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.CheckAppUpdateResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -22,10 +23,10 @@ public class AppService {
     CollectionConfigurationsRepository collectionConfigurationsRepository;
 
 
-    public CheckAppUpdateResponse checkAppVersion(String platform, String currentVersion) {
+    public BaseDTOResponse<Object> checkAppVersion(String platform, String currentVersion) throws Exception {
 
-        log.info(platform);
-        log.info(currentVersion);
+        BaseDTOResponse<Object> response;
+
         if ((platform != null) && (!platform.isBlank()) && (currentVersion != null) && (!currentVersion.isBlank())) {
 
 
@@ -63,24 +64,28 @@ public class AppService {
                 }
             } else {
 
-                log.error(ErrorCode.CONFIGURATION_NOT_FOUND.getResponseMessage());
-                throw new CollectionException(ErrorCode.CONFIGURATION_NOT_FOUND);
+                log.error(ErrorCode.RECORD_NOT_FOUND.getResponseMessage());
+                throw new CollectionException(ErrorCode.RECORD_NOT_FOUND);
 
             }
 
 
-                return CheckAppUpdateResponse.builder().
+            CheckAppUpdateResponse checkAppUpdateResponse =  CheckAppUpdateResponse.builder().
                     currentAppVersion(currentAppVersion.toString()).
                     currentAppUpdateVersion(currentAppUpdateVersion.toString()).
                     forceAppUpdateVersion(forceAppUpdateVersion.toString())
                     .isUpdate(isUpdate)
                     .isForceUpdate(isForceUpdate).build();
+            response = new BaseDTOResponse<Object>(checkAppUpdateResponse);
+
+            return response;
+
 
 
         }
         else{
-            log.error(ErrorCode.REQUESTED_PARAM_CANNOT_BE_NULL.getResponseMessage());
-            throw new CollectionException(ErrorCode.REQUESTED_PARAM_CANNOT_BE_NULL);
+            log.error("Requested parameters cannot be null");
+            throw new Exception("101809");
         }
     }
 }

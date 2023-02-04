@@ -32,9 +32,6 @@ public class CollectionRestController {
     FollowUpService followUpService;
 
     @Autowired
-    DataSource dataSource;
-
-    @Autowired
     RegisteredDeviceInfoService registeredDeviceInfoService;
 
     @Autowired
@@ -102,20 +99,19 @@ public class CollectionRestController {
     @RequestMapping(value = "/check-update", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<Object> checkAppUpdates(@RequestParam("platform") String platform, @RequestParam("version") String version) throws SQLException {
 
-        BaseResponse<Object> baseResponse;
-        ResponseEntity<Object> response = null;
-        CheckAppUpdateResponse appUpdateResponse;
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
 
-//        HashMap<String, CheckAppUpdateResponse> initialResponse = new HashMap<>(){{put("data", new CheckAppUpdateResponse());}};
         try {
-            appUpdateResponse = appService.checkAppVersion(platform, version);
-
-            baseResponse = new BaseResponse<>(appUpdateResponse);
+            baseResponse = appService.checkAppVersion(platform, version);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
-            baseResponse = new BaseResponse<>(ErrorCode.DATA_FETCH_ERROR);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
             response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
         }
 
@@ -130,8 +126,6 @@ public class CollectionRestController {
         BaseResponse<Object> baseResponse;
         ResponseEntity<Object> response;
         List<RegisteredDeviceInfoDTO> result;
-
-        log.info(" URL {}", dataSource.getConnection().getMetaData().getURL());
         try {
             result = registeredDeviceInfoService.findDeviceInfoByUserId(userId);
             baseResponse = new BaseResponse<>(result);
@@ -158,8 +152,8 @@ public class CollectionRestController {
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {
-            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
-                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
             } else {
                 baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
             }

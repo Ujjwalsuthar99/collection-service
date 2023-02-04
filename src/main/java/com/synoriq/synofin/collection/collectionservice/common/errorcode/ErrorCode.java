@@ -124,7 +124,7 @@ public enum ErrorCode {
 //    PAYMENT_DATE_LESS_DISBURSAL_DATE(101808, "Payment Date cannot be less than Disbursal Date."),
 //    DEBIT_FREEZE_REQUEST_ERROR(101805, "Cannot raise the debit freeze and lien marking request as Payment request is not yet approved or reject"),
 //    TOTAL_FREEZE_REQUEST_ERROR(101806, "Cannot raise the request for total freeze as payment and receipt request is not approved or reject"),
-    REQUESTED_PARAM_CANNOT_BE_NULL(101809, "Requested parameter Cannot be null to fetch the requested data"),
+    REQUESTED_PARAM_CANNOT_BE_NULL(101809, "Requested parameter cannot be null or blank"),
 //    SCHEME_CODE_INVALID(100807, "Scheme Code Not Found or Invalid"),
 //    MARITAL_STATUS(100808, "Marital Status Not Found or Invalid"),
 //    REPAYMENT_ALREADY_BILLED(101809, " Tranche cannot be cancelled after installment has been billed"),
@@ -168,9 +168,10 @@ public enum ErrorCode {
 //    INVALID_ACTION_DATE_DUE_TO_BUSINESS_DATE(1016022, "%s date should not be greater than business date"),
 //    INVALID_ACTION_DATE_DUE_TO_REPO_DATE(1016023, "%s date should not be less than repo date"),
 //    INVALID_RECEIPT_ACTION(1016024, "Action is already taken on this receipt"),
-    CONFIGURATION_NOT_FOUND(1016025, "Configuration not found in the database"),
+    RECORD_NOT_FOUND(1016025, "Requested record not found in the database"),
     NO_ACTIVITY_DEVICE(1016026, "No activity since long time!, Please contact IT support for your device activation"),
-    DEVICE_ALREADY_ACTIVE(1016027, "You are already active with one device!, Please contact IT support for new device registration");
+    DEVICE_ALREADY_ACTIVE(1016027, "You are already active with one device!, Please contact IT support for new device registration"),
+    CHECK_THE_REQUEST_BODY(1016028, "Please check the values passed from your end!");
 
     private Integer codeValue;
     private String responseMessage;
