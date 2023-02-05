@@ -64,7 +64,7 @@ public class DBInitialization {
                 connectionProperty.setProperty("maxActive", "100");
                 connectionProperty.setProperty("maxIdle", "10");
                 log.info("Datbase driver = " + getDbDriver());
-                if(client.equals("synoriq")) {
+                if(client.equals("deccan")) {
 
                     dataSource.setDriverClassName(getDbDriver());
                     dataSource.setUrl(getDbUrl() + client + (getDbConnectionProperties() != null ? getDbConnectionProperties() : ""));
