@@ -116,31 +116,6 @@ public class ActivityLogRestController {
         return response;
     }
 
-    @RequestMapping(value = "/all-activity-logs/{userId}", method = RequestMethod.GET)
-    public ResponseEntity<Object> getActivityLogs(@PathVariable("userId") Long userId,
-                                                  @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
-                                                  @RequestParam(value = "size", defaultValue = "1", required = false) Integer size,
-                                                  @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date fromDate,
-                                                  @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate) {
-
-        BaseDTOResponse<Object> baseResponse;
-        ResponseEntity<Object> response;
-
-        try {
-            baseResponse = activityLogService.getAllActivityLogs(page,size,userId, fromDate, toDate);
-            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-
-        } catch (Exception e) {
-
-            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
-                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
-            } else {
-                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
-            }
-            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
-        }
-        return response;
-    }
 
 
 }

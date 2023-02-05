@@ -176,23 +176,6 @@ public class ActivityLogService {
     }
 
 
-    public BaseDTOResponse<Object> getAllActivityLogs(Integer page, Integer size, Long userId, Date fromDate, Date toDate){
-
-        BaseDTOResponse<Object> baseDTOResponse;
-
-         Pageable pageable =  PageRequest.of(page,size);
-        Page<CollectionActivityLogsEntity> collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsByUserIdAndDuration(userId,fromDate,toDate,pageable);
-
-        List<CollectionActivityLogsEntity> collectionActivityLogsEntities = collectionActivityLogs.getContent();
-
-        baseDTOResponse = new BaseDTOResponse<>(collectionActivityLogsEntities);
-
-        log.info(collectionActivityLogsEntities.toString());
-
-        return baseDTOResponse;
-
-    }
-
     private Date checkToDate(Date toDate){
 
         return DateUtils.addDays(toDate,1);

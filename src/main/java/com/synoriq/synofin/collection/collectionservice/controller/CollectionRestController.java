@@ -175,7 +175,7 @@ public class CollectionRestController {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         List<AdditionalContactDetailsDtoRequest> result;
-        
+
         try{
             result = additionalContactDetailsService.getAdditionalContactDetailsByLoanId(loanId);
             baseResponse = new BaseDTOResponse<>(result);
