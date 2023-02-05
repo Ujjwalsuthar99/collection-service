@@ -65,14 +65,12 @@ public class DBInitialization {
                 connectionProperty.setProperty("maxIdle", "10");
                 log.info("Datbase driver = " + getDbDriver());
                 if(client.equals("deccan")) {
-
                     dataSource.setDriverClassName(getDbDriver());
                     dataSource.setUrl(getDbUrl() + client + (getDbConnectionProperties() != null ? getDbConnectionProperties() : ""));
                     dataSource.setUsername(getDbUserName());
                     dataSource.setPassword(getDbPassword());
                     dataSource.setConnectionProperties(connectionProperty);
                     log.info("client datasource url = " + dataSource.getUrl());
-
                     hashMap.put(client, dataSource);
                 }
             }

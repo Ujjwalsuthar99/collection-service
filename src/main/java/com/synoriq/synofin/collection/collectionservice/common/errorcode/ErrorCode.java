@@ -10,6 +10,7 @@ public enum ErrorCode {
     //    DEFAULT_ERROR_CODE(1015000),
     DATA_FETCH_ERROR(1017000, "An Exception occurred in fetching data"),
         DATA_SAVE_ERROR(1017001, "An Exception occurred in saving data"),
+    NO_DATA_FOUND(1017002, "No Data Found"),
 //    CREDENTIALS_ERROR(1017002, "Incorrect username or password"),
 //    LOGIN_ERROR(1017003, "An Exception occurred in login. Please try again"),
 //    LOGIN_SUCCESS_CODE(1017004, "Login successfully"),
@@ -169,7 +170,8 @@ public enum ErrorCode {
 //    INVALID_RECEIPT_ACTION(1016024, "Action is already taken on this receipt"),
     RECORD_NOT_FOUND(1016025, "Requested record not found in the database"),
     NO_ACTIVITY_DEVICE(1016026, "No activity since long time!, Please contact IT support for your device activation"),
-    DEVICE_ALREADY_ACTIVE(1016027, "You are already active with one device!, Please contact IT support for new device registration");
+    DEVICE_ALREADY_ACTIVE(1016027, "You are already active with one device!, Please contact IT support for new device registration"),
+    CHECK_THE_REQUEST_BODY(1016028, "Please check the values passed from your end!");
 
     private Integer codeValue;
     private String responseMessage;
