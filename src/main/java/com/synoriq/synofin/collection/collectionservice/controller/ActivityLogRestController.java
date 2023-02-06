@@ -4,7 +4,6 @@ import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCo
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
-import com.synoriq.synofin.lms.commondto.rest.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -13,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
 @RestController
 @RequestMapping("/v1")
@@ -29,6 +30,7 @@ public class ActivityLogRestController {
         ResponseEntity<Object> response;
 
         try {
+
             baseResponse = activityLogService.getActivityLogsById(id);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
@@ -46,6 +48,8 @@ public class ActivityLogRestController {
 
     @RequestMapping(value = "/users/{userId}/activity-logs/", method = RequestMethod.GET)
     public ResponseEntity<Object> getActivityLogsByUserIdWithDuration(@PathVariable("userId") Long userId,
+                                                                      @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
+                                                                      @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
                                                                       @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date fromDate,
                                                                       @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate) {
 
@@ -54,7 +58,7 @@ public class ActivityLogRestController {
 
         try {
 
-            baseResponse = activityLogService.getActivityLogsByUserIdWithDuration(userId, fromDate, toDate);
+            baseResponse = activityLogService.getActivityLogsByUserIdWithDuration(page, size, userId, fromDate, toDate);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -70,13 +74,15 @@ public class ActivityLogRestController {
 
     @RequestMapping(value = "/loans/{loanId}/activity-logs", method = RequestMethod.GET)
     public ResponseEntity<Object> getActivityLogsByLoanIdWIthDuration(@PathVariable("loanId") Long loanId,
+                                                                      @RequestParam(value = "page",defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
+                                                                      @RequestParam(value = "size",defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
                                                                       @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date fromDate,
                                                                       @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = activityLogService.getActivityLogsByLoanIdWithDuration(loanId, fromDate, toDate);
+            baseResponse = activityLogService.getActivityLogsByLoanIdWithDuration(page, size, loanId, fromDate, toDate);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -96,7 +102,6 @@ public class ActivityLogRestController {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
 
-
         try {
 
             baseResponse = activityLogService.createActivityLogs(collectionActivityLogRequest);
@@ -110,4 +115,7 @@ public class ActivityLogRestController {
 
         return response;
     }
+
+
+
 }

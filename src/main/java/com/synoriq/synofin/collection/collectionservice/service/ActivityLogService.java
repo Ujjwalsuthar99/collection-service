@@ -1,7 +1,5 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
-import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogRequest;
@@ -10,6 +8,9 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -56,7 +57,7 @@ public class ActivityLogService {
 
     }
 
-    public BaseDTOResponse<Object> getActivityLogsByUserIdWithDuration(Long userId, Date fromDate, Date toDate) throws Exception {
+    public BaseDTOResponse<Object> getActivityLogsByUserIdWithDuration(Integer page, Integer size,Long userId, Date fromDate, Date toDate) throws Exception {
 
         if(fromDate.compareTo(toDate) == 0){
             toDate = checkToDate(toDate);
@@ -64,16 +65,20 @@ public class ActivityLogService {
 
         BaseDTOResponse<Object> response;
 
-        List<CollectionActivityLogsEntity> collectionActivityLogs =
-                collectionActivityLogsRepository.getActivityLogsByUserIdAndDuration(userId, fromDate, toDate);
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<CollectionActivityLogsEntity> collectionActivityLogs =
+                collectionActivityLogsRepository.getActivityLogsByUserIdAndDuration(userId, fromDate, toDate, pageable);
+
+        List<CollectionActivityLogsEntity> collectionActivityLogsEntities = collectionActivityLogs.getContent();
 
         List<ActivityLogResponse> activityLogResponses = new LinkedList<>();
 
-        if(!(collectionActivityLogs.isEmpty())){
+        if(!(collectionActivityLogsEntities.isEmpty())){
 
             log.info("Getting activity log for userId {} ", userId);
 
-            for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogs){
+            for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogsEntities){
 
                 ActivityLogResponse activityLogResponse = new ActivityLogResponse();
                 activityLogResponse.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
@@ -98,7 +103,7 @@ public class ActivityLogService {
         }
     }
 
-    public BaseDTOResponse<Object> getActivityLogsByLoanIdWithDuration(Long loanId, Date fromDate, Date toDate) throws Exception {
+    public BaseDTOResponse<Object> getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date toDate) throws Exception {
 
         if(fromDate.compareTo(toDate) == 0){
             toDate = checkToDate(toDate);
@@ -106,16 +111,20 @@ public class ActivityLogService {
 
         BaseDTOResponse<Object> response;
 
-        List<CollectionActivityLogsEntity> collectionActivityLogs =
-                collectionActivityLogsRepository.getActivityLogsByLoanIdAndDuration(loanId, fromDate, toDate);
+        Pageable pageable = PageRequest.of(page,size);
+
+        Page<CollectionActivityLogsEntity> collectionActivityLogs =
+                collectionActivityLogsRepository.getActivityLogsByLoanIdAndDuration(loanId, fromDate, toDate, pageable);
+
+        List<CollectionActivityLogsEntity> collectionActivityLogsEntities = collectionActivityLogs.getContent();
 
         List<ActivityLogResponse> activityLogResponses = new LinkedList<>();
 
-        if(!collectionActivityLogs.isEmpty()){
+        if(!collectionActivityLogsEntities.isEmpty()){
 
             log.info("Getting activity log for loanId {} ", loanId);
 
-            for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogs){
+            for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogsEntities){
 
                 ActivityLogResponse activityLogResponse = new ActivityLogResponse();
                 activityLogResponse.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
@@ -130,7 +139,7 @@ public class ActivityLogService {
                 activityLogResponses.add(activityLogResponse);
             }
 
-            response = new BaseDTOResponse<Object>(activityLogResponses);
+            response = new BaseDTOResponse<>(activityLogResponses);
             return response;
 
         }else{
@@ -165,6 +174,7 @@ public class ActivityLogService {
 
 
     }
+
 
     private Date checkToDate(Date toDate){
 
