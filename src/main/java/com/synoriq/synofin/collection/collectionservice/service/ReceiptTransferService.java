@@ -35,26 +35,16 @@ public class ReceiptTransferService {
     @Autowired
     private CollectionActivityLogsRepository collectionActivityLogsRepository;
 
+    @Autowired
+    private ActivityLogService activityLogService;
+
     @Transactional
     public BaseDTOResponse<Object> createReceiptTransfer(@RequestBody ReceiptTransferDtoRequest receiptTransferDtoRequest) throws Exception {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         try {
-//            CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
-//
-//            collectionActivityLogsEntity.setActivityDate(new Date());
-//            collectionActivityLogsEntity.setActivityBy(receiptTransferDtoRequest.getTransferredBy());
-//            collectionActivityLogsEntity.setDeleted(false);
-//            collectionActivityLogsEntity.setActivityName(receiptTransferDtoRequest.getTransferType());
-//            collectionActivityLogsEntity.setDistanceFromUserBranch(receiptTransferDtoRequest.getDistanceFromUserBranch());
-//            collectionActivityLogsEntity.setAddress(receiptTransferDtoRequest.getAddress());
-//            collectionActivityLogsEntity.setRemarks(receiptTransferDtoRequest.getActivityRemarks());
-//            collectionActivityLogsEntity.setImages(receiptTransferDtoRequest.getActivityImages());
-//            collectionActivityLogsEntity.setLoanId(receiptTransferDtoRequest.getLoanId());
-//            collectionActivityLogsEntity.setGeolocation(receiptTransferDtoRequest.getGeoLocationData());
-//
-//            collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+            Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData());
 
 
             ReceiptTransferEntity receiptTransferEntity = new ReceiptTransferEntity();
@@ -73,8 +63,7 @@ public class ReceiptTransferService {
             receiptTransferEntity.setActionReason(receiptTransferDtoRequest.getActionReason());
             receiptTransferEntity.setActionRemarks(receiptTransferDtoRequest.getActionRemarks());
             receiptTransferEntity.setActionBy(receiptTransferDtoRequest.getActionBy());
-//            receiptTransferEntity.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
-            receiptTransferEntity.setCollectionActivityLogsId(1L);
+            receiptTransferEntity.setCollectionActivityLogsId(collectionActivityId);
 
             receiptTransferRepository.save(receiptTransferEntity);
 

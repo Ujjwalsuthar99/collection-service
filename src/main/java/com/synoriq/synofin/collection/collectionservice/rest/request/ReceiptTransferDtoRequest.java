@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request;
 
+import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
 import lombok.Data;
 
 import java.util.Date;
@@ -23,12 +24,6 @@ public class ReceiptTransferDtoRequest {
     String actionRemarks;
     Long actionBy;
     List<Long> receipts;
-//    String activityName;
-//    Double distanceFromUserBranch;
-//    Object address;
-//    String activityRemarks;
-//    Object activityImages;
-//    Long loanId;
-//    Object geoLocationData;
+    CollectionActivityLogDTO activityData;
 
 }

@@ -5,6 +5,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionAct
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,9 +150,8 @@ public class ActivityLogService {
     }
 
 
-    public BaseDTOResponse<Object> createActivityLogs(CollectionActivityLogRequest activityLogRequest){
+    public Long createActivityLogs(CollectionActivityLogDTO activityLogRequest){
 
-        BaseDTOResponse<Object> response;
 
         CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
 
@@ -169,9 +169,7 @@ public class ActivityLogService {
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
             log.info("Saving collection activity log for user id {}", activityLogRequest.getUserId());
 
-            response = new BaseDTOResponse<Object>("Data saved successfully");
-            return response;
-
+            return collectionActivityLogsEntity.getCollectionActivityLogsId();
 
     }
 

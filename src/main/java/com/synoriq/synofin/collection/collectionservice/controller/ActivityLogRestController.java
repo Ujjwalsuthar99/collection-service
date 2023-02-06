@@ -96,26 +96,6 @@ public class ActivityLogRestController {
         return response;
     }
 
-    @RequestMapping(value = "/activity-logs", method = RequestMethod.POST)
-    public ResponseEntity<Object> createActivityLogs(@RequestBody CollectionActivityLogRequest collectionActivityLogRequest) {
-
-        BaseDTOResponse<Object> baseResponse;
-        ResponseEntity<Object> response;
-
-        try {
-
-            baseResponse = activityLogService.createActivityLogs(collectionActivityLogRequest);
-            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-
-        } catch (Exception e) {
-
-            baseResponse = new BaseDTOResponse<Object>(ErrorCode.DATA_SAVE_ERROR);
-            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
-        }
-
-        return response;
-    }
-
 
 
 }
