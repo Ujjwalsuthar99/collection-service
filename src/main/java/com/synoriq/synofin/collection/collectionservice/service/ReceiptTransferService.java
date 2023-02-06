@@ -1,8 +1,10 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferHistoryEntity;
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptTransferHistoryRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptTransferRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
@@ -30,16 +32,36 @@ public class ReceiptTransferService {
     @Autowired
     private ReceiptTransferHistoryRepository receiptTransferHistoryRepository;
 
+    @Autowired
+    private CollectionActivityLogsRepository collectionActivityLogsRepository;
+
     @Transactional
     public BaseDTOResponse<Object> createReceiptTransfer(@RequestBody ReceiptTransferDtoRequest receiptTransferDtoRequest) throws Exception {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         try {
+//            CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+//
+//            collectionActivityLogsEntity.setActivityDate(new Date());
+//            collectionActivityLogsEntity.setActivityBy(receiptTransferDtoRequest.getTransferredBy());
+//            collectionActivityLogsEntity.setDeleted(false);
+//            collectionActivityLogsEntity.setActivityName(receiptTransferDtoRequest.getTransferType());
+//            collectionActivityLogsEntity.setDistanceFromUserBranch(receiptTransferDtoRequest.getDistanceFromUserBranch());
+//            collectionActivityLogsEntity.setAddress(receiptTransferDtoRequest.getAddress());
+//            collectionActivityLogsEntity.setRemarks(receiptTransferDtoRequest.getActivityRemarks());
+//            collectionActivityLogsEntity.setImages(receiptTransferDtoRequest.getActivityImages());
+//            collectionActivityLogsEntity.setLoanId(receiptTransferDtoRequest.getLoanId());
+//            collectionActivityLogsEntity.setGeolocation(receiptTransferDtoRequest.getGeoLocationData());
+//
+//            collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+
+
             ReceiptTransferEntity receiptTransferEntity = new ReceiptTransferEntity();
 
             receiptTransferEntity.setCreatedDate(new Date());
             receiptTransferEntity.setTransferredBy(receiptTransferDtoRequest.getTransferredBy());
+            receiptTransferEntity.setDeleted(false);
             receiptTransferEntity.setTransferType(receiptTransferDtoRequest.getTransferType());
             receiptTransferEntity.setTransferMode(receiptTransferDtoRequest.getTransferMode());
             receiptTransferEntity.setTransferredToUserId(receiptTransferDtoRequest.getTransferredToUserId());
@@ -51,7 +73,8 @@ public class ReceiptTransferService {
             receiptTransferEntity.setActionReason(receiptTransferDtoRequest.getActionReason());
             receiptTransferEntity.setActionRemarks(receiptTransferDtoRequest.getActionRemarks());
             receiptTransferEntity.setActionBy(receiptTransferDtoRequest.getActionBy());
-            receiptTransferEntity.setCollectionActivityLogsId(receiptTransferDtoRequest.getCollectionActivityLogsId());
+//            receiptTransferEntity.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+            receiptTransferEntity.setCollectionActivityLogsId(1L);
 
             receiptTransferRepository.save(receiptTransferEntity);
 
@@ -63,7 +86,6 @@ public class ReceiptTransferService {
                 receiptTransferHistoryEntity.setCollectionReceiptsId(receiptTransferId);
                 receiptTransferHistoryRepository.save(receiptTransferHistoryEntity);
             }
-
 
             baseResponse = new BaseDTOResponse<Object>(receiptTransferEntity);
         } catch (Exception ee) {

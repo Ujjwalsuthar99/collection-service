@@ -175,8 +175,6 @@ public class CollectionRestController {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         List<AdditionalContactDetailsDtoRequest> result;
-
-        log.info(" URL {}", dataSource.getConnection().getMetaData().getURL());
         try{
             result = additionalContactDetailsService.getAdditionalContactDetailsByLoanId(loanId);
             baseResponse = new BaseDTOResponse<>(result);

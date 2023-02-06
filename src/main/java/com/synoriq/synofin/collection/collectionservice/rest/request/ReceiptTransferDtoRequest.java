@@ -1,8 +1,5 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.synoriq.synofin.utilityservice.utility.DateTime;
 import lombok.Data;
 
 import java.util.Date;
@@ -25,7 +22,13 @@ public class ReceiptTransferDtoRequest {
     String actionReason;
     String actionRemarks;
     Long actionBy;
-    Long collectionActivityLogsId;
     List<Long> receipts;
+//    String activityName;
+//    Double distanceFromUserBranch;
+//    Object address;
+//    String activityRemarks;
+//    Object activityImages;
+//    Long loanId;
+//    Object geoLocationData;
 
 }
