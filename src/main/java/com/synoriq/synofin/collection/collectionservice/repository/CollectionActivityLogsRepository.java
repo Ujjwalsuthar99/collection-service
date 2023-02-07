@@ -18,17 +18,12 @@ public interface CollectionActivityLogsRepository extends PagingAndSortingReposi
 
     @Query(nativeQuery = true,value = "select * from collection.collection_activity_logs where activity_by = :userId " +
             "and activity_date between :fromDate and :toDate ")
-    Page<CollectionActivityLogsEntity> getActivityLogsByUserIdAndDuration(@Param("userId") Long userId, @Param("fromDate")Date fromDate
+    Page<CollectionActivityLogsEntity> getActivityLogsUserWIseByDuration(@Param("userId") Long userId, @Param("fromDate")Date fromDate
             , @Param("toDate") Date toDate, Pageable pageable);
 
     @Query(nativeQuery = true,value = "select * from collection.collection_activity_logs where loan_id = :loanId " +
             "and activity_date between :fromDate and :toDate ")
-    Page<CollectionActivityLogsEntity> getActivityLogsByLoanIdAndDuration(@Param("loanId") Long loanId, @Param("fromDate")Date fromDate
-            , @Param("toDate") Date toDate, Pageable pageable);
-
-    @Query(nativeQuery = true,value = "select * from collection.collection_activity_logs where activity_by = :userId " +
-            "and activity_date between :fromDate and :toDate ")
-    Page<CollectionActivityLogsEntity> findByActivityBy(@Param("userId") Long userId, @Param("fromDate")Date fromDate
+    Page<CollectionActivityLogsEntity> getActivityLogsLoanWiseByDuration(@Param("loanId") Long loanId, @Param("fromDate")Date fromDate
             , @Param("toDate") Date toDate, Pageable pageable);
 
 
