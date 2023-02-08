@@ -15,8 +15,8 @@ import java.util.Date;
 public class FollowUpEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "followup_id", nullable = false)
-    private Long followUpId;
+    @Column(name = "followups_id", nullable = false)
+    private Long followupId;
 
     @Column(name = "loan_id")
     protected Long loanId;
@@ -38,9 +38,12 @@ public class FollowUpEntity {
     protected String otherFollowUpReason;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "followup_datetime")
-    protected Date followUpDateTime;
+    @Column(name = "next_followup_datetime")
+    protected Date nextFollowUpDateTime;
 
-    @Column(name = "remarks")
-    protected String remarks;
+    @Column(name = "remarks", columnDefinition = "TEXT")
+    private String remarks;
+
+    @Column(name = "collection_activity_logs_id")
+    private Long collectionActivityLogsId;
 }
