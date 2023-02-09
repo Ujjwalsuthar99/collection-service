@@ -2,7 +2,6 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
@@ -69,7 +68,7 @@ public class ActivityLogService {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<CollectionActivityLogsEntity> collectionActivityLogs =
-                collectionActivityLogsRepository.getActivityLogsByUserIdAndDuration(userId, fromDate, toDate, pageable);
+                collectionActivityLogsRepository.getActivityLogsUserWIseByDuration(userId, fromDate, toDate, pageable);
 
         List<CollectionActivityLogsEntity> collectionActivityLogsEntities = collectionActivityLogs.getContent();
 
@@ -94,7 +93,7 @@ public class ActivityLogService {
                 activityLogResponses.add(activityLogResponse);
             }
 
-            response = new BaseDTOResponse<Object>(activityLogResponses);
+            response = new BaseDTOResponse<>(activityLogResponses);
 
             return response;
 
@@ -115,7 +114,7 @@ public class ActivityLogService {
         Pageable pageable = PageRequest.of(page,size);
 
         Page<CollectionActivityLogsEntity> collectionActivityLogs =
-                collectionActivityLogsRepository.getActivityLogsByLoanIdAndDuration(loanId, fromDate, toDate, pageable);
+                collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
 
         List<CollectionActivityLogsEntity> collectionActivityLogsEntities = collectionActivityLogs.getContent();
 
@@ -150,9 +149,13 @@ public class ActivityLogService {
     }
 
 
-    public Long createActivityLogs(CollectionActivityLogDTO activityLogRequest){
+    public Long createActivityLogs(CollectionActivityLogDTO activityLogRequest) throws Exception {
 
 
+        if(activityLogRequest.getLoanId() == null){
+            log.error("Requested parameter loan id cannot be blank");
+            throw new Exception("101809");
+        }
         CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
 
             collectionActivityLogsEntity.setActivityBy(activityLogRequest.getUserId());
