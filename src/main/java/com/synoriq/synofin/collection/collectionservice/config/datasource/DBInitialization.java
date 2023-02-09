@@ -64,15 +64,13 @@ public class DBInitialization {
                 connectionProperty.setProperty("maxActive", "100");
                 connectionProperty.setProperty("maxIdle", "10");
                 log.info("Datbase driver = " + getDbDriver());
-                if(client.equals("deccan")) {
-                    dataSource.setDriverClassName(getDbDriver());
-                    dataSource.setUrl(getDbUrl() + client + (getDbConnectionProperties() != null ? getDbConnectionProperties() : ""));
-                    dataSource.setUsername(getDbUserName());
-                    dataSource.setPassword(getDbPassword());
-                    dataSource.setConnectionProperties(connectionProperty);
-                    log.info("client datasource url = " + dataSource.getUrl());
-                    hashMap.put(client, dataSource);
-                }
+                dataSource.setDriverClassName(getDbDriver());
+                dataSource.setUrl(getDbUrl() + client + (getDbConnectionProperties() != null ? getDbConnectionProperties() : ""));
+                dataSource.setUsername(getDbUserName());
+                dataSource.setPassword(getDbPassword());
+                dataSource.setConnectionProperties(connectionProperty);
+                log.info("client datasource url = " + dataSource.getUrl());
+                hashMap.put(client, dataSource);
             }
         } else {
             throw new NullPointerException("Client Array not defined");
@@ -81,7 +79,7 @@ public class DBInitialization {
         return hashMap;
     }
 
-    public List<String> fetchClientList(){
+    public List<String> fetchClientList() {
         List<String> clientArray = new ArrayList<>();
         try {
             String response = new RestTemplate().getForObject(Objects.requireNonNull(configUtility.getProperty("clientList.api.url")), String.class);
@@ -95,7 +93,7 @@ public class DBInitialization {
             for (int i = 0; i < array.size(); i++) {
                 clientArray.add(array.get(i).getAsJsonObject().getAsJsonPrimitive("clientId").getAsString());
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Exception occurred while fetching client list.", e);
         }
         return clientArray;
