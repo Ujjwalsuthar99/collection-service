@@ -1,7 +1,7 @@
 server:
   servlet:
     context-path: /collection-service
-  port: '9002'
+  port: '1101'
 
 spring:
   redis:
