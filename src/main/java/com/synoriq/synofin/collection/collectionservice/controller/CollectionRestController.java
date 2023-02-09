@@ -122,7 +122,7 @@ public class CollectionRestController {
         return response;
     }
 
-    @GetMapping(value = "additional-contacts/{id}")
+    @GetMapping(value = "/additional-contacts/{id}")
     public ResponseEntity<Object> getAdditionalContactDetailsById(@PathVariable(value = "id") Long id) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -144,7 +144,7 @@ public class CollectionRestController {
         return response;
     }
 
-    @RequestMapping(value = "additional-contact", method = RequestMethod.POST)
+    @RequestMapping(value = "/additional-contact", method = RequestMethod.POST)
     public ResponseEntity<Object> createAdditionalContactDetail(@RequestBody AdditionalContactDetailsDtoRequest additionalContactDetailsDtoRequest) {
         log.info("my request body {}", additionalContactDetailsDtoRequest);
 
