@@ -1,4 +1,6 @@
-server: 
+server:
+  servlet:
+    context-path: /collection-service
   port: '1101'
 
 spring:
