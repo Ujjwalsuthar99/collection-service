@@ -13,7 +13,7 @@ spring:
     enabled: false
     schemas:
       - flyway
-    baseline-on-migrate:
+    baseline-on-migrate: true
     baseline-version: 0
     table: flyway_schema_history_collection
     common-migration-files-location: classpath:db/migration/common
