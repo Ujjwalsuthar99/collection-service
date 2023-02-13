@@ -40,7 +40,7 @@ public class CustomDBRouting extends AbstractRoutingDataSource {
     @Override
     protected Object determineCurrentLookupKey() {
         log.info("Current determineCurrentLookupKey Function Running: {}", currentUserInfo.getClientId());
-        return currentUserInfo.getClientId() != null ? currentUserInfo.getClientId() : "finova";
+        return currentUserInfo.getClientId() != null ? currentUserInfo.getClientId() : "";
     }
 
 
