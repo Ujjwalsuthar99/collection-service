@@ -22,9 +22,13 @@ public class DashboardService {
         Map<String, Map> responseLoans = new HashMap<>();
 
         try {
-            Map<String, Object> dataCounts = dashboardRepository.getFollowupCountByUserIdByDuration(userId, fromDate, toDate);
-            log.info("my data counts from followup {}", dataCounts);
-            responseLoans.put("followup", dataCounts);
+            Map<String, Object> followupDataCounts = dashboardRepository.getFollowupCountByUserIdByDuration(userId, fromDate, toDate);
+            Map<String, Object> amountTransferDataCounts = dashboardRepository.getAmountTransferCountByUserIdByDuration(userId, fromDate, toDate);
+            Map<String, Object> receiptDataCounts = dashboardRepository.getReceiptCountByUserIdByDuration(userId.toString(), fromDate, toDate);
+            log.info("my data counts from followup {}", followupDataCounts);
+            responseLoans.put("followup", followupDataCounts);
+            responseLoans.put("receipt", receiptDataCounts);
+            responseLoans.put("amount_transfer", amountTransferDataCounts);
         } catch (Exception e) {
             throw new Exception("1017000");
         }
