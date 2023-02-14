@@ -8,7 +8,9 @@ spring:
   cloud:
     config:
       label: dev
+      uri: http://13.232.9.69:8888
   flyway:
+    enabled: false
     default-schema: flyway
     schemas:
       - flyway
