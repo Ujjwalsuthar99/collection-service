@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class})
+@SpringBootApplication
 @ComponentScan("com.synoriq.synofin.collection.collectionservice.common")
 @ComponentScan("com.synoriq.synofin.collection.collectionservice.config")
 @ComponentScan("com.synoriq.synofin.collection.collectionservice.controller")
