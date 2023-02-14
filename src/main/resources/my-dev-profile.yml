@@ -14,7 +14,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   security:
     basic:
-    enabled: false
+      enabled: false
   management:
     security:
       enabled: false

@@ -10,7 +10,6 @@ spring:
       label: dev
   flyway:
     default-schema: flyway
-    enabled: false
     schemas:
       - flyway
     baseline-on-migrate: true
