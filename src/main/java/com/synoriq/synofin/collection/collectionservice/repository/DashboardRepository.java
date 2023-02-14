@@ -1,15 +1,12 @@
 package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -21,6 +18,18 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
             "from collection.followups f join collection.collection_activity_logs cal on cal.collection_activity_logs_id = f.collection_activity_logs_id where f.created_by = :userId " +
             "and f.next_followup_datetime between :fromDate and :toDate")
     Map<String,Object> getFollowupCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
+            , @Param("toDate") Date toDate);
+
+    @Query(nativeQuery = true, value = "select count(*) AS total_count, sum(cast(coalesce(sr.form->>'receipt_amount', '0') as integer)) as total_amount\n" +
+            "from lms.service_request sr where sr.request_source = 'm_collect' and sr.form->>'created_by' = :userId " +
+            "and sr.form->>'transaction_date' between :fromDate and :toDate")
+    Map<String,Object> getReceiptCountByUserIdByDuration(@Param("userId") String userId, @Param("fromDate") Date fromDate
+            , @Param("toDate") Date toDate);
+
+    @Query(nativeQuery = true, value = "select \n" +
+            "sum(amount) as total_amount, count(*) as total_count\n" +
+            "from collection.receipt_transfer rt where rt.deleted = false and rt.action_by = :userId and date(rt.created_date) between :fromDate and :toDate")
+    Map<String,Object> getAmountTransferCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);
 
 
