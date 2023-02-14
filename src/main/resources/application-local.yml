@@ -1,6 +1,6 @@
 server:
   servlet:
-    context-path: /collection-service
+    context-path: /
   port: '9002'
 
 spring:
@@ -24,7 +24,7 @@ datasource:
   collection:
     driver-class-name: org.postgresql.Driver
     username: postgres
-    password: ajay503
+    password: shiv.k.1lck.pgsql
     jdbc-url: jdbc:postgresql://localhost:5432/
     connection-properties: ?ApplicationName=${spring.application.name}
 

@@ -1,6 +1,6 @@
 server:
   servlet:
-    context-path: /
+    context-path: /collection-service
   port: '1101'
 
 spring:
@@ -14,7 +14,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   security:
     basic:
-    enabled: false
+      enabled: false
   management:
     security:
       enabled: false

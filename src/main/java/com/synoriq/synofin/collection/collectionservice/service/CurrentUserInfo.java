@@ -24,10 +24,13 @@ public class CurrentUserInfo {
     public synchronized String getClientId() {
         OAuth2Authentication principal;
         if (SecurityContextHolder.getContext().getAuthentication() instanceof OAuth2Authentication) {
+            log.info("get client id function if block");
             principal = (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
             return principal.getOAuth2Request().getClientId();
         } else {
-            return tokenClients.get(Thread.currentThread().getName());
+            log.info("Get client else block");
+            return "finova";
+//            return tokenClients.get(Thread.currentThread().getName());
         }
     }
 }

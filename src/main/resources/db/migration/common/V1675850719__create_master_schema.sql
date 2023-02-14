@@ -23,7 +23,7 @@ SET row_security = off;
 -- Name: master; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
-CREATE SCHEMA master;
+--CREATE SCHEMA master;
 
 
 ALTER SCHEMA master OWNER TO postgres;
