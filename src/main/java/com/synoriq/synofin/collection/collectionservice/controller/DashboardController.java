@@ -30,7 +30,7 @@ public class DashboardController {
     @RequestMapping(value = "/dashboard-count/{userId}", method = RequestMethod.GET)
     public ResponseEntity<Object> getDashboardCountByUserId(@PathVariable(value = "userId") Long userId,
                                                             @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date fromDate,
-                                                            @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date toDate)
+                                                            @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate)
                                                             throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;

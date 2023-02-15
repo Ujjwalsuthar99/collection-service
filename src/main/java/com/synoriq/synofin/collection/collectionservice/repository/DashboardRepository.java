@@ -32,5 +32,10 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
     Map<String,Object> getAmountTransferCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);
 
+    @Query(nativeQuery = true, value = "select \n" +
+            "sum(amount) as total_amount, count(*) as total_count\n" +
+            "from collection.receipt_transfer rt where rt.deleted = false and rt.action_by = :userId and rt.status = 'pending' and date(rt.created_date) between :fromDate and :toDate")
+    Map<String,Object> getAmountTransferInProcessCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
+            , @Param("toDate") Date toDate);
 
 }
