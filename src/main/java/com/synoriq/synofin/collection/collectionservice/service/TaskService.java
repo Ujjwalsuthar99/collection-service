@@ -3,6 +3,7 @@ package com.synoriq.synofin.collection.collectionservice.service;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail.DUMMyCUST;
+import com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail.DummyBasicInfo;
 import com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail.DummyLoanDetails;
 import com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail.DummyResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -50,11 +51,24 @@ public class TaskService {
         if(true) {
             DummyResponse response = new DummyResponse();
             DummyLoanDetails loanDetails = new DummyLoanDetails();
-            loanDetails.setId("12121");
-            response.setLoanDetails(loanDetails);
+            DummyBasicInfo basicInfo = new DummyBasicInfo();
             DUMMyCUST dUMMyCUST = new DUMMyCUST();
-            dUMMyCUST.setId("1234");
-            response.setCustomerDetails((List<DUMMyCUST>) dUMMyCUST);
+            loanDetails.setLoanId("123");
+            loanDetails.setLpp(56738.0);
+            loanDetails.setBounceCharges(678.0);
+            loanDetails.setLegalCharges(678.0);
+            loanDetails.setEmiAmount(5679.0);
+            loanDetails.setLoanId("567898");
+            loanDetails.setCollectionVisitCharges(6578.0);
+            basicInfo.setDob("12-06-2000");
+            basicInfo.setFirstName("Ujjwal");
+            basicInfo.setMiddleName("Singh");
+            basicInfo.setLastName("Towar");
+            basicInfo.setFullAddress("WO BABALU HARIJAN 136 HARIJAN MOHALLA SEWA JAIPUR SEWA RAJASTHAN 303008");
+            dUMMyCUST.setId(1567L);
+            dUMMyCUST.setBasicInfo(basicInfo);
+            response.setLoanDetails(loanDetails);
+            response.setCustomerDetails(Collections.singletonList(dUMMyCUST));
             baseDTOResponse = new BaseDTOResponse<>(response);
         } else {
             Map<String,Object> taskDetailPages = taskRepository.getTaskDetailsByLoanId(loanId);

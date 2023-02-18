@@ -3,16 +3,21 @@ package com.synoriq.synofin.collection.collectionservice.rest.response.dummyTask
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class DUMMyCUST {
 
 
     @JsonProperty("id")
-    public String id;
+    public Long id;
 
 
     @JsonProperty("customer_type")
     public String customerType;
+
+    @JsonProperty("basic_info")
+    public DummyBasicInfo basicInfo;
 
 
 }
