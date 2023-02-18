@@ -11,6 +11,8 @@ public class GlobalVariables {
 
     public static final String FORCE_APP_UPDATE_VERSION_ANDROID = "force_app_update_version_android";
     public static final String CURRENT_APP_VERSION_ANDROID = "current_app_version_android";
+    public static final String CHEQUE_COLLECTION_DEFAULT_LIMIT = "cheque_collection_default_limit";
+    public static final String CASH_COLLECTION_DEFAULT_LIMIT = "cash_collection_default_limit";
 
 
     //Pagination Config

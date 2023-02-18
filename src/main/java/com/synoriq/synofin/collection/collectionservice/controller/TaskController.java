@@ -27,7 +27,7 @@ public class TaskController {
     TaskService taskService;
 
     @RequestMapping(value = "tasks", method = RequestMethod.GET)
-    public ResponseEntity<Object> getFollowupDetailsLoanWiseByDuration(@RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
+    public ResponseEntity<Object> getTaskDetails(@RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
                                                                        @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) {
 
         BaseDTOResponse<Object> baseResponse;
@@ -38,6 +38,28 @@ public class TaskController {
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
             log.info("Get Task Details success | size=[{}]", pageNo);
+
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+
+    @RequestMapping(value = "task/{loanId}", method = RequestMethod.GET)
+    public ResponseEntity<Object> getTaskDetailByLoanId(@PathVariable("loanId") Long loanId) throws Exception {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+
+        try {
+            baseResponse = taskService.getTaskDetailByLoanId(loanId);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
