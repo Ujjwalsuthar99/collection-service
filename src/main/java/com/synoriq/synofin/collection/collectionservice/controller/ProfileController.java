@@ -42,7 +42,7 @@ public class ProfileController {
 
     ProfileService profileService;
 
-    @RequestMapping(value = "user/profile", method = RequestMethod.GET)
+    @RequestMapping(value = "users/profile", method = RequestMethod.GET)
     public ResponseEntity<Object> getProfileDetails(@RequestParam(value = "username") Long username) {
 
         BaseDTOResponse<Object> baseResponse;
