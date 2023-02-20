@@ -51,7 +51,7 @@ public class TaskController {
     }
 
 
-    @RequestMapping(value = "task/{loanId}", method = RequestMethod.GET)
+    @RequestMapping(value = "task/detail-summary/{loanId}", method = RequestMethod.GET)
     public ResponseEntity<Object> getTaskDetailByLoanId(@PathVariable("loanId") Long loanId) throws Exception {
 
         BaseDTOResponse<Object> baseResponse;
