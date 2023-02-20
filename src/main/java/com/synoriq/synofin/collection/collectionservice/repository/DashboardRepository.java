@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
+import com.synoriq.synofin.collection.collectionservice.rest.response.utilsDTO.DashboardCountDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,7 +39,8 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
     Map<String,Object> getAmountTransferInProcessCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);
 
-    @Query(nativeQuery = true, value = "select sum(cast(sr.form->>'receipt_amount' as decimal)) as cash_in_hand\n" +
+    @Query(nativeQuery = true, value = "select sum(cast(sr.form->>'receipt_amount' as decimal)) as cash_in_hand,\n" +
+            "cast((select cc.configuration_value from collection.collection_configurations cc where cc.configuration_name = 'cash_collection_default_limit') as integer) as cash_in_hand_limit\n" +
             "from lms.service_request sr\n" +
             "join collection.receipt_transfer_history rth on sr.service_request_id != rth.collection_receipts_id where sr.request_source = 'm_collect' and sr.form->>'payment_mode' = 'cash' and sr.form->>'created_by' = :userId " +
             "and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
@@ -46,7 +48,8 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
             , @Param("toDate") String toDate);
 
 
-    @Query(nativeQuery = true, value = "select sum(cast(sr.form->>'receipt_amount' as decimal)) as cheque_amount\n" +
+    @Query(nativeQuery = true, value = "select sum(cast(sr.form->>'receipt_amount' as decimal)) as cheque_amount,\n" +
+            "cast((select cc.configuration_value from collection.collection_configurations cc where cc.configuration_name = 'cheque_collection_default_limit') as integer) as cheque_limit\n" +
             "from lms.service_request sr\n" +
             "join collection.receipt_transfer_history rth on sr.service_request_id != rth.collection_receipts_id where sr.request_source = 'm_collect' and sr.form->>'payment_mode' = 'cheque' and sr.form->>'created_by' = :userId " +
             "and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
