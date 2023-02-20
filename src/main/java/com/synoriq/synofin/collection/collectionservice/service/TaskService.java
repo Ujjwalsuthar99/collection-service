@@ -82,4 +82,25 @@ public class TaskService {
 
     }
 
+    public BaseDTOResponse<Object> getTaskDetailsBySearchKey(String searchKey, Integer pageNo, Integer pageSize) throws Exception {
+
+
+        BaseDTOResponse<Object> baseDTOResponse;
+        try {
+            Pageable pageRequest;
+            if (pageNo > 0) {
+                pageNo = pageNo - 1;
+            }
+            pageRequest = PageRequest.of(pageNo, pageSize);
+            List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsBySearchKey(searchKey, pageRequest);
+
+            baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
+        } catch (Exception e) {
+            throw new Exception("1017002");
+        }
+
+        return baseDTOResponse;
+
+    }
+
 }
