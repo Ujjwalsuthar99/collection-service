@@ -20,11 +20,10 @@ public class ProfileService {
 
             if (true) {
                 DummyProfileDetailDTO dummyProfileDetailDTO = new DummyProfileDetailDTO();
-
-                dummyProfileDetailDTO.setBranch("Jaipur");
-                dummyProfileDetailDTO.setEmail("shikam.lothara@gmail.com");
+                dummyProfileDetailDTO.setName("Ujwal Suthar");
                 dummyProfileDetailDTO.setMobile("8107767383");
-                dummyProfileDetailDTO.setName("Ujwall Suthar");
+                dummyProfileDetailDTO.setBranch("Jaipur");
+                dummyProfileDetailDTO.setEmail("ujwal.suthar@gmail.com");
 
                 baseDTOResponse = new BaseDTOResponse<>(dummyProfileDetailDTO);
             } else {
