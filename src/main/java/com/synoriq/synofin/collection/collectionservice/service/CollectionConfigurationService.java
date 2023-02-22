@@ -24,14 +24,11 @@ public class CollectionConfigurationService {
         List<CollectionConfigurationsEntity> collectionConfigurationsEntityList = collectionConfigurationsRepository.findAll();
         try {
             for (CollectionConfigurationsEntity collectionConfigurationsEntity : collectionConfigurationsEntityList) {
-                log.info("additionalContactDetailsEntity Data {}", collectionConfigurationsEntity);
+                log.info("Configuration Data {}", collectionConfigurationsEntity);
 
                 CollectionConfigurationDtoRequest collectionConfigurationDtoRequest = new CollectionConfigurationDtoRequest();
-                collectionConfigurationDtoRequest.setCreatedDate(collectionConfigurationsEntity.getCreatedDate());
-                collectionConfigurationDtoRequest.setCreatedBy(collectionConfigurationsEntity.getCreatedBy());
                 collectionConfigurationDtoRequest.setConfigurationName(collectionConfigurationsEntity.getConfigurationName());
                 collectionConfigurationDtoRequest.setConfigurationValue(collectionConfigurationsEntity.getConfigurationValue());
-                collectionConfigurationDtoRequest.setConfigurationDescription(collectionConfigurationsEntity.getConfigurationDescription());
                 collectionConfigurationDtoRequestList.add(collectionConfigurationDtoRequest);
             }
             return collectionConfigurationDtoRequestList;

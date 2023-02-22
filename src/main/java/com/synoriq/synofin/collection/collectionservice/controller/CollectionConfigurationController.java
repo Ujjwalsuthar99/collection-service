@@ -26,7 +26,7 @@ public class CollectionConfigurationController {
     CollectionConfigurationService collectionConfigurationService;
 
     @RequestMapping(value = "/configurations", method = RequestMethod.GET)
-    public ResponseEntity<Object> getDashboardCountByUserId() throws SQLException {
+    public ResponseEntity<Object> getCollectionConfigurations() throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         List<CollectionConfigurationDtoRequest> result;
