@@ -183,7 +183,7 @@ public class ReceiptService {
             if (businessDateConf.equals("true")) {
                 lmsBusinessDate = HTTPRequestService.<Object, ReceiptServiceSystemPropertiesResponse>builder()
                         .httpMethod(HttpMethod.GET)
-                        .url("http://localhost:8070/v1/getSystemProperties")
+                        .url("http://localhost:1102/v1/getSystemProperties")
                         .httpHeaders(httpHeaders)
                         .body(receiptDateResponse)
                         .typeResponseType(ReceiptServiceSystemPropertiesResponse.class)
