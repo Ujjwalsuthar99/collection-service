@@ -1,57 +1,48 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptServiceDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.FollowUpDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.searchDTOs.SearchDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.SearchDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
+import com.synoriq.synofin.collection.collectionservice.service.SearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
+import java.sql.SQLException;
+
 @RestController
 @RequestMapping("/v1")
 @EnableTransactionManagement
-public class ReceiptServiceController {
+@Slf4j
+public class SearchController {
 
     @Autowired
-    ReceiptService receiptService;
+    SearchService searchService;
 
-
-    @RequestMapping(value = "/create-receipt", method = RequestMethod.POST)
-    public ResponseEntity<Object> createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, @RequestHeader("Authorization") String bearerToken) {
-        log.info("my request body {}", receiptServiceDtoRequest);
-
+    @RequestMapping(value = "index/search", method = RequestMethod.POST)
+    public ResponseEntity<Object> getReceiptsByUserIdWithDuration(@RequestBody SearchDtoRequest searchDtoRequest) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
+        Object searchResponse;
         ResponseEntity<Object> response = null;
-        Object createReceiptResponse;
 
         try {
-            createReceiptResponse = receiptService.createReceipt(receiptServiceDtoRequest, bearerToken);
-            response = new ResponseEntity<>(createReceiptResponse, HttpStatus.OK);
-
+            searchResponse = searchService.getLoanDataBySearch(searchDtoRequest);
+            response = new ResponseEntity<>(searchResponse, HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
             } else {
-                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
             }
             response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
         }
-
         return response;
-
     }
-
-
 }
-
-
-
-
-
-

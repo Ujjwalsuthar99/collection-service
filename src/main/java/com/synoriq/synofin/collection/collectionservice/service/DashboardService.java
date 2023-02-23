@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.DashboardRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +10,17 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
+
 @Service
 @Slf4j
 public class DashboardService {
 
     @Autowired
     private DashboardRepository dashboardRepository;
+
+    @Autowired
+    private CollectionConfigurationsRepository collectionConfigurationsRepository;
 
     public Map<String, Map> getDashboardCountByUserId(Long userId, String startDate, String toDate) throws Exception {
         Map<String, Map> responseLoans = new HashMap<>();
@@ -34,13 +40,25 @@ public class DashboardService {
             Map<String, Object> receiptDataCounts = dashboardRepository.getReceiptCountByUserIdByDuration(userId.toString(), startDate, toDate);
             Map<String, Object> cashInHandDataCounts = dashboardRepository.getCashInHandByUserIdByDuration(userId.toString(), startDate, toDate);
             Map<String, Object> chequeAmountData = dashboardRepository.getChequeByUserIdByDuration(userId.toString(), startDate, toDate);
+
+//            chequeAmountData.put("")
+//            Map<String, Object> chequeLImit1
+//            String chequeLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT);
+//            String cashLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
+//            Map<String, String> limits = new HashMap<>();
+//            limits.put("cash_limit", cashLimit);
+//            limits.put("cheque_limit", chequeLimit);
             log.info("my data counts from followup {}", followupDataCounts);
+//            Map<String, Object> test = (Map<String, Object>) cashInHandDataCounts;
             responseLoans.put("followup", followupDataCounts);
             responseLoans.put("receipt", receiptDataCounts);
             responseLoans.put("amount_transfer", amountTransferDataCounts);
             responseLoans.put("amount_transfer_inprocess", amountTransferInProcessDataCounts);
             responseLoans.put("cash_in_hand", cashInHandDataCounts);
             responseLoans.put("cheque_amount", chequeAmountData);
+//            responseLoans.put("limits", limits);
+//            test.put("cash_limit", cashLimit);
+
         } catch (Exception e) {
             throw new Exception("1017000");
         }
