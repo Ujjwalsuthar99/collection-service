@@ -18,7 +18,7 @@ public class SearchService {
 //        SearchDTOResponse res = new SearchDTOResponse();
         Object res = new Object();
         SearchDtoRequest searchBody = new ObjectMapper().convertValue(requestBody, SearchDtoRequest.class);
-        log.info("Search Body -- {} ", searchBody);
+        log.info("Search Body -- {} ", searchBody.getRequestData().getSearchTerm());
         try {
 
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -27,7 +27,7 @@ public class SearchService {
 
             res = HTTPRequestService.<Object, SearchDTOResponse>builder()
                     .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:8070/v1/getLoanDataBySearch")
+                    .url("http://localhost:1102/v1/getLoanDataBySearch")
                     .httpHeaders(httpHeaders)
                     .body(searchBody)
                     .typeResponseType(SearchDTOResponse.class)

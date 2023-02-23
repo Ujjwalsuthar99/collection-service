@@ -18,7 +18,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    la.loan_application_number,\n" +
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
-            "    sr.form->>'receipt_amount' as receipt_amount,\n" +
+            "    cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
             "    sr.status as status\n" +
             "    from lms.service_request sr \n" +
             "    join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id \n" +
@@ -37,7 +37,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    c.contact_person_mobile as mobile_number,\n" +
-            "    sr.form->>'receipt_amount' as receipt_amount,\n" +
+            "    cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
             "    sr.form->>'payment_mode' as payment_mode,\n" +
             "    sr.form->>'date_of_receipt' as receipt_date,\n" +
             "    sr.status as status\n" +

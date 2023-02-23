@@ -1,8 +1,11 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+
+import java.util.Date;
 
 @Data
 public class DummyLoanDetails {
@@ -12,8 +15,8 @@ public class DummyLoanDetails {
     @JsonProperty("collection_visit_charges")
     public Double collectionVisitCharges;
 
-    @JsonProperty("bounce_charges")
-    public Double bounceCharges;
+    @JsonProperty("cheque_bounce_charges")
+    public Double chequeBounceCharges;
 
     @JsonProperty("total_due_amount")
     public Double totalDueAmount;
@@ -26,6 +29,10 @@ public class DummyLoanDetails {
 
     @JsonProperty("emi_amount")
     public Double emiAmount;
-
-
+    @JsonProperty("visit_charges")
+    public Double visitCharges;
+    @JsonProperty("pos")
+    public Integer pos;
+    @JsonProperty("emi_start_date")
+    public String emiStartDate;
 }
