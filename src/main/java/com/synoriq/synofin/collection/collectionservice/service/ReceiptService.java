@@ -129,7 +129,8 @@ public class ReceiptService {
 
             res = HTTPRequestService.<Object, ServiceRequestSaveResponse>builder()
                     .httpMethod(HttpMethod.POST)
-                    .url("http://13.232.9.69:1102/v1/createReceipt")
+                    .url("http://localhost:1102/v1/createReceipt")
+//                    .url("http://13.232.9.69:1102/v1/createReceipt")
                     .httpHeaders(httpHeaders)
                     .body(createReceiptBody)
                     .typeResponseType(ServiceRequestSaveResponse.class)
