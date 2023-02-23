@@ -8,7 +8,7 @@ public class DummyBasicInfo {
 
 
     @JsonProperty("id")
-    public Long id;
+    public Integer id;
 
     @JsonProperty("first_name")
     public String firstName;
@@ -20,8 +20,15 @@ public class DummyBasicInfo {
     public String dob;
     @JsonProperty("numbers")
     public String mobNo;
-    @JsonProperty("full_address")
-    public String FullAddress;
+    @JsonProperty("home_address")
+    public String HomeAddress;
 
+    @JsonProperty("work_address")
+    public String WorkAddress;
 
+    @JsonProperty("alternative_mobile")
+    public String alternativeMobile;
+
+    @JsonProperty("mobile_spouse")
+    public String MobileSpouse;
 }
