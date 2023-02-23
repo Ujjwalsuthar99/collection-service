@@ -1,10 +1,8 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionConfigurationDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptServiceDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.service.CollectionConfigurationService;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +13,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
-import java.util.List;
-
-import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_SIZE;
 
 @RestController
 @RequestMapping("/v1")
@@ -87,6 +82,32 @@ public class ReceiptController {
         try {
             createReceiptResponse = receiptService.createReceipt(receiptServiceDtoRequest, bearerToken);
             response = new ResponseEntity<>(createReceiptResponse, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        return response;
+
+    }
+
+
+    @RequestMapping(value = "/get-receipt-date", method = RequestMethod.GET)
+    public ResponseEntity<Object> getReceiptDate(@RequestHeader("Authorization") String bearerToken) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        Object getReceiptDateResponse;
+
+        try {
+            getReceiptDateResponse = receiptService.getReceiptDate(bearerToken);
+            response = new ResponseEntity<>(getReceiptDateResponse, HttpStatus.OK);
 
         } catch (Exception e) {
             e.printStackTrace();
