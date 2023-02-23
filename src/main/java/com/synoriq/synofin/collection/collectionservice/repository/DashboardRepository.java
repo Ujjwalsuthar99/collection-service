@@ -39,7 +39,7 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
             , @Param("toDate") Date toDate);
 
     @Query(nativeQuery = true, value = "select sum(cast(sr.form->>'receipt_amount' as decimal)) as cash_in_hand,\n" +
-            "(select cc.configuration_value from collection.collection_configurations cc where cc.configuration_name = 'cash_collection_default_limit') as cash_in_hand_limit\n" +
+            "CAST((select cc.configuration_value from collection.collection_configurations cc where cc.configuration_name = 'cash_collection_default_limit') as integer) as cash_in_hand_limit\n" +
             "from lms.service_request sr\n" +
             "join collection.receipt_transfer_history rth on sr.service_request_id != rth.collection_receipts_id where sr.request_source = 'm_collect' and sr.form->>'payment_mode' = 'cash' and sr.form->>'created_by' = :userId " +
             "and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
@@ -48,7 +48,7 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
 
 
     @Query(nativeQuery = true, value = "select sum(cast(sr.form->>'receipt_amount' as decimal)) as cheque_amount,\n" +
-            "(select cc.configuration_value from collection.collection_configurations cc where cc.configuration_name = 'cheque_collection_default_limit') as cheque_limit\n" +
+            "CAST((select cc.configuration_value from collection.collection_configurations cc where cc.configuration_name = 'cheque_collection_default_limit') as integer) as cheque_limit\n" +
             "from lms.service_request sr\n" +
             "join collection.receipt_transfer_history rth on sr.service_request_id != rth.collection_receipts_id where sr.request_source = 'm_collect' and sr.form->>'payment_mode' = 'cheque' and sr.form->>'created_by' = :userId " +
             "and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")

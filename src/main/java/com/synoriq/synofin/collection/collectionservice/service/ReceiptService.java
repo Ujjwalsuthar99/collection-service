@@ -1,18 +1,21 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 
-import com.synoriq.synofin.collection.collectionservice.entity.CollectionConfigurationsEntity;
-import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
+import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEntity;
+import com.synoriq.synofin.collection.collectionservice.repository.LoanAllocationRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionConfigurationDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptServiceResponse;
+import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,11 +35,11 @@ public class ReceiptService {
         BaseDTOResponse<Object> baseDTOResponse;
         try {
             paymentMode = paymentMode == "" ? paymentMode = "cash" : paymentMode;
-    //            Pageable pageRequest;
-    //            if (pageNo > 0) {
-    //                pageNo = pageNo - 1;
-    //            }
-    //            pageRequest = PageRequest.of(pageNo, pageSize);
+            //            Pageable pageRequest;
+            //            if (pageNo > 0) {
+            //                pageNo = pageNo - 1;
+            //            }
+            //            pageRequest = PageRequest.of(pageNo, pageSize);
             List<Map<String, Object>> taskDetailPages = receiptRepository.getReceiptsByUserIdWithDuration(userId.toString(), fromDate, toDate);
 
             baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
@@ -54,11 +57,11 @@ public class ReceiptService {
         BaseDTOResponse<Object> baseDTOResponse;
         try {
             paymentMode = paymentMode == "" ? paymentMode = "cash" : paymentMode;
-    //            Pageable pageRequest;
-    //            if (pageNo > 0) {
-    //                pageNo = pageNo - 1;
-    //            }
-    //            pageRequest = PageRequest.of(pageNo, pageSize);
+            //            Pageable pageRequest;
+            //            if (pageNo > 0) {
+            //                pageNo = pageNo - 1;
+            //            }
+            //            pageRequest = PageRequest.of(pageNo, pageSize);
             List<Map<String, Object>> taskDetailPages = receiptRepository.getReceiptsByLoanIdWithDuration(loanId, fromDate, toDate);
 
             baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
@@ -71,11 +74,10 @@ public class ReceiptService {
     }
 
 
-
     public Object createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception {
         Object res = new Object();
-         ReceiptServiceDtoRequest createReceiptBody = new ObjectMapper().convertValue(receiptServiceDtoRequest, ReceiptServiceDtoRequest.class);
-         log.info("createReceiptBody {}", createReceiptBody);
+        ReceiptServiceDtoRequest createReceiptBody = new ObjectMapper().convertValue(receiptServiceDtoRequest, ReceiptServiceDtoRequest.class);
+        log.info("createReceiptBody {}", createReceiptBody);
         try {
 
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -91,7 +93,7 @@ public class ReceiptService {
                     .build().call();
 
 
-        //            baseResponse = new BaseDTOResponse<Object>(baseResponse);
+            //            baseResponse = new BaseDTOResponse<Object>(baseResponse);
         } catch (Exception ee) {
             throw new Exception(ee);
         }

@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionConfigurationDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.CollectionConfigurationService;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
