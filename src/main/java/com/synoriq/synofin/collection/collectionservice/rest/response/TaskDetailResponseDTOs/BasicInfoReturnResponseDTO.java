@@ -1,14 +1,16 @@
-package com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail;
+package com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class DummyBasicInfo {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class BasicInfoReturnResponseDTO {
 
 
     @JsonProperty("id")
-    public Integer id;
+    public Long id;
 
     @JsonProperty("first_name")
     public String firstName;

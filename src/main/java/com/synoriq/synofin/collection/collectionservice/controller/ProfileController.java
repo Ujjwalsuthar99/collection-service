@@ -46,11 +46,12 @@ public class ProfileController {
     public ResponseEntity<Object> getProfileDetails(@RequestParam(value = "username") Long username) {
 
         BaseDTOResponse<Object> baseResponse;
+        Object profileDetailResponse;
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = profileService.getProfileDetails(username);
-            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+            profileDetailResponse = profileService.getProfileDetails(username);
+            response = new ResponseEntity<>(profileDetailResponse, HttpStatus.OK);
 
             log.info("Get Profile Details success", username);
 

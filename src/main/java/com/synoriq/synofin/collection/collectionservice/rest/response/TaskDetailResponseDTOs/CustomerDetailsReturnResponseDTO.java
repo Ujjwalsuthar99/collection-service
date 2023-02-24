@@ -1,23 +1,20 @@
-package com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail;
+package com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
-public class DUMMyCUST {
+public class CustomerDetailsReturnResponseDTO {
 
 
     @JsonProperty("id")
     public Long id;
 
-
     @JsonProperty("customer_type")
     public String customerType;
 
     @JsonProperty("basic_info")
-    public DummyBasicInfo basicInfo;
+    public BasicInfoReturnResponseDTO basicInfo;
 
 
 }

@@ -4,37 +4,39 @@ package com.synoriq.synofin.collection.collectionservice.service;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DummyProfileDetailDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.SearchDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 public class ProfileService {
 
-    public BaseDTOResponse<Object> getProfileDetails(Long username) throws Exception {
-
+    public Object getProfileDetails(Long username) throws Exception {
+        Object res = new Object();
 
         BaseDTOResponse<Object> baseDTOResponse = null;
         try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Content-Type", "application/json");
 
-            if (true) {
-                DummyProfileDetailDTO dummyProfileDetailDTO = new DummyProfileDetailDTO();
-                dummyProfileDetailDTO.setName("Ujwal Suthar");
-                dummyProfileDetailDTO.setMobile("8107767383");
-                dummyProfileDetailDTO.setBranch("Jaipur");
-                dummyProfileDetailDTO.setEmail("ujwal.suthar@gmail.com");
+            res = HTTPRequestService.<Object, SearchDTOResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getProfileDetails?username=" + username)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(SearchDTOResponse.class)
+                    .build().call();
 
-                baseDTOResponse = new BaseDTOResponse<>(dummyProfileDetailDTO);
-            } else {
-//                Map<String,Object> taskDetailPages = taskRepository.getTaskDetailsByLoanId(loanId);
-                baseDTOResponse = new BaseDTOResponse<>(baseDTOResponse);
-            }
+            log.info("profile Response {}", res);
         } catch (Exception e) {
             throw new Exception("1017002");
         }
 
-        return baseDTOResponse;
+        return res;
 
     }
 }

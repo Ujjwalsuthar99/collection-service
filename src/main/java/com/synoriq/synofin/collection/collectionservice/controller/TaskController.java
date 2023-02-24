@@ -1,6 +1,8 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.rest.request.FollowUpDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
@@ -51,14 +53,14 @@ public class TaskController {
     }
 
 
-    @RequestMapping(value = "task/detail-summary/{loanId}", method = RequestMethod.GET)
-    public ResponseEntity<Object> getTaskDetailByLoanId(@PathVariable("loanId") Long loanId) throws Exception {
+    @RequestMapping(value = "task/detail-summary", method = RequestMethod.POST)
+    public ResponseEntity<Object> getTaskDetailByLoanId(@RequestBody TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
 
-        BaseDTOResponse<Object> baseResponse;
+        Object baseResponse;
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = taskService.getTaskDetailByLoanId(loanId);
+            baseResponse = taskService.getTaskDetailByLoanId(taskDetailRequestDTO);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {
