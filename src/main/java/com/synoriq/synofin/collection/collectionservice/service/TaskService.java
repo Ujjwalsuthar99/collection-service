@@ -55,6 +55,7 @@ public class TaskService {
         String loanId = taskDetailRequestDTO.getRequestData().getLoanId();
         Long loanIdNumber = Long.parseLong(loanId);
         try {
+            log.info("request dto details {}", taskDetailRequestDTO);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Content-Type", "application/json");
 
@@ -66,6 +67,8 @@ public class TaskService {
                     .typeResponseType(TaskDetailDTOResponse.class)
                     .build().call();
 
+            log.info("loan details {}", loanRes);
+
 //            if (loanRes) {
 //
 //            }
@@ -76,6 +79,8 @@ public class TaskService {
                     .httpHeaders(httpHeaders)
                     .typeResponseType(CustomerDetailDTOResponse.class)
                     .build().call();
+
+            log.info("customer details {}", customerRes);
 
 
             TaskDetailReturnResponseDTO response = new TaskDetailReturnResponseDTO();
