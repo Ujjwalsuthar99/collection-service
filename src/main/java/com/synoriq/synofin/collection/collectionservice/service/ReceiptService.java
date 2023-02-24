@@ -185,7 +185,6 @@ public class ReceiptService {
                         .httpMethod(HttpMethod.GET)
                         .url("http://localhost:1102/v1/getSystemProperties")
                         .httpHeaders(httpHeaders)
-                        .body(receiptDateResponse)
                         .typeResponseType(ReceiptServiceSystemPropertiesResponse.class)
                         .build().call();
 
