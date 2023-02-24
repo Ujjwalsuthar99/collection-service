@@ -7,32 +7,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
 public class ActivityNameService {
     public Object getActivityDetails() throws Exception {
-        Map<String, String> responseActivity = new HashMap<>();
+        Map<String, String> responseActivity = new LinkedHashMap<>();
         BaseDTOResponse<Object> baseDTOResponse  = null;
         try {
+            responseActivity.put("login", ActivityEvent.LOGIN);
+            responseActivity.put("app_access", ActivityEvent.APP_ACCESS);
             responseActivity.put("create_receipt", ActivityEvent.CREATE_RECEIPT);
             responseActivity.put("create_followup", ActivityEvent.CREATE_FOLLOWUP);
-            responseActivity.put("add_contact", ActivityEvent.ADD_CONTACT);
+            responseActivity.put("add_contact", ActivityEvent.ADD_ADDITIONAL_CONTACT);
             responseActivity.put("receipt_transfer", ActivityEvent.RECEIPT_TRANSFER);
-            responseActivity.put("closed", ActivityEvent.CLOSED);
-            responseActivity.put("login", ActivityEvent.LOGIN);
+            responseActivity.put("receipt_transfer_approve", ActivityEvent.RECEIPT_TRANSFER_APPROVE);
+            responseActivity.put("receipt_transfer_reject", ActivityEvent.RECEIPT_TRANSFER_REJECT);
+            responseActivity.put("receipt_transfer_cancel", ActivityEvent.RECEIPT_TRANSFER_CANCEL);
             responseActivity.put("logout", ActivityEvent.LOGOUT);
-            responseActivity.put("reschedule", ActivityEvent.RESCHEDULE);
-            responseActivity.put("change_password", ActivityEvent.CHANGE_PASSWORD);
-
-
-
-
-
             baseDTOResponse = new BaseDTOResponse<>(responseActivity);
             return baseDTOResponse;
         } catch(Exception e) {
