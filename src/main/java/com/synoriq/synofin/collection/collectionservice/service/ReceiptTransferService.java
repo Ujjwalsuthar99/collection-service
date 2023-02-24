@@ -10,6 +10,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.ReceiptTransf
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -136,15 +138,20 @@ public class ReceiptTransferService {
     }
 
 
-    public ReceiptTransferEntity getReceiptTransferById(Long receiptTransferId) throws Exception {
+    public ReceiptTransferResponseDTO getReceiptTransferById(Long receiptTransferId) throws Exception {
         log.info("receipt tranfer idddd {}", receiptTransferId);
         ReceiptTransferEntity receiptTransferEntity;
+        ReceiptTransferResponseDTO receiptTransferResponseDTO = new ReceiptTransferResponseDTO();
         try {
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
+            List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId);
+            receiptTransferResponseDTO.setReceiptTransferData(receiptTransferEntity);
+            receiptTransferResponseDTO.setReceiptData(receiptsData);
+
         } catch (Exception e) {
             throw new Exception("1016028");
         }
-        return receiptTransferEntity;
+        return receiptTransferResponseDTO;
     }
 
 

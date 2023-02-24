@@ -5,6 +5,7 @@ import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEn
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptTransferService;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -104,7 +105,7 @@ public class ReceiptTransferController {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
-        ReceiptTransferEntity result;
+        ReceiptTransferResponseDTO result;
         try {
             log.info("Receipt Transfer id {}", receiptTransferId);
             result = receiptTransferService.getReceiptTransferById(receiptTransferId);
