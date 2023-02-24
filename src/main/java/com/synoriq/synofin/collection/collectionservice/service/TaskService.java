@@ -78,34 +78,36 @@ public class TaskService {
                     .build().call();
 
 
-
             TaskDetailReturnResponseDTO response = new TaskDetailReturnResponseDTO();
             List<CustomerDetailsReturnResponseDTO> customerList = new ArrayList<>();
-            for (CustomerDataResponseDTO customerData : customerRes.getData()) {
-                CustomerDetailsReturnResponseDTO customerDetails = new CustomerDetailsReturnResponseDTO();
-                BasicInfoReturnResponseDTO basicInfoApplicant = new BasicInfoReturnResponseDTO();
-                customerDetails.setId(customerData.getId());
-                customerDetails.setCustomerType(customerData.getCustomerType());
-                basicInfoApplicant.setId(customerData.getBasicInfo().getId());
-                basicInfoApplicant.setFirstName(customerData.getBasicInfo().getFirstName());
-                basicInfoApplicant.setMiddleName(customerData.getBasicInfo().getMiddleName());
-                basicInfoApplicant.setLastName(customerData.getBasicInfo().getLastName());
-                basicInfoApplicant.setDob(customerData.getBasicInfo().getDob());
-                for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
-                    if (!(communicationData.getAddressType() == null)) {
-                        if (communicationData.getAddressType().equals("Permanent Address")) {
-                            basicInfoApplicant.setHomeAddress(communicationData.getFullAddress());
-                        } else if (communicationData.getAddressType().equals("Current Address")) {
-                            basicInfoApplicant.setWorkAddress(communicationData.getFullAddress());
-                            basicInfoApplicant.setMobNo(communicationData.getNumbers());
+
+            if (!(customerRes.getData() == null)) {
+                for (CustomerDataResponseDTO customerData : customerRes.getData()) {
+                    CustomerDetailsReturnResponseDTO customerDetails = new CustomerDetailsReturnResponseDTO();
+                    BasicInfoReturnResponseDTO basicInfoApplicant = new BasicInfoReturnResponseDTO();
+                    customerDetails.setId(customerData.getId());
+                    customerDetails.setCustomerType(customerData.getCustomerType());
+                    basicInfoApplicant.setId(customerData.getBasicInfo().getId());
+                    basicInfoApplicant.setFirstName(customerData.getBasicInfo().getFirstName());
+                    basicInfoApplicant.setMiddleName(customerData.getBasicInfo().getMiddleName());
+                    basicInfoApplicant.setLastName(customerData.getBasicInfo().getLastName());
+                    basicInfoApplicant.setDob(customerData.getBasicInfo().getDob());
+                    for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
+                        if (!(communicationData.getAddressType() == null)) {
+                            if (communicationData.getAddressType().equals("Permanent Address")) {
+                                basicInfoApplicant.setHomeAddress(communicationData.getFullAddress());
+                            } else if (communicationData.getAddressType().equals("Current Address")) {
+                                basicInfoApplicant.setWorkAddress(communicationData.getFullAddress());
+                                basicInfoApplicant.setMobNo(communicationData.getNumbers());
+                            }
+                        } else {
+                            basicInfoApplicant.setAlternativeMobile(communicationData.getNumbers());
                         }
-                    } else {
-                        basicInfoApplicant.setAlternativeMobile(communicationData.getNumbers());
                     }
+                    customerDetails.setBasicInfo(basicInfoApplicant);
+                    customerList.add(customerDetails);
+                    log.info("applicantDetails {}", customerDetails);
                 }
-                customerDetails.setBasicInfo(basicInfoApplicant);
-                customerList.add(customerDetails);
-                log.info("applicantDetails {}", customerDetails);
             }
             log.info("customerList {}", customerList);
 
