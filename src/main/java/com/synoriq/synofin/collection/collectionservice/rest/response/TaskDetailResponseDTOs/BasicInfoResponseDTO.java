@@ -8,7 +8,7 @@ public class BasicInfoResponseDTO {
 
 
     @JsonProperty("id")
-    public Long id;
+    public Integer id;
 
     @JsonProperty("first_name")
     public String firstName;
@@ -21,11 +21,23 @@ public class BasicInfoResponseDTO {
 
     @JsonProperty("dob")
     public String dob;
+    @JsonProperty("numbers")
+    public String mobNo;
+    @JsonProperty("home_address")
+    public String HomeAddress;
 
-    @JsonProperty("gender")
-    public String gender;
+    @JsonProperty("work_address")
+    public String WorkAddress;
 
-    @JsonProperty("profile_picture_url")
-    public String profilePictureUrl;
+    @JsonProperty("alternative_mobile")
+    public String alternativeMobile;
 
+    @JsonProperty("mobile_spouse")
+    public String MobileSpouse;
+
+    // @JsonProperty("gender")
+    // public String gender;
+
+    // @JsonProperty("profile_picture_url")
+    // public String profilePictureUrl;
 }
