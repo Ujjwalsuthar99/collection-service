@@ -18,7 +18,15 @@ public class SearchService {
 //        SearchDTOResponse res = new SearchDTOResponse();
         Object res = new Object();
         SearchDtoRequest searchBody = new ObjectMapper().convertValue(requestBody, SearchDtoRequest.class);
-        log.info("Search Body -- {} ", searchBody.getRequestData().getSearchTerm());
+        int stringSize= searchBody.getRequestData().getSearchTerm().length();
+       //  Restrict Global Search Loan Id for user with last 7 digit
+        if (stringSize > 7) {
+            String data = searchBody.getRequestData().getSearchTerm();
+            String search = data.substring((stringSize- 7));
+            searchBody.getRequestData().setSearchTerm(search);
+            searchBody.getRequestData().setFilterBy(searchBody.getRequestData().getFilterBy());
+            searchBody.getRequestData().setPaginationDTO(searchBody.getRequestData().getPaginationDTO());
+        }
         try {
 
             HttpHeaders httpHeaders = new HttpHeaders();
