@@ -1,15 +1,17 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail.DUMMyCUST;
-import com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail.DummyBasicInfo;
-import com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail.DummyLoanDetails;
-import com.synoriq.synofin.collection.collectionservice.rest.response.dummyTaskDetail.DummyResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.*;
+import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -43,41 +45,76 @@ public class TaskService {
     }
 
     // for task details --> wrapper binding should be called here //
-    public BaseDTOResponse<Object> getTaskDetailByLoanId(Long loanId) throws Exception {
+    public Object getTaskDetailByLoanId(TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
+
+        TaskDetailDTOResponse loanRes;
+        CustomerDetailDTOResponse customerRes;
+        TaskDetailRequestDTO loanDataBody = new ObjectMapper().convertValue(taskDetailRequestDTO, TaskDetailRequestDTO.class);
+        TaskDetailDTOResponse resp = new TaskDetailDTOResponse();
+        BaseDTOResponse<Object> baseDTOResponse = null;
+        String loanId = taskDetailRequestDTO.getRequestData().getLoanId();
+        Long loanIdNumber = Long.parseLong(loanId);
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Content-Type", "application/json");
+
+            loanRes = HTTPRequestService.<Object, TaskDetailDTOResponse>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/getDataForLoanActions")
+                    .httpHeaders(httpHeaders)
+                    .body(loanDataBody)
+                    .typeResponseType(TaskDetailDTOResponse.class)
+                    .build().call();
+
+//            if (loanRes) {
+//
+//            }
+
+            customerRes = HTTPRequestService.<Object, CustomerDetailDTOResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getCustomerDetails?loanId=" + loanIdNumber)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(CustomerDetailDTOResponse.class)
+                    .build().call();
 
 
-        BaseDTOResponse<Object> baseDTOResponse  = null;
 
-        if(true) {
-            DummyResponse response = new DummyResponse();
-            DummyLoanDetails loanDetails = new DummyLoanDetails();
-            DummyBasicInfo basicInfo = new DummyBasicInfo();
-            DUMMyCUST dUMMyCUST = new DUMMyCUST();
-            loanDetails.setLoanId("123");
-            loanDetails.setLpp(56738.0);
-            loanDetails.setBounceCharges(678.0);
-            loanDetails.setLegalCharges(678.0);
-            loanDetails.setEmiAmount(5679.0);
-            loanDetails.setLoanId("567898");
-            loanDetails.setCollectionVisitCharges(6578.0);
-            basicInfo.setDob("12-06-2000");
-            basicInfo.setFirstName("Ujjwal");
-            basicInfo.setMiddleName("Singh");
-            basicInfo.setLastName("Towar");
-            basicInfo.setFullAddress("WO BABALU HARIJAN 136 HARIJAN MOHALLA SEWA JAIPUR SEWA RAJASTHAN 303008");
-            dUMMyCUST.setId(1567L);
-            dUMMyCUST.setBasicInfo(basicInfo);
-            response.setLoanDetails(loanDetails);
-            response.setCustomerDetails(Collections.singletonList(dUMMyCUST));
+            TaskDetailReturnResponseDTO response = new TaskDetailReturnResponseDTO();
+            List<CustomerDetailsReturnResponseDTO> customerList = new ArrayList<>();
+            for (CustomerDataResponseDTO customerData : customerRes.getData()) {
+                CustomerDetailsReturnResponseDTO customerDetails = new CustomerDetailsReturnResponseDTO();
+                BasicInfoReturnResponseDTO basicInfoApplicant = new BasicInfoReturnResponseDTO();
+                customerDetails.setId(customerData.getId());
+                customerDetails.setCustomerType(customerData.getCustomerType());
+                basicInfoApplicant.setId(customerData.getBasicInfo().getId());
+                basicInfoApplicant.setFirstName(customerData.getBasicInfo().getFirstName());
+                basicInfoApplicant.setMiddleName(customerData.getBasicInfo().getMiddleName());
+                basicInfoApplicant.setLastName(customerData.getBasicInfo().getLastName());
+                basicInfoApplicant.setDob(customerData.getBasicInfo().getDob());
+                for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
+                    if (!(communicationData.getAddressType() == null)) {
+                        if (communicationData.getAddressType().equals("Permanent Address")) {
+                            basicInfoApplicant.setHomeAddress(communicationData.getFullAddress());
+                        } else if (communicationData.getAddressType().equals("Current Address")) {
+                            basicInfoApplicant.setWorkAddress(communicationData.getFullAddress());
+                            basicInfoApplicant.setMobNo(communicationData.getNumbers());
+                        }
+                    } else {
+                        basicInfoApplicant.setAlternativeMobile(communicationData.getNumbers());
+                    }
+                }
+                customerDetails.setBasicInfo(basicInfoApplicant);
+                customerList.add(customerDetails);
+                log.info("applicantDetails {}", customerDetails);
+            }
+            log.info("customerList {}", customerList);
+
+            response.setCustomerDetails(customerList);
+            response.setLoanDetails(loanRes.getData());
             baseDTOResponse = new BaseDTOResponse<>(response);
-        } else {
-            Map<String,Object> taskDetailPages = taskRepository.getTaskDetailsByLoanId(loanId);
-            baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
+        } catch (Exception e) {
+            throw new Exception("1017002");
         }
-
-        List<Object> taskDetailsData;
-
-//        baseDTOResponse = ;
         return baseDTOResponse;
 
     }

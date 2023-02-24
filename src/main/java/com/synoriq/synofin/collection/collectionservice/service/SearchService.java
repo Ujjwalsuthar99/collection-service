@@ -22,12 +22,11 @@ public class SearchService {
         try {
 
             HttpHeaders httpHeaders = new HttpHeaders();
-//            httpHeaders.add("Authorization", "Bearer d0fb6bba-3e21-41b8-8eb2-b0a8c9769ebf");
             httpHeaders.add("Content-Type", "application/json");
 
             res = HTTPRequestService.<Object, SearchDTOResponse>builder()
                     .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:8070/v1/getLoanDataBySearch")
+                    .url("http://localhost:1102/v1/getLoanDataBySearch")
                     .httpHeaders(httpHeaders)
                     .body(searchBody)
                     .typeResponseType(SearchDTOResponse.class)
