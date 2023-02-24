@@ -54,13 +54,13 @@ public class TaskController {
 
 
     @RequestMapping(value = "task/detail-summary", method = RequestMethod.POST)
-    public ResponseEntity<Object> getTaskDetailByLoanId(@RequestBody TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
+    public ResponseEntity<Object> getTaskDetailByLoanId(@RequestHeader("Authorization") String bearerToken, @RequestBody TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
 
         Object baseResponse;
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = taskService.getTaskDetailByLoanId(taskDetailRequestDTO);
+            baseResponse = taskService.getTaskDetailByLoanId(bearerToken, taskDetailRequestDTO);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {

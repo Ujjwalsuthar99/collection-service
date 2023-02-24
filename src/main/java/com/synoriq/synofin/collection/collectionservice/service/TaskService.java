@@ -45,7 +45,7 @@ public class TaskService {
     }
 
     // for task details --> wrapper binding should be called here //
-    public Object getTaskDetailByLoanId(TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
+    public Object getTaskDetailByLoanId(String token, TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
 
         TaskDetailDTOResponse loanRes;
         CustomerDetailDTOResponse customerRes;
@@ -57,6 +57,7 @@ public class TaskService {
         try {
             log.info("request dto details {}", taskDetailRequestDTO);
             HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
             loanRes = HTTPRequestService.<Object, TaskDetailDTOResponse>builder()
