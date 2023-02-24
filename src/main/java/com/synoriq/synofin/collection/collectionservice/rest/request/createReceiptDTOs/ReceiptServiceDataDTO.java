@@ -2,10 +2,9 @@ package com.synoriq.synofin.collection.collectionservice.rest.request.createRece
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
-public class requestDataDTO {
+public class ReceiptServiceDataDTO {
     @JsonProperty("service_request_type")
     public String serviceRequestType;
 
@@ -19,5 +18,5 @@ public class requestDataDTO {
     public String requestSource;
 
     @JsonProperty("request_data")
-    public Object requestData;
+    public ReceiptServiceRequestDataDTO requestData;
 }

@@ -13,6 +13,7 @@ public class GlobalVariables {
     public static final String CURRENT_APP_VERSION_ANDROID = "current_app_version_android";
     public static final String CHEQUE_COLLECTION_DEFAULT_LIMIT = "cheque_collection_default_limit";
     public static final String CASH_COLLECTION_DEFAULT_LIMIT = "cash_collection_default_limit";
+    public static final String USE_BUSINESS_DATE_AS_RECEIPT_DATE = "use_business_date_as_receipt_trx_date";
 
 
     //Pagination Config
