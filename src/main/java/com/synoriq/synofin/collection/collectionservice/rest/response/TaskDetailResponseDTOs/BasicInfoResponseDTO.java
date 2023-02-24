@@ -8,7 +8,7 @@ public class BasicInfoResponseDTO {
 
 
     @JsonProperty("id")
-    public Integer id;
+    public Long id;
 
     @JsonProperty("first_name")
     public String firstName;
