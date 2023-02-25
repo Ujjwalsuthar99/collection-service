@@ -157,26 +157,26 @@ public class ReceiptTransferService {
     }
 
 
-    public List<ReceiptTransferEntity> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date toDate, String status) throws Exception {
-        List<ReceiptTransferEntity> receiptTransferEntity;
-        try {
-            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status);
-        } catch (Exception e) {
-            throw new Exception("1016028");
-        }
-        return receiptTransferEntity;
-    }
-
-
-//    public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date toDate, String status) throws Exception {
-//        List<Map<String, Object>> receiptTransferEntity;
+//    public List<ReceiptTransferEntity> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date toDate, String status) throws Exception {
+//        List<ReceiptTransferEntity> receiptTransferEntity;
 //        try {
-////            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status);
-//            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserIdWithAllStatus(transferredBy, fromDate, toDate);
+//            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status);
 //        } catch (Exception e) {
 //            throw new Exception("1016028");
 //        }
 //        return receiptTransferEntity;
 //    }
+
+
+    public List<Map<String , Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date toDate, String status) throws Exception {
+        List<Map<String , Object>> receiptTransferEntity;
+        try {
+//            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status);
+            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserIdWithAllStatus(transferredBy, fromDate, toDate);
+        } catch (Exception e) {
+            throw new Exception("1016028");
+        }
+        return receiptTransferEntity;
+    }
 
 }

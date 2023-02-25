@@ -133,7 +133,7 @@ public class ReceiptTransferController {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
-        List<ReceiptTransferEntity> result;
+        List<Map<String, Object>> result;
         try {
             log.info("Receipt Transfer user id {}", transferredBy);
             result = receiptTransferService.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status);
