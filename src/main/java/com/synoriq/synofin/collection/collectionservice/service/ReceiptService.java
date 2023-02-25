@@ -163,7 +163,7 @@ public class ReceiptService {
 
             log.info("collection limit user wise entity already exist {}", collectionLimitUser);
 
-            DummyProfileDetailDTO profileData = (DummyProfileDetailDTO) profileService.getProfileDetails(Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()));
+            DummyProfileDetailDTO profileData = (DummyProfileDetailDTO) profileService.getProfileDetails(bearerToken, Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()));
 
             if (collectionLimitUser != null) {
                 collectionLimitUser.setUtilizedLimitValue(Double.valueOf(collectionLimitUser.getUtilizedLimitValue() + receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
