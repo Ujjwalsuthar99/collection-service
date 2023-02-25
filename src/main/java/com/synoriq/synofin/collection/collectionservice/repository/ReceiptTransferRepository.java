@@ -22,12 +22,12 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
     List<ReceiptTransferEntity> getReceiptTransferByUserId(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, @Param("status") String status);
 
-    @Query(nativeQuery = true,value = "select * from collection.receipt_transfer \n" +
-            "where transferred_by = :transferredBy and created_date between :fromDate and :toDate\n" +
-            "order by \n" +
-            "    case when status = 'pending' then 1 \n" +
-            "         when status = 'approved' then 2 \n" +
-            "         else 3 end")
+    @Query(nativeQuery = true,value = "select rt.*, u.name as transferred_to_name from collection.receipt_transfer rt join master.users u on u.user_id = rt.transferred_to_user_id \n" +
+            "            where rt.transferred_by = :transferredBy and rt.created_date between :fromDate and :toDate\n" +
+            "            order by\n" +
+            "            case when rt.status = 'pending' then 1\n" +
+            "            when rt.status = 'approved' then 2\n" +
+            "            else 3 end")
     List<ReceiptTransferEntity> getReceiptTransferByUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);
 
