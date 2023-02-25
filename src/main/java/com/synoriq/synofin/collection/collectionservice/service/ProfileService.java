@@ -16,12 +16,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ProfileService {
 
-    public Object getProfileDetails(Long username) throws Exception {
+    public Object getProfileDetails(String token, Long username) throws Exception {
         Object res = new Object();
 
         BaseDTOResponse<Object> baseDTOResponse = null;
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
             res = HTTPRequestService.<Object, SearchDTOResponse>builder()

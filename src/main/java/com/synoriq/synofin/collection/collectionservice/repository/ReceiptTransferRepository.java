@@ -28,7 +28,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "            case when rt.status = 'pending' then 1\n" +
             "            when rt.status = 'approved' then 2\n" +
             "            else 3 end")
-    List<ReceiptTransferEntity> getReceiptTransferByUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
+    List<Map<String, Object>> getReceiptTransferByUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);
 
 

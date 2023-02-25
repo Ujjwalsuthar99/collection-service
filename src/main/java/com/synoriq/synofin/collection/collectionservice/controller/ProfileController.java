@@ -43,14 +43,14 @@ public class ProfileController {
     ProfileService profileService;
 
     @RequestMapping(value = "users/profile", method = RequestMethod.GET)
-    public ResponseEntity<Object> getProfileDetails(@RequestParam(value = "username") Long username) {
+    public ResponseEntity<Object> getProfileDetails(@RequestHeader("Authorization") String bearerToken, @RequestParam(value = "username") Long username) {
 
         BaseDTOResponse<Object> baseResponse;
         Object profileDetailResponse;
         ResponseEntity<Object> response;
 
         try {
-            profileDetailResponse = profileService.getProfileDetails(username);
+            profileDetailResponse = profileService.getProfileDetails(bearerToken, username);
             response = new ResponseEntity<>(profileDetailResponse, HttpStatus.OK);
 
             log.info("Get Profile Details success", username);
