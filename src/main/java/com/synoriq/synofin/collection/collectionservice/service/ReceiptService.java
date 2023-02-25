@@ -180,16 +180,15 @@ public class ReceiptService {
             httpHeaders.add("Authorization", bearerToken);
             httpHeaders.add("Content-Type", "application/json");
 
+            lmsBusinessDate = HTTPRequestService.<Object, ReceiptServiceSystemPropertiesResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getSystemProperties")
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(ReceiptServiceSystemPropertiesResponse.class)
+                    .build().call();
+
             if (businessDateConf.equals("true")) {
-                lmsBusinessDate = HTTPRequestService.<Object, ReceiptServiceSystemPropertiesResponse>builder()
-                        .httpMethod(HttpMethod.GET)
-                        .url("http://localhost:1102/v1/getSystemProperties")
-                        .httpHeaders(httpHeaders)
-                        .typeResponseType(ReceiptServiceSystemPropertiesResponse.class)
-                        .build().call();
-
                 String bDate = lmsBusinessDate.data.businessDate;
-
                 getReceiptDateResponse.setReceiptDate(bDate);
                 baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
             } else {
