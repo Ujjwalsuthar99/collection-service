@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -132,7 +133,7 @@ public class ReceiptTransferController {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
-        List<ReceiptTransferEntity> result;
+        List<Map<String, Object>> result;
         try {
             log.info("Receipt Transfer user id {}", transferredBy);
             result = receiptTransferService.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status);
