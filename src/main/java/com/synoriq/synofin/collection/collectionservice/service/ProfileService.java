@@ -24,11 +24,11 @@ public class ProfileService {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Content-Type", "application/json");
 
-            res = HTTPRequestService.<Object, SearchDTOResponse>builder()
+            res = HTTPRequestService.<Object, DummyProfileDetailDTO>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getProfileDetails?username=" + username)
                     .httpHeaders(httpHeaders)
-                    .typeResponseType(SearchDTOResponse.class)
+                    .typeResponseType(DummyProfileDetailDTO.class)
                     .build().call();
 
             log.info("profile Response {}", res);

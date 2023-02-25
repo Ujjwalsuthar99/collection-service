@@ -2,10 +2,11 @@ package com.synoriq.synofin.collection.collectionservice.rest.response.createRec
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptDateResponse;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
+@Data
 @NoArgsConstructor
 public class ServiceRequestSaveResponse {
 

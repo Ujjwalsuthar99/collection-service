@@ -1,10 +1,11 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.createReceiptLms;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
+@Data
 @NoArgsConstructor
 public class ServiceRequestIdResponse {
 

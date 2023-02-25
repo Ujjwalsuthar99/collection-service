@@ -15,7 +15,6 @@ import javax.transaction.Transactional;
 public class CollectionReceiptEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "receipt_id", nullable = false)
     private Long receiptId;
 

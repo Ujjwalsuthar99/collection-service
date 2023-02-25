@@ -7,17 +7,14 @@ import lombok.Data;
 @Data
 public class DummyProfileDetailDTO {
 
-    @JsonProperty("name")
-    public String name;
+    @JsonProperty("response")
+    public String response;
 
-    @JsonProperty("mobile")
-    public String mobile;
+    @JsonProperty("data")
+    public ProfileDataDTO data;
 
-    @JsonProperty("branch")
-    public String branch;
-
-    @JsonProperty("email")
-    public String email;
+    @JsonProperty("error")
+    public String error;
 
 
 
