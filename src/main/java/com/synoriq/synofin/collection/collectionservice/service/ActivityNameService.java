@@ -25,6 +25,7 @@ public class ActivityNameService {
             responseActivity.put("receipt_transfer_approve", ActivityEvent.RECEIPT_TRANSFER_APPROVE);
             responseActivity.put("receipt_transfer_reject", ActivityEvent.RECEIPT_TRANSFER_REJECT);
             responseActivity.put("receipt_transfer_cancel", ActivityEvent.RECEIPT_TRANSFER_CANCEL);
+            responseActivity.put("pending", ActivityEvent.RECEIPT_TRANSFER_PENDING);
             responseActivity.put("logout", ActivityEvent.LOGOUT);
             baseDTOResponse = new BaseDTOResponse<>(responseActivity);
             return baseDTOResponse;

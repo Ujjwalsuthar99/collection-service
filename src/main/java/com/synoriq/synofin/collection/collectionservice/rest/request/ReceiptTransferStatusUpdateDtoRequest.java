@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request;
 
+import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
 import lombok.Data;
 
 import java.util.Date;
@@ -12,5 +13,6 @@ public class ReceiptTransferStatusUpdateDtoRequest {
     String actionReason;
     String actionRemarks;
     Long actionBy;
+    CollectionActivityLogDTO activityLog;
 
 }

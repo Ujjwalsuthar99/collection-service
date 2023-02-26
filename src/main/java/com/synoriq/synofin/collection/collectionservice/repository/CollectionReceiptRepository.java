@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CollectionReceiptRepository extends PagingAndSortingRepository<CollectionReceiptEntity, Long> {
 
+    CollectionReceiptEntity findByReceiptId(Long receiptId);
 }

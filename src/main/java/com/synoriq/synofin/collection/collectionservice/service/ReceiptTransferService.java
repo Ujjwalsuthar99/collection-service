@@ -2,9 +2,11 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
+import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferHistoryEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionReceiptRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptTransferHistoryRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptTransferRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
@@ -19,14 +21,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import javax.persistence.criteria.CriteriaBuilder;
+import java.util.*;
+
+import static com.synoriq.synofin.collection.collectionservice.common.ActivityEvent.*;
+import static com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.*;
 
 @Service
 @Slf4j
 public class ReceiptTransferService {
+    @Autowired
+    private CollectionReceiptRepository collectionReceiptRepository;
 
     @Autowired
     private ReceiptTransferRepository receiptTransferRepository;
@@ -122,23 +127,72 @@ public class ReceiptTransferService {
     public ReceiptTransferEntity statusUpdate(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest) throws Exception {
         BaseDTOResponse<Object> baseResponse = null;
         ResponseEntity<Object> response = null;
-        ReceiptTransferEntity receiptTransferEntity = new ReceiptTransferEntity();
+        ReceiptTransferEntity receiptTransferEntity;
         try {
-//            if (receiptTransferStatusUpdateDtoRequest.getStatus() == "cancel") {
-                receiptTransferEntity = receiptTransferRepository.findById(receiptTransferStatusUpdateDtoRequest.getReceiptTransferId()).get();
-                receiptTransferEntity.setStatus(receiptTransferStatusUpdateDtoRequest.getStatus());
-                receiptTransferEntity.setActionDatetime(new Date());
-                receiptTransferEntity.setActionReason(receiptTransferStatusUpdateDtoRequest.getActionReason());
-                receiptTransferEntity.setActionRemarks(receiptTransferStatusUpdateDtoRequest.getActionReason());
-                receiptTransferEntity.setActionBy(receiptTransferStatusUpdateDtoRequest.getActionBy());
-//            }
-            receiptTransferRepository.save(receiptTransferEntity);
+            String requestStatus = receiptTransferStatusUpdateDtoRequest.getStatus();
+            Long requestActionBy = receiptTransferStatusUpdateDtoRequest.getActionBy();
+            Long receiptTransferId = receiptTransferStatusUpdateDtoRequest.getReceiptTransferId();
+            receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
+            Long receiptTransferEntityTransferredToUserId  = receiptTransferEntity.getTransferredToUserId();
+            Long receiptTransferEntityTransferredBy  = receiptTransferEntity.getTransferredBy();
+            String currentStatus = receiptTransferEntity.getStatus();
+
+            Long collectionActivityLogsId = activityLogService.createActivityLogs(receiptTransferStatusUpdateDtoRequest.getActivityLog());
+
+
+            if (currentStatus.equals("pending")) {
+                switch (requestStatus) {
+                    case RECEIPT_TRANSFER_CANCEL:
+                        if (receiptTransferEntityTransferredBy.equals(requestActionBy)) {
+                            saveReceiptTransferData(receiptTransferStatusUpdateDtoRequest, receiptTransferEntity, collectionActivityLogsId);
+                        } else {
+                            throw new Exception("1016029");
+                        }
+                        break;
+                    case RECEIPT_TRANSFER_APPROVE:
+                        if (receiptTransferEntityTransferredToUserId.equals(requestActionBy)) {
+                            List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferStatusUpdateDtoRequest.getReceiptTransferId());
+                            for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
+                                Long collectionReceiptId = receiptTransferHistoryEntity.getCollectionReceiptsId();
+                                CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(collectionReceiptId);
+                                collectionReceiptEntity.setLastReceiptTransferId(receiptTransferId);
+                                collectionReceiptEntity.setReceiptHolderUserId(requestActionBy);
+                                collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityLogsId);
+                                collectionReceiptRepository.save(collectionReceiptEntity);
+                            }
+                            saveReceiptTransferData(receiptTransferStatusUpdateDtoRequest, receiptTransferEntity, collectionActivityLogsId);
+                        } else {
+                            throw new Exception("1016029");
+                        }
+                        break;
+                    case RECEIPT_TRANSFER_REJECT:
+                        if (receiptTransferEntityTransferredToUserId.equals(requestActionBy)) {
+                            saveReceiptTransferData(receiptTransferStatusUpdateDtoRequest, receiptTransferEntity, collectionActivityLogsId);
+                        } else {
+                            throw new Exception("1016029");
+                        }
+                        break;
+                }
+            } else {
+                throw new Exception("1016030");
+            }
         } catch (Exception e) {
-            throw new Exception("1016028");
+            throw new Exception(e.getMessage());
         }
         return receiptTransferEntity;
     }
 
+
+    public void saveReceiptTransferData(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, ReceiptTransferEntity receiptTransferEntity, Long collectionActivityLogsId)
+            throws Exception {
+        receiptTransferEntity.setStatus(receiptTransferStatusUpdateDtoRequest.getStatus());
+        receiptTransferEntity.setActionDatetime(new Date());
+        receiptTransferEntity.setActionReason(receiptTransferStatusUpdateDtoRequest.getActionReason());
+        receiptTransferEntity.setActionRemarks(receiptTransferStatusUpdateDtoRequest.getActionRemarks());
+        receiptTransferEntity.setActionBy(receiptTransferStatusUpdateDtoRequest.getActionBy());
+        receiptTransferEntity.setCollectionActivityLogsId(collectionActivityLogsId);
+        receiptTransferRepository.save(receiptTransferEntity);
+    }
 
     public ReceiptTransferResponseDTO getReceiptTransferById(Long receiptTransferId) throws Exception {
         log.info("receipt tranfer idddd {}", receiptTransferId);
@@ -157,19 +211,8 @@ public class ReceiptTransferService {
     }
 
 
-//    public List<ReceiptTransferEntity> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date toDate, String status) throws Exception {
-//        List<ReceiptTransferEntity> receiptTransferEntity;
-//        try {
-//            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status);
-//        } catch (Exception e) {
-//            throw new Exception("1016028");
-//        }
-//        return receiptTransferEntity;
-//    }
-
-
-    public List<Map<String , Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date toDate, String status) throws Exception {
-        List<Map<String , Object>> receiptTransferEntity;
+    public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date toDate, String status) throws Exception {
+        List<Map<String, Object>> receiptTransferEntity;
         try {
 //            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status);
             receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserIdWithAllStatus(transferredBy, fromDate, toDate);
