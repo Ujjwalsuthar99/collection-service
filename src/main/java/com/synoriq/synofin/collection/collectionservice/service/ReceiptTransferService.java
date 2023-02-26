@@ -155,10 +155,12 @@ public class ReceiptTransferService {
                             for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
                                 Long collectionReceiptId = receiptTransferHistoryEntity.getCollectionReceiptsId();
                                 CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(collectionReceiptId);
-                                collectionReceiptEntity.setLastReceiptTransferId(receiptTransferId);
-                                collectionReceiptEntity.setReceiptHolderUserId(requestActionBy);
-                                collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityLogsId);
-                                collectionReceiptRepository.save(collectionReceiptEntity);
+                                if (collectionReceiptEntity != null) {
+                                    collectionReceiptEntity.setLastReceiptTransferId(receiptTransferId);
+                                    collectionReceiptEntity.setReceiptHolderUserId(requestActionBy);
+                                    collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityLogsId);
+                                    collectionReceiptRepository.save(collectionReceiptEntity);
+                                }
                             }
                             saveReceiptTransferData(receiptTransferStatusUpdateDtoRequest, receiptTransferEntity, collectionActivityLogsId);
                         } else {
