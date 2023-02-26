@@ -17,8 +17,8 @@ public class CollectionLimitUserWiseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "collection_limit_userwise_id", nullable = false)
-    private Long collectionLimitUserwiseId;
+    @Column(name = "collection_limit_definitions_id", nullable = false)
+    private Long collectionLimitDefinitionsId;
 
     @Column(name = "created_date")
     private Date createdDate;

@@ -169,7 +169,6 @@ public class ReceiptService {
                 collectionLimitUser.setUtilizedLimitValue(Double.valueOf(collectionLimitUser.getUtilizedLimitValue() + receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
 
             } else {
-                collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
                 collectionLimitUserWiseEntity.setCreatedDate(new Date());
                 collectionLimitUserWiseEntity.setDeleted(false);
                 collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode());
