@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class SearchService {
 
-    public Object getLoanDataBySearch(SearchDtoRequest requestBody) throws Exception {
-//        SearchDTOResponse res = new SearchDTOResponse();
+    public Object getLoanDataBySearch(String token, SearchDtoRequest requestBody) throws Exception {
+
         Object res = new Object();
         SearchDtoRequest searchBody = new ObjectMapper().convertValue(requestBody, SearchDtoRequest.class);
         int stringSize= searchBody.getRequestData().getSearchTerm().length();
@@ -30,6 +30,7 @@ public class SearchService {
         try {
 
             HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
             res = HTTPRequestService.<Object, SearchDTOResponse>builder()

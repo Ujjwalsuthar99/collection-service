@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.Map;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_NUMBER;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_SIZE;
@@ -29,9 +30,12 @@ public class FollowupRestController {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
+        Map<String, Object> result;
 
         try {
-            baseResponse = followUpService.getFollowupById(followupId);
+//            baseResponse = followUpService.getFollowupById(followupId);
+            result = followUpService.getFollowupDetailsById(followupId);
+            baseResponse = new BaseDTOResponse<Object>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
             log.info("Get followup details API response success | followup id=[{}]", followupId);

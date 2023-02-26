@@ -14,9 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -56,6 +54,18 @@ public class FollowUpService {
         }
 
     }
+    public Map<String, Object> getFollowupDetailsById(Long followupId) throws Exception {
+
+        Map<String, Object> followupData;
+        try {
+            followupData = followUpRepository.getFollowupDetailsById(followupId);
+        } catch (Exception e) {
+            throw new Exception("1017002");
+        }
+        return followupData;
+    }
+
+
 
     public BaseDTOResponse<Object> getFollowupLoanWiseWithDuration(Integer page, Integer size, Long loanId, Date fromDate, Date toDate) throws Exception {
 

@@ -27,13 +27,13 @@ public class SearchController {
     SearchService searchService;
 
     @RequestMapping(value = "index/search", method = RequestMethod.POST)
-    public ResponseEntity<Object> getReceiptsByUserIdWithDuration(@RequestBody SearchDtoRequest searchDtoRequest) throws SQLException {
+    public ResponseEntity<Object> getReceiptsByUserIdWithDuration(@RequestHeader("Authorization") String bearerToken, @RequestBody SearchDtoRequest searchDtoRequest) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         Object searchResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            searchResponse = searchService.getLoanDataBySearch(searchDtoRequest);
+            searchResponse = searchService.getLoanDataBySearch(bearerToken, searchDtoRequest);
             response = new ResponseEntity<>(searchResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
