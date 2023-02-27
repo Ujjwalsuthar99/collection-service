@@ -1,14 +1,8 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferHistoryEntity;
-import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
-import com.synoriq.synofin.collection.collectionservice.repository.CollectionReceiptRepository;
-import com.synoriq.synofin.collection.collectionservice.repository.ReceiptTransferHistoryRepository;
-import com.synoriq.synofin.collection.collectionservice.repository.ReceiptTransferRepository;
+import com.synoriq.synofin.collection.collectionservice.entity.*;
+import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
@@ -41,6 +35,9 @@ public class ReceiptTransferService {
 
     @Autowired
     private CollectionActivityLogsRepository collectionActivityLogsRepository;
+
+    @Autowired
+    private CollectionLimitUserWiseRepository collectionLimitUserWiseRepository;
 
     @Autowired
     private ActivityLogService activityLogService;
@@ -135,6 +132,8 @@ public class ReceiptTransferService {
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
             Long receiptTransferEntityTransferredToUserId  = receiptTransferEntity.getTransferredToUserId();
             Long receiptTransferEntityTransferredBy  = receiptTransferEntity.getTransferredBy();
+            String receiptTransferEntityTransferMode = receiptTransferEntity.getTransferMode();
+            Double amount = receiptTransferEntity.getAmount();
             String currentStatus = receiptTransferEntity.getStatus();
 
             Long collectionActivityLogsId = activityLogService.createActivityLogs(receiptTransferStatusUpdateDtoRequest.getActivityLog());
@@ -160,6 +159,20 @@ public class ReceiptTransferService {
                                     collectionReceiptEntity.setReceiptHolderUserId(requestActionBy);
                                     collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityLogsId);
                                     collectionReceiptRepository.save(collectionReceiptEntity);
+                                }
+                            }
+                            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptTransferEntityTransferredBy, receiptTransferEntityTransferMode);
+                            if (collectionLimitUserWiseEntity != null) {
+                                if (receiptTransferEntityTransferMode.equals("cash")) {
+                                    Double utilizedLimitValue = collectionLimitUserWiseEntity.getUtilizedLimitValue();
+                                    Double updatedLimit = utilizedLimitValue - amount;
+                                    collectionLimitUserWiseEntity.setUtilizedLimitValue(updatedLimit);
+                                    collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+                                } else if (receiptTransferEntityTransferMode.equals("cheque")) {
+                                    Double utilizedLimitValue = collectionLimitUserWiseEntity.getUtilizedLimitValue();
+                                    Double updatedLimit = utilizedLimitValue - amount;
+                                    collectionLimitUserWiseEntity.setUtilizedLimitValue(updatedLimit);
+                                    collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                                 }
                             }
                             saveReceiptTransferData(receiptTransferStatusUpdateDtoRequest, receiptTransferEntity, collectionActivityLogsId);

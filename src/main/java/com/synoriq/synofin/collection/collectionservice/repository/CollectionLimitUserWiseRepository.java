@@ -17,10 +17,10 @@ import java.util.List;
 public interface CollectionLimitUserWiseRepository extends PagingAndSortingRepository<CollectionLimitUserWiseEntity, Long> {
 
     @Query(nativeQuery = true,value = "select * from collection.collection_limit_userwise where user_id = :userId " +
-            "and deleted is false ")
-    CollectionLimitUserWiseEntity getCollectionLimitUserWiseByUserId(@Param("userId") Long userId);
+            "and deleted is false and collection_limit_strategies_key = :strategyKey")
+    CollectionLimitUserWiseEntity getCollectionLimitUserWiseByUserId(@Param("userId") Long userId, @Param("strategyKey") String strategyKey);
 
 
-    CollectionLimitUserWiseEntity findByUserId(Long userId);
+//    CollectionLimitUserWiseEntity findByUserId(Long userId);
 
 }

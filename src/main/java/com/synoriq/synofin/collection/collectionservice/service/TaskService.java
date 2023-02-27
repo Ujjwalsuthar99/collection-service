@@ -91,6 +91,7 @@ public class TaskService {
                 for (CustomerDataResponseDTO customerData : customerRes.getData()) {
                     CustomerDetailsReturnResponseDTO customerDetails = new CustomerDetailsReturnResponseDTO();
                     BasicInfoReturnResponseDTO basicInfoApplicant = new BasicInfoReturnResponseDTO();
+                    CommunicationReturnResponseDTO communicationReturnResponseDTO = new CommunicationReturnResponseDTO();
                     customerDetails.setId(customerData.getId());
                     customerDetails.setCustomerType(customerData.getCustomerType());
                     basicInfoApplicant.setId(customerData.getBasicInfo().getId());
@@ -101,16 +102,17 @@ public class TaskService {
                     for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
                         if (!(communicationData.getAddressType() == null)) {
                             if (communicationData.getAddressType().equals("Permanent Address")) {
-                                basicInfoApplicant.setHomeAddress(communicationData.getFullAddress());
+                                communicationReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
                             } else if (communicationData.getAddressType().equals("Current Address")) {
-                                basicInfoApplicant.setWorkAddress(communicationData.getFullAddress());
-                                basicInfoApplicant.setMobNo(communicationData.getNumbers());
+                                communicationReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
+                                communicationReturnResponseDTO.setMobNo(communicationData.getNumbers());
                             }
                         } else {
-                            basicInfoApplicant.setAlternativeMobile(communicationData.getNumbers());
+                            communicationReturnResponseDTO.setAlternativeMobile(communicationData.getNumbers());
                         }
                     }
                     customerDetails.setBasicInfo(basicInfoApplicant);
+                    customerDetails.setCommunicationData(communicationReturnResponseDTO);
                     customerList.add(customerDetails);
                     log.info("applicantDetails {}", customerDetails);
                 }

@@ -16,5 +16,7 @@ public class CustomerDetailsReturnResponseDTO {
     @JsonProperty("basic_info")
     public BasicInfoReturnResponseDTO basicInfo;
 
+    @JsonProperty("communication_data")
+    public CommunicationReturnResponseDTO communicationData;
 
 }

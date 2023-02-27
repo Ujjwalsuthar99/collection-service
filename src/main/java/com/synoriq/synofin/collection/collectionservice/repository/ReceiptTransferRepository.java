@@ -40,7 +40,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             , @Param("toDate") Date toDate);
 
 
-    @Query(nativeQuery = true,value = "select concat_ws(' ', c.first_name, c.last_name) as name, sr.form->>'receipt_amount' as receipt_amount, sr.service_request_id as receipt_id, sr.form->>'payment_mode' as payment_mode\n" +
+    @Query(nativeQuery = true,value = "select concat_ws(' ', c.first_name, c.last_name) as name, cast(sr.form->>'receipt_amount' as decimal) as receipt_amount, sr.service_request_id as receipt_id, sr.form->>'payment_mode' as payment_mode\n" +
             "         from collection.receipt_transfer rt \n" +
             "         join (select collection_receipts_id, receipt_transfer_id from collection.receipt_transfer_history) as rth on rt.receipt_transfer_id  = rth.receipt_transfer_id \n" +
             "         join (select service_request_id, loan_id, form from lms.service_request) as sr on sr.service_request_id = rth.collection_receipts_id \n" +
