@@ -1,0 +1,21 @@
+package com.synoriq.synofin.collection.collectionservice.rest.response;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
+
+        import com.fasterxml.jackson.annotation.JsonProperty;
+        import lombok.Data;
+
+@Data
+public class MasterDTOResponse {
+    @JsonProperty("response")
+    public String response;
+
+    @JsonProperty("data")
+    public Object data;
+
+    @JsonProperty("error")
+    public String error;
+}
+
