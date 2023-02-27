@@ -148,4 +148,20 @@ public class TaskService {
 
     }
 
+
+    public BaseDTOResponse<Object> getLoanIdsByLoanId(Long loanId) throws Exception {
+
+
+        BaseDTOResponse<Object> baseDTOResponse;
+        try {
+            List<Object> loanIds = taskRepository.getLoanIdsByLoanId(loanId);
+            baseDTOResponse = new BaseDTOResponse<>(loanIds);
+        } catch (Exception e) {
+            throw new Exception("1017002");
+        }
+
+        return baseDTOResponse;
+
+    }
+
 }

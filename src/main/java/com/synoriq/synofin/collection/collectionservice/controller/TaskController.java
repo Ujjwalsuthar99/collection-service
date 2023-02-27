@@ -96,5 +96,27 @@ public class TaskController {
         }
         return response;
     }
+    @RequestMapping(value = "loans", method = RequestMethod.GET)
+    public ResponseEntity<Object> getLoanIdsByLoanId(@RequestParam(value = "loanId") Long loanId) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+
+        try {
+            baseResponse = taskService.getLoanIdsByLoanId(loanId);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+            log.info("Get Loan Id {}", loanId);
+
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
 }
 

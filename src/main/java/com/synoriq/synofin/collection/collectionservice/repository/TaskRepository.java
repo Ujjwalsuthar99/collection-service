@@ -1,11 +1,11 @@
 package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEntity;
-import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -299,5 +299,12 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "order by\n" +
             "    la.loan_application_id asc")
     List<Map<String,Object>> getTaskDetailsBySearchKey(String searchKey, Pageable pageRequest);
+
+    @Query(nativeQuery = true, value = "select clm2.loan_id as loan_id from lms.loan_application la \n" +
+            "             join lms.customer_loan_mapping clm on clm.loan_id = la.loan_application_id \n" +
+            "             left join lms.customer_loan_mapping clm2 on clm2.customer_id = clm.customer_id \n" +
+            "        \t where la.loan_application_id = :loanId and clm.customer_type = 'applicant'")
+    List<Object> getLoanIdsByLoanId(@Param("loanId") Long loanId);
+
 
 }
