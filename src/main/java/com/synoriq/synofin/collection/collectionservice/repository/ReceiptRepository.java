@@ -14,13 +14,21 @@ import java.util.Map;
 public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
 
     @Query(nativeQuery = true, value = "select \n" +
-            "    clm.loan_id,\n" +
-            "    la.loan_application_number,\n" +
-            "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
-            "    c.address1_json->>'address' as address,\n" +
-            "    cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
-            "    sr.status as status\n" +
-            "    from lms.service_request sr \n" +
+            "                sr.service_request_id ,\n" +
+            "                clm.loan_id,\n" +
+            "                la.loan_application_number,\n" +
+            "                concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+            "                c.address1_json->>'address' as address,\n" +
+            "                cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
+            "                sr.status as status,\n" +
+            "                (case \n" +
+            "                    when sr.status = 'approved' then 'green'\n" +
+            "                    when sr.status = 'rejected' then 'red'\n" +
+            "                    when sr.status = 'initiated' then 'yellow'\n" +
+            "                    else 'black'\n" +
+            "                end) as status_color_key\n" +
+            "                from lms.service_request sr \n" +
+            "                join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id\n" +
             "    join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id \n" +
             "    join lms.customer_loan_mapping clm on clm.loan_id = sr.loan_id \n" +
             "    join lms.customer c on clm.customer_id = c.customer_id \n" +
@@ -32,16 +40,21 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
 
 
     @Query(nativeQuery = true, value = "select \n" +
-            "    clm.loan_id,\n" +
-            "    la.loan_application_number,\n" +
-            "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
-            "    c.address1_json->>'address' as address,\n" +
-            "    c.contact_person_mobile as mobile_number,\n" +
-            "    cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
-            "    sr.form->>'payment_mode' as payment_mode,\n" +
-            "    sr.form->>'date_of_receipt' as receipt_date,\n" +
-            "    sr.status as status\n" +
-            "    from lms.service_request sr \n" +
+            "                sr.service_request_id ,\n" +
+            "                clm.loan_id,\n" +
+            "                la.loan_application_number,\n" +
+            "                concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+            "                c.address1_json->>'address' as address,\n" +
+            "                cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
+            "                sr.status as status,\n" +
+            "                (case \n" +
+            "                    when sr.status = 'approved' then 'green'\n" +
+            "                    when sr.status = 'rejected' then 'red'\n" +
+            "                    when sr.status = 'initiated' then 'yellow'\n" +
+            "                    else 'black'\n" +
+            "                end) as status_color_key\n" +
+            "                from lms.service_request sr \n" +
+            "                join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id\n" +
             "    join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id \n" +
             "    join lms.customer_loan_mapping clm on clm.loan_id = sr.loan_id \n" +
             "    join lms.customer c on clm.customer_id = c.customer_id \n" +
@@ -49,5 +62,22 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    and sr.request_source = 'm_collect' and sr.loan_id = :loanId\n" +
             "    and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
     List<Map<String, Object>> getReceiptsByLoanIdWithDuration(@Param("loanId") Long loanId, @Param("fromDate") String fromDate
+            , @Param("toDate") String toDate);
+
+
+
+    @Query(nativeQuery = true, value = "select \n" +
+            "    sr.service_request_id as id ,\n" +
+            "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+            "    cast(sr.form->>'receipt_amount' as decimal) as receipt_amount\n" +
+            "    from lms.service_request sr \n" +
+            "    join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id \n" +
+            "    join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id\n" +
+            "    join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id = sr.loan_id\n" +
+            "    join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
+            "    where cr.receipt_id not in (select collection_receipts_id from collection.receipt_transfer_history) and clm.customer_type = 'applicant' and\n" +
+            "    sr.request_source = 'm_collect' and sr.form->>'created_by' = :userId" +
+            "    and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
+    List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferred(@Param("userId") String userId, @Param("fromDate") String fromDate
             , @Param("toDate") String toDate);
 }
