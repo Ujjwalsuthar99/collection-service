@@ -83,6 +83,22 @@ public class ReceiptService {
 
     }
 
+
+    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferred(Long userId, String fromDate, String toDate) throws Exception {
+
+
+        BaseDTOResponse<Object> baseDTOResponse;
+        try {
+            List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferred(userId.toString(), fromDate, toDate);
+            baseDTOResponse = new BaseDTOResponse<>(receiptsData);
+        } catch (Exception e) {
+            throw new Exception("1017002");
+        }
+
+        return baseDTOResponse;
+
+    }
+
     public BaseDTOResponse<Object> getReceiptsByLoanIdWithDuration(Long loanId, String fromDate, String toDate, String status, String paymentMode) throws Exception {
 
 
