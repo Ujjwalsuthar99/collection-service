@@ -41,7 +41,7 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
     @Query(nativeQuery = true, value = "select sum(cast(sr.form->>'receipt_amount' as decimal)) as cash_in_hand,\n" +
             "CAST((select cc.configuration_value from collection.collection_configurations cc where cc.configuration_name = 'cash_collection_default_limit') as integer) as cash_in_hand_limit\n" +
             "from lms.service_request sr\n" +
-            "join collection.receipt_transfer_history rth on sr.service_request_id != rth.collection_receipts_id where sr.request_source = 'm_collect' and sr.form->>'payment_mode' = 'cash' and sr.form->>'created_by' = :userId " +
+            "join collection.collection_receipts cr on cr.receipt_holder_user_id = cast(sr.form->>'created_by' as integer) where sr.request_source = 'm_collect' and sr.form->>'payment_mode' = 'cash' and sr.form->>'created_by' = :userId " +
             "and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
     Map<String,Object> getCashInHandByUserIdByDuration(@Param("userId") String userId, @Param("fromDate") String fromDate
             , @Param("toDate") String toDate);
@@ -50,7 +50,7 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
     @Query(nativeQuery = true, value = "select sum(cast(sr.form->>'receipt_amount' as decimal)) as cheque_amount,\n" +
             "CAST((select cc.configuration_value from collection.collection_configurations cc where cc.configuration_name = 'cheque_collection_default_limit') as integer) as cheque_limit\n" +
             "from lms.service_request sr\n" +
-            "join collection.receipt_transfer_history rth on sr.service_request_id != rth.collection_receipts_id where sr.request_source = 'm_collect' and sr.form->>'payment_mode' = 'cheque' and sr.form->>'created_by' = :userId " +
+            "join collection.collection_receipts cr on cr.receipt_holder_user_id = cast(sr.form->>'created_by' as integer) where sr.request_source = 'm_collect' and sr.form->>'payment_mode' = 'cheque' and sr.form->>'created_by' = :userId " +
             "and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
     Map<String,Object> getChequeByUserIdByDuration(@Param("userId") String userId, @Param("fromDate") String fromDate
             , @Param("toDate") String toDate);

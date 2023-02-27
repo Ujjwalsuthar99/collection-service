@@ -20,4 +20,7 @@ public interface CollectionLimitUserWiseRepository extends PagingAndSortingRepos
             "and deleted is false ")
     CollectionLimitUserWiseEntity getCollectionLimitUserWiseByUserId(@Param("userId") Long userId);
 
+
+    CollectionLimitUserWiseEntity findByUserId(Long userId);
+
 }
