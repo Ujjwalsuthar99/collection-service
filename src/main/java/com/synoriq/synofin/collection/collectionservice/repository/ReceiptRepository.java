@@ -67,7 +67,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
 
 
     @Query(nativeQuery = true, value = "select \n" +
-            "    sr.service_request_id ,\n" +
+            "    sr.service_request_id as id ,\n" +
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    cast(sr.form->>'receipt_amount' as decimal) as receipt_amount\n" +
             "    from lms.service_request sr \n" +
