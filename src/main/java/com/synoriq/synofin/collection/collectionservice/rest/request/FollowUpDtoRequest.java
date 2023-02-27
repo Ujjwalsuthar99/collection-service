@@ -11,7 +11,7 @@ public class FollowUpDtoRequest {
 
 
     Long loanId;
-    Boolean isDeleted;
+//    Boolean isDeleted;
     Long createdBy;
     String followUpReason;
 
