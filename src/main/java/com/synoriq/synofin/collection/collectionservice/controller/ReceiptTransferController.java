@@ -21,6 +21,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_NUMBER;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_SIZE;
+
 @Slf4j
 @RestController
 @RequestMapping("/v1")
@@ -129,14 +132,42 @@ public class ReceiptTransferController {
     public ResponseEntity<Object> getReceiptTransferByUserId(@PathVariable("transferredBy") Long transferredBy,
                                                              @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date fromDate,
                                                              @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date toDate,
-                                                             @RequestParam("status") String status) throws SQLException {
+                                                             @RequestParam("status") String status,
+                                                             @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
+                                                             @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws SQLException {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
         List<Map<String, Object>> result;
         try {
             log.info("Receipt Transfer user id {}", transferredBy);
-            result = receiptTransferService.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status);
+            result = receiptTransferService.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status, pageNo, pageSize);
+            baseResponse = new BaseDTOResponse<>(result);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "/users/{transferredBy}/all-receipt-transfer", method = RequestMethod.GET)
+    public ResponseEntity<Object> getReceiptTransferByUserIdWithAllStatus(@PathVariable("transferredBy") Long transferredBy,
+                                                             @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date fromDate,
+                                                             @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date toDate,
+                                                             @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
+                                                             @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws SQLException {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+        List<Map<String, Object>> result;
+        try {
+            log.info("Receipt Transfer user id {}", transferredBy);
+            result = receiptTransferService.getReceiptTransferByUserIdWithAllStatus(transferredBy, fromDate, toDate, pageNo, pageSize);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {

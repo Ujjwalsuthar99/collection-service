@@ -10,6 +10,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTra
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,37 +52,47 @@ public class ReceiptTransferService {
         try {
             Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData());
 
+            Double transferredAmount = receiptTransferDtoRequest.getAmount();
+            Long transferredToID = receiptTransferDtoRequest.getTransferredToUserId();
+            String transferMode = receiptTransferDtoRequest.getTransferMode();
+            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(transferredToID, transferMode);
+            Double utilizedAmount = collectionLimitUserWiseEntity.getUtilizedLimitValue();
+            Double totalLimitValue = collectionLimitUserWiseEntity.getTotalLimitValue();
+            if ((utilizedAmount + transferredAmount) < totalLimitValue) {
 
-            ReceiptTransferEntity receiptTransferEntity = new ReceiptTransferEntity();
 
-            receiptTransferEntity.setCreatedDate(new Date());
-            receiptTransferEntity.setTransferredBy(receiptTransferDtoRequest.getTransferredBy());
-            receiptTransferEntity.setDeleted(false);
-            receiptTransferEntity.setTransferType(receiptTransferDtoRequest.getTransferType());
-            receiptTransferEntity.setTransferMode(receiptTransferDtoRequest.getTransferMode());
-            receiptTransferEntity.setTransferredToUserId(receiptTransferDtoRequest.getTransferredToUserId());
-            receiptTransferEntity.setAmount(receiptTransferDtoRequest.getAmount());
-            receiptTransferEntity.setReceiptImage(receiptTransferDtoRequest.getReceiptImage());
-            receiptTransferEntity.setStatus(receiptTransferDtoRequest.getStatus());
-            receiptTransferEntity.setTransferBankCode(receiptTransferDtoRequest.getTransferBankCode());
-            receiptTransferEntity.setActionDatetime(receiptTransferDtoRequest.getActionDatetime());
-            receiptTransferEntity.setActionReason(receiptTransferDtoRequest.getActionReason());
-            receiptTransferEntity.setActionRemarks(receiptTransferDtoRequest.getActionRemarks());
-            receiptTransferEntity.setActionBy(receiptTransferDtoRequest.getActionBy());
-            receiptTransferEntity.setCollectionActivityLogsId(collectionActivityId);
+                ReceiptTransferEntity receiptTransferEntity = new ReceiptTransferEntity();
 
-            receiptTransferRepository.save(receiptTransferEntity);
+                receiptTransferEntity.setCreatedDate(new Date());
+                receiptTransferEntity.setTransferredBy(receiptTransferDtoRequest.getTransferredBy());
+                receiptTransferEntity.setDeleted(false);
+                receiptTransferEntity.setTransferType(receiptTransferDtoRequest.getTransferType());
+                receiptTransferEntity.setTransferMode(receiptTransferDtoRequest.getTransferMode());
+                receiptTransferEntity.setTransferredToUserId(receiptTransferDtoRequest.getTransferredToUserId());
+                receiptTransferEntity.setAmount(receiptTransferDtoRequest.getAmount());
+                receiptTransferEntity.setReceiptImage(receiptTransferDtoRequest.getReceiptImage());
+                receiptTransferEntity.setStatus(receiptTransferDtoRequest.getStatus());
+                receiptTransferEntity.setTransferBankCode(receiptTransferDtoRequest.getTransferBankCode());
+                receiptTransferEntity.setActionDatetime(receiptTransferDtoRequest.getActionDatetime());
+                receiptTransferEntity.setActionReason(receiptTransferDtoRequest.getActionReason());
+                receiptTransferEntity.setActionRemarks(receiptTransferDtoRequest.getActionRemarks());
+                receiptTransferEntity.setActionBy(receiptTransferDtoRequest.getActionBy());
+                receiptTransferEntity.setCollectionActivityLogsId(collectionActivityId);
 
-            for (Long receiptTransferId : receiptTransferDtoRequest.getReceipts()) {
+                receiptTransferRepository.save(receiptTransferEntity);
 
-                ReceiptTransferHistoryEntity receiptTransferHistoryEntity = new ReceiptTransferHistoryEntity();
+                for (Long receiptTransferId : receiptTransferDtoRequest.getReceipts()) {
 
-                receiptTransferHistoryEntity.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
-                receiptTransferHistoryEntity.setCollectionReceiptsId(receiptTransferId);
-                receiptTransferHistoryRepository.save(receiptTransferHistoryEntity);
+                    ReceiptTransferHistoryEntity receiptTransferHistoryEntity = new ReceiptTransferHistoryEntity();
+
+                    receiptTransferHistoryEntity.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
+                    receiptTransferHistoryEntity.setCollectionReceiptsId(receiptTransferId);
+                    receiptTransferHistoryRepository.save(receiptTransferHistoryEntity);
+                }
+                baseResponse = new BaseDTOResponse<Object>(receiptTransferEntity);
+            } else {
+                throw new Exception("1016031");
             }
-
-            baseResponse = new BaseDTOResponse<Object>(receiptTransferEntity);
         } catch (Exception ee) {
             log.error("RestControllers error occurred for vanWebHookDetails: {} ->  {}", ee.getMessage());
             if (ErrorCode.getErrorCode(Integer.valueOf(ee.getMessage().trim())) == null) {
@@ -130,8 +142,8 @@ public class ReceiptTransferService {
             Long requestActionBy = receiptTransferStatusUpdateDtoRequest.getActionBy();
             Long receiptTransferId = receiptTransferStatusUpdateDtoRequest.getReceiptTransferId();
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
-            Long receiptTransferEntityTransferredToUserId  = receiptTransferEntity.getTransferredToUserId();
-            Long receiptTransferEntityTransferredBy  = receiptTransferEntity.getTransferredBy();
+            Long receiptTransferEntityTransferredToUserId = receiptTransferEntity.getTransferredToUserId();
+            Long receiptTransferEntityTransferredBy = receiptTransferEntity.getTransferredBy();
             String receiptTransferEntityTransferMode = receiptTransferEntity.getTransferMode();
             Double amount = receiptTransferEntity.getAmount();
             String currentStatus = receiptTransferEntity.getStatus();
@@ -226,15 +238,34 @@ public class ReceiptTransferService {
     }
 
 
-    public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date toDate, String status) throws Exception {
+    public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date toDate, String status, Integer pageNo, Integer pageSize) throws Exception {
         List<Map<String, Object>> receiptTransferEntity;
         try {
-//            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status);
-            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserIdWithAllStatus(transferredBy, fromDate, toDate);
+            Pageable pageRequest;
+            if (pageNo > 0) {
+                pageNo = pageNo - 1;
+            }
+            pageRequest = PageRequest.of(pageNo, pageSize);
+            receiptTransferEntity = receiptTransferRepository.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status, pageRequest);
         } catch (Exception e) {
             throw new Exception("1016028");
         }
         return receiptTransferEntity;
+    }
+
+    public List<Map<String, Object>> getReceiptTransferByUserIdWithAllStatus(Long transferredBy, Date fromDate, Date toDate, Integer pageNo, Integer pageSize) throws Exception {
+        List<Map<String, Object>> receiptTransferEntity2nd;
+        try {
+            Pageable pageRequest;
+            if (pageNo > 0) {
+                pageNo = pageNo - 1;
+            }
+            pageRequest = PageRequest.of(pageNo, pageSize);
+            receiptTransferEntity2nd = receiptTransferRepository.getReceiptTransferByUserIdWithAllStatus(transferredBy, fromDate, toDate, pageRequest);
+        } catch (Exception e) {
+            throw new Exception("1016028");
+        }
+        return receiptTransferEntity2nd;
     }
 
 }
