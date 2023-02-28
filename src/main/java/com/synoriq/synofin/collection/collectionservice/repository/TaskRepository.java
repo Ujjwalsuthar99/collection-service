@@ -34,8 +34,8 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "       when la.days_past_due between 91 and 120 then '91-120 DPD'\n" +
             "       when la.days_past_due between 121 and 150 then '121-150 DPD'\n" +
             "       when la.days_past_due between 151 and 180 then '151-180 DPD'\n" +
-            "       else '180++ DPD' end) as days_past_due,\n" +
-            "   la.days_past_due_day,\n" +
+            "       else '180++ DPD' end) as days_past_due_bucket,\n" +
+            "   la.days_past_due,\n" +
             "    (case\n" +
             "        when la.days_past_due between 0 and 30 then 'grey'\n" +
             "        when la.days_past_due between 31 and 60 then 'blue'\n" +
