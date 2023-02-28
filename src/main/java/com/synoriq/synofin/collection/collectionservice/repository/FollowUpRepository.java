@@ -29,12 +29,39 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "f.other_followup_reason as other_followup_reason,\n" +
             "f.remarks as remarks,\n" +
             "la.days_past_due as dpd,\n" +
+            "    (case\n" +
+            "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
+            "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
+            "       when la.days_past_due between 61 and 90 then '61-90 DPD'\n" +
+            "       when la.days_past_due between 91 and 120 then '91-120 DPD'\n" +
+            "       when la.days_past_due between 121 and 150 then '121-150 DPD'\n" +
+            "       when la.days_past_due between 151 and 180 then '151-180 DPD'\n" +
+            "       else '180++ DPD' end) as days_past_due_bucket,\n" +
+            "    (case\n" +
+            "        when la.days_past_due between 0 and 30 then '#828282'\n" +
+            "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
+            "        when la.days_past_due between 61 and 90 then '#FDAAAA'\n" +
+            "        when la.days_past_due between 91 and 120 then '#B78103'\n" +
+            "        when la.days_past_due between 121 and 150 then '#F2994A'\n" +
+            "        when la.days_past_due between 151 and 180 then '#EC1C24'\n" +
+            "        else '#323232'\n" +
+            "    end) as dpd_bg_color_key,\n" +
+            "    (case\n" +
+            "        when la.days_past_due between 0 and 30 then '#ffffff'\n" +
+            "        when la.days_past_due between 31 and 60 then '#323232'\n" +
+            "        when la.days_past_due between 61 and 90 then '#323232'\n" +
+            "        when la.days_past_due between 91 and 120 then '#323232'\n" +
+            "        when la.days_past_due between 121 and 150 then '#323232'\n" +
+            "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
+            "        else '#ffffff'\n" +
+            "    end) as dpd_text_color_key,\n" +
             "la.product as loan_type,\n" +
             "la.sanctioned_amount as loan_amount\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due,product,sanctioned_amount from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "            join (select loan_id, customer_id from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
-            "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  where f.loan_id = :loanId  \n" +
+            "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  " +
+            "where f.loan_id = :loanId  \n" +
             "            and created_date between :fromDate and :toDate ")
     List<Map<String,Object>> getFollowupsLoanWiseByDuration(@Param("loanId") Long loanId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageable);
