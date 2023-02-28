@@ -1,7 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
-import com.synoriq.synofin.collection.collectionservice.rest.response.utilsDTO.DashboardCountDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
