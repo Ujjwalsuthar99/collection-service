@@ -17,18 +17,26 @@ import com.synoriq.synofin.collection.collectionservice.service.utilityservice.H
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 import static com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.*;
@@ -290,5 +298,40 @@ public class ReceiptService {
             throw new Exception(ee);
         }
         return baseResponse;
+    }
+
+
+    public void getPdf(String token, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
+//        log.info("value is called -- {} ", serviceRequestId);
+        String serviceRequestId = null;
+        String deliverableType = null;
+
+        if (httpServletRequest.getParameter("deliverableType") != null) {
+            deliverableType = httpServletRequest.getParameter("deliverableType");
+        }
+        if (httpServletRequest.getParameter("serviceRequestId") != null) {
+            serviceRequestId = httpServletRequest.getParameter("serviceRequestId");
+        }
+
+        String url = "http://localhost:1102/v1/getPdf?deliverableType=" + deliverableType + "&serviceRequestId=" + serviceRequestId;
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth("6c6e74fe-7dc4-4a8f-891e-fbe4d061cafc");
+//            httpHeaders.setBearerAuth(token);
+
+        ResponseEntity<byte[]> response;
+
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                new HttpEntity<>(httpHeaders),
+                byte[].class);
+
+        OutputStream outputStream = httpServletResponse.getOutputStream();
+        outputStream.write(Objects.requireNonNull(response.getBody()));
+        outputStream.close();
+
     }
 }
