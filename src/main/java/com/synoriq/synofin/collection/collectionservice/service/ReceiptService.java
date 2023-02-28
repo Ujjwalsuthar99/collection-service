@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -277,7 +279,9 @@ public class ReceiptService {
                 getReceiptDateResponse.setReceiptDate(bDate);
                 baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
             } else {
-                String cDate = lmsBusinessDate.data.currentDate;
+                LocalDate dateObj = LocalDate.now();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                String cDate = dateObj.format(formatter);
                 getReceiptDateResponse.setReceiptDate(cDate);
                 baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
             }
