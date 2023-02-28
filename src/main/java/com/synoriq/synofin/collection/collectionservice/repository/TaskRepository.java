@@ -46,13 +46,13 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        else '#323232'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#323232'\n" +
+            "        when la.days_past_due between 0 and 30 then '#ffffff'\n" +
             "        when la.days_past_due between 31 and 60 then '#323232'\n" +
             "        when la.days_past_due between 61 and 90 then '#323232'\n" +
             "        when la.days_past_due between 91 and 120 then '#323232'\n" +
             "        when la.days_past_due between 121 and 150 then '#323232'\n" +
-            "        when la.days_past_due between 151 and 180 then '#e5e5e5'\n" +
-            "        else '#e5e5e5'\n" +
+            "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
+            "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key\n" +
             "from\n" +
             "    lms.loan_application la\n" +
@@ -216,24 +216,32 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    la.product,\n" +
             "    overdue_repayment,\n" +
             "    la.loan_application_number,\n" +
-            "    la.days_past_due,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then 'grey'\n" +
-            "        when la.days_past_due between 31 and 60 then 'blue'\n" +
-            "        when la.days_past_due between 61 and 90 then 'purple'\n" +
-            "        when la.days_past_due between 91 and 120 then 'yellow'\n" +
-            "        when la.days_past_due between 121 and 150 then 'orange'\n" +
-            "        when la.days_past_due between 151 and 180 then 'red'\n" +
-            "        else 'black'\n" +
+            "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
+            "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
+            "       when la.days_past_due between 61 and 90 then '61-90 DPD'\n" +
+            "       when la.days_past_due between 91 and 120 then '91-120 DPD'\n" +
+            "       when la.days_past_due between 121 and 150 then '121-150 DPD'\n" +
+            "       when la.days_past_due between 151 and 180 then '151-180 DPD'\n" +
+            "       else '180++ DPD' end) as days_past_due_bucket,\n" +
+            "   la.days_past_due,\n" +
+            "    (case\n" +
+            "        when la.days_past_due between 0 and 30 then '#828282'\n" +
+            "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
+            "        when la.days_past_due between 61 and 90 then '#FDAAAA'\n" +
+            "        when la.days_past_due between 91 and 120 then '#B78103'\n" +
+            "        when la.days_past_due between 121 and 150 then '#F2994A'\n" +
+            "        when la.days_past_due between 151 and 180 then '#EC1C24'\n" +
+            "        else '#323232'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then 'black'\n" +
-            "        when la.days_past_due between 31 and 60 then 'black'\n" +
-            "        when la.days_past_due between 61 and 90 then 'black'\n" +
-            "        when la.days_past_due between 91 and 120 then 'black'\n" +
-            "        when la.days_past_due between 121 and 150 then 'black'\n" +
-            "        when la.days_past_due between 151 and 180 then 'white'\n" +
-            "        else 'white'\n" +
+            "        when la.days_past_due between 0 and 30 then '#ffffff'\n" +
+            "        when la.days_past_due between 31 and 60 then '#323232'\n" +
+            "        when la.days_past_due between 61 and 90 then '#323232'\n" +
+            "        when la.days_past_due between 91 and 120 then '#323232'\n" +
+            "        when la.days_past_due between 121 and 150 then '#323232'\n" +
+            "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
+            "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key\n" +
             "from\n" +
             "    lms.loan_application la\n" +
