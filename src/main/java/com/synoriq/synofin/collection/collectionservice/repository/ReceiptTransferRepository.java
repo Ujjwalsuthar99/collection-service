@@ -25,16 +25,16 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
     @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount , u.name as transferred_to_name " +
             "            ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "            (case \n" +
-            "            when rt.status = 'pending' then 'blue'\n" +
-            "            when rt.status = 'receipt_transfer_approve' then 'green'\n" +
-            "            when rt.status = 'receipt_transfer_reject' then 'red'\n" +
-            "            else 'black'\n" +
+            "            when rt.status = 'pending' then '#F2994A'\n" +
+            "            when rt.status = 'approve' then '#229A16'\n" +
+            "            when rt.status = 'reject' then '#EC1C24'\n" +
+            "            else '#B78103'\n" +
             "            end) as status_color_key\n" +
             "            from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id \n" +
             "            where (rt.transferred_by = :transferredBy or rt.transferred_to_user_id = :transferredBy) and rt.created_date between :fromDate and :toDate\n" +
             "            order by\n" +
             "            case when rt.status = 'pending' then 1\n" +
-            "            when rt.status = 'receipt_transfer_approve' then 2\n" +
+            "            when rt.status = 'approve' then 2\n" +
             "            else 3 end")
     List<Map<String, Object>> getReceiptTransferByUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);

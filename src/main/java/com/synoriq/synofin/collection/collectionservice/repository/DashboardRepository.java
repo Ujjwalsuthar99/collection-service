@@ -59,8 +59,8 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
     Map<String,Object> getCashInHandByUserIdByDuration(@Param("userId") Long userId);
 
 
-    @Query(nativeQuery = true, value = "select clu.utilized_limit_value as cash_in_hand,\n" +
-            "clu.total_limit_value as cash_in_hand_limit\n" +
+    @Query(nativeQuery = true, value = "select clu.utilized_limit_value as cheque_amount,\n" +
+            "clu.total_limit_value as cheque_limit\n" +
             "from collection.collection_limit_userwise clu\n" +
             "where clu.user_id = :userId and clu.collection_limit_strategies_key = 'cheque'")
     Map<String,Object> getChequeByUserIdByDuration(@Param("userId") Long userId);
