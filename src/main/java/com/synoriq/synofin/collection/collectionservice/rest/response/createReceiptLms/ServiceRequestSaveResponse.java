@@ -17,6 +17,6 @@ public class ServiceRequestSaveResponse {
     public ServiceRequestIdResponse data;
 
     @JsonProperty("error")
-    public Object error;
+    public ServiceRequestErrorResponse error;
 
 }
