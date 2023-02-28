@@ -16,7 +16,10 @@ public class CustomerDetailsReturnResponseDTO {
     @JsonProperty("basic_info")
     public BasicInfoReturnResponseDTO basicInfo;
 
-    @JsonProperty("communication_data")
-    public CommunicationReturnResponseDTO communicationData;
+    @JsonProperty("address")
+    public AddressReturnResponseDTO address;
+
+    @JsonProperty("numbers")
+    public NumbersReturnResponseDTO numbers;
 
 }
