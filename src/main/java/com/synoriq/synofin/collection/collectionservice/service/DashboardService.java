@@ -38,26 +38,29 @@ public class DashboardService {
             Map<String, Object> amountTransferDataCounts = dashboardRepository.getAmountTransferCountByUserIdByDuration(userId, fromDate, endDate);
             Map<String, Object> amountTransferInProcessDataCounts = dashboardRepository.getAmountTransferInProcessCountByUserIdByDuration(userId, fromDate, endDate);
             Map<String, Object> receiptDataCounts = dashboardRepository.getReceiptCountByUserIdByDuration(userId.toString(), startDate, toDate);
-            Map<String, Object> cashInHandDataCounts = dashboardRepository.getCashInHandByUserIdByDuration(userId.toString(), startDate, toDate);
-            Map<String, Object> chequeAmountData = dashboardRepository.getChequeByUserIdByDuration(userId.toString(), startDate, toDate);
-
-//            chequeAmountData.put("")
-//            Map<String, Object> chequeLImit1
-//            String chequeLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT);
-//            String cashLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
-//            Map<String, String> limits = new HashMap<>();
-//            limits.put("cash_limit", cashLimit);
-//            limits.put("cheque_limit", chequeLimit);
+            Map<String, Object> cashInHandDataCounts = dashboardRepository.getCashInHandByUserIdByDuration(userId);
+            Map<String, Object> chequeAmountData = dashboardRepository.getChequeByUserIdByDuration(userId);
+            if (cashInHandDataCounts.isEmpty()) {
+                Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT));
+                Map<String , Object> newCashInHand = new HashMap<>();
+                newCashInHand.put("cash_in_hand", 0);
+                newCashInHand.put("cash_in_hand_limit", totalLimitValue);
+                cashInHandDataCounts = newCashInHand;
+            }
+            if (chequeAmountData.isEmpty()) {
+                Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT));
+                Map<String , Object> newChequeAmount = new HashMap<>();
+                newChequeAmount.put("cheque_amount", 0);
+                newChequeAmount.put("cheque_limit", totalLimitValue);
+                chequeAmountData = newChequeAmount;
+            }
             log.info("my data counts from followup {}", followupDataCounts);
-//            Map<String, Object> test = (Map<String, Object>) cashInHandDataCounts;
             responseLoans.put("followup", followupDataCounts);
             responseLoans.put("receipt", receiptDataCounts);
             responseLoans.put("amount_transfer", amountTransferDataCounts);
             responseLoans.put("amount_transfer_inprocess", amountTransferInProcessDataCounts);
             responseLoans.put("cash_in_hand", cashInHandDataCounts);
             responseLoans.put("cheque_amount", chequeAmountData);
-//            responseLoans.put("limits", limits);
-//            test.put("cash_limit", cashLimit);
 
         } catch (Exception e) {
             throw new Exception("1017000");

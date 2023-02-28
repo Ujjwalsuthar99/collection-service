@@ -12,9 +12,9 @@ public class ActivityEvent {
     public  static final String CREATE_FOLLOWUP = "create_followup";
     public static final String ADD_ADDITIONAL_CONTACT = "add_additional_contact";
     public static final String RECEIPT_TRANSFER = "receipt_transfer";
-    public static final String RECEIPT_TRANSFER_CANCEL = "receipt_transfer_cancel";
-    public static final String RECEIPT_TRANSFER_REJECT = "receipt_transfer_reject";
-    public static final String RECEIPT_TRANSFER_APPROVE = "receipt_transfer_approve";
+    public static final String RECEIPT_TRANSFER_CANCEL = "cancel";
+    public static final String RECEIPT_TRANSFER_REJECT = "reject";
+    public static final String RECEIPT_TRANSFER_APPROVE = "approve";
     public static final String RECEIPT_TRANSFER_PENDING = "pending";
     public static final String LOGOUT = "logout";
 

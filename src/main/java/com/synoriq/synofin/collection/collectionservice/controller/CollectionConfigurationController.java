@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1")
@@ -29,7 +30,7 @@ public class CollectionConfigurationController {
     public ResponseEntity<Object> getCollectionConfigurations() throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
-        List<CollectionConfigurationDtoRequest> result;
+        Map<String, String > result;
 
         try {
             result = collectionConfigurationService.getCollectionConfiguration();

@@ -94,6 +94,8 @@ public class TaskService {
                 for (CustomerDataResponseDTO customerData : customerRes.getData()) {
                     CustomerDetailsReturnResponseDTO customerDetails = new CustomerDetailsReturnResponseDTO();
                     BasicInfoReturnResponseDTO basicInfoApplicant = new BasicInfoReturnResponseDTO();
+                    AddressReturnResponseDTO addressReturnResponseDTO = new AddressReturnResponseDTO();
+                    NumbersReturnResponseDTO numbersReturnResponseDTO = new NumbersReturnResponseDTO();
                     customerDetails.setId(customerData.getId());
                     customerDetails.setCustomerType(customerData.getCustomerType());
                     basicInfoApplicant.setId(customerData.getBasicInfo().getId());
@@ -104,16 +106,18 @@ public class TaskService {
                     for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
                         if (!(communicationData.getAddressType() == null)) {
                             if (communicationData.getAddressType().equals("Permanent Address")) {
-                                basicInfoApplicant.setHomeAddress(communicationData.getFullAddress());
+                                addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
                             } else if (communicationData.getAddressType().equals("Current Address")) {
-                                basicInfoApplicant.setWorkAddress(communicationData.getFullAddress());
-                                basicInfoApplicant.setMobNo(communicationData.getNumbers());
+                                addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
+                                numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
                             }
                         } else {
-                            basicInfoApplicant.setAlternativeMobile(communicationData.getNumbers());
+                            numbersReturnResponseDTO.setAlternativeMobile(communicationData.getNumbers());
                         }
                     }
                     customerDetails.setBasicInfo(basicInfoApplicant);
+                    customerDetails.setAddress(addressReturnResponseDTO);
+                    customerDetails.setNumbers(numbersReturnResponseDTO);
                     customerList.add(customerDetails);
                     log.info("applicantDetails {}", customerDetails);
                 }
@@ -143,6 +147,22 @@ public class TaskService {
             List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsBySearchKey(searchKey, pageRequest);
 
             baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
+        } catch (Exception e) {
+            throw new Exception("1017002");
+        }
+
+        return baseDTOResponse;
+
+    }
+
+
+    public BaseDTOResponse<Object> getLoanIdsByLoanId(Long loanId) throws Exception {
+
+
+        BaseDTOResponse<Object> baseDTOResponse;
+        try {
+            List<Object> loanIds = taskRepository.getLoanIdsByLoanId(loanId);
+            baseDTOResponse = new BaseDTOResponse<>(loanIds);
         } catch (Exception e) {
             throw new Exception("1017002");
         }

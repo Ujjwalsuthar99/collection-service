@@ -1,8 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 
-import com.google.gson.Gson;
-import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEntity;
@@ -11,7 +9,6 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.createRecei
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceRequestDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DummyProfileDetailDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptServiceResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.createReceiptLms.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.GetReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptDateResponse;
@@ -19,19 +16,30 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.systemProp
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
+import static com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.*;
 
 @Service
 @Slf4j
@@ -121,7 +129,7 @@ public class ReceiptService {
 
     }
 
-
+    @Transactional
     public Object createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception {
         ServiceRequestSaveResponse res = new ServiceRequestSaveResponse();
         ReceiptServiceSystemPropertiesResponse lmsBusinessDate = new ReceiptServiceSystemPropertiesResponse();
@@ -131,6 +139,36 @@ public class ReceiptService {
         ReceiptDateResponse receiptDateResponse = new ReceiptDateResponse();
         log.info("createReceiptBody {}", createReceiptBody);
         try {
+
+            String limitConf = null;
+            if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash")) {
+                limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
+            } else {
+                limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
+            }
+
+
+            Double totalLimitValue = 0.00;
+            Double currentReceiptAmountAllowed = 0.00;
+            CollectionLimitUserWiseEntity collectionLimitUser = (CollectionLimitUserWiseEntity) collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()), receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode);
+
+            if(collectionLimitUser != null) {
+                totalLimitValue = collectionLimitUser.getTotalLimitValue();
+                currentReceiptAmountAllowed = totalLimitValue - collectionLimitUser.getUtilizedLimitValue();
+                log.info("Utilized limit {}", collectionLimitUser.getUtilizedLimitValue());
+            } else {
+                currentReceiptAmountAllowed = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
+            }
+
+
+
+            log.info("Total Limit Value {}", totalLimitValue);
+            log.info("Receipt amount can be collected by a user at current situation {}", currentReceiptAmountAllowed);
+            log.info("Receipt amount {}", receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
+
+            if(currentReceiptAmountAllowed < Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount())) {
+                throw new Exception(String.valueOf(RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT));
+            }
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", bearerToken);
@@ -169,33 +207,38 @@ public class ReceiptService {
 
             collectionReceiptRepository.save(collectionReceiptEntity);
 
-            Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT));
-//            Map<String, Object> cashInHand = dashboardRepository.getCashInHandByUserIdByDuration(String.valueOf(receiptServiceDtoRequest.getActivityData().getUserId()), "01-01-2023", String.valueOf(new Date()));
-
-            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
-            log.info("Got here ------ 1");
-            CollectionLimitUserWiseEntity collectionLimitUser = (CollectionLimitUserWiseEntity) collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptServiceDtoRequest.getActivityData().getUserId());
-            log.info("Got here ------ 2");
-
-            log.info("collection limit user wise entity already exist {}", collectionLimitUser);
-
             DummyProfileDetailDTO profileData = (DummyProfileDetailDTO) profileService.getProfileDetails(bearerToken, Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()));
 
-            if (collectionLimitUser != null) {
-                collectionLimitUser.setUtilizedLimitValue(Double.valueOf(collectionLimitUser.getUtilizedLimitValue() + receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
+//            Map<String, Object> cashInHand = dashboardRepository.getCashInHandByUserIdByDuration(String.valueOf(receiptServiceDtoRequest.getActivityData().getUserId()), "01-01-2023", String.valueOf(new Date()));
 
-            } else {
-                collectionLimitUserWiseEntity.setCreatedDate(new Date());
-                collectionLimitUserWiseEntity.setDeleted(false);
-                collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode());
-                collectionLimitUserWiseEntity.setUserId(profileData.getData().getUserId());
-                collectionLimitUserWiseEntity.setTotalLimitValue(totalLimitValue);
-                collectionLimitUserWiseEntity.setUtilizedLimitValue(totalLimitValue);
+            if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque")) {
+                CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
+
+                log.info("collection limit user wise entity already exist {}", collectionLimitUser);
+
+
+                if (collectionLimitUser != null) {
+                    collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
+                    collectionLimitUserWiseEntity.setCreatedDate(new Date());
+                    collectionLimitUserWiseEntity.setDeleted(collectionLimitUser.getDeleted());
+                    collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUser.getCollectionLimitStrategiesKey());
+                    collectionLimitUserWiseEntity.setUserId(collectionLimitUser.getUserId());
+                    collectionLimitUserWiseEntity.setTotalLimitValue(collectionLimitUser.getTotalLimitValue());
+                    collectionLimitUserWiseEntity.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() + Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
+
+                } else {
+                    collectionLimitUserWiseEntity.setCreatedDate(new Date());
+                    collectionLimitUserWiseEntity.setDeleted(false);
+                    collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode());
+                    collectionLimitUserWiseEntity.setUserId(Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()));
+                    collectionLimitUserWiseEntity.setTotalLimitValue(currentReceiptAmountAllowed);
+                    collectionLimitUserWiseEntity.setUtilizedLimitValue(Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
+                }
+                log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
+                collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
             }
 
-            log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
 
-            collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
 
 
         } catch (Exception ee) {
@@ -244,7 +287,9 @@ public class ReceiptService {
                 getReceiptDateResponse.setReceiptDate(bDate);
                 baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
             } else {
-                String cDate = lmsBusinessDate.data.currentDate;
+                LocalDate dateObj = LocalDate.now();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                String cDate = dateObj.format(formatter);
                 getReceiptDateResponse.setReceiptDate(cDate);
                 baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
             }
@@ -253,5 +298,40 @@ public class ReceiptService {
             throw new Exception(ee);
         }
         return baseResponse;
+    }
+
+
+    public void getPdf(String token, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
+//        log.info("value is called -- {} ", serviceRequestId);
+        String serviceRequestId = null;
+        String deliverableType = null;
+
+        if (httpServletRequest.getParameter("deliverableType") != null) {
+            deliverableType = httpServletRequest.getParameter("deliverableType");
+        }
+        if (httpServletRequest.getParameter("serviceRequestId") != null) {
+            serviceRequestId = httpServletRequest.getParameter("serviceRequestId");
+        }
+
+        String url = "http://localhost:1102/v1/getPdf?deliverableType=" + deliverableType + "&serviceRequestId=" + serviceRequestId;
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth("6c6e74fe-7dc4-4a8f-891e-fbe4d061cafc");
+//            httpHeaders.setBearerAuth(token);
+
+        ResponseEntity<byte[]> response;
+
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                new HttpEntity<>(httpHeaders),
+                byte[].class);
+
+        OutputStream outputStream = httpServletResponse.getOutputStream();
+        outputStream.write(Objects.requireNonNull(response.getBody()));
+        outputStream.close();
+
     }
 }
