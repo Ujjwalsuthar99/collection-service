@@ -44,9 +44,9 @@ public class MasterDataService {
 
         return res;
     }
-    public Object getUserDetail(String token) throws Exception {
+    public Object getUserDetail(String token, Integer page, Integer size) throws Exception {
 
-        Object res = new Object();
+        UserDTOResponse res = new UserDTOResponse();
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
@@ -60,6 +60,12 @@ public class MasterDataService {
                     .build().call();
 
             log.info("responseData {}", res);
+            List<Object> userData = res.getData();
+            log.info("userData.toArray().length {}", userData.toArray().length);
+//            for (int i = 0; i < userData.toArray().length; i++) {
+//                log.info("userData Object {}", userData);
+//            }
+
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
