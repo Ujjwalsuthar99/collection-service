@@ -76,38 +76,38 @@ public class FollowUpService {
         BaseDTOResponse<Object> baseDTOResponse;
         Pageable pageable = PageRequest.of(page,size);
 
-        Page<FollowUpEntity> followUpEntityPages =
+        List<Map<String,Object>> followUpEntityPages =
                 followUpRepository.getFollowupsLoanWiseByDuration(loanId, fromDate,toDate, pageable);
 
-        List<FollowUpEntity> followUpEntities;
+//        List<FollowUpEntity> followUpEntities;
 
         if(!followUpEntityPages.isEmpty()){
-            followUpEntities = followUpEntityPages.getContent();
+            baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
         }else{
             log.error("Followup data not found for loan Id {}", loanId);
             throw new Exception("1016025");
         }
+//
+//        List<FollowupResponse> followupResponseList = new LinkedList<>();
 
-        List<FollowupResponse> followupResponseList = new LinkedList<>();
+//        for(FollowUpEntity followUpEntity : followUpEntities){
+//
+//            FollowupResponse followupResponse = new FollowupResponse();
+//            followupResponse.setLoanId(followUpEntity.getLoanId());
+//            followupResponse.setFollowUpId(followUpEntity.getFollowupId());
+//            followupResponse.setRemarks(followUpEntity.getRemarks());
+//            followupResponse.setOtherFollowupReason(followupResponse.getOtherFollowupReason());
+//            followupResponse.setNextFollowUpDateTime(followUpEntity.getNextFollowUpDateTime());
+//            followupResponse.setCreatedBy(followUpEntity.getCreatedBy());
+//            followupResponse.setCreatedDate(followUpEntity.getCreatedDate());
+//            followupResponse.setIsDeleted(followUpEntity.getIsDeleted());
+//            followupResponse.setFollowUpReason(followUpEntity.getFollowUpReason());
+//
+//            followupResponseList.add(followupResponse);
+//
+//        }
 
-        for(FollowUpEntity followUpEntity : followUpEntities){
-
-            FollowupResponse followupResponse = new FollowupResponse();
-            followupResponse.setLoanId(followUpEntity.getLoanId());
-            followupResponse.setFollowUpId(followUpEntity.getFollowupId());
-            followupResponse.setRemarks(followUpEntity.getRemarks());
-            followupResponse.setOtherFollowupReason(followupResponse.getOtherFollowupReason());
-            followupResponse.setNextFollowUpDateTime(followUpEntity.getNextFollowUpDateTime());
-            followupResponse.setCreatedBy(followUpEntity.getCreatedBy());
-            followupResponse.setCreatedDate(followUpEntity.getCreatedDate());
-            followupResponse.setIsDeleted(followUpEntity.getIsDeleted());
-            followupResponse.setFollowUpReason(followUpEntity.getFollowUpReason());
-
-            followupResponseList.add(followupResponse);
-
-        }
-
-        baseDTOResponse = new BaseDTOResponse<>(followupResponseList);
+//        baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
 
         return baseDTOResponse;
 

@@ -12,6 +12,7 @@ public enum ErrorCode {
         DATA_SAVE_ERROR(1017001, "An Exception occurred in saving data"),
     NO_DATA_FOUND(1017002, "No Data Found"),
     RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT(1017003, "Limit Exceeded due to receipts available in your bucket!"),
+    INTERNAL_SERVER_ERROR(1017004, "Error while fetching PDF from LMS"),
 //    CREDENTIALS_ERROR(1017002, "Incorrect username or password"),
 //    LOGIN_ERROR(1017003, "An Exception occurred in login. Please try again"),
 //    LOGIN_SUCCESS_CODE(1017004, "Login successfully"),

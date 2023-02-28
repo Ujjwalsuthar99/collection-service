@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 
 @RestController
@@ -141,6 +143,32 @@ public class ReceiptController {
         }
 
         return response;
+
+    }
+
+
+    @RequestMapping(value = "/get-pdf", method = RequestMethod.GET)
+    public ResponseEntity<Object> getPdf(@RequestHeader("Authorization") String bearerToken, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+
+        ResponseEntity<Object> responseEntity = null;
+        BaseDTOResponse<Object> response = null;
+        try {
+//            log.info("token {}", bearerToken);
+//            log.info("deliverableType {}", deliverableType);
+//            log.info("serviceRequestId {}", serviceRequestId);
+            receiptService.getPdf(bearerToken, httpServletRequest, httpServletResponse);
+        } catch (Exception ee) {
+            log.error("RestControllers error occurred for vanWebHookDetails: {} ->  {}", ee.getMessage());
+            if (ErrorCode.getErrorCode(1017004) == null) {
+                responseEntity = new ResponseEntity<>(ErrorCode.getErrorCode(1017004), HttpStatus.BAD_REQUEST);
+
+//                throw new CommonServiceException(ErrorCodes.getErrorCode("INTERNAL_SERVER_ERROR"));
+            } else {
+                responseEntity = new ResponseEntity<>(ErrorCode.getErrorCode(1017002), HttpStatus.BAD_REQUEST);
+//                throw new CommonServiceException(ErrorCodes.getErrorCode(ee.getMessage().trim()));
+            }
+        }
+        return responseEntity;
 
     }
 }
