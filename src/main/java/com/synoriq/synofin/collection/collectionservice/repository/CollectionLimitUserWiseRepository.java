@@ -20,4 +20,7 @@ public interface CollectionLimitUserWiseRepository extends PagingAndSortingRepos
             "and deleted is false and collection_limit_strategies_key = :strategyKey")
     CollectionLimitUserWiseEntity getCollectionLimitUserWiseByUserId(@Param("userId") Long userId, @Param("strategyKey") String strategyKey);
 
+
+//    CollectionLimitUserWiseEntity findByUserId(Long userId);
+
 }

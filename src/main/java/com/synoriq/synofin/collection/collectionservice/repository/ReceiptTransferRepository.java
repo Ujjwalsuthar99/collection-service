@@ -25,9 +25,9 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
     @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount , u.name as transferred_to_name " +
             "            ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "            (case \n" +
-            "            when sr.status = 'pending' then 'blue'\n" +
-            "            when sr.status = 'receipt_transfer_approve' then 'green'\n" +
-            "            when sr.status = 'receipt_transfer_reject' then 'red'\n" +
+            "            when rt.status = 'pending' then 'blue'\n" +
+            "            when rt.status = 'receipt_transfer_approve' then 'green'\n" +
+            "            when rt.status = 'receipt_transfer_reject' then 'red'\n" +
             "            else 'black'\n" +
             "            end) as status_color_key\n" +
             "            from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id \n" +
@@ -40,7 +40,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             , @Param("toDate") Date toDate);
 
 
-    @Query(nativeQuery = true,value = "select concat_ws(' ', c.first_name, c.last_name) as name, sr.form->>'receipt_amount' as receipt_amount, sr.service_request_id as receipt_id, sr.form->>'payment_mode' as payment_mode\n" +
+    @Query(nativeQuery = true,value = "select concat_ws(' ', c.first_name, c.last_name) as name, cast(sr.form->>'receipt_amount' as decimal) as receipt_amount, sr.service_request_id as receipt_id, sr.form->>'payment_mode' as payment_mode\n" +
             "         from collection.receipt_transfer rt \n" +
             "         join (select collection_receipts_id, receipt_transfer_id from collection.receipt_transfer_history) as rth on rt.receipt_transfer_id  = rth.receipt_transfer_id \n" +
             "         join (select service_request_id, loan_id, form from lms.service_request) as sr on sr.service_request_id = rth.collection_receipts_id \n" +

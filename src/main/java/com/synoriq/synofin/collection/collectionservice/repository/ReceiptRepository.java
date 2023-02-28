@@ -69,7 +69,8 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
     @Query(nativeQuery = true, value = "select \n" +
             "    sr.service_request_id as id ,\n" +
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
-            "    cast(sr.form->>'receipt_amount' as decimal) as receipt_amount\n" +
+            "    cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
+            "    sr.form->>'payment_mode' as payment_mode\n" +
             "    from lms.service_request sr \n" +
             "    join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id \n" +
             "    join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id\n" +

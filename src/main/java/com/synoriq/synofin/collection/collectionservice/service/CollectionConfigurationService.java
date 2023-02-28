@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -18,20 +20,14 @@ public class CollectionConfigurationService {
     @Autowired
     CollectionConfigurationsRepository collectionConfigurationsRepository;
 
-    public List<CollectionConfigurationDtoRequest> getCollectionConfiguration() throws Exception {
-
-        List<CollectionConfigurationDtoRequest> collectionConfigurationDtoRequestList = new ArrayList<>();
+    public Map<String, String> getCollectionConfiguration() throws Exception {
         List<CollectionConfigurationsEntity> collectionConfigurationsEntityList = collectionConfigurationsRepository.findAll();
         try {
+            Map<String, String> objectData = new HashMap<>();
             for (CollectionConfigurationsEntity collectionConfigurationsEntity : collectionConfigurationsEntityList) {
-                log.info("Configuration Data {}", collectionConfigurationsEntity);
-
-                CollectionConfigurationDtoRequest collectionConfigurationDtoRequest = new CollectionConfigurationDtoRequest();
-                collectionConfigurationDtoRequest.setConfigurationName(collectionConfigurationsEntity.getConfigurationName());
-                collectionConfigurationDtoRequest.setConfigurationValue(collectionConfigurationsEntity.getConfigurationValue());
-                collectionConfigurationDtoRequestList.add(collectionConfigurationDtoRequest);
+                objectData.put(collectionConfigurationsEntity.getConfigurationName(), collectionConfigurationsEntity.getConfigurationValue());
             }
-            return collectionConfigurationDtoRequestList;
+            return objectData;
         } catch(Exception e) {
             throw new Exception("1017002");
         }
