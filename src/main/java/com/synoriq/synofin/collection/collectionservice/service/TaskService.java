@@ -34,8 +34,11 @@ public class TaskService {
             }
             pageRequest = PageRequest.of(pageNo, pageSize);
             List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsByPages(pageRequest);
-
-            baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
+            if (!taskDetailPages.isEmpty()) {
+                baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
+            } else {
+                throw new Exception("1016025");
+            }
         } catch (Exception e) {
             throw new Exception("1017002");
         }

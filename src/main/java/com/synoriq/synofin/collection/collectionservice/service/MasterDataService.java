@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionConfigurationsEntity;
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionConfigurationDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ContactDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
@@ -57,6 +58,28 @@ public class MasterDataService {
                     .url("http://localhost:1102/v1/getAllUserData")
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UserDTOResponse.class)
+                    .build().call();
+
+            log.info("responseData {}", res);
+        } catch (Exception ee) {
+            log.error("{}", ee.getMessage());
+        }
+
+        return res;
+    }
+    public Object getContactSupport(String token,String keyword, String model) throws Exception {
+
+        Object res = new Object();
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, ContactDTOResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getContactSupport?keyword="+keyword+"&model="+model)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(ContactDTOResponse.class)
                     .build().call();
 
             log.info("responseData {}", res);

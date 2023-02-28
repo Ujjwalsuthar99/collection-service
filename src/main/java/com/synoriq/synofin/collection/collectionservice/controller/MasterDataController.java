@@ -63,5 +63,25 @@ public class MasterDataController {
         }
         return response;
     }
+    @RequestMapping(value = "getContactSupport", method = RequestMethod.GET)
+    public ResponseEntity<Object> getContactSupport(@RequestHeader("Authorization") String bearerToken, @RequestParam(value = "keyword") String keyword, @RequestParam(value = "model") String model) throws SQLException {
+        BaseDTOResponse<Object> baseResponse;
+        Object userResponse;
+        ResponseEntity<Object> response = null;
+        Object result;
+
+        try {
+            result = masterDataService.getContactSupport(bearerToken, keyword, model);
+            response = new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
 
 }
