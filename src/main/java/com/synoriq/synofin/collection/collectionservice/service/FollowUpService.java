@@ -112,6 +112,51 @@ public class FollowUpService {
         return baseDTOResponse;
 
     }
+    public BaseDTOResponse<Object> getFollowupUserWiseWithDuration(Integer page, Integer size, Long userId, Date fromDate, Date toDate) throws Exception {
+
+        if(fromDate.compareTo(toDate) == 0){
+            toDate = checkToDate(toDate);
+        }
+
+        BaseDTOResponse<Object> baseDTOResponse;
+        Pageable pageable = PageRequest.of(page,size);
+
+        List<Map<String,Object>> followUpEntityPages =
+                followUpRepository.getFollowupsUserWiseByDuration(userId, fromDate,toDate, pageable);
+
+//        List<FollowUpEntity> followUpEntities;
+
+        if(!followUpEntityPages.isEmpty()){
+            baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
+        }else{
+            log.error("Followup data not found for loan Id {}", userId);
+            throw new Exception("1016025");
+        }
+//
+//        List<FollowupResponse> followupResponseList = new LinkedList<>();
+
+//        for(FollowUpEntity followUpEntity : followUpEntities){
+//
+//            FollowupResponse followupResponse = new FollowupResponse();
+//            followupResponse.setLoanId(followUpEntity.getLoanId());
+//            followupResponse.setFollowUpId(followUpEntity.getFollowupId());
+//            followupResponse.setRemarks(followUpEntity.getRemarks());
+//            followupResponse.setOtherFollowupReason(followupResponse.getOtherFollowupReason());
+//            followupResponse.setNextFollowUpDateTime(followUpEntity.getNextFollowUpDateTime());
+//            followupResponse.setCreatedBy(followUpEntity.getCreatedBy());
+//            followupResponse.setCreatedDate(followUpEntity.getCreatedDate());
+//            followupResponse.setIsDeleted(followUpEntity.getIsDeleted());
+//            followupResponse.setFollowUpReason(followUpEntity.getFollowUpReason());
+//
+//            followupResponseList.add(followupResponse);
+//
+//        }
+
+//        baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
+
+        return baseDTOResponse;
+
+    }
 
     public BaseDTOResponse<Object> createFollowup(FollowUpDtoRequest followUpDtoRequest){
 

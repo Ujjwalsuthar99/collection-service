@@ -76,6 +76,31 @@ public class FollowupRestController {
         }
         return response;
     }
+    @RequestMapping(value = "users/{userId}/followups", method = RequestMethod.GET)
+    public ResponseEntity<Object> getFollowupDetailsUserWiseByDuration(@PathVariable("userId") Long userId,@RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
+                                                                       @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
+                                                                       @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date fromDate,
+                                                                       @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+
+        try {
+            baseResponse = followUpService.getFollowupUserWiseWithDuration(page, size, userId, fromDate, toDate);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+            log.info("Get followup details API response success | loan id=[{}]", userId);
+
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
 
     @RequestMapping(value = "/followups", method = RequestMethod.POST)
     public ResponseEntity<Object> createFollowups(@RequestBody FollowUpDtoRequest followUpDtoRequest) {
