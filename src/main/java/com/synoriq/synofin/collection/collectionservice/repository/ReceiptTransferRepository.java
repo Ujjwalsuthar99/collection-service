@@ -33,8 +33,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "                         else '#FCEBDB'\n" +
             "                end) as status_bg_color_key" +
             "               from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id\n" +
-            "               where (rt.transferred_by = :transferredBy or rt.transferred_to_user_id = :transferredBy)\n" +
-            "               and rt.created_date between :fromDate and :toDate and rt.status = :status")
+            "               where rt.transferred_by = :transferredBy and rt.deleted = false\n" +
+            "               and rt.created_date between :fromDate and :toDate and rt.status = :status ")
     List<Map<String, Object>> getReceiptTransferByUserId(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, @Param("status") String status, Pageable pageRequest);
 
@@ -53,7 +53,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "                        else '#FCEBDB'\n" +
             "            end) as status_bg_color_key\n" +
             "            from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id \n" +
-            "            where (rt.transferred_by = :transferredBy or rt.transferred_to_user_id = :transferredBy) and rt.created_date between :fromDate and :toDate\n" +
+            "            where (rt.transferred_by = :transferredBy or rt.transferred_to_user_id = :transferredBy) and rt.created_date between :fromDate and :toDate and rt.deleted = false\n" +
             "            order by\n" +
             "            case when rt.status = 'pending' then 1\n" +
             "            when rt.status = 'approved' then 2\n" +
