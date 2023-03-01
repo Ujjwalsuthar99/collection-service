@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityEvent.*;
@@ -45,6 +46,8 @@ public class ReceiptTransferService {
 
     @Autowired
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
+    @Autowired
+    private MasterDataService masterDataService;
 
     @Autowired
     private ActivityLogService activityLogService;
@@ -252,9 +255,10 @@ public class ReceiptTransferService {
     }
 
 
-    public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date toDate, String status, Integer pageNo, Integer pageSize) throws Exception {
+    public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date endDate, String status, Integer pageNo, Integer pageSize) throws Exception {
         List<Map<String, Object>> receiptTransferEntity;
         try {
+            Date toDate = masterDataService.addOneDay(endDate);
             Pageable pageRequest;
             if (pageNo > 0) {
                 pageNo = pageNo - 1;
@@ -267,9 +271,10 @@ public class ReceiptTransferService {
         return receiptTransferEntity;
     }
 
-    public List<Map<String, Object>> getReceiptTransferByUserIdWithAllStatus(Long transferredBy, Date fromDate, Date toDate, Integer pageNo, Integer pageSize) throws Exception {
+    public List<Map<String, Object>> getReceiptTransferByUserIdWithAllStatus(Long transferredBy, Date fromDate, Date endDate, Integer pageNo, Integer pageSize) throws Exception {
         List<Map<String, Object>> receiptTransferEntity2nd;
         try {
+            Date toDate = masterDataService.addOneDay(endDate);
             Pageable pageRequest;
             if (pageNo > 0) {
                 pageNo = pageNo - 1;

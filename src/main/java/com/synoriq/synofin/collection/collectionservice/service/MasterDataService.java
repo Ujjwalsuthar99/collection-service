@@ -12,9 +12,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -98,6 +97,17 @@ public class MasterDataService {
         }
 
         return res;
+    }
+
+    public Date addOneDay(Date date) throws Exception {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        Calendar c = Calendar.getInstance();
+        String endDate = simpleDateFormat.format(date);
+        c.setTime(simpleDateFormat.parse(endDate));
+        c.add(Calendar.DATE, 1);  // number of days to add
+        String to = simpleDateFormat.format(c.getTime());
+        SimpleDateFormat simpleDateFormats = new SimpleDateFormat("dd-MM-yyyy");
+        return simpleDateFormats.parse(to);
     }
 
 }
