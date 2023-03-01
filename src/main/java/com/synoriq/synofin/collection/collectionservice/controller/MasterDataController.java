@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.SQLException;
 import java.util.List;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
+
 @RestController
 @RequestMapping("/v1")
 @EnableTransactionManagement
@@ -44,14 +46,15 @@ public class MasterDataController {
         return response;
     }
     @RequestMapping(value = "getAllUserData", method = RequestMethod.GET)
-    public ResponseEntity<Object> getAllUserDetail(@RequestHeader("Authorization") String bearerToken) throws SQLException {
+    public ResponseEntity<Object> getAllUserDetail(@RequestHeader("Authorization") String bearerToken, @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
+                                                   @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         Object userResponse;
         ResponseEntity<Object> response = null;
         Object result;
 
         try {
-            result = masterDataService.getUserDetail(bearerToken);
+            result = masterDataService.getUserDetail(bearerToken, page, size);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
