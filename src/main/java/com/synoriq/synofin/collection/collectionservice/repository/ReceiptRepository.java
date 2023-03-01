@@ -22,11 +22,17 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "                cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
             "                sr.status as status,\n" +
             "                (case \n" +
-            "                    when sr.status = 'approved' then 'green'\n" +
-            "                    when sr.status = 'rejected' then 'red'\n" +
-            "                    when sr.status = 'initiated' then 'yellow'\n" +
-            "                    else 'black'\n" +
-            "                end) as status_color_key\n" +
+            "                    when sr.status = 'approved' then '#229A16'\n" +
+            "                    when sr.status = 'rejected' then '#EC1C24'\n" +
+            "                    when sr.status = 'initiated' then '#2F80ED'\n" +
+            "                    else '#B78103'\n" +
+            "                end) as status_text_color_key,\n" +
+            "                (case \n" +
+            "                    when sr.status = 'approved' then '#E3F8DD'\n" +
+            "                    when sr.status = 'rejected' then '#FFCECC'\n" +
+            "                    when sr.status = 'initiated' then '#D0E1F7'\n" +
+            "                    else '#FCEBDB'\n" +
+            "                end) as status_bg_color_key\n" +
             "                from lms.service_request sr \n" +
             "                join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id\n" +
             "    join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id \n" +
@@ -51,8 +57,14 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "                    when sr.status = 'approved' then '#229A16'\n" +
             "                    when sr.status = 'rejected' then '#EC1C24'\n" +
             "                    when sr.status = 'initiated' then '#2F80ED'\n" +
-            "                    else '#323232'\n" +
-            "                end) as status_color_key\n" +
+            "                    else '#B78103'\n" +
+            "                end) as status_text_color_key,\n" +
+            "                (case \n" +
+            "                    when sr.status = 'approved' then '#E3F8DD'\n" +
+            "                    when sr.status = 'rejected' then '#FFCECC'\n" +
+            "                    when sr.status = 'initiated' then '#D0E1F7'\n" +
+            "                    else '#FCEBDB'\n" +
+            "                end) as status_bg_color_key\n" +
             "                from lms.service_request sr \n" +
             "                join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id\n" +
             "    join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id \n" +

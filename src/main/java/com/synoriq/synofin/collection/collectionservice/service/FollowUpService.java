@@ -124,7 +124,7 @@ public class FollowUpService {
 
             FollowUpEntity followUpEntity = new FollowUpEntity();
             followUpEntity.setLoanId(followUpDtoRequest.getLoanId());
-
+            followUpEntity.setIsDeleted(false);
             followUpEntity.setCreatedDate(new Date());
             followUpEntity.setCreatedBy(followUpDtoRequest.getCreatedBy());
 
