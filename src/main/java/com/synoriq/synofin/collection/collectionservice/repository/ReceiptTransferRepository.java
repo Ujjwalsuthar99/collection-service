@@ -22,19 +22,19 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "                ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "                (case \n" +
             "                         when rt.status = 'pending' then '#F2994A'\n" +
-            "                         when rt.status = 'approve' then '#229A16'\n" +
-            "                         when rt.status = 'reject' then '#EC1C24'\n" +
+            "                         when rt.status = 'approved' then '#229A16'\n" +
+            "                         when rt.status = 'rejected' then '#EC1C24'\n" +
             "                         else '#B78103'\n" +
             "                end) as status_text_color_key,\n" +
             "                (case \n" +
             "                         when rt.status = 'pending' then '#FFF5D7'\n" +
-            "                         when rt.status = 'approve' then '#E3F8DD'\n" +
-            "                         when rt.status = 'reject' then '#FFCECC'\n" +
+            "                         when rt.status = 'approved' then '#E3F8DD'\n" +
+            "                         when rt.status = 'rejected' then '#FFCECC'\n" +
             "                         else '#FCEBDB'\n" +
             "                end) as status_bg_color_key" +
             "               from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id\n" +
-            "               where (rt.transferred_by = :transferredBy or rt.transferred_to_user_id = :transferredBy)\n" +
-            "               and rt.created_date between :fromDate and :toDate and rt.status = :status")
+            "               where rt.transferred_by = :transferredBy and rt.deleted = false\n" +
+            "               and rt.created_date between :fromDate and :toDate and rt.status = :status ")
     List<Map<String, Object>> getReceiptTransferByUserId(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, @Param("status") String status, Pageable pageRequest);
 
@@ -42,21 +42,21 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "            ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "            (case \n" +
             "                        when rt.status = 'pending' then '#F2994A'\n" +
-            "                        when rt.status = 'approve' then '#229A16'\n" +
-            "                        when rt.status = 'reject' then '#EC1C24'\n" +
+            "                        when rt.status = 'approved' then '#229A16'\n" +
+            "                        when rt.status = 'rejected' then '#EC1C24'\n" +
             "                        else '#B78103'\n" +
             "            end) as status_color_key,\n" +
             "            (case \n" +
             "                        when rt.status = 'pending' then '#FFF5D7'\n" +
-            "                        when rt.status = 'approve' then '#E3F8DD'\n" +
-            "                        when rt.status = 'reject' then '#FFCECC'\n" +
+            "                        when rt.status = 'approved' then '#E3F8DD'\n" +
+            "                        when rt.status = 'rejected' then '#FFCECC'\n" +
             "                        else '#FCEBDB'\n" +
             "            end) as status_bg_color_key\n" +
             "            from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id \n" +
-            "            where (rt.transferred_by = :transferredBy or rt.transferred_to_user_id = :transferredBy) and rt.created_date between :fromDate and :toDate\n" +
+            "            where (rt.transferred_by = :transferredBy or rt.transferred_to_user_id = :transferredBy) and rt.created_date between :fromDate and :toDate and rt.deleted = false\n" +
             "            order by\n" +
             "            case when rt.status = 'pending' then 1\n" +
-            "            when rt.status = 'approve' then 2\n" +
+            "            when rt.status = 'approved' then 2\n" +
             "            else 3 end")
     List<Map<String, Object>> getReceiptTransferByUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageRequest);
