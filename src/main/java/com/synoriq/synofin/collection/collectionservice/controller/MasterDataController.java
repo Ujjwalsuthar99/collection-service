@@ -47,14 +47,15 @@ public class MasterDataController {
     }
     @RequestMapping(value = "getAllUserData", method = RequestMethod.GET)
     public ResponseEntity<Object> getAllUserDetail(@RequestHeader("Authorization") String bearerToken, @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
-                                                   @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size) throws SQLException {
+                                                   @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
+                                                   @RequestParam(value = "key", defaultValue = "", required = false) String key) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         Object userResponse;
         ResponseEntity<Object> response = null;
         Object result;
 
         try {
-            result = masterDataService.getUserDetail(bearerToken, page, size);
+            result = masterDataService.getUserDetail(bearerToken, page, size, key);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

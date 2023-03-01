@@ -6,6 +6,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.rest.response.ContactDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -44,7 +46,7 @@ public class MasterDataService {
 
         return res;
     }
-    public Object getUserDetail(String token, Integer page, Integer size) throws Exception {
+    public Object getUserDetail(String token, Integer page, Integer size, String key) throws Exception {
 
         UserDTOResponse res = new UserDTOResponse();
         BaseDTOResponse<Object> baseDTOResponse = null;
@@ -60,16 +62,23 @@ public class MasterDataService {
                     .typeResponseType(UserDTOResponse.class)
                     .build().call();
 
-            List<Object> userData = res.getData();
+            List<UsersDataDTO> userData = res.getData();
             log.info("userData.toArray().length {}", userData.toArray().length);
             int pageRequest = (page * size) - 10 ;
             List<Object> pageableArr = new LinkedList<>();
             for (int i = pageRequest; i < (pageRequest+10); i++) {
                 pageableArr.add(userData.get(i));
             }
-            log.info("pageableArr {}", pageableArr);
-            baseDTOResponse = new BaseDTOResponse<>(pageableArr);
+//            List<UsersDataDTO> filteredList = userData.parallelStream().filter(user -> (user.getUsername().contains(key) || user.getName().contains(key))).collect(Collectors.toList());
+            if (key.equals("")) {
+                baseDTOResponse = new BaseDTOResponse<>(pageableArr);
+            } else {
+                List<UsersDataDTO> filteredList = userData.stream().filter(user -> (user.getUsername().contains(key) || user.getName().contains(key))).collect(Collectors.toList());
+                log.info("filteredList {}", filteredList);
+                baseDTOResponse = new BaseDTOResponse<>(filteredList);
+            }
 
+            log.info("pageableArr {}", pageableArr);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }

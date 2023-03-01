@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public class UserDTOResponse {
     public String response;
 
     @JsonProperty("data")
-    public List<Object> data;
+    public List<UsersDataDTO> data;
 
     @JsonProperty("error")
     public String error;
