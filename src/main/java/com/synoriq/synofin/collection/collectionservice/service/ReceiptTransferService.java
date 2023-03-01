@@ -21,6 +21,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityEvent.*;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.CASH_COLLECTION_DEFAULT_LIMIT;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.CHEQUE_COLLECTION_DEFAULT_LIMIT;
 import static com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.*;
 
 @Service
@@ -42,6 +44,9 @@ public class ReceiptTransferService {
     private CollectionLimitUserWiseRepository collectionLimitUserWiseRepository;
 
     @Autowired
+    private CollectionConfigurationsRepository collectionConfigurationsRepository;
+
+    @Autowired
     private ActivityLogService activityLogService;
 
     @Transactional
@@ -51,13 +56,26 @@ public class ReceiptTransferService {
         ResponseEntity<Object> response = null;
         try {
             Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData());
+            String limitConf;
 
+            Double utilizedAmount;
+            Double totalLimitValue;
             Double transferredAmount = receiptTransferDtoRequest.getAmount();
             Long transferredToID = receiptTransferDtoRequest.getTransferredToUserId();
             String transferMode = receiptTransferDtoRequest.getTransferMode();
+            if(transferMode.equals("cash")) {
+                limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
+            } else {
+                limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
+            }
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(transferredToID, transferMode);
-            Double utilizedAmount = collectionLimitUserWiseEntity.getUtilizedLimitValue();
-            Double totalLimitValue = collectionLimitUserWiseEntity.getTotalLimitValue();
+            if (collectionLimitUserWiseEntity == null) {
+                utilizedAmount = 0.00;
+                totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
+            } else {
+                utilizedAmount = collectionLimitUserWiseEntity.getUtilizedLimitValue();
+                totalLimitValue = collectionLimitUserWiseEntity.getTotalLimitValue();
+            }
             if ((utilizedAmount + transferredAmount) < totalLimitValue) {
 
 
@@ -95,11 +113,7 @@ public class ReceiptTransferService {
             }
         } catch (Exception ee) {
             log.error("RestControllers error occurred for vanWebHookDetails: {} ->  {}", ee.getMessage());
-            if (ErrorCode.getErrorCode(Integer.valueOf(ee.getMessage().trim())) == null) {
-                baseResponse = new BaseDTOResponse<Object>(ErrorCode.DATA_FETCH_ERROR);
-            } else {
-                baseResponse = new BaseDTOResponse<Object>(ErrorCode.getErrorCode(Integer.valueOf(ee.getMessage().trim())));
-            }
+            throw new Exception(ee.getMessage());
         }
         return baseResponse;
     }
