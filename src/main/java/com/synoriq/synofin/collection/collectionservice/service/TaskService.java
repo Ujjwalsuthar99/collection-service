@@ -91,7 +91,7 @@ public class TaskService {
 
             log.info("customer details {}", customerRes);
 
-
+            String loanApplicationNumber = taskRepository.getLoanApplicationNumber(loanIdNumber);
             TaskDetailReturnResponseDTO response = new TaskDetailReturnResponseDTO();
             List<CustomerDetailsReturnResponseDTO> customerList = new ArrayList<>();
 
@@ -129,6 +129,7 @@ public class TaskService {
             }
             log.info("customerList {}", customerList);
 
+            loanRes.getData().setLoanApplicationNumber(loanApplicationNumber);
             response.setCustomerDetails(customerList);
             response.setLoanDetails(loanRes.getData());
             baseDTOResponse = new BaseDTOResponse<>(response);

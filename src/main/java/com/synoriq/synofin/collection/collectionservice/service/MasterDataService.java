@@ -68,13 +68,14 @@ public class MasterDataService {
                 userData.get(i).setTransferTo(userData.get(i).getName() + " - " + userData.get(i).getEmployeeCode());
             }
             log.info("userData.toArray().length {}", userData.toArray().length);
-            int pageRequest = (page * size) - 10 ;
+            int pageRequest = (page * size) - 10;
             List<UsersDataDTO> pageableArr = new LinkedList<>();
-            for (int i = pageRequest; i < (pageRequest+10); i++) {
-                pageableArr.add(userData.get(i));
-            }
+
 //            List<UsersDataDTO> filteredList = userData.parallelStream().filter(user -> (user.getUsername().contains(key) || user.getName().contains(key))).collect(Collectors.toList());
             if (key.equals("")) {
+                for (int i = pageRequest; i < (pageRequest+10); i++) {
+                    pageableArr.add(userData.get(i));
+                }
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);
             } else {
                 List<UsersDataDTO> filteredList = userData.
@@ -82,7 +83,13 @@ public class MasterDataService {
                                                 filter(user -> ( Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getUsername()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getName()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getEmployeeCode()).find())).
                                                 collect(Collectors.toList());
                 log.info("filteredList {}", filteredList);
-                for (int i = pageRequest; i < (pageRequest+10); i++) {
+                int length;
+                if (filteredList.size() > 10) {
+                    length = (pageRequest + 10);
+                } else {
+                    length = pageRequest + filteredList.size();
+                }
+                for (int i = pageRequest; i < length; i++) {
                     pageableArr.add(filteredList.get(i));
                 }
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);

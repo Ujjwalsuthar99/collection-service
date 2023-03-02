@@ -18,5 +18,8 @@ public class LoanDataDTO {
     @JsonProperty("addition_in_excess_money")
     Decimal additionInExcessMoney;
 
+    @JsonProperty("loan_application_number")
+    String loanApplicationNumber;
+
 }
 
