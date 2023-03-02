@@ -22,6 +22,9 @@ public class ActivityLogResponse {
     @JsonProperty("loan_id")
     Long loanId;
 
+    @JsonProperty("remarks")
+    String remarks;
+
     @JsonProperty("activity_name")
     String activityName;
 
@@ -33,5 +36,8 @@ public class ActivityLogResponse {
 
     @JsonProperty("geo_location")
     Object geolocation;
+
+    @JsonProperty("distance_from_user_branch")
+    Double distanceFromUserBranch;
 
 }

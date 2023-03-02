@@ -133,6 +133,8 @@ public class ActivityLogService {
                 activityLogResponse.setActivityDate(collectionActivityLogsEntity.getActivityDate());
                 activityLogResponse.setActivityName(collectionActivityLogsEntity.getActivityName());
                 activityLogResponse.setAddress(collectionActivityLogsEntity.getAddress());
+                activityLogResponse.setRemarks(collectionActivityLogsEntity.getRemarks());
+                activityLogResponse.setDistanceFromUserBranch(collectionActivityLogsEntity.getDistanceFromUserBranch());
                 activityLogResponse.setGeolocation(collectionActivityLogsEntity.getGeolocation());
                 activityLogResponse.setImages(collectionActivityLogsEntity.getImages());
 
