@@ -25,7 +25,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    la.product,\n" +
-            "    overdue_repayment,\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment,\n" +
             "    la.loan_application_number,\n" +
             "    (case\n" +
             "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
@@ -46,7 +46,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        else '#F9000A'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#ffffff'\n" +
+            "        when la.days_past_due between 0 and 30 then '#323232'\n" +
             "        when la.days_past_due between 31 and 60 then '#323232'\n" +
             "        when la.days_past_due between 61 and 90 then '#323232'\n" +
             "        when la.days_past_due between 91 and 120 then '#323232'\n" +
@@ -131,7 +131,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    la.product,\n" +
-            "    overdue_repayment,\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment,\n" +
             "    la.loan_application_number,\n" +
             "    (case\n" +
             "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
@@ -152,7 +152,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        else '#F9000A'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#ffffff'\n" +
+            "        when la.days_past_due between 0 and 30 then '#323232'\n" +
             "        when la.days_past_due between 31 and 60 then '#323232'\n" +
             "        when la.days_past_due between 61 and 90 then '#323232'\n" +
             "        when la.days_past_due between 91 and 120 then '#323232'\n" +

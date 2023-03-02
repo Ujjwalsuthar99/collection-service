@@ -71,13 +71,18 @@ public class ReceiptTransferService {
             } else {
                 limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
             }
-            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(transferredToID, transferMode);
-            if (collectionLimitUserWiseEntity == null) {
+            if (transferredToID != null) {
+                CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(transferredToID, transferMode);
+                if (collectionLimitUserWiseEntity == null) {
+                    utilizedAmount = 0.00;
+                    totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
+                } else {
+                    utilizedAmount = collectionLimitUserWiseEntity.getUtilizedLimitValue();
+                    totalLimitValue = collectionLimitUserWiseEntity.getTotalLimitValue();
+                }
+            } else {
                 utilizedAmount = 0.00;
                 totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
-            } else {
-                utilizedAmount = collectionLimitUserWiseEntity.getUtilizedLimitValue();
-                totalLimitValue = collectionLimitUserWiseEntity.getTotalLimitValue();
             }
             if ((utilizedAmount + transferredAmount) < totalLimitValue) {
 
