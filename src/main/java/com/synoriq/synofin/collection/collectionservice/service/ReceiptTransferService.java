@@ -276,8 +276,10 @@ public class ReceiptTransferService {
         return receiptTransferEntity;
     }
 
-    public List<Map<String, Object>> getReceiptTransferByUserIdWithAllStatus(Long transferredBy, Date fromDate, Date endDate, Integer pageNo, Integer pageSize) throws Exception {
-        List<Map<String, Object>> receiptTransferEntity2nd;
+    public Map<String, List<Map<String, Object>>> getReceiptTransferByUserIdWithAllStatus(Long transferredBy, Date fromDate, Date endDate, Integer pageNo, Integer pageSize) throws Exception {
+        List<Map<String, Object>> transfer;
+        List<Map<String, Object>> receiver;
+        Map<String, List<Map<String, Object>>> newObjResponse = new HashMap<>();
         try {
             Date toDate = masterDataService.addOneDay(endDate);
             Pageable pageRequest;
@@ -285,11 +287,14 @@ public class ReceiptTransferService {
                 pageNo = pageNo - 1;
             }
             pageRequest = PageRequest.of(pageNo, pageSize);
-            receiptTransferEntity2nd = receiptTransferRepository.getReceiptTransferByUserIdWithAllStatus(transferredBy, fromDate, toDate, pageRequest);
+            receiver = receiptTransferRepository.getReceiptTransferByReceiverUserIdWithAllStatus(transferredBy, fromDate, toDate, pageRequest);
+            transfer = receiptTransferRepository.getReceiptTransferByTransferUserIdWithAllStatus(transferredBy, fromDate, toDate, pageRequest);
+            newObjResponse.put("receiver", receiver);
+            newObjResponse.put("transfer", transfer);
         } catch (Exception e) {
             throw new Exception("1016028");
         }
-        return receiptTransferEntity2nd;
+        return newObjResponse;
     }
 
 }

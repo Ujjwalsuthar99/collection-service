@@ -53,12 +53,35 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "                        else '#FCEBDB'\n" +
             "            end) as status_bg_color_key\n" +
             "            from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id \n" +
-            "            where (rt.transferred_by = :transferredBy or rt.transferred_to_user_id = :transferredBy) and rt.created_date between :fromDate and :toDate and rt.deleted = false\n" +
+            "            where rt.transferred_by = :transferredBy and rt.created_date between :fromDate and :toDate and rt.deleted = false\n" +
             "            order by\n" +
             "            case when rt.status = 'pending' then 1\n" +
             "            when rt.status = 'approved' then 2\n" +
             "            else 3 end")
-    List<Map<String, Object>> getReceiptTransferByUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
+    List<Map<String, Object>> getReceiptTransferByTransferUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
+            , @Param("toDate") Date toDate, Pageable pageRequest);
+
+    @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount , u.name as transferred_to_name " +
+            "            ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
+            "            (case \n" +
+            "                        when rt.status = 'pending' then '#F2994A'\n" +
+            "                        when rt.status = 'approved' then '#229A16'\n" +
+            "                        when rt.status = 'rejected' then '#EC1C24'\n" +
+            "                        else '#B78103'\n" +
+            "            end) as status_color_key,\n" +
+            "            (case \n" +
+            "                        when rt.status = 'pending' then '#FFF5D7'\n" +
+            "                        when rt.status = 'approved' then '#E3F8DD'\n" +
+            "                        when rt.status = 'rejected' then '#FFCECC'\n" +
+            "                        else '#FCEBDB'\n" +
+            "            end) as status_bg_color_key\n" +
+            "            from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id \n" +
+            "            where rt.transferred_to_user_id = :transferredBy and rt.created_date between :fromDate and :toDate and rt.deleted = false\n" +
+            "            order by\n" +
+            "            case when rt.status = 'pending' then 1\n" +
+            "            when rt.status = 'approved' then 2\n" +
+            "            else 3 end")
+    List<Map<String, Object>> getReceiptTransferByReceiverUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageRequest);
 
 
@@ -67,8 +90,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "         join (select collection_receipts_id, receipt_transfer_id from collection.receipt_transfer_history) as rth on rt.receipt_transfer_id  = rth.receipt_transfer_id \n" +
             "         join (select service_request_id, loan_id, form from lms.service_request) as sr on sr.service_request_id = rth.collection_receipts_id \n" +
             "         join (select loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id \n" +
-            "         join (select loan_id, customer_id from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
+            "         join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "         join (select customer_id, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id \n" +
-            "         where rt.receipt_transfer_id = :receiptTransferId")
+            "         where rt.receipt_transfer_id = :receiptTransferId and clm.customer_type = 'applicant'")
     List<Map<String, Object>> getDataByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
 }

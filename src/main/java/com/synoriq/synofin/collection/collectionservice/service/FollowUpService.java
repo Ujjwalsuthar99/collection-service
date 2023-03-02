@@ -76,9 +76,12 @@ public class FollowUpService {
         BaseDTOResponse<Object> baseDTOResponse;
         Pageable pageable = PageRequest.of(page,size);
 
-        List<Map<String,Object>> followUpEntityPages =
-                followUpRepository.getFollowupsLoanWiseByDuration(loanId, fromDate,toDate, pageable);
-
+        List<Map<String,Object>> followUpEntityPages = followUpRepository.getFollowupsLoanWiseByDuration(loanId, fromDate,toDate, pageable);
+        if (page > 0) {
+            if (followUpEntityPages.size() == 0) {
+                return new BaseDTOResponse<>(followUpEntityPages);
+            }
+        }
 //        List<FollowUpEntity> followUpEntities;
 
         if(!followUpEntityPages.isEmpty()){
@@ -121,9 +124,12 @@ public class FollowUpService {
         BaseDTOResponse<Object> baseDTOResponse;
         Pageable pageable = PageRequest.of(page,size);
 
-        List<Map<String,Object>> followUpEntityPages =
-                followUpRepository.getFollowupsUserWiseByDuration(userId, fromDate,toDate, pageable);
-
+        List<Map<String,Object>> followUpEntityPages = followUpRepository.getFollowupsUserWiseByDuration(userId, fromDate,toDate, pageable);
+        if (page > 0) {
+            if (followUpEntityPages.size() == 0) {
+                return new BaseDTOResponse<>(followUpEntityPages);
+            }
+        }
 //        List<FollowUpEntity> followUpEntities;
 
         if(!followUpEntityPages.isEmpty()){

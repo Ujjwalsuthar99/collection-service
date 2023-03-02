@@ -82,7 +82,10 @@ public class MasterDataService {
                                                 filter(user -> ( Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getUsername()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getName()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getEmployeeCode()).find())).
                                                 collect(Collectors.toList());
                 log.info("filteredList {}", filteredList);
-                baseDTOResponse = new BaseDTOResponse<>(filteredList);
+                for (int i = pageRequest; i < (pageRequest+10); i++) {
+                    pageableArr.add(filteredList.get(i));
+                }
+                baseDTOResponse = new BaseDTOResponse<>(pageableArr);
             }
 
             log.info("pageableArr {}", pageableArr);

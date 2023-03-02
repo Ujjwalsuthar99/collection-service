@@ -9,10 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,18 +69,21 @@ public class ActivityLogService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<CollectionActivityLogsEntity> collectionActivityLogs =
+        List<CollectionActivityLogsEntity> collectionActivityLogs =
                 collectionActivityLogsRepository.getActivityLogsUserWIseByDuration(userId, fromDate, toDate, pageable);
-
-        List<CollectionActivityLogsEntity> collectionActivityLogsEntities = collectionActivityLogs.getContent();
+        if (page > 0) {
+            if (collectionActivityLogs.size() == 0) {
+                return new BaseDTOResponse<>(collectionActivityLogs);
+            }
+        }
 
         List<ActivityLogResponse> activityLogResponses = new LinkedList<>();
 
-        if(!(collectionActivityLogsEntities.isEmpty())){
+        if(!(collectionActivityLogs.isEmpty())){
 
             log.info("Getting activity log for userId {} ", userId);
 
-            for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogsEntities){
+            for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogs){
 
                 ActivityLogResponse activityLogResponse = new ActivityLogResponse();
                 activityLogResponse.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
@@ -113,18 +118,20 @@ public class ActivityLogService {
 
         Pageable pageable = PageRequest.of(page,size);
 
-        Page<CollectionActivityLogsEntity> collectionActivityLogs =
-                collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
-
-        List<CollectionActivityLogsEntity> collectionActivityLogsEntities = collectionActivityLogs.getContent();
+        List<CollectionActivityLogsEntity> collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
+        if (page > 0) {
+            if (collectionActivityLogs.size() == 0) {
+                return new BaseDTOResponse<>(collectionActivityLogs);
+            }
+        }
 
         List<ActivityLogResponse> activityLogResponses = new LinkedList<>();
 
-        if(!collectionActivityLogsEntities.isEmpty()){
+        if(!collectionActivityLogs.isEmpty()){
 
             log.info("Getting activity log for loanId {} ", loanId);
 
-            for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogsEntities){
+            for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogs){
 
                 ActivityLogResponse activityLogResponse = new ActivityLogResponse();
                 activityLogResponse.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
@@ -145,7 +152,7 @@ public class ActivityLogService {
             response = new BaseDTOResponse<>(activityLogResponses);
             return response;
 
-        }else{
+        } else {
             log.error("Activity log loan id {} not found", loanId);
             throw new Exception("1016025");
         }
