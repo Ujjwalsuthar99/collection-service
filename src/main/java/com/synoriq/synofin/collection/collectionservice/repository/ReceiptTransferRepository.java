@@ -34,7 +34,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "                end) as status_bg_color_key" +
             "               from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id\n" +
             "               where rt.transferred_by = :transferredBy and rt.deleted = false\n" +
-            "               and rt.created_date between :fromDate and :toDate and rt.status = :status order by rt.created desc")
+            "               and rt.created_date between :fromDate and :toDate and rt.status = :status order by rt.created_date desc")
     List<Map<String, Object>> getReceiptTransferByUserId(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, @Param("status") String status, Pageable pageRequest);
 
