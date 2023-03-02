@@ -40,4 +40,7 @@ public class ActivityLogResponse {
     @JsonProperty("distance_from_user_branch")
     Double distanceFromUserBranch;
 
+    @JsonProperty("is_receipt")
+    Boolean isReceipt;
+
 }

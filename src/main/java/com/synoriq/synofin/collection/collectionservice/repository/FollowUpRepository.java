@@ -38,13 +38,13 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "       when la.days_past_due between 151 and 180 then '151-180 DPD'\n" +
             "       else '180++ DPD' end) as days_past_due_bucket,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#828282'\n" +
-            "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
+            "        when la.days_past_due between 0 and 30 then '#ABCFFF'\n" +
+            "        when la.days_past_due between 31 and 60 then '#FDB4FF'\n" +
             "        when la.days_past_due between 61 and 90 then '#FDAAAA'\n" +
-            "        when la.days_past_due between 91 and 120 then '#B78103'\n" +
+            "        when la.days_past_due between 91 and 120 then '#FCDA8B'\n" +
             "        when la.days_past_due between 121 and 150 then '#F2994A'\n" +
-            "        when la.days_past_due between 151 and 180 then '#EC1C24'\n" +
-            "        else '#323232'\n" +
+            "        when la.days_past_due between 151 and 180 then '#FF5359'\n" +
+            "        else '#F9000A'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
             "        when la.days_past_due between 0 and 30 then '#ffffff'\n" +

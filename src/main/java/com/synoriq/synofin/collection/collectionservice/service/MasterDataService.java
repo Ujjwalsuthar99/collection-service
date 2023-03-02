@@ -79,7 +79,7 @@ public class MasterDataService {
             } else {
                 List<UsersDataDTO> filteredList = userData.
                                                 stream().
-                                                filter(user -> ( Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getUsername()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getName()).find())).
+                                                filter(user -> ( Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getUsername()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getName()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getEmployeeCode()).find())).
                                                 collect(Collectors.toList());
                 log.info("filteredList {}", filteredList);
                 baseDTOResponse = new BaseDTOResponse<>(filteredList);

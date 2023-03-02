@@ -137,6 +137,7 @@ public class ActivityLogService {
                 activityLogResponse.setDistanceFromUserBranch(collectionActivityLogsEntity.getDistanceFromUserBranch());
                 activityLogResponse.setGeolocation(collectionActivityLogsEntity.getGeolocation());
                 activityLogResponse.setImages(collectionActivityLogsEntity.getImages());
+                activityLogResponse.setIsReceipt(collectionActivityLogsEntity.getActivityName().equals("Create Receipt"));
 
                 activityLogResponses.add(activityLogResponse);
             }
