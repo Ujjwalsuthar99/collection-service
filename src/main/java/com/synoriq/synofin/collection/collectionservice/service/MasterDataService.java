@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,9 +64,12 @@ public class MasterDataService {
                     .build().call();
 
             List<UsersDataDTO> userData = res.getData();
+            for (int i = 0; i < userData.toArray().length; i++) {
+                userData.get(i).setTransferTo(userData.get(i).getName() + " - " + userData.get(i).getEmployeeCode());
+            }
             log.info("userData.toArray().length {}", userData.toArray().length);
             int pageRequest = (page * size) - 10 ;
-            List<Object> pageableArr = new LinkedList<>();
+            List<UsersDataDTO> pageableArr = new LinkedList<>();
             for (int i = pageRequest; i < (pageRequest+10); i++) {
                 pageableArr.add(userData.get(i));
             }
@@ -73,7 +77,10 @@ public class MasterDataService {
             if (key.equals("")) {
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);
             } else {
-                List<UsersDataDTO> filteredList = userData.stream().filter(user -> (user.getUsername().contains(key) || user.getName().contains(key))).collect(Collectors.toList());
+                List<UsersDataDTO> filteredList = userData.
+                                                stream().
+                                                filter(user -> ( Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getUsername()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getName()).find())).
+                                                collect(Collectors.toList());
                 log.info("filteredList {}", filteredList);
                 baseDTOResponse = new BaseDTOResponse<>(filteredList);
             }

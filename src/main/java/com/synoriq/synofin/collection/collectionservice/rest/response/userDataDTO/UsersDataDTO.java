@@ -63,5 +63,9 @@ public class UsersDataDTO {
     @JsonProperty("active")
     public Boolean active;
 
+    @JsonProperty("transferTo")
+    public String transferTo;
+
+
 
 }
