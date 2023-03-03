@@ -62,7 +62,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "            join (select loan_id, customer_id from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  " +
             " where f.loan_id = :loanId  \n" +
-            "            and created_date between :fromDate and :toDate ")
+            "            and f.next_followup_datetime between :fromDate and :toDate ")
     List<Map<String,Object>> getFollowupsLoanWiseByDuration(@Param("loanId") Long loanId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageable);
 
@@ -111,7 +111,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "            join (select loan_id, customer_id from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  " +
             " where f.created_by = :userId  \n" +
-            "            and created_date between :fromDate and :toDate ")
+            "            and f.next_followup_datetime between :fromDate and :toDate ")
     List<Map<String,Object>> getFollowupsUserWiseByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageable);
 

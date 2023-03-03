@@ -18,8 +18,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
     List<ReceiptTransferEntity> getReceiptTransferSummaryByTransferredBy(Long transferredBy);
 
 
-    @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount , u.name as transferred_to_name \n" +
-            "                ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
+    @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount \n" +
+            "                ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "                (case \n" +
             "                         when rt.status = 'pending' then '#F2994A'\n" +
             "                         when rt.status = 'approved' then '#229A16'\n" +
@@ -38,8 +38,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
     List<Map<String, Object>> getReceiptTransferByUserId(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, @Param("status") String status, Pageable pageRequest);
 
-    @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount , u.name as transferred_to_name " +
-            "            ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
+    @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount\n" +
+            "            ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "            (case \n" +
             "                        when rt.status = 'pending' then '#F2994A'\n" +
             "                        when rt.status = 'approved' then '#229A16'\n" +
@@ -61,8 +61,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
     List<Map<String, Object>> getReceiptTransferByTransferUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageRequest);
 
-    @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount , u.name as transferred_to_name " +
-            "            ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
+    @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount  " +
+            "            ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "            (case \n" +
             "                        when rt.status = 'pending' then '#F2994A'\n" +
             "                        when rt.status = 'approved' then '#229A16'\n" +

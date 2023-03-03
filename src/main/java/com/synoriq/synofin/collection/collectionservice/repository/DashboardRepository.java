@@ -12,10 +12,9 @@ import java.util.Map;
 @Repository
 public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long> {
 
-    @Query(nativeQuery = true, value = "select\n" +
-            "SUM(case when cal.activity_name in ('Create Follow Up', 'Reschedule') then 1 else 0 end) as total_count,\n" +
-            "SUM(case when cal.activity_name = 'Closed' then 1 else 0 end) as action_count\n" +
-            "from collection.followups f join collection.collection_activity_logs cal on cal.collection_activity_logs_id = f.collection_activity_logs_id where f.created_by = :userId " +
+    @Query(nativeQuery = true, value = "select count(f.*) as total_count , 0 as action_count\n" +
+            "from collection.followups f join (select loan_application_id ,days_past_due,product,sanctioned_amount from lms.loan_application) as la on la.loan_application_id = f.loan_id\n" +
+            "where f.created_by = :userId \n" +
             "and f.next_followup_datetime between :fromDate and :toDate")
     Map<String,Object> getFollowupCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);
