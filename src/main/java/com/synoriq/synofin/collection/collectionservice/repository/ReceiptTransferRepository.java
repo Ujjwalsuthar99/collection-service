@@ -57,7 +57,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "            order by\n" +
             "            case when rt.status = 'pending' then 1\n" +
             "            when rt.status = 'approved' then 2\n" +
-            "            else 3 end")
+            "            else 3 end, rt.created_date desc")
     List<Map<String, Object>> getReceiptTransferByTransferUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageRequest);
 
@@ -80,7 +80,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "            order by\n" +
             "            case when rt.status = 'pending' then 1\n" +
             "            when rt.status = 'approved' then 2\n" +
-            "            else 3 end")
+            "            else 3 end, rt.created_date desc")
     List<Map<String, Object>> getReceiptTransferByReceiverUserIdWithAllStatus(@Param("transferredBy") Long transferredBy, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageRequest);
 

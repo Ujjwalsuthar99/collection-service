@@ -221,6 +221,8 @@ public class ReceiptTransferService {
                             throw new Exception("1016029");
                         }
                         break;
+                    default:
+                        throw new Exception("1016030");
                 }
             } else {
                 throw new Exception("1016030");

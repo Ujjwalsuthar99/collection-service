@@ -176,7 +176,8 @@ public enum ErrorCode {
     CHECK_THE_REQUEST_BODY(1016028, "Please check the values passed from your end!"),
     DONT_HAVE_PERMISSION_TO_ACTION(1016029, "You Don't Have Permission to Action on this transfer"),
     ALREADY_HAD_ACTIONED_ON_THIS_TRANSFER(1016030, "This transfer is already been actioned"),
-    RECEIVER_HAVE_EXCEED_THEIR_LIMIT(1016031, "Transfer stopped, because receiver have exceed their limit");
+    RECEIVER_HAVE_EXCEED_THEIR_LIMIT(1016031, "Transfer stopped, because receiver have exceed their limit"),
+    STATUS_NOT_MATCHED(1016032, "Request status is not matched");
     private Integer codeValue;
     private String responseMessage;
 
