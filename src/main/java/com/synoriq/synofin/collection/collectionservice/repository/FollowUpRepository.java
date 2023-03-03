@@ -155,7 +155,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "    end) as dpd_text_color_key,\n" +
             "    la.sanctioned_amount as loan_amount\n" +
             "             from collection.followups f \n" +
-            "            join (select loan_application_id ,days_past_due from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
+            "            join (select loan_application_id ,days_past_due, sanctioned_amount from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "            join (select loan_id, customer_id from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id\n" +
             "           where f.followups_id = :followupId")
