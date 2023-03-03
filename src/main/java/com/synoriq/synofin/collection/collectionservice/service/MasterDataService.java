@@ -84,10 +84,12 @@ public class MasterDataService {
                                                 collect(Collectors.toList());
                 log.info("filteredList {}", filteredList);
                 int length;
-                if (filteredList.size() > 10) {
+                int filterSize = filteredList.size();
+                filterSize = filterSize - pageRequest ;
+                if (filterSize > 10) {
                     length = (pageRequest + 10);
                 } else {
-                    length = pageRequest + filteredList.size();
+                    length = filterSize + pageRequest;
                 }
                 for (int i = pageRequest; i < length; i++) {
                     pageableArr.add(filteredList.get(i));
