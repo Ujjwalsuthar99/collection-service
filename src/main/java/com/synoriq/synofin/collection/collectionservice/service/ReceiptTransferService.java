@@ -222,7 +222,7 @@ public class ReceiptTransferService {
                         }
                         break;
                     default:
-                        throw new Exception("1016030");
+                        throw new Exception("1016032");
                 }
             } else {
                 throw new Exception("1016030");
