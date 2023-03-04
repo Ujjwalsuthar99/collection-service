@@ -36,7 +36,7 @@ public class FollowupResponse {
     String otherFollowupReason;
 
     @JsonProperty("next_followup_datetime")
-    Date nextFollowUpDateTime;
+    String nextFollowUpDateTime;
 
     @JsonProperty("remarks")
     String remarks;

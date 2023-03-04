@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -32,7 +33,7 @@ public class FollowUpService {
         FollowupResponse followupResponse = new FollowupResponse();
 
         FollowUpEntity followUpEntity = followUpRepository.findByFollowupId(followupById);
-
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         if(followUpEntity != null){
 
             followupResponse.setFollowUpId(followUpEntity.getFollowupId());
@@ -42,7 +43,7 @@ public class FollowUpService {
             followupResponse.setRemarks(followUpEntity.getRemarks());
             followupResponse.setCreatedBy(followUpEntity.getCreatedBy());
             followupResponse.setCreatedDate(followUpEntity.getCreatedDate());
-            followupResponse.setNextFollowUpDateTime(followUpEntity.getNextFollowUpDateTime());
+            followupResponse.setNextFollowUpDateTime(formatter.format(followUpEntity.getNextFollowUpDateTime()));
             followupResponse.setIsDeleted(followUpEntity.getIsDeleted());
 
             response = new BaseDTOResponse<Object>(followupResponse);
@@ -172,7 +173,7 @@ public class FollowUpService {
 
             Long collectionActivityLogsId = activityLogService.
                     createActivityLogs(followUpDtoRequest.getActivityLog());
-
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             FollowUpEntity followUpEntity = new FollowUpEntity();
             followUpEntity.setLoanId(followUpDtoRequest.getLoanId());
             followUpEntity.setIsDeleted(false);
@@ -182,7 +183,7 @@ public class FollowUpService {
             followUpEntity.setFollowUpReason(followUpDtoRequest.getFollowUpReason());
             followUpEntity.setOtherFollowUpReason(followUpDtoRequest.getOtherFollowupReason());
 
-            followUpEntity.setNextFollowUpDateTime(followUpDtoRequest.getNextFollowUpDateTime());
+            followUpEntity.setNextFollowUpDateTime(formatter.parse(followUpDtoRequest.getNextFollowUpDateTime()));
             followUpEntity.setRemarks(followUpDtoRequest.getRemarks());
             followUpEntity.setCollectionActivityLogsId(collectionActivityLogsId);
 

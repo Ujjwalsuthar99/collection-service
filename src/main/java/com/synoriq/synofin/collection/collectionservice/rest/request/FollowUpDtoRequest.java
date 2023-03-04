@@ -17,7 +17,7 @@ public class FollowUpDtoRequest {
 
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    Date nextFollowUpDateTime;
+    String nextFollowUpDateTime;
 
     String otherFollowupReason;
     String remarks;
