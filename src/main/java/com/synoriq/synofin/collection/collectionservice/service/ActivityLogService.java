@@ -8,16 +8,11 @@ import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -118,38 +113,16 @@ public class ActivityLogService {
 
         Pageable pageable = PageRequest.of(page,size);
 
-        List<CollectionActivityLogsEntity> collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
+        List<Map<String, Object>> collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
         if (page > 0) {
             if (collectionActivityLogs.size() == 0) {
                 return new BaseDTOResponse<>(collectionActivityLogs);
             }
         }
 
-        List<ActivityLogResponse> activityLogResponses = new LinkedList<>();
-
         if(!collectionActivityLogs.isEmpty()){
-
             log.info("Getting activity log for loanId {} ", loanId);
-
-            for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogs){
-
-                ActivityLogResponse activityLogResponse = new ActivityLogResponse();
-                activityLogResponse.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
-                activityLogResponse.setLoanId(collectionActivityLogsEntity.getLoanId());
-                activityLogResponse.setUserId(collectionActivityLogsEntity.getActivityBy());
-                activityLogResponse.setActivityDate(collectionActivityLogsEntity.getActivityDate());
-                activityLogResponse.setActivityName(collectionActivityLogsEntity.getActivityName());
-                activityLogResponse.setAddress(collectionActivityLogsEntity.getAddress());
-                activityLogResponse.setRemarks(collectionActivityLogsEntity.getRemarks());
-                activityLogResponse.setDistanceFromUserBranch(collectionActivityLogsEntity.getDistanceFromUserBranch());
-                activityLogResponse.setGeolocation(collectionActivityLogsEntity.getGeolocation());
-                activityLogResponse.setImages(collectionActivityLogsEntity.getImages());
-                activityLogResponse.setIsReceipt(collectionActivityLogsEntity.getActivityName().equals("create_receipt"));
-
-                activityLogResponses.add(activityLogResponse);
-            }
-
-            response = new BaseDTOResponse<>(activityLogResponses);
+            response = new BaseDTOResponse<>(collectionActivityLogs);
             return response;
 
         } else {

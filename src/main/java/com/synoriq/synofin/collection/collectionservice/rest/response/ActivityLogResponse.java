@@ -43,4 +43,7 @@ public class ActivityLogResponse {
     @JsonProperty("is_receipt")
     Boolean isReceipt;
 
+    @JsonProperty("receipt_id")
+    Long receiptId;
+
 }

@@ -3,6 +3,7 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
+import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -83,6 +84,28 @@ public class ActivityLogRestController {
 
         try {
             baseResponse = activityLogService.getActivityLogsByLoanIdWithDuration(page, size, loanId, fromDate, toDate);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "/activity-logs", method = RequestMethod.POST)
+    public ResponseEntity<Object> createActivityLog(@RequestBody CollectionActivityLogDTO collectionActivityLogDTO) {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+        Long result;
+
+        try {
+            result = activityLogService.createActivityLogs(collectionActivityLogDTO);
+            baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {
