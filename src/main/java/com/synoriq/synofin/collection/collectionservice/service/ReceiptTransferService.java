@@ -265,8 +265,11 @@ public class ReceiptTransferService {
         try {
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
             List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId);
+            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptTransferEntity.getTransferredBy(), receiptTransferEntity.getTransferMode());
+
             receiptTransferResponseDTO.setReceiptTransferData(receiptTransferEntity);
             receiptTransferResponseDTO.setReceiptData(receiptsData);
+            receiptTransferResponseDTO.setAmountInHand(collectionLimitUserWiseEntity.getUtilizedLimitValue());
 
         } catch (Exception e) {
             throw new Exception("1016028");
