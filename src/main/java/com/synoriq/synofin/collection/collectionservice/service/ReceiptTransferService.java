@@ -58,6 +58,7 @@ public class ReceiptTransferService {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         try {
+            Long receiptTransferTableId = receiptTransferDtoRequest.getReceiptTransferId();
             Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData());
             String limitConf;
 
@@ -106,16 +107,28 @@ public class ReceiptTransferService {
                 receiptTransferEntity.setCollectionActivityLogsId(collectionActivityId);
 
                 receiptTransferRepository.save(receiptTransferEntity);
+                if (receiptTransferTableId == null) {
+                    for (Long receiptTransferId : receiptTransferDtoRequest.getReceipts()) {
 
-                for (Long receiptTransferId : receiptTransferDtoRequest.getReceipts()) {
+                        ReceiptTransferHistoryEntity receiptTransferHistoryEntity = new ReceiptTransferHistoryEntity();
 
-                    ReceiptTransferHistoryEntity receiptTransferHistoryEntity = new ReceiptTransferHistoryEntity();
+                        receiptTransferHistoryEntity.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
+                        receiptTransferHistoryEntity.setCollectionReceiptsId(receiptTransferId);
+                        receiptTransferHistoryRepository.save(receiptTransferHistoryEntity);
+                    }
+                } else {
+                    List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList;
+                    receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferTableId);
+                    for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
 
-                    receiptTransferHistoryEntity.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
-                    receiptTransferHistoryEntity.setCollectionReceiptsId(receiptTransferId);
-                    receiptTransferHistoryRepository.save(receiptTransferHistoryEntity);
+                        ReceiptTransferHistoryEntity receiptTransferHistoryEntityToBeSaved = new ReceiptTransferHistoryEntity();
+                        receiptTransferHistoryEntityToBeSaved.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
+                        receiptTransferHistoryEntityToBeSaved.setCollectionReceiptsId(receiptTransferHistoryEntity.getCollectionReceiptsId());
+                        receiptTransferHistoryRepository.save(receiptTransferHistoryEntityToBeSaved);
+                    }
                 }
                 baseResponse = new BaseDTOResponse<Object>(receiptTransferEntity);
+
             } else {
                 throw new Exception("1016031");
             }

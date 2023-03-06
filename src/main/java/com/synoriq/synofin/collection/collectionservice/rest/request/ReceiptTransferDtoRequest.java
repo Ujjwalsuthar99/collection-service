@@ -24,6 +24,7 @@ public class ReceiptTransferDtoRequest {
     String actionRemarks;
     Long actionBy;
     List<Long> receipts;
+    Long receiptTransferId;
     CollectionActivityLogDTO activityData;
 
 }
