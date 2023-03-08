@@ -28,6 +28,7 @@ import static com.synoriq.synofin.collection.collectionservice.common.errorcode.
 
 @Service
 @Slf4j
+@Transactional
 public class ReceiptTransferService {
     @Autowired
     private CollectionReceiptRepository collectionReceiptRepository;
@@ -191,6 +192,11 @@ public class ReceiptTransferService {
                     case RECEIPT_TRANSFER_CANCEL:
                         if (receiptTransferEntityTransferredBy.equals(requestActionBy)) {
                             saveReceiptTransferData(receiptTransferStatusUpdateDtoRequest, receiptTransferEntity, collectionActivityLogsId);
+                            // history entity rows delete on cancelling the transfer
+                            List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferId);
+                            for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
+                                receiptTransferHistoryRepository.deleteById(receiptTransferHistoryEntity.getReceiptTransferHistoryId());
+                            }
                         } else {
                             throw new Exception("1016029");
                         }
