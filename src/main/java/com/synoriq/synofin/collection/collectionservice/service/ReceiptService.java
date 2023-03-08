@@ -15,6 +15,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.systemProp
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptServiceSystemPropertiesResponse;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.pqc.jcajce.provider.LMS;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -198,51 +199,56 @@ public class ReceiptService {
                     .typeResponseType(ServiceRequestSaveResponse.class)
                     .build().call();
 
+            if (res.getData() != null) {
 
-            CollectionReceiptEntity collectionReceiptEntity = new CollectionReceiptEntity();
-            collectionReceiptEntity.setReceiptId(res.getData().getServiceRequestId());
-            collectionReceiptEntity.setCreatedBy(receiptServiceDtoRequest.getActivityData().getUserId());
-            collectionReceiptEntity.setReceiptHolderUserId(receiptServiceDtoRequest.getActivityData().getUserId());
-            collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityId);
 
-            collectionReceiptRepository.save(collectionReceiptEntity);
+                CollectionReceiptEntity collectionReceiptEntity = new CollectionReceiptEntity();
+                collectionReceiptEntity.setReceiptId(res.getData().getServiceRequestId());
+                collectionReceiptEntity.setCreatedBy(receiptServiceDtoRequest.getActivityData().getUserId());
+                collectionReceiptEntity.setReceiptHolderUserId(receiptServiceDtoRequest.getActivityData().getUserId());
+                collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityId);
 
-            DummyProfileDetailDTO profileData = (DummyProfileDetailDTO) profileService.getProfileDetails(bearerToken, Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()));
+                collectionReceiptRepository.save(collectionReceiptEntity);
+
+                DummyProfileDetailDTO profileData = (DummyProfileDetailDTO) profileService.getProfileDetails(bearerToken, Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()));
 
 //            Map<String, Object> cashInHand = dashboardRepository.getCashInHandByUserIdByDuration(String.valueOf(receiptServiceDtoRequest.getActivityData().getUserId()), "01-01-2023", String.valueOf(new Date()));
 
-            if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque")) {
-                CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
+                if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque")) {
+                    CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
-                log.info("collection limit user wise entity already exist {}", collectionLimitUser);
+                    log.info("collection limit user wise entity already exist {}", collectionLimitUser);
 
 
-                if (collectionLimitUser != null) {
-                    collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
-                    collectionLimitUserWiseEntity.setCreatedDate(new Date());
-                    collectionLimitUserWiseEntity.setDeleted(collectionLimitUser.getDeleted());
-                    collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUser.getCollectionLimitStrategiesKey());
-                    collectionLimitUserWiseEntity.setUserId(collectionLimitUser.getUserId());
-                    collectionLimitUserWiseEntity.setTotalLimitValue(collectionLimitUser.getTotalLimitValue());
-                    collectionLimitUserWiseEntity.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() + Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
+                    if (collectionLimitUser != null) {
+                        collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
+                        collectionLimitUserWiseEntity.setCreatedDate(new Date());
+                        collectionLimitUserWiseEntity.setDeleted(collectionLimitUser.getDeleted());
+                        collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUser.getCollectionLimitStrategiesKey());
+                        collectionLimitUserWiseEntity.setUserId(collectionLimitUser.getUserId());
+                        collectionLimitUserWiseEntity.setTotalLimitValue(collectionLimitUser.getTotalLimitValue());
+                        collectionLimitUserWiseEntity.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() + Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
 
-                } else {
-                    collectionLimitUserWiseEntity.setCreatedDate(new Date());
-                    collectionLimitUserWiseEntity.setDeleted(false);
-                    collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode());
-                    collectionLimitUserWiseEntity.setUserId(Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()));
-                    collectionLimitUserWiseEntity.setTotalLimitValue(currentReceiptAmountAllowed);
-                    collectionLimitUserWiseEntity.setUtilizedLimitValue(Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
+                    } else {
+                        collectionLimitUserWiseEntity.setCreatedDate(new Date());
+                        collectionLimitUserWiseEntity.setDeleted(false);
+                        collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode());
+                        collectionLimitUserWiseEntity.setUserId(Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()));
+                        collectionLimitUserWiseEntity.setTotalLimitValue(currentReceiptAmountAllowed);
+                        collectionLimitUserWiseEntity.setUtilizedLimitValue(Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
+                    }
+                    log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
+                    collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                 }
-                log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
-                collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+            } else {
+                throw new Exception("1016033");
             }
 
 
 
 
         } catch (Exception ee) {
-            throw new Exception(ee);
+            throw new Exception(ee.getMessage());
         }
         return res;
     }
