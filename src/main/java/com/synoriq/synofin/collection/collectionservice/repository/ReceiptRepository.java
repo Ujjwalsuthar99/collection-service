@@ -40,7 +40,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    join lms.customer c on clm.customer_id = c.customer_id \n" +
             "    where clm.customer_type = 'applicant' and\n" +
             "    sr.request_source = 'm_collect' and sr.form->>'created_by' = :userId\n" +
-            "    and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
+            "    and date(sr.form->>'date_of_receipt') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
     List<Map<String, Object>> getReceiptsByUserIdWithDuration(@Param("userId") String userId, @Param("fromDate") String fromDate
             , @Param("toDate") String toDate);
 
@@ -72,7 +72,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    join lms.customer c on clm.customer_id = c.customer_id \n" +
             "    where clm.customer_type = 'applicant' \n" +
             "    and sr.request_source = 'm_collect' and sr.loan_id = :loanId\n" +
-            "    and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
+            "    and date(sr.form->>'date_of_receipt') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
     List<Map<String, Object>> getReceiptsByLoanIdWithDuration(@Param("loanId") Long loanId, @Param("fromDate") String fromDate
             , @Param("toDate") String toDate);
 
@@ -90,7 +90,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
             "    where cr.receipt_id not in (select collection_receipts_id from collection.receipt_transfer_history) and clm.customer_type = 'applicant' and\n" +
             "    sr.request_source = 'm_collect' and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque') and sr.form->>'created_by' = :userId" +
-            "    and date(sr.form->>'transaction_date') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
+            "    and date(sr.form->>'date_of_receipt') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
     List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferred(@Param("userId") String userId, @Param("fromDate") String fromDate
             , @Param("toDate") String toDate);
 }
