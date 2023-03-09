@@ -275,7 +275,11 @@ public class ReceiptTransferService {
 
             receiptTransferResponseDTO.setReceiptTransferData(receiptTransferEntity);
             receiptTransferResponseDTO.setReceiptData(receiptsData);
-            receiptTransferResponseDTO.setAmountInHand(collectionLimitUserWiseEntity.getUtilizedLimitValue());
+            if (collectionLimitUserWiseEntity != null) {
+                receiptTransferResponseDTO.setAmountInHand(collectionLimitUserWiseEntity.getUtilizedLimitValue());
+            } else {
+                receiptTransferResponseDTO.setAmountInHand(0.0);
+            }
 
         } catch (Exception e) {
             throw new Exception("1016028");

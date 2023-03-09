@@ -59,9 +59,9 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "la.sanctioned_amount as loan_amount\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due,product,sanctioned_amount from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
-            "            join (select loan_id, customer_id from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
+            "            join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  " +
-            " where f.loan_id = :loanId  \n" +
+            " where f.loan_id = :loanId and clm.customer_type = 'applicant' \n" +
             "            and f.next_followup_datetime between :fromDate and :toDate ")
     List<Map<String,Object>> getFollowupsLoanWiseByDuration(@Param("loanId") Long loanId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageable);
@@ -108,9 +108,9 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "la.sanctioned_amount as loan_amount\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due,product,sanctioned_amount from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
-            "            join (select loan_id, customer_id from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
+            "            join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  " +
-            " where f.created_by = :userId  \n" +
+            " where f.created_by = :userId and clm.customer_type = 'applicant' \n" +
             "            and f.next_followup_datetime between :fromDate and :toDate ")
     List<Map<String,Object>> getFollowupsUserWiseByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageable);
