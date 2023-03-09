@@ -21,6 +21,9 @@ public class ActivityLogService {
     @Autowired
     CollectionActivityLogsRepository collectionActivityLogsRepository;
 
+    @Autowired
+    MasterDataService masterDataService;
+
 
     public BaseDTOResponse<Object> getActivityLogsById(Long activityLogsId) throws Exception {
 
@@ -54,16 +57,16 @@ public class ActivityLogService {
 
     }
 
-    public BaseDTOResponse<Object> getActivityLogsByUserIdWithDuration(Integer page, Integer size,Long userId, Date fromDate, Date toDate) throws Exception {
+    public BaseDTOResponse<Object> getActivityLogsByUserIdWithDuration(Integer page, Integer size,Long userId, Date fromDate, Date endDate) throws Exception {
 
-        if(fromDate.compareTo(toDate) == 0){
-            toDate = checkToDate(toDate);
+        if(fromDate.compareTo(endDate) == 0){
+            endDate = checkToDate(endDate);
         }
 
         BaseDTOResponse<Object> response;
 
         Pageable pageable = PageRequest.of(page, size);
-
+        Date toDate = masterDataService.addOneDay(endDate);
         List<CollectionActivityLogsEntity> collectionActivityLogs =
                 collectionActivityLogsRepository.getActivityLogsUserWIseByDuration(userId, fromDate, toDate, pageable);
         if (page > 0) {
@@ -103,14 +106,15 @@ public class ActivityLogService {
         }
     }
 
-    public BaseDTOResponse<Object> getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date toDate) throws Exception {
+    public BaseDTOResponse<Object> getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date endDate) throws Exception {
 
-        if(fromDate.compareTo(toDate) == 0){
-            toDate = checkToDate(toDate);
+        if(fromDate.compareTo(endDate) == 0){
+            endDate = checkToDate(endDate);
         }
 
         BaseDTOResponse<Object> response;
 
+        Date toDate = masterDataService.addOneDay(endDate);
         Pageable pageable = PageRequest.of(page,size);
 
         List<Map<String, Object>> collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
