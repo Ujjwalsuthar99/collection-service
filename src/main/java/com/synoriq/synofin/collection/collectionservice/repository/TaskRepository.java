@@ -230,7 +230,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    clm.\"customer_type\" = 'applicant'\n" +
             "    and la.deleted = false\n" +
             "    and la.loan_status in ( 'active', 'maturity_closure')\n" +
-            "    and (concat_ws(' ', c.first_name, c.last_name) like %:searchKey% or la.product like %:searchKey% or la.loan_application_number like %:searchKey%)\n" +
+            "    and (LOWER(concat_ws(' ', c.first_name, c.last_name)) like LOWER(concat('%', :searchKey,'%')) or LOWER(la.product) like LOWER(concat('%', :searchKey, '%')) or LOWER(la.loan_application_number) like LOWER(concat('%', :searchKey, '%')))\n" +
             "order by\n" +
             "    la.loan_application_id asc")
     List<Map<String,Object>> getTaskDetailsBySearchKey(String searchKey, Pageable pageRequest);
