@@ -15,6 +15,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
 
     @Query(nativeQuery = true, value = "select \n" +
             "                sr.service_request_id ,\n" +
+            "                sr.created_date ,\n" +
             "                clm.loan_id,\n" +
             "                la.loan_application_number,\n" +
             "                concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
@@ -47,6 +48,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
 
     @Query(nativeQuery = true, value = "select \n" +
             "                sr.service_request_id ,\n" +
+            "                sr.created_date ,\n" +
             "                clm.loan_id,\n" +
             "                la.loan_application_number,\n" +
             "                concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
