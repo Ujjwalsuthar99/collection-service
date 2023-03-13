@@ -89,6 +89,7 @@ public class ActivityLogService {
                 activityLogResponse.setAddress(collectionActivityLogsEntity.getAddress());
                 activityLogResponse.setGeolocation(collectionActivityLogsEntity.getGeolocation());
                 activityLogResponse.setImages(collectionActivityLogsEntity.getImages());
+                activityLogResponse.setRemarks(collectionActivityLogsEntity.getRemarks());
 
                 activityLogResponses.add(activityLogResponse);
             }
