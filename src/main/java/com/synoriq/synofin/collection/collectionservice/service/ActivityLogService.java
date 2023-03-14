@@ -22,7 +22,7 @@ public class ActivityLogService {
     CollectionActivityLogsRepository collectionActivityLogsRepository;
 
     @Autowired
-    MasterDataService masterDataService;
+    UtilityService utilityService;
 
 
     public BaseDTOResponse<Object> getActivityLogsById(Long activityLogsId) throws Exception {
