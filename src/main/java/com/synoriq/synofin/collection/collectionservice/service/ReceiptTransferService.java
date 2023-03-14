@@ -1,6 +1,5 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
-import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
@@ -17,14 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityEvent.*;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.CASH_COLLECTION_DEFAULT_LIMIT;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.CHEQUE_COLLECTION_DEFAULT_LIMIT;
-import static com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.*;
 
 @Service
 @Slf4j
@@ -48,7 +44,7 @@ public class ReceiptTransferService {
     @Autowired
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
     @Autowired
-    private MasterDataService masterDataService;
+    private UtilityService utilityService;
 
     @Autowired
     private ActivityLogService activityLogService;
@@ -291,7 +287,7 @@ public class ReceiptTransferService {
     public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date endDate, String status, Integer pageNo, Integer pageSize) throws Exception {
         List<Map<String, Object>> receiptTransferEntity;
         try {
-            Date toDate = masterDataService.addOneDay(endDate);
+            Date toDate = utilityService.addOneDay(endDate);
             Pageable pageRequest;
             if (pageNo > 0) {
                 pageNo = pageNo - 1;
@@ -309,7 +305,7 @@ public class ReceiptTransferService {
         List<Map<String, Object>> receiver;
         Map<String, List<Map<String, Object>>> newObjResponse = new HashMap<>();
         try {
-            Date toDate = masterDataService.addOneDay(endDate);
+            Date toDate = utilityService.addOneDay(endDate);
             Pageable pageRequest;
             if (pageNo > 0) {
                 pageNo = pageNo - 1;

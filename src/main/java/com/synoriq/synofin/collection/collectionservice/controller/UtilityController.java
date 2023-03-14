@@ -1,10 +1,9 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEntity;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.service.MasterDataService;
+import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,7 +12,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
-import java.util.List;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
@@ -21,10 +19,10 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @RequestMapping("/v1")
 @EnableTransactionManagement
 @Slf4j
-public class MasterDataController {
+public class UtilityController {
 
     @Autowired
-    MasterDataService masterDataService;
+    UtilityService utilityService;
 
     @RequestMapping(value = "getMasterType", method = RequestMethod.POST)
     public ResponseEntity<Object> getMasterData(@RequestHeader("Authorization") String bearerToken, @RequestBody MasterDtoRequest masterDtoRequest) throws SQLException {
@@ -33,7 +31,7 @@ public class MasterDataController {
         ResponseEntity<Object> response = null;
 
         try {
-            masterResponse = masterDataService.getMasterData(bearerToken, masterDtoRequest);
+            masterResponse = utilityService.getMasterData(bearerToken, masterDtoRequest);
             response = new ResponseEntity<>(masterResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -55,7 +53,7 @@ public class MasterDataController {
         Object result;
 
         try {
-            result = masterDataService.getUserDetail(bearerToken, page, size, key);
+            result = utilityService.getUserDetail(bearerToken, page, size, key);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -75,7 +73,27 @@ public class MasterDataController {
         Object result;
 
         try {
-            result = masterDataService.getContactSupport(bearerToken, keyword, model);
+            result = utilityService.getContactSupport(bearerToken, keyword, model);
+            response = new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "getBankNameByIFSC", method = RequestMethod.GET)
+    public ResponseEntity<Object> getBankNameByIFSC(@RequestParam(value = "keyword") String keyword) throws SQLException {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        Object result;
+
+        try {
+            result = utilityService.getBankNameByIFSC(keyword);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

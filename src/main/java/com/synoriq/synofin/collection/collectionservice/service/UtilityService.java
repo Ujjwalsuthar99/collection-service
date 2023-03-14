@@ -2,10 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ContactDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class MasterDataService {
+public class UtilityService {
 
     public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception {
 
@@ -138,4 +135,25 @@ public class MasterDataService {
         return simpleDateFormats.parse(to);
     }
 
+    public Object getBankNameByIFSC(String keyword) throws Exception {
+
+        Object res = new Object();
+
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, BankNameIFSCDTOResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getBankNameByIFSC?keyword=" + keyword)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(BankNameIFSCDTOResponse.class)
+                    .build().call();
+
+            log.info("responseData {}", res);
+        } catch (Exception ee) {
+            log.error("{}", ee.getMessage());
+        }
+        return res;
+    }
 }
