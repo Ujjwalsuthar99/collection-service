@@ -178,7 +178,9 @@ public enum ErrorCode {
     ALREADY_HAD_ACTIONED_ON_THIS_TRANSFER(1016030, "This transfer is already been actioned"),
     RECEIVER_HAVE_EXCEED_THEIR_LIMIT(1016031, "Transfer stopped, because receiver have exceed their limit"),
     STATUS_NOT_MATCHED(1016032, "Request status is not matched"),
-    LMS_CREATE_RECEIPT_ERROR(1016033, "LMS create receipt is getting null response");
+    LMS_CREATE_RECEIPT_ERROR(1016033, "LMS create receipt is getting null response"),
+    REGEX_NOT_MATCHING(1016034, "Input is not matched with the REGEX"),
+    DATA_NOT_FOUND_IN_LMS(1016035, "Data not found in LMS regarding this Inputted Loan Number");
     private Integer codeValue;
     private String responseMessage;
 

@@ -266,9 +266,15 @@ public class ReceiptTransferService {
         ReceiptTransferResponseDTO receiptTransferResponseDTO = new ReceiptTransferResponseDTO();
         try {
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
+            Long receiptTransferToUserId = receiptTransferEntity.getTransferredToUserId();
+
             List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId);
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptTransferEntity.getTransferredBy(), receiptTransferEntity.getTransferMode());
-
+            //  flagg //
+            // temporary work for user data //
+            Map<String, Object> userData = receiptTransferRepository.getUserDataByUserId(receiptTransferToUserId);
+            receiptTransferResponseDTO.setUserData(userData);
+            // temporary work for user data //
             receiptTransferResponseDTO.setReceiptTransferData(receiptTransferEntity);
             receiptTransferResponseDTO.setReceiptData(receiptsData);
             if (collectionLimitUserWiseEntity != null) {

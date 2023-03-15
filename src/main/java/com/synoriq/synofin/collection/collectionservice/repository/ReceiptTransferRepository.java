@@ -124,4 +124,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "         join (select customer_id, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id \n" +
             "         where rt.receipt_transfer_id = :receiptTransferId and clm.customer_type = 'applicant'")
     List<Map<String, Object>> getDataByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
+
+    @Query(nativeQuery = true,value = "select u.user_id as user_id, u.username as user_name, u.department as department, u.name as name from master.users u where u.user_id = :userId")
+    Map<String, Object> getUserDataByUserId(@Param("userId") Long userId);
 }
