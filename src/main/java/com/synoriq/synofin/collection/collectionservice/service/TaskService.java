@@ -23,7 +23,7 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
 
-    public BaseDTOResponse<Object> getTaskDetails(Integer pageNo, Integer pageSize) throws Exception {
+    public BaseDTOResponse<Object> getTaskDetails(Long userId, Integer pageNo, Integer pageSize) throws Exception {
 
 
         BaseDTOResponse<Object> baseDTOResponse;
@@ -33,7 +33,7 @@ public class TaskService {
                 pageNo = pageNo - 1;
             }
             pageRequest = PageRequest.of(pageNo, pageSize);
-            List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsByPages(pageRequest);
+            List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsByPages(userId, pageRequest);
             if (pageNo > 0) {
                 if (taskDetailPages.size() == 0) {
                     return new BaseDTOResponse<>(taskDetailPages);
@@ -140,7 +140,7 @@ public class TaskService {
 
     }
 
-    public BaseDTOResponse<Object> getTaskDetailsBySearchKey(String searchKey, Integer pageNo, Integer pageSize) throws Exception {
+    public BaseDTOResponse<Object> getTaskDetailsBySearchKey(Long userId, String searchKey, Integer pageNo, Integer pageSize) throws Exception {
 
 
         BaseDTOResponse<Object> baseDTOResponse;
@@ -150,7 +150,7 @@ public class TaskService {
                 pageNo = pageNo - 1;
             }
             pageRequest = PageRequest.of(pageNo, pageSize);
-            List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsBySearchKey(searchKey, pageRequest);
+            List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsBySearchKey(userId, searchKey, pageRequest);
             if (pageNo > 0) {
                 if (taskDetailPages.size() == 0) {
                     return new BaseDTOResponse<>(taskDetailPages);

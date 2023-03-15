@@ -28,15 +28,15 @@ public class TaskController {
     @Autowired
     TaskService taskService;
 
-    @RequestMapping(value = "tasks", method = RequestMethod.GET)
-    public ResponseEntity<Object> getTaskDetails(@RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
+    @RequestMapping(value = "users/{userId}/tasks", method = RequestMethod.GET)
+    public ResponseEntity<Object> getTaskDetails(@PathVariable("userId") Long userId, @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
                                                                        @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = taskService.getTaskDetails(pageNo, pageSize);
+            baseResponse = taskService.getTaskDetails(userId, pageNo, pageSize);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
             log.info("Get Task Details success | size=[{}]", pageNo);
@@ -74,8 +74,8 @@ public class TaskController {
         return response;
     }
 
-    @RequestMapping(value = "search-tasks", method = RequestMethod.GET)
-    public ResponseEntity<Object> getTaskDetailsBySearchKey(@RequestParam(value = "searchKey") String searchKey,
+    @RequestMapping(value = "users/{userId}/tasks/search-tasks", method = RequestMethod.GET)
+    public ResponseEntity<Object> getTaskDetailsBySearchKey(@PathVariable("userId") Long userId, @RequestParam(value = "searchKey") String searchKey,
                                                             @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
                                                             @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws Exception {
 
@@ -83,7 +83,7 @@ public class TaskController {
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = taskService.getTaskDetailsBySearchKey(searchKey, pageNo, pageSize);
+            baseResponse = taskService.getTaskDetailsBySearchKey(userId, searchKey, pageNo, pageSize);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {

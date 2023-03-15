@@ -26,7 +26,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
     @Query(nativeQuery = true, value = "select la.loan_application_id,\n" +
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
-            "    la.product,\n" +
+            "    p.product_name as product,\n" +
             "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment,\n" +
             "    la.loan_application_number,\n" +
             "    (case\n" +
@@ -120,19 +120,22 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        em2.loan_id\n" +
             ") excess_money on\n" +
             "    la.loan_application_id = excess_money.loan_id\n" +
+            "    join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
+            "    join (select product_code, product_name from master.product) as p on p.product_code = la.product \n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
             "    and la.deleted = false\n" +
             "    and la.loan_status in ( 'active', 'maturity_closure')\n" +
+            "    and la2.allocated_to_user_id = :userId\n" +
             "order by\n" +
             "    la.loan_application_id asc")
-    List<Map<String,Object>> getTaskDetailsByPages(Pageable pageRequest);
+    List<Map<String,Object>> getTaskDetailsByPages(@Param("userId") Long userId, Pageable pageRequest);
 
 
     @Query(nativeQuery = true, value = "select la.loan_application_id,\n" +
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
-            "    la.product,\n" +
+            "    p.product_name as product,\n" +
             "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment,\n" +
             "    la.loan_application_number,\n" +
             "    (case\n" +
@@ -226,14 +229,17 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        em2.loan_id\n" +
             ") excess_money on\n" +
             "    la.loan_application_id = excess_money.loan_id\n" +
+            "join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
+            "join (select product_code, product_name from master.product) as p on p.product_code = la.product \n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
             "    and la.deleted = false\n" +
             "    and la.loan_status in ( 'active', 'maturity_closure')\n" +
+            "    and la2.allocated_to_user_id = :userId\n" +
             "    and (LOWER(concat_ws(' ', c.first_name, c.last_name)) like LOWER(concat('%', :searchKey,'%')) or LOWER(la.product) like LOWER(concat('%', :searchKey, '%')) or LOWER(la.loan_application_number) like LOWER(concat('%', :searchKey, '%')))\n" +
             "order by\n" +
             "    la.loan_application_id asc")
-    List<Map<String,Object>> getTaskDetailsBySearchKey(String searchKey, Pageable pageRequest);
+    List<Map<String,Object>> getTaskDetailsBySearchKey(@Param("userId") Long userId, String searchKey, Pageable pageRequest);
 
     @Query(nativeQuery = true, value = "select clm2.loan_id as loan_id from lms.loan_application la \n" +
             "             join lms.customer_loan_mapping clm on clm.loan_id = la.loan_application_id \n" +
