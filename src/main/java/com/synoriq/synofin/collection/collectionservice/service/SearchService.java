@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -27,14 +29,21 @@ public class SearchService {
         List<TaskListDTOReturnResponse> result = new ArrayList<>();
         SearchDTOReturnResponse searchDataResponse = new SearchDTOReturnResponse();
         SearchDtoRequest searchBody = new ObjectMapper().convertValue(requestBody, SearchDtoRequest.class);
-        int stringSize= searchBody.getRequestData().getSearchTerm().length();
+        int stringSize = searchBody.getRequestData().getSearchTerm().length();
+        String data = searchBody.getRequestData().getSearchTerm();
        //  Restrict Global Search Loan id for user with last 7 digit
         if (stringSize > 7) {
-            String data = searchBody.getRequestData().getSearchTerm();
             String search = data.substring((stringSize- 7));
             searchBody.getRequestData().setSearchTerm(search);
             searchBody.getRequestData().setFilterBy(searchBody.getRequestData().getFilterBy());
             searchBody.getRequestData().setPaginationDTO(searchBody.getRequestData().getPaginationDTO());
+        } else {
+            final Pattern pattern = Pattern.compile("(?=.*[A-Z])(?=.*\\d).{2,}", Pattern.CASE_INSENSITIVE);
+            final Matcher matcher = pattern.matcher(data);
+
+            if (!matcher.matches()) {
+                throw new Exception("1016034");
+            }
         }
         try {
 
@@ -51,53 +60,57 @@ public class SearchService {
                     .build().call();
 
             log.info("responseData {}", res);
-            for(LMSLoanDataDTO loanDataDTO : res.getData().getLoanDetails()) {
-                TaskListDTOReturnResponse taskListDTOReturnResponse = new TaskListDTOReturnResponse();
-                taskListDTOReturnResponse.setAddress("Incoming From LMS soon");
-                taskListDTOReturnResponse.setCustomerName(loanDataDTO.getCustomerDetails().getName());
-                taskListDTOReturnResponse.setProduct("IncomingLMS");
-                taskListDTOReturnResponse.setLoanApplicationId(Long.parseLong(loanDataDTO.getLoanId()));
-                taskListDTOReturnResponse.setLoanApplicationNumber(loanDataDTO.getLoanApplicationNumber());
-                taskListDTOReturnResponse.setOverdueRepayment(0L);
-                taskListDTOReturnResponse.setDaysPastDue(0L);
+            if (res.getData().getLoanDetails() != null) {
+                for (LMSLoanDataDTO loanDataDTO : res.getData().getLoanDetails()) {
+                    TaskListDTOReturnResponse taskListDTOReturnResponse = new TaskListDTOReturnResponse();
+                    taskListDTOReturnResponse.setAddress("Incoming From LMS soon");
+                    taskListDTOReturnResponse.setCustomerName(loanDataDTO.getCustomerDetails().getName());
+                    taskListDTOReturnResponse.setProduct("IncomingLMS");
+                    taskListDTOReturnResponse.setLoanApplicationId(Long.parseLong(loanDataDTO.getLoanId()));
+                    taskListDTOReturnResponse.setLoanApplicationNumber(loanDataDTO.getLoanApplicationNumber());
+                    taskListDTOReturnResponse.setOverdueRepayment(0L);
+                    taskListDTOReturnResponse.setDaysPastDue(0L);
 
-                int dpd = Integer.parseInt((loanDataDTO.getLoanId()));
-                if (dpd >= 0 && dpd <= 30) {
-                    taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                    taskListDTOReturnResponse.setDpdBgColorKey("#ABCFFF");
-                    taskListDTOReturnResponse.setDaysPastDueBucket("0-30 DPD");
-                } else if (dpd >= 31 && dpd <= 60) {
-                    taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                    taskListDTOReturnResponse.setDpdBgColorKey("#FDB4FF");
-                    taskListDTOReturnResponse.setDaysPastDueBucket("31-60 DPD");
-                } else if (dpd >= 61 && dpd <= 90) {
-                    taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                    taskListDTOReturnResponse.setDpdBgColorKey("#FDAAAA");
-                    taskListDTOReturnResponse.setDaysPastDueBucket("61-90 DPD");
-                } else if (dpd >= 91 && dpd <= 120) {
-                    taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                    taskListDTOReturnResponse.setDpdBgColorKey("#FCDA8B");
-                    taskListDTOReturnResponse.setDaysPastDueBucket("91-120 DPD");
-                } else if (dpd >= 121 && dpd <= 150) {
-                    taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                    taskListDTOReturnResponse.setDpdBgColorKey("#F2994A");
-                    taskListDTOReturnResponse.setDaysPastDueBucket("121-150 DPD");
-                } else if (dpd >= 151 && dpd <= 180) {
-                    taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
-                    taskListDTOReturnResponse.setDpdBgColorKey("#FF5359");
-                    taskListDTOReturnResponse.setDaysPastDueBucket("151-180 DPD");
-                } else {
-                    taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
-                    taskListDTOReturnResponse.setDpdBgColorKey("#F9000A");
-                    taskListDTOReturnResponse.setDaysPastDueBucket("180++ DPD");
+                    int dpd = Integer.parseInt((loanDataDTO.getLoanId()));
+                    if (dpd >= 0 && dpd <= 30) {
+                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#ABCFFF");
+                        taskListDTOReturnResponse.setDaysPastDueBucket("0-30 DPD");
+                    } else if (dpd >= 31 && dpd <= 60) {
+                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#FDB4FF");
+                        taskListDTOReturnResponse.setDaysPastDueBucket("31-60 DPD");
+                    } else if (dpd >= 61 && dpd <= 90) {
+                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#FDAAAA");
+                        taskListDTOReturnResponse.setDaysPastDueBucket("61-90 DPD");
+                    } else if (dpd >= 91 && dpd <= 120) {
+                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#FCDA8B");
+                        taskListDTOReturnResponse.setDaysPastDueBucket("91-120 DPD");
+                    } else if (dpd >= 121 && dpd <= 150) {
+                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#F2994A");
+                        taskListDTOReturnResponse.setDaysPastDueBucket("121-150 DPD");
+                    } else if (dpd >= 151 && dpd <= 180) {
+                        taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#FF5359");
+                        taskListDTOReturnResponse.setDaysPastDueBucket("151-180 DPD");
+                    } else {
+                        taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#F9000A");
+                        taskListDTOReturnResponse.setDaysPastDueBucket("180++ DPD");
+                    }
+                    result.add(taskListDTOReturnResponse);
                 }
-                result.add(taskListDTOReturnResponse);
+            } else {
+                throw new Exception("1016035");
             }
             searchDataResponse.setData(result);
             baseDTOResponse = new BaseDTOResponse<>(searchDataResponse.getData());
         } catch (Exception ee) {
-//            ee.printStackTrace();
             log.error("{}", ee.getMessage());
+            throw new Exception(ee.getMessage());
         }
         return baseDTOResponse;
     }

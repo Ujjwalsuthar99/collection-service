@@ -18,6 +18,9 @@ public class ReceiptTransferResponseDTO {
     @JsonProperty("receipt_data")
     List<Map<String, Object>> receiptData;
 
+    @JsonProperty("user_data")
+    Map<String, Object> userData;
+
     @JsonProperty("amount_in_hand")
     Double amountInHand;
 
