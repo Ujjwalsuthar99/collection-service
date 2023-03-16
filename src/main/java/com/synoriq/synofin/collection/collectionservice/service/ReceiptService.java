@@ -199,6 +199,7 @@ public class ReceiptService {
                     .typeResponseType(ServiceRequestSaveResponse.class)
                     .build().call();
 
+            log.info("response create receipt {}", res);
             if (res.getData() != null) {
 
 
@@ -210,7 +211,7 @@ public class ReceiptService {
 
                 collectionReceiptRepository.save(collectionReceiptEntity);
 
-                DummyProfileDetailDTO profileData = (DummyProfileDetailDTO) profileService.getProfileDetails(bearerToken, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
+//                DummyProfileDetailDTO profileData = (DummyProfileDetailDTO) profileService.getProfileDetails(bearerToken, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
 
 //            Map<String, Object> cashInHand = dashboardRepository.getCashInHandByUserIdByDuration(String.valueOf(receiptServiceDtoRequest.getActivityData().getUserId()), "01-01-2023", String.valueOf(new Date()));
 
@@ -241,7 +242,7 @@ public class ReceiptService {
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                 }
             } else {
-                throw new Exception("1016033");
+                return res;
             }
 
 
