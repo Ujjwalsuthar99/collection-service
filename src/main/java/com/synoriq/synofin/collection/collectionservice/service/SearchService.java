@@ -64,15 +64,15 @@ public class SearchService {
             if (res.getData().getLoanDetails() != null) {
                 for (LMSLoanDataDTO loanDataDTO : res.getData().getLoanDetails()) {
                     TaskListDTOReturnResponse taskListDTOReturnResponse = new TaskListDTOReturnResponse();
-                    taskListDTOReturnResponse.setAddress("Incoming From LMS soon");
+                    taskListDTOReturnResponse.setAddress(loanDataDTO.getCustomerDetails().getCustomerAddress());
                     taskListDTOReturnResponse.setCustomerName(loanDataDTO.getCustomerDetails().getName());
-                    taskListDTOReturnResponse.setProduct("IncomingLMS");
+                    taskListDTOReturnResponse.setProduct(loanDataDTO.getProduct());
                     taskListDTOReturnResponse.setLoanApplicationId(Long.parseLong(loanDataDTO.getLoanId()));
                     taskListDTOReturnResponse.setLoanApplicationNumber(loanDataDTO.getLoanApplicationNumber());
-                    taskListDTOReturnResponse.setOverdueRepayment(0L);
-                    taskListDTOReturnResponse.setDaysPastDue(0L);
+                    taskListDTOReturnResponse.setOverdueRepayment(loanDataDTO.getOverDueAmount());
+                    taskListDTOReturnResponse.setDaysPastDue(loanDataDTO.getDpd());
 
-                    int dpd = Integer.parseInt((loanDataDTO.getLoanId()));
+                    int dpd = loanDataDTO.getDpd();
                     if (dpd >= 0 && dpd <= 30) {
                         taskListDTOReturnResponse.setDpdTextColorKey("#323232");
                         taskListDTOReturnResponse.setDpdBgColorKey("#ABCFFF");
@@ -99,7 +99,7 @@ public class SearchService {
                         taskListDTOReturnResponse.setDaysPastDueBucket("151-180 DPD");
                     } else {
                         taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#F9000A");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#C83939");
                         taskListDTOReturnResponse.setDaysPastDueBucket("180++ DPD");
                     }
                     result.add(taskListDTOReturnResponse);

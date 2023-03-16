@@ -210,19 +210,51 @@ public class ReceiptTransferService {
                                     collectionReceiptRepository.save(collectionReceiptEntity);
                                 }
                             }
-                            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptTransferEntityTransferredBy, receiptTransferEntityTransferMode);
-                            if (collectionLimitUserWiseEntity != null) {
+                            // checking limit value from limit_wise table for transfer by user id
+                            CollectionLimitUserWiseEntity collectionLimitUserWiseEntityOfTransferById = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptTransferEntityTransferredBy, receiptTransferEntityTransferMode);
+                            if (collectionLimitUserWiseEntityOfTransferById != null) {
                                 if (receiptTransferEntityTransferMode.equals("cash")) {
-                                    Double utilizedLimitValue = collectionLimitUserWiseEntity.getUtilizedLimitValue();
+                                    Double utilizedLimitValue = collectionLimitUserWiseEntityOfTransferById.getUtilizedLimitValue();
                                     Double updatedLimit = utilizedLimitValue - amount;
-                                    collectionLimitUserWiseEntity.setUtilizedLimitValue(updatedLimit);
-                                    collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+                                    collectionLimitUserWiseEntityOfTransferById.setUtilizedLimitValue(updatedLimit);
+                                    collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntityOfTransferById);
                                 } else if (receiptTransferEntityTransferMode.equals("cheque")) {
-                                    Double utilizedLimitValue = collectionLimitUserWiseEntity.getUtilizedLimitValue();
+                                    Double utilizedLimitValue = collectionLimitUserWiseEntityOfTransferById.getUtilizedLimitValue();
                                     Double updatedLimit = utilizedLimitValue - amount;
-                                    collectionLimitUserWiseEntity.setUtilizedLimitValue(updatedLimit);
-                                    collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+                                    collectionLimitUserWiseEntityOfTransferById.setUtilizedLimitValue(updatedLimit);
+                                    collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntityOfTransferById);
                                 }
+                            }
+                            // checking limit value from limit_wise table for transfer to user id
+                            CollectionLimitUserWiseEntity collectionLimitUserWiseEntityOfTransferToUserId = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(requestActionBy, receiptTransferEntityTransferMode);
+                            if (collectionLimitUserWiseEntityOfTransferToUserId != null) {
+                                if (receiptTransferEntityTransferMode.equals("cash")) {
+                                    Double utilizedLimitValue = collectionLimitUserWiseEntityOfTransferToUserId.getUtilizedLimitValue();
+                                    Double updatedLimit = utilizedLimitValue - amount;
+                                    collectionLimitUserWiseEntityOfTransferToUserId.setUtilizedLimitValue(updatedLimit);
+                                    collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntityOfTransferToUserId);
+                                } else if (receiptTransferEntityTransferMode.equals("cheque")) {
+                                    Double utilizedLimitValue = collectionLimitUserWiseEntityOfTransferToUserId.getUtilizedLimitValue();
+                                    Double updatedLimit = utilizedLimitValue - amount;
+                                    collectionLimitUserWiseEntityOfTransferToUserId.setUtilizedLimitValue(updatedLimit);
+                                    collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntityOfTransferToUserId);
+                                }
+                            } else {
+                                CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
+                                String limitConf = "";
+                                if(receiptTransferEntityTransferMode.equals("cash")) {
+                                    limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
+                                } else {
+                                    limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
+                                }
+                                Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
+                                collectionLimitUserWiseEntity.setCreatedDate(new Date());
+                                collectionLimitUserWiseEntity.setDeleted(false);
+                                collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(receiptTransferEntityTransferMode);
+                                collectionLimitUserWiseEntity.setUserId(requestActionBy);
+                                collectionLimitUserWiseEntity.setTotalLimitValue(totalLimitValue);
+                                collectionLimitUserWiseEntity.setUtilizedLimitValue(amount);
+                                collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                             }
                             saveReceiptTransferData(receiptTransferStatusUpdateDtoRequest, receiptTransferEntity, collectionActivityLogsId);
                         } else {
@@ -260,7 +292,7 @@ public class ReceiptTransferService {
         receiptTransferRepository.save(receiptTransferEntity);
     }
 
-    public ReceiptTransferResponseDTO getReceiptTransferById(Long receiptTransferId) throws Exception {
+    public ReceiptTransferResponseDTO getReceiptTransferById(Long receiptTransferId, Long userId) throws Exception {
         log.info("receipt tranfer idddd {}", receiptTransferId);
         ReceiptTransferEntity receiptTransferEntity;
         ReceiptTransferResponseDTO receiptTransferResponseDTO = new ReceiptTransferResponseDTO();
@@ -269,7 +301,7 @@ public class ReceiptTransferService {
             Long receiptTransferToUserId = receiptTransferEntity.getTransferredToUserId();
 
             List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId);
-            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptTransferEntity.getTransferredBy(), receiptTransferEntity.getTransferMode());
+            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, receiptTransferEntity.getTransferMode());
             //  flagg //
             // temporary work for user data //
             Map<String, Object> userData = receiptTransferRepository.getUserDataByUserId(receiptTransferToUserId);

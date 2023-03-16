@@ -21,4 +21,7 @@ public class CustomerDetailsInLoanDataDTO {
     @JsonProperty("global_customer_id")
     String globalCustomerId;
 
+    @JsonProperty("customer_address")
+    String customerAddress;
+
 }

@@ -201,7 +201,9 @@ public class ReceiptService {
 
             log.info("response create receipt {}", res);
             if (res.getData() != null) {
-
+                if (res.getData().getServiceRequestId() == null) {
+                    throw new Exception("1016035");
+                }
 
                 CollectionReceiptEntity collectionReceiptEntity = new CollectionReceiptEntity();
                 collectionReceiptEntity.setReceiptId(res.getData().getServiceRequestId());

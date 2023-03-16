@@ -105,14 +105,14 @@ public class ReceiptTransferController {
 
 
     @RequestMapping(value = "/receipt-transfer/{receiptTransferId}", method = RequestMethod.GET)
-    public ResponseEntity<Object> getReceiptTransferById(@PathVariable("receiptTransferId") Long receiptTransferId) throws SQLException {
+    public ResponseEntity<Object> getReceiptTransferById(@PathVariable("receiptTransferId") Long receiptTransferId, @RequestParam("userId") Long userId) throws SQLException {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
         ReceiptTransferResponseDTO result;
         try {
             log.info("Receipt Transfer id {}", receiptTransferId);
-            result = receiptTransferService.getReceiptTransferById(receiptTransferId);
+            result = receiptTransferService.getReceiptTransferById(receiptTransferId, userId);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {

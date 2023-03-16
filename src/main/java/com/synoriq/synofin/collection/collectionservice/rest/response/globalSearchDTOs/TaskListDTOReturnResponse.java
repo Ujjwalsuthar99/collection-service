@@ -28,12 +28,12 @@ public class TaskListDTOReturnResponse {
     String dpdBgColorKey;
 
     @JsonProperty("days_past_due")
-    Long daysPastDue;
+    int daysPastDue;
 
     @JsonProperty("address")
     String address;
 
     @JsonProperty("overdue_repayment")
-    Long overdueRepayment;
+    Double overdueRepayment;
 
 }
