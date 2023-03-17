@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class MasterDTOResponse {
     @JsonProperty("response")
-    public String response;
+    public Boolean response;
 
     @JsonProperty("data")
     public Object data;

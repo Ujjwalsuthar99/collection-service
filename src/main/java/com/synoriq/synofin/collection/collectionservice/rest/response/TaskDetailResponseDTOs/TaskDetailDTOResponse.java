@@ -7,7 +7,7 @@ import lombok.Data;
 public class TaskDetailDTOResponse {
 
     @JsonProperty("response")
-    public String response;
+    public Boolean response;
 
     @JsonProperty("data")
     public LoanDataDTO data;

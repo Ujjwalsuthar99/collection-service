@@ -9,7 +9,7 @@ import lombok.Setter;
 public class ReceiptServiceSystemPropertiesResponse {
 
     @JsonProperty("response")
-    public String response;
+    public Boolean response;
 
     @JsonProperty("data")
     public ReceiptDateResponse data;

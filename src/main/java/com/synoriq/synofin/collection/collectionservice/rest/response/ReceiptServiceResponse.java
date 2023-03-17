@@ -11,7 +11,7 @@ import java.util.Date;
 public class ReceiptServiceResponse {
 
     @JsonProperty("response")
-    public String response;
+    public Boolean response;
 
     @JsonProperty("data")
     public Object data;
