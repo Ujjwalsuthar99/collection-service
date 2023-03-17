@@ -168,7 +168,7 @@ public class ReceiptService {
             log.info("Receipt amount {}", receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
 
             if(currentReceiptAmountAllowed < Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount())) {
-                throw new Exception(String.valueOf(RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT));
+                throw new Exception("1017003");
             }
 
             HttpHeaders httpHeaders = new HttpHeaders();
