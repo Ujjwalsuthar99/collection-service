@@ -180,7 +180,7 @@ public enum ErrorCode {
     STATUS_NOT_MATCHED(1016032, "Request status is not matched"),
     LMS_CREATE_RECEIPT_ERROR(1016033, "LMS create receipt is getting null response"),
     REGEX_NOT_MATCHING(1016034, "Input is not matched with the REGEX"),
-    DATA_NOT_FOUND_IN_LMS(1016035, "Data not found in LMS regarding this Inputted Loan Number");
+    DATA_NOT_FOUND_IN_LMS(1016035, "Receipt id is getting null from LMS");
     private Integer codeValue;
     private String responseMessage;
 

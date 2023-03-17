@@ -10,6 +10,9 @@ import lombok.Setter;
 @Setter
 public class LMSLoanDataDTO {
 
+    @JsonProperty("dpd")
+    int dpd;
+
     @JsonProperty("product")
     String product;
 
@@ -48,6 +51,9 @@ public class LMSLoanDataDTO {
 
     @JsonProperty("loan_amount")
     String loanAmount;
+
+    @JsonProperty("overdue_amount")
+    Double overDueAmount;
 
     @JsonProperty("rate_of_interest")
     String rateOfInterest;

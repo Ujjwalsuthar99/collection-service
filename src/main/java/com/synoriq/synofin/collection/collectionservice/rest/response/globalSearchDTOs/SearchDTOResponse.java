@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class SearchDTOResponse {
     @JsonProperty("response")
-    public String response;
+    public Boolean response;
 
     @JsonProperty("data")
     public LMSSearchDTOResponse data;

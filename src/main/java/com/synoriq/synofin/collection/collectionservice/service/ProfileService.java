@@ -2,7 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DummyProfileDetailDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -22,11 +22,11 @@ public class ProfileService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
-            res = HTTPRequestService.<Object, DummyProfileDetailDTO>builder()
+            res = HTTPRequestService.<Object, ProfileDetailResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getProfileDetails?username=" + username)
                     .httpHeaders(httpHeaders)
-                    .typeResponseType(DummyProfileDetailDTO.class)
+                    .typeResponseType(ProfileDetailResponseDTO.class)
                     .build().call();
 
             log.info("profile Response {}", res);

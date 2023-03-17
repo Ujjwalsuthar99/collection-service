@@ -32,19 +32,20 @@ public class SearchService {
         int stringSize = searchBody.getRequestData().getSearchTerm().length();
         String data = searchBody.getRequestData().getSearchTerm();
        //  Restrict Global Search Loan id for user with last 7 digit
-        if (stringSize > 7) {
+        if (stringSize >= 7) {
             String search = data.substring((stringSize- 7));
             searchBody.getRequestData().setSearchTerm(search);
             searchBody.getRequestData().setFilterBy(searchBody.getRequestData().getFilterBy());
             searchBody.getRequestData().setPaginationDTO(searchBody.getRequestData().getPaginationDTO());
-        } else {
-            final Pattern pattern = Pattern.compile("(?=.*[A-Z])(?=.*\\d).{2,}", Pattern.CASE_INSENSITIVE);
-            final Matcher matcher = pattern.matcher(data);
-
-            if (!matcher.matches()) {
-                throw new Exception("1016034");
-            }
         }
+//        else {
+//            final Pattern pattern = Pattern.compile("(?=.*[A-Z])(?=.*\\d).{2,}", Pattern.CASE_INSENSITIVE);
+//            final Matcher matcher = pattern.matcher(data);
+//
+//            if (!matcher.matches()) {
+//                throw new Exception("1016034");
+//            }
+//        }
         try {
 
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -63,15 +64,15 @@ public class SearchService {
             if (res.getData().getLoanDetails() != null) {
                 for (LMSLoanDataDTO loanDataDTO : res.getData().getLoanDetails()) {
                     TaskListDTOReturnResponse taskListDTOReturnResponse = new TaskListDTOReturnResponse();
-                    taskListDTOReturnResponse.setAddress("Incoming From LMS soon");
+                    taskListDTOReturnResponse.setAddress(loanDataDTO.getCustomerDetails().getCustomerAddress());
                     taskListDTOReturnResponse.setCustomerName(loanDataDTO.getCustomerDetails().getName());
-                    taskListDTOReturnResponse.setProduct("IncomingLMS");
+                    taskListDTOReturnResponse.setProduct(loanDataDTO.getProduct());
                     taskListDTOReturnResponse.setLoanApplicationId(Long.parseLong(loanDataDTO.getLoanId()));
                     taskListDTOReturnResponse.setLoanApplicationNumber(loanDataDTO.getLoanApplicationNumber());
-                    taskListDTOReturnResponse.setOverdueRepayment(0L);
-                    taskListDTOReturnResponse.setDaysPastDue(0L);
+                    taskListDTOReturnResponse.setOverdueRepayment(loanDataDTO.getOverDueAmount());
+                    taskListDTOReturnResponse.setDaysPastDue(loanDataDTO.getDpd());
 
-                    int dpd = Integer.parseInt((loanDataDTO.getLoanId()));
+                    int dpd = loanDataDTO.getDpd();
                     if (dpd >= 0 && dpd <= 30) {
                         taskListDTOReturnResponse.setDpdTextColorKey("#323232");
                         taskListDTOReturnResponse.setDpdBgColorKey("#ABCFFF");
@@ -98,7 +99,7 @@ public class SearchService {
                         taskListDTOReturnResponse.setDaysPastDueBucket("151-180 DPD");
                     } else {
                         taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#F9000A");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#C83939");
                         taskListDTOReturnResponse.setDaysPastDueBucket("180++ DPD");
                     }
                     result.add(taskListDTOReturnResponse);

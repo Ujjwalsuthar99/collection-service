@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class UserDTOResponse {
     @JsonProperty("response")
-    public String response;
+    public Boolean response;
 
     @JsonProperty("data")
     public List<UsersDataDTO> data;

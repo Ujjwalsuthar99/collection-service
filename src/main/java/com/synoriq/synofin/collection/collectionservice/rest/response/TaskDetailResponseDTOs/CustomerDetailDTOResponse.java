@@ -9,7 +9,7 @@ import java.util.List;
 public class CustomerDetailDTOResponse {
 
     @JsonProperty("response")
-    public String response;
+    public Boolean response;
 
     @JsonProperty("data")
     public List<CustomerDataResponseDTO> data;

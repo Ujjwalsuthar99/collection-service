@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class BankNameIFSCDTOResponse {
     @JsonProperty("response")
-    public String response;
+    public Boolean response;
 
     @JsonProperty("data")
     public Object data;

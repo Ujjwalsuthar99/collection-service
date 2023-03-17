@@ -11,7 +11,7 @@ import lombok.Setter;
 public class ServiceRequestSaveResponse {
 
     @JsonProperty("response")
-    public String response;
+    public Boolean response;
 
     @JsonProperty("data")
     public ServiceRequestIdResponse data;

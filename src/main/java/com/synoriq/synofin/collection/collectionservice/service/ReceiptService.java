@@ -8,14 +8,12 @@ import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceRequestDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DummyProfileDetailDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.createReceiptLms.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.GetReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptServiceSystemPropertiesResponse;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.pqc.jcajce.provider.LMS;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -40,7 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
-import static com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.*;
 
 @Service
 @Slf4j
@@ -168,7 +165,7 @@ public class ReceiptService {
             log.info("Receipt amount {}", receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
 
             if(currentReceiptAmountAllowed < Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount())) {
-                throw new Exception(String.valueOf(RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT));
+                throw new Exception("1017003");
             }
 
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -199,8 +196,11 @@ public class ReceiptService {
                     .typeResponseType(ServiceRequestSaveResponse.class)
                     .build().call();
 
+            log.info("response create receipt {}", res);
             if (res.getData() != null) {
-
+                if (res.getData().getServiceRequestId() == null) {
+                    throw new Exception("1016035");
+                }
 
                 CollectionReceiptEntity collectionReceiptEntity = new CollectionReceiptEntity();
                 collectionReceiptEntity.setReceiptId(res.getData().getServiceRequestId());
@@ -210,7 +210,7 @@ public class ReceiptService {
 
                 collectionReceiptRepository.save(collectionReceiptEntity);
 
-                DummyProfileDetailDTO profileData = (DummyProfileDetailDTO) profileService.getProfileDetails(bearerToken, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
+//                DummyProfileDetailDTO profileData = (DummyProfileDetailDTO) profileService.getProfileDetails(bearerToken, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
 
 //            Map<String, Object> cashInHand = dashboardRepository.getCashInHandByUserIdByDuration(String.valueOf(receiptServiceDtoRequest.getActivityData().getUserId()), "01-01-2023", String.valueOf(new Date()));
 
@@ -241,7 +241,7 @@ public class ReceiptService {
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                 }
             } else {
-                throw new Exception("1016033");
+                return res;
             }
 
 

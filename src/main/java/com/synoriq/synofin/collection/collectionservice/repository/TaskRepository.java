@@ -45,7 +45,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        when la.days_past_due between 91 and 120 then '#FCDA8B'\n" +
             "        when la.days_past_due between 121 and 150 then '#F2994A'\n" +
             "        when la.days_past_due between 151 and 180 then '#FF5359'\n" +
-            "        else '#F9000A'\n" +
+            "        else '#C83939'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
             "        when la.days_past_due between 0 and 30 then '#323232'\n" +
@@ -154,7 +154,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        when la.days_past_due between 91 and 120 then '#FCDA8B'\n" +
             "        when la.days_past_due between 121 and 150 then '#F2994A'\n" +
             "        when la.days_past_due between 151 and 180 then '#FF5359'\n" +
-            "        else '#F9000A'\n" +
+            "        else '#C83939'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
             "        when la.days_past_due between 0 and 30 then '#323232'\n" +

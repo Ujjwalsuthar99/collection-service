@@ -13,7 +13,7 @@ import java.util.List;
 public class SearchDTOReturnResponse {
 
     @JsonProperty("response")
-    public String response;
+    public Boolean response;
 
     @JsonProperty("data")
     public List<TaskListDTOReturnResponse> data;
