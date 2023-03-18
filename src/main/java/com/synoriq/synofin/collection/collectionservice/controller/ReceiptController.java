@@ -16,6 +16,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_NUMBER;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_SIZE;
+
 @RestController
 @RequestMapping("/v1")
 @EnableTransactionManagement
@@ -30,12 +33,14 @@ public class ReceiptController {
                                                                   @RequestParam(value = "status", required = false) String status,
                                                                   @RequestParam(value = "paymentmode", required = false) String paymentMode,
                                                                   @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String fromDate,
-                                                                  @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate) throws SQLException {
+                                                                  @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate,
+                                                                  @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
+                                                                  @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            baseResponse = receiptService.getReceiptsByUserIdWithDuration(userId, fromDate, toDate, status, paymentMode);
+            baseResponse = receiptService.getReceiptsByUserIdWithDuration(userId, fromDate, toDate, status, paymentMode, pageNo, pageSize);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

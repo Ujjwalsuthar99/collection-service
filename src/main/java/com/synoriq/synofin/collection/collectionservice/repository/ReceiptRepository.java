@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -43,7 +44,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    sr.request_source = 'm_collect' and sr.form->>'created_by' = :userId\n" +
             "    and date(sr.form->>'date_of_receipt') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
     List<Map<String, Object>> getReceiptsByUserIdWithDuration(@Param("userId") String userId, @Param("fromDate") String fromDate
-            , @Param("toDate") String toDate);
+            , @Param("toDate") String toDate, Pageable pageRequest);
 
 
     @Query(nativeQuery = true, value = "select \n" +
