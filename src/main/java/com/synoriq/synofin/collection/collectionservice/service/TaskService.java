@@ -57,6 +57,7 @@ public class TaskService {
 
         TaskDetailDTOResponse loanRes;
         CustomerDetailDTOResponse customerRes;
+        LoanBasicDetailsDTOResponse loanDetailRes;
         TaskDetailRequestDTO loanDataBody = new ObjectMapper().convertValue(taskDetailRequestDTO, TaskDetailRequestDTO.class);
         TaskDetailDTOResponse resp = new TaskDetailDTOResponse();
         BaseDTOResponse<Object> baseDTOResponse = null;
@@ -78,9 +79,14 @@ public class TaskService {
 
             log.info("loan details {}", loanRes);
 
-//            if (loanRes) {
-//
-//            }
+            loanDetailRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getBasicLoanDetails?loanId=" + loanIdNumber)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(LoanBasicDetailsDTOResponse.class)
+                    .build().call();
+
+            log.info("getBasicLoanDetails {}", loanDetailRes);
 
             customerRes = HTTPRequestService.<Object, CustomerDetailDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
@@ -91,9 +97,45 @@ public class TaskService {
 
             log.info("customer details {}", customerRes);
 
+            int dpd = loanDetailRes.getData().getDpd();
+            String dpdTextColor;
+            String dpdBgColor;
+            String dpdBucket;
+
+            if (dpd >= 0 && dpd <= 30) {
+                dpdTextColor = "#323232";
+                dpdBgColor = "#ABCFFF";
+                dpdBucket = "0-30 DPD";
+            } else if (dpd >= 31 && dpd <= 60) {
+                dpdTextColor = "#323232";
+                dpdBgColor = "#FDB4FF";
+                dpdBucket = "31-60 DPD";
+            } else if (dpd >= 61 && dpd <= 90) {
+                dpdTextColor = "#323232";
+                dpdBgColor = "#FDAAAA";
+                dpdBucket = "61-90 DPD";
+            } else if (dpd >= 91 && dpd <= 120) {
+                dpdTextColor = "#323232";
+                dpdBgColor = "#FCDA8B";
+                dpdBucket = "91-120 DPD";
+            } else if (dpd >= 121 && dpd <= 150) {
+                dpdTextColor = "#323232";
+                dpdBgColor = "#F2994A";
+                dpdBucket = "121-150 DPD";
+            } else if (dpd >= 151 && dpd <= 180) {
+                dpdTextColor = "#ffffff";
+                dpdBgColor = "#FF5359";
+                dpdBucket = "151-180 DPD";
+            } else {
+                dpdTextColor = "#ffffff";
+                dpdBgColor = "#C83939";
+                dpdBucket = "180++ DPD";
+            }
+
             String loanApplicationNumber = taskRepository.getLoanApplicationNumber(loanIdNumber);
             TaskDetailReturnResponseDTO response = new TaskDetailReturnResponseDTO();
             List<CustomerDetailsReturnResponseDTO> customerList = new ArrayList<>();
+
 
             if (!(customerRes.getData() == null)) {
                 for (CustomerDataResponseDTO customerData : customerRes.getData()) {
@@ -108,6 +150,14 @@ public class TaskService {
                     basicInfoApplicant.setMiddleName(customerData.getBasicInfo().getMiddleName());
                     basicInfoApplicant.setLastName(customerData.getBasicInfo().getLastName());
                     basicInfoApplicant.setDob(customerData.getBasicInfo().getDob());
+                    basicInfoApplicant.setDpd(dpd);
+                    basicInfoApplicant.setDpdBucket(dpdBucket);
+                    basicInfoApplicant.setDpdBgColor(dpdBgColor);
+                    basicInfoApplicant.setDpdTextColor(dpdTextColor);
+                    basicInfoApplicant.setPos(loanDetailRes.getData().getPrincipalOutstanding());
+                    basicInfoApplicant.setLoanAmount(loanDetailRes.getData().getLoanAmount());
+                    basicInfoApplicant.setLoanTenure(loanDetailRes.getData().getLoanTenure());
+                    basicInfoApplicant.setEmiDate("Pending LMS");
                     for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
                         if (!(communicationData.getAddressType() == null)) {
                             if (communicationData.getAddressType().equals("Permanent Address")) {
