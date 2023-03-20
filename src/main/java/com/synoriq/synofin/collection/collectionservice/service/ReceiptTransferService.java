@@ -230,12 +230,12 @@ public class ReceiptTransferService {
                             if (collectionLimitUserWiseEntityOfTransferToUserId != null) {
                                 if (receiptTransferEntityTransferMode.equals("cash")) {
                                     Double utilizedLimitValue = collectionLimitUserWiseEntityOfTransferToUserId.getUtilizedLimitValue();
-                                    Double updatedLimit = utilizedLimitValue - amount;
+                                    Double updatedLimit = utilizedLimitValue + amount;
                                     collectionLimitUserWiseEntityOfTransferToUserId.setUtilizedLimitValue(updatedLimit);
                                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntityOfTransferToUserId);
                                 } else if (receiptTransferEntityTransferMode.equals("cheque")) {
                                     Double utilizedLimitValue = collectionLimitUserWiseEntityOfTransferToUserId.getUtilizedLimitValue();
-                                    Double updatedLimit = utilizedLimitValue - amount;
+                                    Double updatedLimit = utilizedLimitValue + amount;
                                     collectionLimitUserWiseEntityOfTransferToUserId.setUtilizedLimitValue(updatedLimit);
                                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntityOfTransferToUserId);
                                 }

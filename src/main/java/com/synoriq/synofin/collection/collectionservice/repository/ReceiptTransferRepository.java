@@ -49,7 +49,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             , @Param("toDate") Date toDate, @Param("status") String status, Pageable pageRequest);
 
     @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount\n" +
-            "            ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
+            "            ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else uu.name end) as transferred_by_name\n" +
+            "               ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "                (case \n" +
             "                         when rt.transfer_mode = 'cash' then '#9B51E0'\n" +
             "                         when rt.transfer_mode = 'cheque' then '#136AD5'\n" +
@@ -72,7 +73,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "                        when rt.status = 'rejected' then '#FFCECC'\n" +
             "                        else '#FCEBDB'\n" +
             "            end) as status_bg_color_key\n" +
-            "            from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id \n" +
+            "            from collection.receipt_transfer rt left join (select user_id, name from master.users) as u on u.user_id = rt.transferred_to_user_id \n" +
+            "            left join (select user_id, name from master.users) as uu on uu.user_id = rt.transferred_by \n" +
             "            where rt.transferred_by = :transferredBy and rt.created_date between :fromDate and :toDate and rt.deleted = false\n" +
             "            order by\n" +
             "            case when rt.status = 'pending' then 1\n" +
@@ -82,7 +84,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             , @Param("toDate") Date toDate, Pageable pageRequest);
 
     @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount  " +
-            "            ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
+            "            ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else uu.name end) as transferred_by_name\n" +
+            "               ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "                (case \n" +
             "                         when rt.transfer_mode = 'cash' then '#9B51E0'\n" +
             "                         when rt.transfer_mode = 'cheque' then '#136AD5'\n" +
@@ -105,7 +108,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "                        when rt.status = 'rejected' then '#FFCECC'\n" +
             "                        else '#FCEBDB'\n" +
             "            end) as status_bg_color_key\n" +
-            "            from collection.receipt_transfer rt left join master.users u on u.user_id = rt.transferred_to_user_id \n" +
+            "            from collection.receipt_transfer rt left join (select user_id, name from master.users) as u on u.user_id = rt.transferred_to_user_id \n" +
+            "            left join (select user_id, name from master.users) as uu on uu.user_id = rt.transferred_by \n" +
             "            where rt.transferred_to_user_id = :transferredBy and rt.created_date between :fromDate and :toDate and rt.deleted = false\n" +
             "            order by\n" +
             "            case when rt.status = 'pending' then 1\n" +

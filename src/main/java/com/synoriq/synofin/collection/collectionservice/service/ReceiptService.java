@@ -324,8 +324,8 @@ public class ReceiptService {
         String url = "http://localhost:1102/v1/getPdf?deliverableType=" + deliverableType + "&serviceRequestId=" + serviceRequestId;
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setBearerAuth("6c6e74fe-7dc4-4a8f-891e-fbe4d061cafc");
-//            httpHeaders.setBearerAuth(token);
+//        httpHeaders.setBearerAuth("6c6e74fe-7dc4-4a8f-891e-fbe4d061cafc");
+            httpHeaders.setBearerAuth(token);
 
         ResponseEntity<byte[]> response;
 
