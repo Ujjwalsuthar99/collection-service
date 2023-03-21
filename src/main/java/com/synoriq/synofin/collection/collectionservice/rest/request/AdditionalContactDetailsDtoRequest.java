@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
 import lombok.*;
 
 import java.util.Date;
@@ -32,4 +33,6 @@ public class AdditionalContactDetailsDtoRequest {
     String email;
 
     String relationWithApplicant;
+
+    CollectionActivityLogDTO activityLog;
 }

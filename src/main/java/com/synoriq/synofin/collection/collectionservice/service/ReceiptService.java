@@ -16,6 +16,8 @@ import com.synoriq.synofin.collection.collectionservice.service.utilityservice.H
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -67,18 +69,18 @@ public class ReceiptService {
     @Autowired
     private ProfileService profileService;
 
-    public BaseDTOResponse<Object> getReceiptsByUserIdWithDuration(Long userId, String fromDate, String toDate, String status, String paymentMode) throws Exception {
+    public BaseDTOResponse<Object> getReceiptsByUserIdWithDuration(Long userId, String fromDate, String toDate, String status, String paymentMode, Integer page, Integer size) throws Exception {
 
 
         BaseDTOResponse<Object> baseDTOResponse;
         try {
             paymentMode = paymentMode == "" ? paymentMode = "cash" : paymentMode;
-            //            Pageable pageRequest;
-            //            if (pageNo > 0) {
-            //                pageNo = pageNo - 1;
-            //            }
-            //            pageRequest = PageRequest.of(pageNo, pageSize);
-            List<Map<String, Object>> taskDetailPages = receiptRepository.getReceiptsByUserIdWithDuration(userId.toString(), fromDate, toDate);
+            Pageable pageRequest;
+            if (page > 0) {
+                page = page - 1;
+            }
+            pageRequest = PageRequest.of(page, size);
+            List<Map<String, Object>> taskDetailPages = receiptRepository.getReceiptsByUserIdWithDuration(userId.toString(), fromDate, toDate, pageRequest);
 
             baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
         } catch (Exception e) {

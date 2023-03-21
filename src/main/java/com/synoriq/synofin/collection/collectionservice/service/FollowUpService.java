@@ -116,8 +116,9 @@ public class FollowUpService {
         return baseDTOResponse;
 
     }
-    public BaseDTOResponse<Object> getFollowupUserWiseWithDuration(Integer page, Integer size, Long userId, Date fromDate, Date toDate) throws Exception {
+    public BaseDTOResponse<Object> getFollowupUserWiseWithDuration(Integer page, Integer size, Long userId, Date fromDate, Date toDate, String type) throws Exception {
 
+        List<Map<String,Object>> followUpEntityPages = new ArrayList<>();
         if(fromDate.compareTo(toDate) == 0){
             toDate = checkToDate(toDate);
         }
@@ -125,7 +126,11 @@ public class FollowUpService {
         BaseDTOResponse<Object> baseDTOResponse;
         Pageable pageable = PageRequest.of(page,size);
 
-        List<Map<String,Object>> followUpEntityPages = followUpRepository.getFollowupsUserWiseByDuration(userId, fromDate,toDate, pageable);
+        if (type.equals("pending")) {
+            followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForPending(userId, fromDate, toDate, pageable);
+        } else {
+            followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForCreated(userId, fromDate, toDate, pageable);
+        }
         if (page > 0) {
             if (followUpEntityPages.size() == 0) {
                 return new BaseDTOResponse<>(followUpEntityPages);

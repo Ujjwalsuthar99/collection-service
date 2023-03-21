@@ -19,6 +19,9 @@ public class AdditionalContactDetailsService {
     @Autowired
     private AdditionalContactDetailsRepository additionalContactDetailsRepository;
 
+    @Autowired
+    private ActivityLogService activityLogService;
+
 //    public ResponseEntity<List<AdditionalContactDetailsEntity>> getAdditionalContactDetailsByLoanId (Long loanId) {
 //
 //        return new ResponseEntity<>(additionalContactDetailsRepository.findAllByLoanId(loanId), HttpStatus.OK);
@@ -72,6 +75,9 @@ public class AdditionalContactDetailsService {
 
     public BaseDTOResponse<Object> createAdditionalContactDetail(AdditionalContactDetailsDtoRequest additionalContactDetailsDtoRequest) throws Exception {
         try {
+            Long collectionActivityLogsId = activityLogService.
+                    createActivityLogs(additionalContactDetailsDtoRequest.getActivityLog());
+
             AdditionalContactDetailsEntity additionalContactDetailsEntity = new AdditionalContactDetailsEntity();
 
             additionalContactDetailsEntity.setCreatedDate(new Date());
