@@ -110,22 +110,12 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "            join (select loan_application_id ,days_past_due,product from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "            left join (\n" +
             "    select\n" +
-            "        MAX(case when rs.status = 'outstanding' then due_date end) over (partition by rs.loan_id ) as duedate,\n" +
-            "        SUM(rs.pending_amount) over (partition by rs.loan_id ) as overdue_repayment,\n" +
-            "        MAX(case when rs.status = 'outstanding' then installment_number end) over (partition by rs.loan_id ) as outstanding_installment_number,\n" +
-            "        case\n" +
-            "            when rs.due_date = (MAX(rs.due_date) over(partition by rs.loan_id )) then \n" +
-            "            rs.installment_amount\n" +
-            "        end as main_emi_amount,\n" +
-            "        count(*) over(partition by rs.loan_id ) as number_of_outstanding_emis,\n" +
-            "        row_number() over(partition by rs.loan_id\n" +
-            "        order by\n" +
-            "            due_date desc ) as rank,\n" +
+            "        max(SUM(rs.pending_amount)) over (partition by rs.loan_id ) as overdue_repayment ,\n" +
             "            rs.loan_id\n" +
             "        from\n" +
             "            lms.repayment_schedule rs\n" +
             "        where\n" +
-            "            rs.status = 'outstanding' ) repay on la.loan_application_id = repay.loan_id\n" +
+            "            rs.status = 'outstanding' group by rs.loan_id ) repay on la.loan_application_id = repay.loan_id\n" +
             "                join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  " +
             " where f.created_by = :userId and clm.customer_type = 'applicant' \n" +
@@ -177,22 +167,12 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "            join (select loan_application_id ,days_past_due,product from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "            left join (\n" +
             "    select\n" +
-            "        MAX(case when rs.status = 'outstanding' then due_date end) over (partition by rs.loan_id ) as duedate,\n" +
-            "        SUM(rs.pending_amount) over (partition by rs.loan_id ) as overdue_repayment,\n" +
-            "        MAX(case when rs.status = 'outstanding' then installment_number end) over (partition by rs.loan_id ) as outstanding_installment_number,\n" +
-            "        case\n" +
-            "            when rs.due_date = (MAX(rs.due_date) over(partition by rs.loan_id )) then \n" +
-            "            rs.installment_amount\n" +
-            "        end as main_emi_amount,\n" +
-            "        count(*) over(partition by rs.loan_id ) as number_of_outstanding_emis,\n" +
-            "        row_number() over(partition by rs.loan_id\n" +
-            "        order by\n" +
-            "            due_date desc ) as rank,\n" +
+            "        max(SUM(rs.pending_amount)) over (partition by rs.loan_id ) as overdue_repayment ,\n" +
             "            rs.loan_id\n" +
             "        from\n" +
             "            lms.repayment_schedule rs\n" +
             "        where\n" +
-            "            rs.status = 'outstanding' ) repay on la.loan_application_id = repay.loan_id\n" +
+            "            rs.status = 'outstanding' group by rs.loan_id ) repay on la.loan_application_id = repay.loan_id\n" +
             "                join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  " +
             " where f.created_by = :userId and clm.customer_type = 'applicant' \n" +

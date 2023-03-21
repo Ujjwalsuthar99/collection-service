@@ -28,4 +28,10 @@ public class ProfileDataDTO {
     @JsonProperty("email")
     public String email;
 
+    @JsonProperty("mobile_number")
+    public String mobileNumber;
+
+    @JsonProperty("branch")
+    public String branch;
+
 }
