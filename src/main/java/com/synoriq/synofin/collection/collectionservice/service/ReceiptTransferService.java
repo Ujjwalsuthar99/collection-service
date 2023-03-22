@@ -264,6 +264,11 @@ public class ReceiptTransferService {
                     case RECEIPT_TRANSFER_REJECT:
                         if (receiptTransferEntityTransferredToUserId.equals(requestActionBy)) {
                             saveReceiptTransferData(receiptTransferStatusUpdateDtoRequest, receiptTransferEntity, collectionActivityLogsId);
+                            // history entity rows delete on rejecting the transfer
+                            List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferId);
+                            for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
+                                receiptTransferHistoryRepository.deleteById(receiptTransferHistoryEntity.getReceiptTransferHistoryId());
+                            }
                         } else {
                             throw new Exception("1016029");
                         }
