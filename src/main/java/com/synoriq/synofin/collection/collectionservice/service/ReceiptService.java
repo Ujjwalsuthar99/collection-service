@@ -150,7 +150,7 @@ public class ReceiptService {
 
             Double totalLimitValue = 0.00;
             Double currentReceiptAmountAllowed = 0.00;
-            CollectionLimitUserWiseEntity collectionLimitUser = (CollectionLimitUserWiseEntity) collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()), receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode);
+            CollectionLimitUserWiseEntity collectionLimitUser = (CollectionLimitUserWiseEntity) collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode);
 
             if(collectionLimitUser != null) {
                 totalLimitValue = collectionLimitUser.getTotalLimitValue();
@@ -235,7 +235,7 @@ public class ReceiptService {
                         collectionLimitUserWiseEntity.setCreatedDate(new Date());
                         collectionLimitUserWiseEntity.setDeleted(false);
                         collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode());
-                        collectionLimitUserWiseEntity.setUserId(Long.parseLong(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy()));
+                        collectionLimitUserWiseEntity.setUserId(receiptServiceDtoRequest.getActivityData().getUserId());
                         collectionLimitUserWiseEntity.setTotalLimitValue(currentReceiptAmountAllowed);
                         collectionLimitUserWiseEntity.setUtilizedLimitValue(Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
                     }
