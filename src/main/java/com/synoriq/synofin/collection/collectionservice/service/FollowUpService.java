@@ -118,10 +118,8 @@ public class FollowUpService {
     }
     public BaseDTOResponse<Object> getFollowupUserWiseWithDuration(Integer page, Integer size, Long userId, Date fromDate, Date toDate, String type) throws Exception {
 
-        List<Map<String,Object>> followUpEntityPages = new ArrayList<>();
-        if(fromDate.compareTo(toDate) == 0){
-            toDate = checkToDate(toDate);
-        }
+        List<Map<String,Object>> followUpEntityPages;
+        toDate = checkToDate(toDate);
 
         BaseDTOResponse<Object> baseDTOResponse;
         Pageable pageable = PageRequest.of(page,size);
