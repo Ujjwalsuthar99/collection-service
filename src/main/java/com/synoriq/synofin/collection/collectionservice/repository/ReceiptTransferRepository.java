@@ -72,7 +72,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "                        when rt.status = 'approved' then '#E3F8DD'\n" +
             "                        when rt.status = 'rejected' then '#FFCECC'\n" +
             "                        else '#FCEBDB'\n" +
-            "            end) as status_bg_color_key\n" +
+            "            end) as status_bg_color_key,\n" +
+            "            (select count(*) from collection.receipt_transfer_history rth where rth.receipt_transfer_id = rt.receipt_transfer_id) as receipt_count\n" +
             "            from collection.receipt_transfer rt left join (select user_id, name from master.users) as u on u.user_id = rt.transferred_to_user_id \n" +
             "            left join (select user_id, name from master.users) as uu on uu.user_id = rt.transferred_by \n" +
             "            where rt.transferred_by = :transferredBy and rt.created_date between :fromDate and :toDate and rt.deleted = false\n" +
@@ -107,7 +108,8 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "                        when rt.status = 'approved' then '#E3F8DD'\n" +
             "                        when rt.status = 'rejected' then '#FFCECC'\n" +
             "                        else '#FCEBDB'\n" +
-            "            end) as status_bg_color_key\n" +
+            "            end) as status_bg_color_key,\n" +
+            "            (select count(*) from collection.receipt_transfer_history rth where rth.receipt_transfer_id = rt.receipt_transfer_id) as receipt_count\n" +
             "            from collection.receipt_transfer rt left join (select user_id, name from master.users) as u on u.user_id = rt.transferred_to_user_id \n" +
             "            left join (select user_id, name from master.users) as uu on uu.user_id = rt.transferred_by \n" +
             "            where rt.transferred_to_user_id = :transferredBy and rt.created_date between :fromDate and :toDate and rt.deleted = false\n" +
