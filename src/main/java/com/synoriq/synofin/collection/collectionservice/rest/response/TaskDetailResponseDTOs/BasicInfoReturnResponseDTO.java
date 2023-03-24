@@ -24,6 +24,9 @@ public class BasicInfoReturnResponseDTO {
     @JsonProperty("last_name")
     public String lastName;
 
+    @JsonProperty("relation")
+    public String relation;
+
     @JsonProperty("dob")
     public String dob;
 

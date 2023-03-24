@@ -1,6 +1,8 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synoriq.synofin.collection.collectionservice.entity.AdditionalContactDetailsEntity;
+import com.synoriq.synofin.collection.collectionservice.repository.AdditionalContactDetailsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
@@ -22,6 +24,9 @@ public class TaskService {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private AdditionalContactDetailsRepository additionalContactDetailsRepository;
 
     public BaseDTOResponse<Object> getTaskDetails(Long userId, Integer pageNo, Integer pageSize) throws Exception {
 
@@ -175,6 +180,22 @@ public class TaskService {
                     customerDetails.setAddress(addressReturnResponseDTO);
                     customerDetails.setNumbers(numbersReturnResponseDTO);
                     customerList.add(customerDetails);
+
+                    List<AdditionalContactDetailsEntity> additionalContactDetailsEntity = additionalContactDetailsRepository.findAllByLoanId(loanIdNumber);
+                    NumbersReturnResponseDTO numbersReturnResponseDTO1 = new NumbersReturnResponseDTO();
+                    BasicInfoReturnResponseDTO basicInfoOther = new BasicInfoReturnResponseDTO();
+                    for (AdditionalContactDetailsEntity additionalContactDetailsEntity1: additionalContactDetailsEntity) {
+                        numbersReturnResponseDTO1.setMobNo(additionalContactDetailsEntity1.getMobileNumber().toString());
+                        numbersReturnResponseDTO1.setAlternativeMobile(additionalContactDetailsEntity1.getAltMobileNumber().toString());
+                        basicInfoOther.setRelation(additionalContactDetailsEntity1.getRelationWithApplicant());
+                        basicInfoOther.setFirstName(additionalContactDetailsEntity1.getContactName());
+                    }
+                    CustomerDetailsReturnResponseDTO customerDetailsOther = new CustomerDetailsReturnResponseDTO();
+                    customerDetailsOther.setBasicInfo(basicInfoOther);
+                    customerDetailsOther.setNumbers(numbersReturnResponseDTO1);
+                    customerDetailsOther.setCustomerType("other");
+
+                    customerList.add(customerDetailsOther);
                     log.info("applicantDetails {}", customerDetails);
                 }
             }

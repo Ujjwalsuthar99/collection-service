@@ -304,16 +304,20 @@ public class ReceiptTransferService {
         try {
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
             Long receiptTransferToUserId = receiptTransferEntity.getTransferredToUserId();
+            Long receiptTrasnferByUserId = receiptTransferEntity.getTransferredBy();
 
             List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId);
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, receiptTransferEntity.getTransferMode());
             //  flagg //
             // temporary work for user data //
-            Map<String, Object> userData = null;
+            Map<String, Object> transferToUserData = null;
+            Map<String, Object> transferByUserData = null;
             if (receiptTransferToUserId != null) {
-                userData = receiptTransferRepository.getUserDataByUserId(receiptTransferToUserId);
+                transferToUserData = receiptTransferRepository.getUserDataByUserId(receiptTransferToUserId);
+                transferByUserData = receiptTransferRepository.getUserDataByUserId(receiptTrasnferByUserId);
             }
-            receiptTransferResponseDTO.setUserData(userData);
+            receiptTransferResponseDTO.setTransferToUserData(transferToUserData);
+            receiptTransferResponseDTO.setTransferByUserData(transferByUserData);
             // temporary work for user data //
             receiptTransferResponseDTO.setReceiptTransferData(receiptTransferEntity);
             receiptTransferResponseDTO.setReceiptData(receiptsData);
