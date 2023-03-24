@@ -66,6 +66,7 @@ public class TaskService {
         try {
             log.info("request dto details {}", taskDetailRequestDTO);
             HttpHeaders httpHeaders = new HttpHeaders();
+            log.info("token {}", token);
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
