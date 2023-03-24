@@ -3,6 +3,8 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.TaskDetailDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -15,11 +17,23 @@ public class ProfileService {
 
     public Object getProfileDetails(String token, String username) throws Exception {
         Object res = new Object();
-
+        TokenDTOResponse serviceToken ;
         BaseDTOResponse<Object> baseDTOResponse = null;
         try {
+            HttpHeaders httpHeaders1 = new HttpHeaders();
+//            httpHeaders.add("Authorization", token);
+            httpHeaders1.add("Content-Type", "application/json");
+
+            serviceToken = HTTPRequestService.<Object, TokenDTOResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("https://api-dev.synofin.tech/get-service-token?access_token=" + token)
+                    .httpHeaders(httpHeaders1)
+                    .typeResponseType(TokenDTOResponse.class)
+                    .build().call();
+
+
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Authorization", serviceToken.getData());
             httpHeaders.add("Content-Type", "application/json");
 
             res = HTTPRequestService.<Object, ProfileDetailResponseDTO>builder()

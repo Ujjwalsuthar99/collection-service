@@ -58,12 +58,15 @@ public class TaskService {
         TaskDetailDTOResponse loanRes;
         CustomerDetailDTOResponse customerRes;
         LoanBasicDetailsDTOResponse loanDetailRes;
+
         TaskDetailRequestDTO loanDataBody = new ObjectMapper().convertValue(taskDetailRequestDTO, TaskDetailRequestDTO.class);
         TaskDetailDTOResponse resp = new TaskDetailDTOResponse();
         BaseDTOResponse<Object> baseDTOResponse = null;
         String loanId = taskDetailRequestDTO.getRequestData().getLoanId();
         Long loanIdNumber = Long.parseLong(loanId);
         try {
+
+
             log.info("request dto details {}", taskDetailRequestDTO);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
