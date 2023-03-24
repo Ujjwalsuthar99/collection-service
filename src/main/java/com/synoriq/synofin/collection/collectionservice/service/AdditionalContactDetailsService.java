@@ -75,8 +75,8 @@ public class AdditionalContactDetailsService {
 
     public BaseDTOResponse<Object> createAdditionalContactDetail(AdditionalContactDetailsDtoRequest additionalContactDetailsDtoRequest) throws Exception {
         try {
-            Long collectionActivityLogsId = activityLogService.
-                    createActivityLogs(additionalContactDetailsDtoRequest.getActivityLog());
+//            Long collectionActivityLogsId = activityLogService.
+//                    createActivityLogs(additionalContactDetailsDtoRequest.getActivityLog());
 
             AdditionalContactDetailsEntity additionalContactDetailsEntity = new AdditionalContactDetailsEntity();
 
