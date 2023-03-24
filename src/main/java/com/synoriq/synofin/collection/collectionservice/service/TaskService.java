@@ -184,10 +184,15 @@ public class TaskService {
                     customerDetails.setNumbers(numbersReturnResponseDTO);
                     customerList.add(customerDetails);
 
-                    List<AdditionalContactDetailsEntity> additionalContactDetailsEntity = additionalContactDetailsRepository.findAllByLoanId(loanIdNumber);
+
+                    log.info("applicantDetails {}", customerDetails);
+                }
+                List<AdditionalContactDetailsEntity> additionalContactDetailsEntity = additionalContactDetailsRepository.findAllByLoanId(loanIdNumber);
+
+                if (!additionalContactDetailsEntity.isEmpty()) {
                     NumbersReturnResponseDTO numbersReturnResponseDTO1 = new NumbersReturnResponseDTO();
                     BasicInfoReturnResponseDTO basicInfoOther = new BasicInfoReturnResponseDTO();
-                    for (AdditionalContactDetailsEntity additionalContactDetailsEntity1: additionalContactDetailsEntity) {
+                    for (AdditionalContactDetailsEntity additionalContactDetailsEntity1 : additionalContactDetailsEntity) {
                         numbersReturnResponseDTO1.setMobNo(additionalContactDetailsEntity1.getMobileNumber().toString());
                         numbersReturnResponseDTO1.setAlternativeMobile(additionalContactDetailsEntity1.getAltMobileNumber().toString());
                         basicInfoOther.setRelation(additionalContactDetailsEntity1.getRelationWithApplicant());
@@ -198,8 +203,6 @@ public class TaskService {
                         customerDetailsOther.setCustomerType("other");
                         customerList.add(customerDetailsOther);
                     }
-
-                    log.info("applicantDetails {}", customerDetails);
                 }
             }
             log.info("customerList {}", customerList);
