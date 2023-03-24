@@ -192,13 +192,13 @@ public class TaskService {
                         numbersReturnResponseDTO1.setAlternativeMobile(additionalContactDetailsEntity1.getAltMobileNumber().toString());
                         basicInfoOther.setRelation(additionalContactDetailsEntity1.getRelationWithApplicant());
                         basicInfoOther.setFirstName(additionalContactDetailsEntity1.getContactName());
+                        CustomerDetailsReturnResponseDTO customerDetailsOther = new CustomerDetailsReturnResponseDTO();
+                        customerDetailsOther.setBasicInfo(basicInfoOther);
+                        customerDetailsOther.setNumbers(numbersReturnResponseDTO1);
+                        customerDetailsOther.setCustomerType("other");
+                        customerList.add(customerDetailsOther);
                     }
-                    CustomerDetailsReturnResponseDTO customerDetailsOther = new CustomerDetailsReturnResponseDTO();
-                    customerDetailsOther.setBasicInfo(basicInfoOther);
-                    customerDetailsOther.setNumbers(numbersReturnResponseDTO1);
-                    customerDetailsOther.setCustomerType("other");
 
-                    customerList.add(customerDetailsOther);
                     log.info("applicantDetails {}", customerDetails);
                 }
             }
