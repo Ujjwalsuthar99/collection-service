@@ -190,9 +190,9 @@ public class TaskService {
                 List<AdditionalContactDetailsEntity> additionalContactDetailsEntity = additionalContactDetailsRepository.findAllByLoanId(loanIdNumber);
 
                 if (!additionalContactDetailsEntity.isEmpty()) {
-                    NumbersReturnResponseDTO numbersReturnResponseDTO1 = new NumbersReturnResponseDTO();
-                    BasicInfoReturnResponseDTO basicInfoOther = new BasicInfoReturnResponseDTO();
                     for (AdditionalContactDetailsEntity additionalContactDetailsEntity1 : additionalContactDetailsEntity) {
+                        NumbersReturnResponseDTO numbersReturnResponseDTO1 = new NumbersReturnResponseDTO();
+                        BasicInfoReturnResponseDTO basicInfoOther = new BasicInfoReturnResponseDTO();
                         numbersReturnResponseDTO1.setMobNo(additionalContactDetailsEntity1.getMobileNumber().toString());
                         numbersReturnResponseDTO1.setAlternativeMobile(additionalContactDetailsEntity1.getAltMobileNumber().toString());
                         basicInfoOther.setRelation(additionalContactDetailsEntity1.getRelationWithApplicant());
