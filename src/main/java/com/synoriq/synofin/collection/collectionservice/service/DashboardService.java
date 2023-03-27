@@ -22,7 +22,7 @@ public class DashboardService {
     @Autowired
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
 
-    public Map<String, Map> getDashboardCountByUserId(Long userId, String startDate, String toDate) throws Exception {
+    public Map<String, Map> getDashboardCountByUserId(Long userId, String userName, String startDate, String toDate) throws Exception {
         Map<String, Map> responseLoans = new HashMap<>();
         // adding 1 day in incoming toDate //
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
@@ -37,7 +37,7 @@ public class DashboardService {
             Map<String, Object> followupDataCounts = dashboardRepository.getFollowupCountByUserIdByDuration(userId, fromDate, endDate);
             Map<String, Object> amountTransferDataCounts = dashboardRepository.getAmountTransferCountByUserIdByDuration(userId, fromDate, endDate);
             Map<String, Object> amountTransferInProcessDataCounts = dashboardRepository.getAmountTransferInProcessCountByUserIdByDuration(userId, fromDate, endDate);
-            Map<String, Object> receiptDataCounts = dashboardRepository.getReceiptCountByUserIdByDuration(userId.toString(), startDate, toDate);
+            Map<String, Object> receiptDataCounts = dashboardRepository.getReceiptCountByUserIdByDuration(userName, startDate, toDate);
             Map<String, Object> cashInHandDataCounts = dashboardRepository.getCashInHandByUserIdByDuration(userId);
             Map<String, Object> chequeAmountData = dashboardRepository.getChequeByUserIdByDuration(userId);
             if (cashInHandDataCounts.isEmpty()) {

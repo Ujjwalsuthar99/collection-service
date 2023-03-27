@@ -27,8 +27,8 @@ public class DashboardController {
     @Autowired
     DashboardService dashboardService;
 
-    @RequestMapping(value = "/dashboard-count/{userId}", method = RequestMethod.GET)
-    public ResponseEntity<Object> getDashboardCountByUserId(@PathVariable(value = "userId") Long userId,
+    @RequestMapping(value = "/dashboard-count/{userId}/{userName}", method = RequestMethod.GET)
+    public ResponseEntity<Object> getDashboardCountByUserId(@PathVariable(value = "userId") Long userId,@PathVariable(value = "userName") String userName,
                                                             @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String fromDate,
                                                             @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate)
                                                             throws SQLException {
@@ -37,7 +37,7 @@ public class DashboardController {
         Map<String,Map> result;
 
         try{
-            result = dashboardService.getDashboardCountByUserId(userId, fromDate, toDate);
+            result = dashboardService.getDashboardCountByUserId(userId, userName, fromDate, toDate);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
             log.info("Get Dashboard Count By UserId | userId={}", userId);
