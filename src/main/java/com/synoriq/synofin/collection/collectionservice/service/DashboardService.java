@@ -29,8 +29,8 @@ public class DashboardService {
         Calendar c = Calendar.getInstance();
         c.setTime(formatter.parse(toDate));
         c.add(Calendar.DATE, 1);  // number of days to add
-        toDate = formatter.format(c.getTime());
-        Date endDate = formatter.parse(toDate);
+        String to = formatter.format(c.getTime());
+        Date endDate = formatter.parse(to);
         Date fromDate = formatter.parse(startDate);
 
         try {
