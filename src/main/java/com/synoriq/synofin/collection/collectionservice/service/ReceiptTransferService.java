@@ -163,8 +163,7 @@ public class ReceiptTransferService {
         }
         return receiptTransferDTOList;
     }
-
-
+    @Transactional
     public ReceiptTransferEntity statusUpdate(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest) throws Exception {
         BaseDTOResponse<Object> baseResponse = null;
         ResponseEntity<Object> response = null;
@@ -230,6 +229,9 @@ public class ReceiptTransferService {
                             if (collectionLimitUserWiseEntityOfTransferToUserId != null) {
                                 if (receiptTransferEntityTransferMode.equals("cash")) {
                                     Double utilizedLimitValue = collectionLimitUserWiseEntityOfTransferToUserId.getUtilizedLimitValue();
+                                    if ((utilizedLimitValue + amount) > collectionLimitUserWiseEntityOfTransferToUserId.getTotalLimitValue()) {
+                                        throw new Exception("1016037");
+                                    }
                                     Double updatedLimit = utilizedLimitValue + amount;
                                     collectionLimitUserWiseEntityOfTransferToUserId.setUtilizedLimitValue(updatedLimit);
                                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntityOfTransferToUserId);

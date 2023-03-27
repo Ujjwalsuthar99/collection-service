@@ -181,7 +181,8 @@ public enum ErrorCode {
     LMS_CREATE_RECEIPT_ERROR(1016033, "LMS create receipt is getting null response"),
     REGEX_NOT_MATCHING(1016034, "Input is not matched with the REGEX"),
     DATA_NOT_FOUND_IN_LMS(1016035, "Receipt id is getting null from LMS"),
-    TRANSFER_TO_USER_ID(1016036, "Transfer to user id is getting null against this entry");
+    TRANSFER_TO_USER_ID(1016036, "Transfer to user id is getting null against this entry"),
+    LIMIT_CHECK_ON_APPROVAL(1016037, "You have exhausted your limit, you cannot accept this transfer");
     private Integer codeValue;
     private String responseMessage;
 
