@@ -99,27 +99,6 @@ public class FollowUpService {
             log.error("Followup data not found for loan Id {}", loanId);
             throw new Exception("1016025");
         }
-//
-//        List<FollowupResponse> followupResponseList = new LinkedList<>();
-
-//        for(FollowUpEntity followUpEntity : followUpEntities){
-//
-//            FollowupResponse followupResponse = new FollowupResponse();
-//            followupResponse.setLoanId(followUpEntity.getLoanId());
-//            followupResponse.setFollowUpId(followUpEntity.getFollowupId());
-//            followupResponse.setRemarks(followUpEntity.getRemarks());
-//            followupResponse.setOtherFollowupReason(followupResponse.getOtherFollowupReason());
-//            followupResponse.setNextFollowUpDateTime(followUpEntity.getNextFollowUpDateTime());
-//            followupResponse.setCreatedBy(followUpEntity.getCreatedBy());
-//            followupResponse.setCreatedDate(followUpEntity.getCreatedDate());
-//            followupResponse.setIsDeleted(followUpEntity.getIsDeleted());
-//            followupResponse.setFollowUpReason(followUpEntity.getFollowUpReason());
-//
-//            followupResponseList.add(followupResponse);
-//
-//        }
-
-//        baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
 
         return baseDTOResponse;
 
