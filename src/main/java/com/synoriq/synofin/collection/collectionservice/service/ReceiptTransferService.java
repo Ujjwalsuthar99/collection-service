@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityEvent.*;
+import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.*;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.CASH_COLLECTION_DEFAULT_LIMIT;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.CHEQUE_COLLECTION_DEFAULT_LIMIT;
 
@@ -58,6 +59,7 @@ public class ReceiptTransferService {
             Long receiptTransferTableId = receiptTransferDtoRequest.getReceiptTransferId();
             Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData());
             String limitConf;
+            String updatedRemarks;
 
             Double utilizedAmount;
             Double totalLimitValue;
@@ -104,6 +106,14 @@ public class ReceiptTransferService {
                 receiptTransferEntity.setCollectionActivityLogsId(collectionActivityId);
 
                 receiptTransferRepository.save(receiptTransferEntity);
+                CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
+                String remarks = receiptTransferDtoRequest.getActivityData().getRemarks();
+                String lastWord = remarks.substring(remarks.lastIndexOf(" ")+1);
+                updatedRemarks = CREATE_TRANSFER;
+                updatedRemarks = updatedRemarks.replace("{transfer_request}", receiptTransferEntity.getReceiptTransferId().toString());
+                updatedRemarks = (updatedRemarks + lastWord);
+                collectionActivityLogsEntity1.setRemarks(updatedRemarks);
+                collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
                 if (receiptTransferTableId == null) {
                     for (Long receiptTransferId : receiptTransferDtoRequest.getReceipts()) {
 
@@ -192,6 +202,8 @@ public class ReceiptTransferService {
                             for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
                                 receiptTransferHistoryRepository.deleteById(receiptTransferHistoryEntity.getReceiptTransferHistoryId());
                             }
+                            // set Activity remarks
+                            setRemarks(receiptTransferStatusUpdateDtoRequest, collectionActivityLogsId);
                         } else {
                             throw new Exception("1016029");
                         }
@@ -259,6 +271,8 @@ public class ReceiptTransferService {
                                 collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                             }
                             saveReceiptTransferData(receiptTransferStatusUpdateDtoRequest, receiptTransferEntity, collectionActivityLogsId);
+                            // set Activity remarks
+                            setRemarks(receiptTransferStatusUpdateDtoRequest, collectionActivityLogsId);
                         } else {
                             throw new Exception("1016029");
                         }
@@ -271,6 +285,8 @@ public class ReceiptTransferService {
                             for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
                                 receiptTransferHistoryRepository.deleteById(receiptTransferHistoryEntity.getReceiptTransferHistoryId());
                             }
+                            // set Activity remarks
+                            setRemarks(receiptTransferStatusUpdateDtoRequest, collectionActivityLogsId);
                         } else {
                             throw new Exception("1016029");
                         }
@@ -297,6 +313,18 @@ public class ReceiptTransferService {
         receiptTransferEntity.setActionBy(receiptTransferStatusUpdateDtoRequest.getActionBy());
         receiptTransferEntity.setCollectionActivityLogsId(collectionActivityLogsId);
         receiptTransferRepository.save(receiptTransferEntity);
+    }
+
+    public void setRemarks(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, Long collectionActivityId) {
+        CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
+        String remarks = receiptTransferStatusUpdateDtoRequest.getActivityLog().getRemarks();
+        String lastWord = remarks.substring(remarks.lastIndexOf(" ")+1);
+        String updatedRemarks = TRANSFER_STATUS;
+        updatedRemarks = updatedRemarks.replace("{transfer_request}", receiptTransferStatusUpdateDtoRequest.getReceiptTransferId().toString());
+        updatedRemarks = updatedRemarks.replace("{transfer_action}", receiptTransferStatusUpdateDtoRequest.getStatus());
+        updatedRemarks = (updatedRemarks + lastWord);
+        collectionActivityLogsEntity1.setRemarks(updatedRemarks);
+        collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
     }
 
     public ReceiptTransferResponseDTO getReceiptTransferById(Long receiptTransferId, Long userId) throws Exception {

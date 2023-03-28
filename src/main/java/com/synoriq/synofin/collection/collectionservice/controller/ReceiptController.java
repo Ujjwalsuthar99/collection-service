@@ -28,8 +28,8 @@ public class ReceiptController {
     @Autowired
     ReceiptService receiptService;
 
-    @RequestMapping(value = "/users/{userId}/receipts", method = RequestMethod.GET)
-    public ResponseEntity<Object> getReceiptsByUserIdWithDuration(@PathVariable(value = "userId") Long userId,
+    @RequestMapping(value = "/users/{userName}/receipts", method = RequestMethod.GET)
+    public ResponseEntity<Object> getReceiptsByUserIdWithDuration(@PathVariable(value = "userName") String userName,
                                                                   @RequestParam(value = "status", required = false) String status,
                                                                   @RequestParam(value = "paymentmode", required = false) String paymentMode,
                                                                   @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String fromDate,
@@ -40,7 +40,7 @@ public class ReceiptController {
         ResponseEntity<Object> response = null;
 
         try {
-            baseResponse = receiptService.getReceiptsByUserIdWithDuration(userId, fromDate, toDate, status, paymentMode, pageNo, pageSize);
+            baseResponse = receiptService.getReceiptsByUserIdWithDuration(userName, fromDate, toDate, status, paymentMode, pageNo, pageSize);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -53,15 +53,15 @@ public class ReceiptController {
         return response;
     }
 
-    @RequestMapping(value = "/users/{userId}/receipts-not-transferred", method = RequestMethod.GET)
-    public ResponseEntity<Object> getReceiptsByUserIdWhichNotTransferred(@PathVariable(value = "userId") Long userId,
+    @RequestMapping(value = "/users/{userName}/receipts-not-transferred", method = RequestMethod.GET)
+    public ResponseEntity<Object> getReceiptsByUserIdWhichNotTransferred(@PathVariable(value = "userName") String userName,
                                                                   @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String fromDate,
                                                                   @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            baseResponse = receiptService.getReceiptsByUserIdWhichNotTransferred(userId, fromDate, toDate);
+            baseResponse = receiptService.getReceiptsByUserIdWhichNotTransferred(userName, fromDate, toDate);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

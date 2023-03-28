@@ -1,11 +1,14 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.FollowUpRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.FollowUpDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.FollowupResponse;
+import com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +20,17 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_FOLLOWUP;
+
 @Service
 @Slf4j
 public class FollowUpService {
 
     @Autowired
     FollowUpRepository followUpRepository;
+
+    @Autowired
+    CollectionActivityLogsRepository collectionActivityLogsRepository;
 
     @Autowired
     ActivityLogService activityLogService;
@@ -192,6 +200,14 @@ public class FollowUpService {
 
             followUpRepository.save(followUpEntity);
 
+            CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityLogsId);
+            String remarks = collectionActivityLogsEntity1.getRemarks();
+            String updatedRemarks = CREATE_FOLLOWUP;
+            updatedRemarks = updatedRemarks.replace("{request_id}", followUpEntity.getFollowupId().toString());
+            updatedRemarks = updatedRemarks.replace("{loan_number}", followUpDtoRequest.getLoanId().toString());
+            updatedRemarks = updatedRemarks + remarks;
+            collectionActivityLogsEntity1.setRemarks(updatedRemarks);
+            collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
             log.info("Followup Saved successfully");
 
             baseResponse = new BaseDTOResponse<Object>(followUpEntity);
