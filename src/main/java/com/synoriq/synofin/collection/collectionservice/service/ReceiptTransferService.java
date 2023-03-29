@@ -200,7 +200,7 @@ public class ReceiptTransferService {
                             // history entity rows delete on cancelling the transfer
                             List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferId);
                             for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
-                                receiptTransferHistoryRepository.deleteById(receiptTransferHistoryEntity.getReceiptTransferHistoryId());
+                                receiptTransferHistoryEntity.setDeleted(true);
                             }
                             // set Activity remarks
                             setRemarks(receiptTransferStatusUpdateDtoRequest, collectionActivityLogsId);
@@ -283,7 +283,7 @@ public class ReceiptTransferService {
                             // history entity rows delete on rejecting the transfer
                             List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferId);
                             for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
-                                receiptTransferHistoryRepository.deleteById(receiptTransferHistoryEntity.getReceiptTransferHistoryId());
+                                receiptTransferHistoryEntity.setDeleted(true);
                             }
                             // set Activity remarks
                             setRemarks(receiptTransferStatusUpdateDtoRequest, collectionActivityLogsId);

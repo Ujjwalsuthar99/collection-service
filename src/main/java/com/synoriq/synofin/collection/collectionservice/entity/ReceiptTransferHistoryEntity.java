@@ -27,4 +27,7 @@ public class ReceiptTransferHistoryEntity {
     @Column(name = "collection_receipts_id")
     private Long collectionReceiptsId;
 
+    @Column(name = "deleted")
+    private Boolean deleted;
+
 }
