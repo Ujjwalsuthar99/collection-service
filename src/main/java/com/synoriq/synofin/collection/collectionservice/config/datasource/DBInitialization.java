@@ -84,18 +84,18 @@ public class DBInitialization {
     public List<String> fetchClientList() {
         List<String> clientArray = new ArrayList<>();
         try {
-//            String response = new RestTemplate().getForObject(Objects.requireNonNull(configUtility.getProperty("clientList.api.url")), String.class);
-//            log.info("Response : {}", response);
-//
-//            JsonArray array = new Gson()
-//                    .fromJson(response, JsonObject.class)
-//                    .getAsJsonArray("data");
-//            log.info("Json Array Data : {}", array);
-//
-//            for (int i = 0; i < array.size(); i++) {
-//                clientArray.add(array.get(i).getAsJsonObject().getAsJsonPrimitive("clientId").getAsString());
-//            }
-            clientArray.add("finova");
+            String response = new RestTemplate().getForObject(Objects.requireNonNull(configUtility.getProperty("clientList.api.url")), String.class);
+            log.info("Response : {}", response);
+
+            JsonArray array = new Gson()
+                    .fromJson(response, JsonObject.class)
+                    .getAsJsonArray("data");
+            log.info("Json Array Data : {}", array);
+
+            for (int i = 0; i < array.size(); i++) {
+                clientArray.add(array.get(i).getAsJsonObject().getAsJsonPrimitive("clientId").getAsString());
+            }
+//            clientArray.add("finova");
         } catch (Exception e) {
             log.error("Exception occurred while fetching client list.", e);
         }
