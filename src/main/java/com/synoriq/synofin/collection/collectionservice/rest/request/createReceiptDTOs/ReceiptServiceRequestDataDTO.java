@@ -63,8 +63,8 @@ public class ReceiptServiceRequestDataDTO {
     @JsonProperty("receipts_allocation")
     public String receiptsAllocation;
 
-    @JsonProperty("bounce_reason_for_nach")
-    public String bounceReasonForNach;
+//    @JsonProperty("bounce_reason_for_nach")
+//    public String bounceReasonForNach;
 
     @JsonProperty("transaction_reference")
     public Object transactionReference;
