@@ -215,7 +215,6 @@ public class ReceiptService {
                 String updatedRemarks = CREATE_RECEIPT;
                 updatedRemarks = updatedRemarks.replace("{receipt_number}", res.getData().getServiceRequestId().toString());
                 updatedRemarks = updatedRemarks.replace("{loan_number}", receiptServiceDtoRequest.getRequestData().getLoanId());
-                updatedRemarks = (updatedRemarks + receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
                 collectionActivityLogsEntity1.setRemarks(updatedRemarks);
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
 
