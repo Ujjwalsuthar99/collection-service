@@ -155,14 +155,14 @@ public class FollowUpService {
 
     }
 
-    public BaseDTOResponse<Object> createFollowup(FollowUpDtoRequest followUpDtoRequest){
+    public BaseDTOResponse<Object> createFollowup(FollowUpDtoRequest followUpDtoRequest, String token){
 
         BaseDTOResponse<Object> baseResponse;
 
         try {
 
             Long collectionActivityLogsId = activityLogService.
-                    createActivityLogs(followUpDtoRequest.getActivityLog());
+                    createActivityLogs(followUpDtoRequest.getActivityLog(), token);
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             FollowUpEntity followUpEntity = new FollowUpEntity();
             followUpEntity.setLoanId(followUpDtoRequest.getLoanId());

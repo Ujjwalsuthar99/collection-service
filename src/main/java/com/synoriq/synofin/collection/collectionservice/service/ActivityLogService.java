@@ -4,6 +4,7 @@ import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivit
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+
+import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.*;
 
 @Slf4j
 @Service
@@ -131,7 +134,7 @@ public class ActivityLogService {
     }
 
 
-    public Long createActivityLogs(CollectionActivityLogDTO activityLogRequest) throws Exception {
+    public Long createActivityLogs(CollectionActivityLogDTO activityLogRequest, String token) throws Exception {
 
 
         if(activityLogRequest.getLoanId() == null){
@@ -140,13 +143,22 @@ public class ActivityLogService {
         }
         CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
 
-            collectionActivityLogsEntity.setActivityBy(activityLogRequest.getUserId());
+            if (activityLogRequest.getActivityName().equals("logout")) {
+                UserDetailByTokenDTOResponse res = utilityService.getUserDetailsByToken(token);
+                collectionActivityLogsEntity.setActivityBy(res.getData().getUserData().getUserId());
+                String userName = res.getData().getUserData().getUserName();
+                String updatedRemarks = LOGOUT_REMARKS;
+                updatedRemarks = updatedRemarks.replace("{user_name}", userName);
+                collectionActivityLogsEntity.setRemarks(updatedRemarks);
+            } else {
+                collectionActivityLogsEntity.setActivityBy(activityLogRequest.getUserId());
+                collectionActivityLogsEntity.setRemarks(activityLogRequest.getRemarks());
+            }
             collectionActivityLogsEntity.setActivityDate(new Date());
             collectionActivityLogsEntity.setActivityName(activityLogRequest.getActivityName());
             collectionActivityLogsEntity.setDeleted(activityLogRequest.getDeleted());
             collectionActivityLogsEntity.setLoanId(activityLogRequest.getLoanId());
             collectionActivityLogsEntity.setDistanceFromUserBranch(activityLogRequest.getDistanceFromUserBranch());
-            collectionActivityLogsEntity.setRemarks(activityLogRequest.getRemarks());
             collectionActivityLogsEntity.setAddress(activityLogRequest.getAddress());
             collectionActivityLogsEntity.setImages(activityLogRequest.getImages());
             collectionActivityLogsEntity.setGeolocation(activityLogRequest.getGeolocationData());

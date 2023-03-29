@@ -98,13 +98,13 @@ public class ActivityLogRestController {
     }
 
     @RequestMapping(value = "/activity-logs", method = RequestMethod.POST)
-    public ResponseEntity<Object> createActivityLog(@RequestBody CollectionActivityLogDTO collectionActivityLogDTO) {
+    public ResponseEntity<Object> createActivityLog(@RequestBody CollectionActivityLogDTO collectionActivityLogDTO, @RequestHeader("Authorization") String bearerToken) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
         Long result;
 
         try {
-            result = activityLogService.createActivityLogs(collectionActivityLogDTO);
+            result = activityLogService.createActivityLogs(collectionActivityLogDTO, bearerToken);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 

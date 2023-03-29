@@ -21,12 +21,12 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
     @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount \n" +
             "                ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "                (case \n" +
-            "                         when rt.transfer_mode = 'cash' then '#BF8600'\n" +
+            "                         when rt.transfer_mode = 'cash' then '#136AD5'\n" +
             "                         when rt.transfer_mode = 'cheque' then '#136AD5'\n" +
             "                         else '#B78103'\n" +
             "                end) as transfer_mode_text_color_key,\n" +
             "                (case \n" +
-            "                         when rt.transfer_mode = 'cash' then '#FDE5AE'\n" +
+            "                         when rt.transfer_mode = 'cash' then '#C6DDFA'\n" +
             "                         when rt.transfer_mode = 'cheque' then '#C6DDFA'\n" +
             "                         else '#FCEBDB'\n" +
             "                end) as transfer_mode_bg_color_key, \n" +
@@ -53,12 +53,12 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "            ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else uu.name end) as transferred_by_name\n" +
             "               ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "                (case \n" +
-            "                         when rt.transfer_mode = 'cash' then '#BF8600'\n" +
+            "                         when rt.transfer_mode = 'cash' then '#136AD5'\n" +
             "                         when rt.transfer_mode = 'cheque' then '#136AD5'\n" +
             "                         else '#B78103'\n" +
             "                end) as transfer_mode_text_color_key,\n" +
             "                (case \n" +
-            "                         when rt.transfer_mode = 'cash' then '#FDE5AE'\n" +
+            "                         when rt.transfer_mode = 'cash' then '#C6DDFA'\n" +
             "                         when rt.transfer_mode = 'cheque' then '#C6DDFA'\n" +
             "                         else '#FCEBDB'\n" +
             "                end) as transfer_mode_bg_color_key, \n" +

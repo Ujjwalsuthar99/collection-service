@@ -51,13 +51,13 @@ public class ReceiptTransferService {
     private ActivityLogService activityLogService;
 
     @Transactional
-    public BaseDTOResponse<Object> createReceiptTransfer(@RequestBody ReceiptTransferDtoRequest receiptTransferDtoRequest) throws Exception {
+    public BaseDTOResponse<Object> createReceiptTransfer(@RequestBody ReceiptTransferDtoRequest receiptTransferDtoRequest, String token) throws Exception {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         try {
             Long receiptTransferTableId = receiptTransferDtoRequest.getReceiptTransferId();
-            Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData());
+            Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
             String limitConf;
             String updatedRemarks;
 
@@ -174,7 +174,7 @@ public class ReceiptTransferService {
         return receiptTransferDTOList;
     }
     @Transactional
-    public ReceiptTransferEntity statusUpdate(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest) throws Exception {
+    public ReceiptTransferEntity statusUpdate(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, String token) throws Exception {
         BaseDTOResponse<Object> baseResponse = null;
         ResponseEntity<Object> response = null;
         ReceiptTransferEntity receiptTransferEntity;
@@ -189,7 +189,7 @@ public class ReceiptTransferService {
             Double amount = receiptTransferEntity.getAmount();
             String currentStatus = receiptTransferEntity.getStatus();
 
-            Long collectionActivityLogsId = activityLogService.createActivityLogs(receiptTransferStatusUpdateDtoRequest.getActivityLog());
+            Long collectionActivityLogsId = activityLogService.createActivityLogs(receiptTransferStatusUpdateDtoRequest.getActivityLog(), token);
 
 
             if (currentStatus.equals("pending")) {

@@ -181,7 +181,7 @@ public class ReceiptService {
             httpHeaders.add("Authorization", bearerToken);
             httpHeaders.add("Content-Type", "application/json");
 
-            Long collectionActivityId = activityLogService.createActivityLogs(receiptServiceDtoRequest.getActivityData());
+            Long collectionActivityId = activityLogService.createActivityLogs(receiptServiceDtoRequest.getActivityData(), bearerToken);
 
             String bDate = receiptServiceDtoRequest.getRequestData().getRequestData().getDateOfReceipt();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");

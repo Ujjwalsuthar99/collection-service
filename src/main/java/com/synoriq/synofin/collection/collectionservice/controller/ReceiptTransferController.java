@@ -34,14 +34,14 @@ public class ReceiptTransferController {
     ReceiptTransferService receiptTransferService;
 
     @RequestMapping(value = "/receipt-transfer/generate", method = RequestMethod.POST)
-    public ResponseEntity<Object> createReceiptTransfer(@RequestBody ReceiptTransferDtoRequest receiptTransferDtoRequest) {
+    public ResponseEntity<Object> createReceiptTransfer(@RequestBody ReceiptTransferDtoRequest receiptTransferDtoRequest, @RequestHeader("Authorization") String bearerToken) {
         log.info("my request body {}", receiptTransferDtoRequest);
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            BaseDTOResponse result = receiptTransferService.createReceiptTransfer(receiptTransferDtoRequest);
+            BaseDTOResponse result = receiptTransferService.createReceiptTransfer(receiptTransferDtoRequest, bearerToken);
             baseResponse = new BaseDTOResponse<>(result.getData());
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
@@ -80,13 +80,13 @@ public class ReceiptTransferController {
 
 
     @RequestMapping(value = "/receipt-transfer/status-update", method = RequestMethod.PUT)
-    public ResponseEntity<Object> getReceiptTransferSummary(@RequestBody ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest) throws SQLException {
+    public ResponseEntity<Object> getReceiptTransferSummary(@RequestBody ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, @RequestHeader("Authorization") String bearerToken) throws SQLException {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
         ReceiptTransferEntity result;
         try {
-            result = receiptTransferService.statusUpdate(receiptTransferStatusUpdateDtoRequest);
+            result = receiptTransferService.statusUpdate(receiptTransferStatusUpdateDtoRequest, bearerToken);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
             log.info("Status update {}", receiptTransferStatusUpdateDtoRequest.getStatus());

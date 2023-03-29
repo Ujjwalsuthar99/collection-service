@@ -104,13 +104,13 @@ public class FollowupRestController {
     }
 
     @RequestMapping(value = "/followups", method = RequestMethod.POST)
-    public ResponseEntity<Object> createFollowups(@RequestBody FollowUpDtoRequest followUpDtoRequest) {
+    public ResponseEntity<Object> createFollowups(@RequestBody FollowUpDtoRequest followUpDtoRequest, @RequestHeader("Authorization") String bearerToken) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = followUpService.createFollowup(followUpDtoRequest);
+            baseResponse = followUpService.createFollowup(followUpDtoRequest, bearerToken);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
             log.info("Get followup details API response success | followup with details[{}]", baseResponse.getData());

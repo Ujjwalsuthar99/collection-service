@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -148,6 +149,29 @@ public class UtilityService {
                     .url("http://localhost:1102/v1/getBankNameByIFSC?keyword=" + keyword)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(BankNameIFSCDTOResponse.class)
+                    .build().call();
+
+            log.info("responseData {}", res);
+        } catch (Exception ee) {
+            log.error("{}", ee.getMessage());
+        }
+        return res;
+    }
+
+
+    public UserDetailByTokenDTOResponse getUserDetailsByToken(String token) {
+        UserDetailByTokenDTOResponse res = new UserDetailByTokenDTOResponse();
+
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, UserDetailByTokenDTOResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getUserDetailsByToken")
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(UserDetailByTokenDTOResponse.class)
                     .build().call();
 
             log.info("responseData {}", res);
