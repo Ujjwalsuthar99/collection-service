@@ -2,7 +2,10 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3DataRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.*;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
@@ -172,6 +175,29 @@ public class UtilityService {
                     .url("http://localhost:1102/v1/getUserDetailsByToken")
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UserDetailByTokenDTOResponse.class)
+                    .build().call();
+
+            log.info("responseData {}", res);
+        } catch (Exception ee) {
+            log.error("{}", ee.getMessage());
+        }
+        return res;
+    }
+
+    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO) {
+        UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
+
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/uploadImageOnS3")
+                    .body(uploadImageOnS3RequestDTO)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(UploadImageOnS3ResponseDTO.class)
                     .build().call();
 
             log.info("responseData {}", res);
