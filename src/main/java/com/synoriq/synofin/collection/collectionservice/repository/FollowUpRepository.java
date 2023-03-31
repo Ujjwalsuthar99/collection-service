@@ -107,7 +107,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
             "    la.product as loan_type,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) - (case when receipt_init.initiated_receipts_amount is null then 0 else receipt_init.initiated_receipts_amount end) as overdue_repayment\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due, product, loan_application_number from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "            left join (\n" +
@@ -118,8 +118,11 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "            lms.repayment_schedule rs\n" +
             "        where\n" +
             "            rs.status = 'outstanding' group by rs.loan_id ) repay on la.loan_application_id = repay.loan_id\n" +
+            "            left join (\n" +
+            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated' and sr.request_source ='m_collect' and sr.loan_id ='5044564'\n" +
+            "    ) receipt_init on repay.loan_id = receipt_init.loan_id\n" +
             "                join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
-            "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  " +
+            "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  \n" +
             " where f.created_by = :userId and clm.customer_type = 'applicant' \n" +
             "            and f.next_followup_datetime between :fromDate and :toDate ")
     List<Map<String,Object>> getFollowupsUserWiseByDurationForPending(@Param("userId") Long userId, @Param("fromDate") Date fromDate
@@ -165,7 +168,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
             "    la.product as loan_type,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) - (case when receipt_init.initiated_receipts_amount is null then 0 else receipt_init.initiated_receipts_amount end) as overdue_repayment\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due,product, loan_application_number from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "            left join (\n" +
@@ -176,8 +179,11 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "            lms.repayment_schedule rs\n" +
             "        where\n" +
             "            rs.status = 'outstanding' group by rs.loan_id ) repay on la.loan_application_id = repay.loan_id\n" +
+            "            left join (\n" +
+            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated' and sr.request_source ='m_collect' and sr.loan_id ='5044564'\n" +
+            "    ) receipt_init on repay.loan_id = receipt_init.loan_id\n" +
             "                join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
-            "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  " +
+            "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  \n" +
             " where f.created_by = :userId and clm.customer_type = 'applicant' \n" +
             "            and f.created_date between :fromDate and :toDate ")
     List<Map<String,Object>> getFollowupsUserWiseByDurationForCreated(@Param("userId") Long userId, @Param("fromDate") Date fromDate
@@ -221,7 +227,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) - (case when receipt_init.initiated_receipts_amount is null then 0 else receipt_init.initiated_receipts_amount end) as overdue_repayment\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "             left join (\n" +
@@ -241,7 +247,10 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "                from\n" +
             "                    lms.repayment_schedule rs\n" +
             "                where\n" +
-            "                    rs.status = 'outstanding' ) repay on la.loan_application_id = repay.loan_id  \n" +
+            "                    rs.status = 'outstanding' ) repay on la.loan_application_id = repay.loan_id \n" +
+            "                    left join (\n" +
+            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated' and sr.request_source ='m_collect' and sr.loan_id ='5044564'\n" +
+            "    ) receipt_init on repay.loan_id = receipt_init.loan_id\n" +
             "            join (select loan_id, customer_id from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id\n" +
             "           where f.followups_id = :followupId")
