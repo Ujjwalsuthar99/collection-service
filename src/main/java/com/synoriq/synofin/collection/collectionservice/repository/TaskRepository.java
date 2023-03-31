@@ -27,7 +27,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    p.product_name as product,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) - (case when receipt_init.initiated_receipts_amount is null then 0 else receipt_init.initiated_receipts_amount end) as overdue_repayment ,\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment,\n" +
             "    la.loan_application_number,\n" +
             "    (case\n" +
             "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
@@ -55,8 +55,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        when la.days_past_due between 121 and 150 then '#323232'\n" +
             "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
             "        else '#ffffff'\n" +
-            "    end) as dpd_text_color_key,\n" +
-            "    receipt_init.initiated_receipts_amount\n" +
+            "    end) as dpd_text_color_key\n" +
             "from\n" +
             "    lms.loan_application la\n" +
             "left join (\n" +
@@ -137,7 +136,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    p.product_name as product,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) - (case when receipt_init.initiated_receipts_amount is null then 0 else receipt_init.initiated_receipts_amount end) as overdue_repayment,\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment,\n" +
             "    la.loan_application_number,\n" +
             "    (case\n" +
             "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +

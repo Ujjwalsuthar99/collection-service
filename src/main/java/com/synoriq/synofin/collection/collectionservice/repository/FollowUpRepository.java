@@ -107,7 +107,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
             "    la.product as loan_type,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) - (case when receipt_init.initiated_receipts_amount is null then 0 else receipt_init.initiated_receipts_amount end) as overdue_repayment\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due, product, loan_application_number from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "            left join (\n" +
@@ -165,7 +165,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
             "    la.product as loan_type,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) - (case when receipt_init.initiated_receipts_amount is null then 0 else receipt_init.initiated_receipts_amount end) as overdue_repayment\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due,product, loan_application_number from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "            left join (\n" +
@@ -221,7 +221,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) - (case when receipt_init.initiated_receipts_amount is null then 0 else receipt_init.initiated_receipts_amount end) as overdue_repayment,\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment\n" +
             "    CAST(cal.geo_location_data as TEXT) as geo_location_data,\n" +
             "    CAST(cal.images as TEXT) as images\n" +
             "             from collection.followups f \n" +
