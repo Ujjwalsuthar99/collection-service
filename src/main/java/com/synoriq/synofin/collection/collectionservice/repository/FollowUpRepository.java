@@ -119,7 +119,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        where\n" +
             "            rs.status = 'outstanding' group by rs.loan_id ) repay on la.loan_application_id = repay.loan_id\n" +
             "            left join (\n" +
-            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated' and sr.request_source ='m_collect' and sr.loan_id ='5044564'\n" +
+            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated'\n" +
             "    ) receipt_init on repay.loan_id = receipt_init.loan_id\n" +
             "                join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  \n" +
@@ -180,7 +180,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        where\n" +
             "            rs.status = 'outstanding' group by rs.loan_id ) repay on la.loan_application_id = repay.loan_id\n" +
             "            left join (\n" +
-            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated' and sr.request_source ='m_collect' and sr.loan_id ='5044564'\n" +
+            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated'\n" +
             "    ) receipt_init on repay.loan_id = receipt_init.loan_id\n" +
             "                join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  \n" +
@@ -249,7 +249,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "                where\n" +
             "                    rs.status = 'outstanding' ) repay on la.loan_application_id = repay.loan_id \n" +
             "                    left join (\n" +
-            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated' and sr.request_source ='m_collect' and sr.loan_id ='5044564'\n" +
+            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated'\n" +
             "    ) receipt_init on repay.loan_id = receipt_init.loan_id\n" +
             "            join (select loan_id, customer_id from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id\n" +
