@@ -11,7 +11,7 @@ public enum ErrorCode {
     DATA_FETCH_ERROR(1017000, "An Exception occurred in fetching data"),
         DATA_SAVE_ERROR(1017001, "An Exception occurred in saving data"),
     NO_DATA_FOUND(1017002, "No Data Found"),
-    RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT(1017003, "Limit Exceeded due to receipts available in your bucket!"),
+    RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT(1017003, "Kindly deposit the amount in hand to continue"),
     INTERNAL_SERVER_ERROR(1017004, "Error while fetching PDF from LMS"),
 //    CREDENTIALS_ERROR(1017002, "Incorrect username or password"),
 //    LOGIN_ERROR(1017003, "An Exception occurred in login. Please try again"),
@@ -176,13 +176,13 @@ public enum ErrorCode {
     CHECK_THE_REQUEST_BODY(1016028, "Please check the values passed from your end!"),
     DONT_HAVE_PERMISSION_TO_ACTION(1016029, "You Don't Have Permission to Action on this transfer"),
     ALREADY_HAD_ACTIONED_ON_THIS_TRANSFER(1016030, "This transfer is already been actioned"),
-    RECEIVER_HAVE_EXCEED_THEIR_LIMIT(1016031, "Transfer stopped, because receiver have exceed their limit"),
+    RECEIVER_HAVE_EXCEED_THEIR_LIMIT(1016031, "Cannot process the request, because receiver limit exceeded"),
     STATUS_NOT_MATCHED(1016032, "Request status is not matched"),
     LMS_CREATE_RECEIPT_ERROR(1016033, "LMS create receipt is getting null response"),
     REGEX_NOT_MATCHING(1016034, "Input is not matched with the REGEX"),
     DATA_NOT_FOUND_IN_LMS(1016035, "Receipt id is getting null from LMS"),
     TRANSFER_TO_USER_ID(1016036, "Transfer to user id is getting null against this entry"),
-    LIMIT_CHECK_ON_APPROVAL(1016037, "You have exhausted your limit, you cannot accept this transfer");
+    LIMIT_CHECK_ON_APPROVAL(1016037, "Cannot process the request as your collection limit is exceeded");
     private Integer codeValue;
     private String responseMessage;
 
