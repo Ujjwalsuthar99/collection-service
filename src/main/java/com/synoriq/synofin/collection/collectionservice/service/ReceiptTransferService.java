@@ -332,7 +332,7 @@ public class ReceiptTransferService {
     public ReceiptTransferResponseDTO getReceiptTransferById(Long receiptTransferId, Long userId) throws Exception {
         log.info("receipt tranfer idddd {}", receiptTransferId);
         ReceiptTransferEntity receiptTransferEntity;
-        boolean buttonRestriction = true;
+        boolean buttonRestriction = false;
         ReceiptTransferResponseDTO receiptTransferResponseDTO = new ReceiptTransferResponseDTO();
         try {
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
@@ -344,10 +344,10 @@ public class ReceiptTransferService {
 
             List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferId);
             Long receiptId =  receiptTransferHistoryEntityList.get(0).getCollectionReceiptsId();
-            ReceiptTransferHistoryEntity receiptTransferHistoryEntity = receiptTransferHistoryRepository.buttonRestriction(receiptTransferId, receiptId);
+            List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntity = receiptTransferHistoryRepository.buttonRestriction(receiptTransferId, receiptId);
 
-            if (receiptTransferHistoryEntity != null) {
-                buttonRestriction = false;
+            if (!receiptTransferHistoryEntity.isEmpty()) {
+                buttonRestriction = true;
             }
             //  flagg //
             // temporary work for user data //
@@ -370,6 +370,8 @@ public class ReceiptTransferService {
             }
 
         } catch (Exception e) {
+            log.info("error {}", e);
+            e.printStackTrace();
             throw new Exception("1016028");
         }
         return receiptTransferResponseDTO;

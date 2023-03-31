@@ -16,5 +16,5 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
     List<ReceiptTransferHistoryEntity> getReceiptTransferHistoryDataByReceiptTransferId(Long receiptTransferId);
 
     @Query(nativeQuery = true,value = "select * from collection.receipt_transfer_history rth where rth.receipt_transfer_id <> :receiptTransferId and rth.collection_receipts_id = :receiptId and deleted is false")
-    ReceiptTransferHistoryEntity buttonRestriction(@Param("receiptTransferId") Long receiptTransferId, @Param("receiptId") Long receiptId);
+    List<ReceiptTransferHistoryEntity> buttonRestriction(@Param("receiptTransferId") Long receiptTransferId, @Param("receiptId") Long receiptId);
 }
