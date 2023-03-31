@@ -27,4 +27,7 @@ public class ReceiptTransferResponseDTO {
     @JsonProperty("amount_in_hand")
     Double amountInHand;
 
+    @JsonProperty("button_restriction")
+    Boolean buttonRestriction;
+
 }

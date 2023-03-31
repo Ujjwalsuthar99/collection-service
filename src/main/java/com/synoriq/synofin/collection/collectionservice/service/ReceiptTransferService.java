@@ -332,24 +332,34 @@ public class ReceiptTransferService {
     public ReceiptTransferResponseDTO getReceiptTransferById(Long receiptTransferId, Long userId) throws Exception {
         log.info("receipt tranfer idddd {}", receiptTransferId);
         ReceiptTransferEntity receiptTransferEntity;
+        boolean buttonRestriction = true;
         ReceiptTransferResponseDTO receiptTransferResponseDTO = new ReceiptTransferResponseDTO();
         try {
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
             Long receiptTransferToUserId = receiptTransferEntity.getTransferredToUserId();
-            Long receiptTrasnferByUserId = receiptTransferEntity.getTransferredBy();
+            Long receiptTransferByUserId = receiptTransferEntity.getTransferredBy();
 
             List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId);
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, receiptTransferEntity.getTransferMode());
+
+            List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferId);
+            Long receiptId =  receiptTransferHistoryEntityList.get(0).getCollectionReceiptsId();
+            ReceiptTransferHistoryEntity receiptTransferHistoryEntity = receiptTransferHistoryRepository.buttonRestriction(receiptTransferId, receiptId);
+
+            if (receiptTransferHistoryEntity != null) {
+                buttonRestriction = false;
+            }
             //  flagg //
             // temporary work for user data //
             Map<String, Object> transferToUserData = null;
             Map<String, Object> transferByUserData = null;
             if (receiptTransferToUserId != null) {
                 transferToUserData = receiptTransferRepository.getUserDataByUserId(receiptTransferToUserId);
-                transferByUserData = receiptTransferRepository.getUserDataByUserId(receiptTrasnferByUserId);
+                transferByUserData = receiptTransferRepository.getUserDataByUserId(receiptTransferByUserId);
             }
             receiptTransferResponseDTO.setTransferToUserData(transferToUserData);
             receiptTransferResponseDTO.setTransferByUserData(transferByUserData);
+            receiptTransferResponseDTO.setButtonRestriction(buttonRestriction);
             // temporary work for user data //
             receiptTransferResponseDTO.setReceiptTransferData(receiptTransferEntity);
             receiptTransferResponseDTO.setReceiptData(receiptsData);
