@@ -123,9 +123,6 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    la.loan_application_id = excess_money.loan_id\n" +
             "    join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
             "    join (select product_code, product_name from master.product) as p on p.product_code = la.product\n" +
-            "    left join (\n" +
-            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated' and sr.is_deleted =false\n" +
-            "    ) receipt_init on repay.loan_id = receipt_init.loan_id\n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
             "    and la.deleted = false\n" +
@@ -235,9 +232,6 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    la.loan_application_id = excess_money.loan_id\n" +
             "join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
             "join (select product_code, product_name from master.product) as p on p.product_code = la.product \n" +
-            "    left join (\n" +
-            "    select sum(cast(sr.form->>'receipt_amount' as decimal)) as initiated_receipts_amount, min(sr.loan_id) as loan_id from lms.service_request sr where sr.status ='initiated' and sr.is_deleted =false\n" +
-            "    ) receipt_init on repay.loan_id = receipt_init.loan_id \n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
             "    and la.deleted = false\n" +
