@@ -193,7 +193,7 @@ public class UtilityService {
             httpHeaders.add("Content-Type", "application/json");
 
             res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
-                    .httpMethod(HttpMethod.GET)
+                    .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/uploadImageOnS3")
                     .body(uploadImageOnS3RequestDTO)
                     .httpHeaders(httpHeaders)

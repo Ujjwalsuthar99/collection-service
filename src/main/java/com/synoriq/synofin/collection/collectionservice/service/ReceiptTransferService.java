@@ -121,6 +121,7 @@ public class ReceiptTransferService {
 
                         receiptTransferHistoryEntity.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
                         receiptTransferHistoryEntity.setCollectionReceiptsId(receiptTransferId);
+                        receiptTransferHistoryEntity.setDeleted(false);
                         receiptTransferHistoryRepository.save(receiptTransferHistoryEntity);
                     }
                 } else {
@@ -130,6 +131,7 @@ public class ReceiptTransferService {
 
                         ReceiptTransferHistoryEntity receiptTransferHistoryEntityToBeSaved = new ReceiptTransferHistoryEntity();
                         receiptTransferHistoryEntityToBeSaved.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
+                        receiptTransferHistoryEntityToBeSaved.setDeleted(false);
                         receiptTransferHistoryEntityToBeSaved.setCollectionReceiptsId(receiptTransferHistoryEntity.getCollectionReceiptsId());
                         receiptTransferHistoryRepository.save(receiptTransferHistoryEntityToBeSaved);
                     }
