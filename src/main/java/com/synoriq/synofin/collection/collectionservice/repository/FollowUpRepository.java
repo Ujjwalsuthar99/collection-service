@@ -221,7 +221,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment\n" +
+            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment,\n" +
             "    CAST(cal.geo_location_data as TEXT) as geo_location_data,\n" +
             "    CAST(cal.images as TEXT) as images\n" +
             "             from collection.followups f \n" +
