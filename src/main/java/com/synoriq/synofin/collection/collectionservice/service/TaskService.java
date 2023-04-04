@@ -113,11 +113,11 @@ public class TaskService {
 
             if (dpd >= 0 && dpd <= 30) {
                 dpdTextColor = "#323232";
-                dpdBgColor = "#ABCFFF";
+                dpdBgColor = "#61B2FF";
                 dpdBucket = "0-30 DPD";
             } else if (dpd >= 31 && dpd <= 60) {
                 dpdTextColor = "#323232";
-                dpdBgColor = "#FDB4FF";
+                dpdBgColor = "#2F80ED";
                 dpdBucket = "31-60 DPD";
             } else if (dpd >= 61 && dpd <= 90) {
                 dpdTextColor = "#323232";
@@ -125,19 +125,19 @@ public class TaskService {
                 dpdBucket = "61-90 DPD";
             } else if (dpd >= 91 && dpd <= 120) {
                 dpdTextColor = "#323232";
-                dpdBgColor = "#FCDA8B";
+                dpdBgColor = "#F2994A";
                 dpdBucket = "91-120 DPD";
             } else if (dpd >= 121 && dpd <= 150) {
                 dpdTextColor = "#323232";
-                dpdBgColor = "#F2994A";
+                dpdBgColor = "#FF5359";
                 dpdBucket = "121-150 DPD";
             } else if (dpd >= 151 && dpd <= 180) {
                 dpdTextColor = "#ffffff";
-                dpdBgColor = "#FF5359";
+                dpdBgColor = "#C83939";
                 dpdBucket = "151-180 DPD";
             } else {
                 dpdTextColor = "#ffffff";
-                dpdBgColor = "#C83939";
+                dpdBgColor = "#722F37";
                 dpdBucket = "180++ DPD";
             }
 
