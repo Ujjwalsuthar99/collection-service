@@ -116,7 +116,7 @@ public class TaskService {
                 dpdBgColor = "#61B2FF";
                 dpdBucket = "0-30 DPD";
             } else if (dpd >= 31 && dpd <= 60) {
-                dpdTextColor = "#323232";
+                dpdTextColor = "#ffffff";
                 dpdBgColor = "#2F80ED";
                 dpdBucket = "31-60 DPD";
             } else if (dpd >= 61 && dpd <= 90) {
@@ -128,7 +128,7 @@ public class TaskService {
                 dpdBgColor = "#F2994A";
                 dpdBucket = "91-120 DPD";
             } else if (dpd >= 121 && dpd <= 150) {
-                dpdTextColor = "#323232";
+                dpdTextColor = "#ffffff";
                 dpdBgColor = "#FF5359";
                 dpdBucket = "121-150 DPD";
             } else if (dpd >= 151 && dpd <= 180) {

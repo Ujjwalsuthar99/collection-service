@@ -49,10 +49,10 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
             "        when la.days_past_due between 0 and 30 then '#323232'\n" +
-            "        when la.days_past_due between 31 and 60 then '#323232'\n" +
+            "        when la.days_past_due between 31 and 60 then '#ffffff'\n" +
             "        when la.days_past_due between 61 and 90 then '#323232'\n" +
             "        when la.days_past_due between 91 and 120 then '#323232'\n" +
-            "        when la.days_past_due between 121 and 150 then '#323232'\n" +
+            "        when la.days_past_due between 121 and 150 then '#ffffff'\n" +
             "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key\n" +
@@ -158,10 +158,10 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
             "        when la.days_past_due between 0 and 30 then '#323232'\n" +
-            "        when la.days_past_due between 31 and 60 then '#323232'\n" +
+            "        when la.days_past_due between 31 and 60 then '#ffffff'\n" +
             "        when la.days_past_due between 61 and 90 then '#323232'\n" +
             "        when la.days_past_due between 91 and 120 then '#323232'\n" +
-            "        when la.days_past_due between 121 and 150 then '#323232'\n" +
+            "        when la.days_past_due between 121 and 150 then '#ffffff'\n" +
             "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key\n" +

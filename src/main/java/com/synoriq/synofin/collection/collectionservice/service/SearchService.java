@@ -78,7 +78,7 @@ public class SearchService {
                         taskListDTOReturnResponse.setDpdBgColorKey("#61B2FF");
                         taskListDTOReturnResponse.setDaysPastDueBucket("0-30 DPD");
                     } else if (dpd >= 31 && dpd <= 60) {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
+                        taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
                         taskListDTOReturnResponse.setDpdBgColorKey("#2F80ED");
                         taskListDTOReturnResponse.setDaysPastDueBucket("31-60 DPD");
                     } else if (dpd >= 61 && dpd <= 90) {
@@ -90,7 +90,7 @@ public class SearchService {
                         taskListDTOReturnResponse.setDpdBgColorKey("#F2994A");
                         taskListDTOReturnResponse.setDaysPastDueBucket("91-120 DPD");
                     } else if (dpd >= 121 && dpd <= 150) {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
+                        taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
                         taskListDTOReturnResponse.setDpdBgColorKey("#FF5359");
                         taskListDTOReturnResponse.setDaysPastDueBucket("121-150 DPD");
                     } else if (dpd >= 151 && dpd <= 180) {
