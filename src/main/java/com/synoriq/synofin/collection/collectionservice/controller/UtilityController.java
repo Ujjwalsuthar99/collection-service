@@ -111,13 +111,17 @@ public class UtilityController {
 
 
     @RequestMapping(value = "uploadImageOnS3", method = RequestMethod.POST)
-    public ResponseEntity<Object> uploadImageOnS3(@RequestHeader("Authorization") String token, @RequestBody UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO, @RequestParam("imageData") MultipartFile imageData) throws SQLException {
+    public ResponseEntity<Object> uploadImageOnS3(@RequestHeader("Authorization") String token, @RequestParam("image") MultipartFile imageData,
+                                                  @RequestParam("user_ref_no") String userRefNo,
+                                                  @RequestParam("file_name") String fileName,
+                                                  @RequestParam("client_id") String clientId,
+                                                  @RequestParam("system_id") String systemId) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         UploadImageOnS3ResponseDTO result;
 
         try {
-            result = utilityService.uploadImageOnS3(token, uploadImageOnS3RequestDTO, imageData);
+            result = utilityService.uploadImageOnS3(token, imageData, userRefNo, fileName, clientId, systemId);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
