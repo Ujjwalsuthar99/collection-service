@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -184,7 +185,7 @@ public class UtilityService {
         return res;
     }
 
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO) {
+    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO, MultipartFile imageData) {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
         try {
@@ -192,6 +193,7 @@ public class UtilityService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
+            log.info("imageData {}", imageData);
             res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/uploadImageOnS3")

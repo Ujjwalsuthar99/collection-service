@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.SQLException;
 
@@ -110,13 +111,13 @@ public class UtilityController {
 
 
     @RequestMapping(value = "uploadImageOnS3", method = RequestMethod.POST)
-    public ResponseEntity<Object> uploadImageOnS3(@RequestHeader("Authorization") String token, @RequestBody UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO) throws SQLException {
+    public ResponseEntity<Object> uploadImageOnS3(@RequestHeader("Authorization") String token, @RequestBody UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO, @RequestParam("imageData") MultipartFile imageData) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         UploadImageOnS3ResponseDTO result;
 
         try {
-            result = utilityService.uploadImageOnS3(token, uploadImageOnS3RequestDTO);
+            result = utilityService.uploadImageOnS3(token, uploadImageOnS3RequestDTO, imageData);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
