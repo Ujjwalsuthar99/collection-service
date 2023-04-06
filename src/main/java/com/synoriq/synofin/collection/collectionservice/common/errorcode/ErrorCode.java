@@ -12,6 +12,7 @@ public enum ErrorCode {
         DATA_SAVE_ERROR(1017001, "An Exception occurred in saving data"),
     NO_DATA_FOUND(1017002, "No Data Found"),
     RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT(1017003, "Kindly deposit the amount in hand to continue"),
+    PER_DAY_CASH_COLLECTION_ERROR(1017004, "Per day cash collection limit exceeded"),
     INTERNAL_SERVER_ERROR(1017004, "Error while fetching PDF from LMS"),
 //    CREDENTIALS_ERROR(1017002, "Incorrect username or password"),
 //    LOGIN_ERROR(1017003, "An Exception occurred in login. Please try again"),
