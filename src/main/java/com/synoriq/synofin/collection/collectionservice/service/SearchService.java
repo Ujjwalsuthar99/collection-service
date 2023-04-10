@@ -37,15 +37,14 @@ public class SearchService {
             searchBody.getRequestData().setSearchTerm(search);
             searchBody.getRequestData().setFilterBy(searchBody.getRequestData().getFilterBy());
             searchBody.getRequestData().setPaginationDTO(searchBody.getRequestData().getPaginationDTO());
+        } else {
+            final Pattern pattern = Pattern.compile("(?=.*[A-Z])(?=.*\\d).{2,}", Pattern.CASE_INSENSITIVE);
+            final Matcher matcher = pattern.matcher(data);
+
+            if (!matcher.matches()) {
+                throw new Exception("1016034");
+            }
         }
-//        else {
-//            final Pattern pattern = Pattern.compile("(?=.*[A-Z])(?=.*\\d).{2,}", Pattern.CASE_INSENSITIVE);
-//            final Matcher matcher = pattern.matcher(data);
-//
-//            if (!matcher.matches()) {
-//                throw new Exception("1016034");
-//            }
-//        }
         try {
 
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -70,6 +69,7 @@ public class SearchService {
                     taskListDTOReturnResponse.setLoanApplicationId(Long.parseLong(loanDataDTO.getLoanId()));
                     taskListDTOReturnResponse.setLoanApplicationNumber(loanDataDTO.getLoanApplicationNumber());
                     taskListDTOReturnResponse.setOverdueRepayment(loanDataDTO.getOverDueAmount());
+                    taskListDTOReturnResponse.setBranch(loanDataDTO.getBranch());
                     taskListDTOReturnResponse.setDaysPastDue(loanDataDTO.getDpd());
 
                     int dpd = loanDataDTO.getDpd();
