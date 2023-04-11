@@ -64,6 +64,12 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
             "where clu.user_id = :userId and clu.collection_limit_strategies_key = 'cheque'")
     Map<String,Object> getChequeByUserIdByDuration(@Param("userId") Long userId);
 
+    @Query(nativeQuery = true, value = "select clu.utilized_limit_value as upi_amount,\n" +
+            "clu.total_limit_value as upi_limit\n" +
+            "from collection.collection_limit_userwise clu\n" +
+            "where clu.user_id = :userId and clu.collection_limit_strategies_key = 'upi'")
+    Map<String,Object> getUpiByUserIdByDuration(@Param("userId") Long userId);
+
 //    @Query(nativeQuery = true, value = "select sum(cast(sr.form->>'receipt_amount' as decimal)) as cheque_amount,\n" +
 //            "CAST((select cc.configuration_value from collection.collection_configurations cc where cc.configuration_name = 'cheque_collection_default_limit') as integer) as cheque_limit\n" +
 //            "from lms.service_request sr\n" +
