@@ -6,6 +6,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTran
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDataReturnResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -329,7 +331,7 @@ public class ReceiptTransferService {
         collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
     }
 
-    public ReceiptTransferResponseDTO getReceiptTransferById(Long receiptTransferId, Long userId) throws Exception {
+    public ReceiptTransferResponseDTO getReceiptTransferById(String token ,Long receiptTransferId, Long userId) throws Exception {
         log.info("receipt tranfer idddd {}", receiptTransferId);
         ReceiptTransferEntity receiptTransferEntity;
         boolean buttonRestriction = false;
@@ -349,18 +351,29 @@ public class ReceiptTransferService {
             if (!receiptTransferHistoryEntity.isEmpty()) {
                 buttonRestriction = true;
             }
-            //  flagg //
-            // temporary work for user data //
-            Map<String, Object> transferToUserData = null;
-            Map<String, Object> transferByUserData = null;
+            UserDetailByUserIdDTOResponse transferToUserData;
+            UserDetailByUserIdDTOResponse transferByUserData;
+            UserDataReturnResponseDTO returnTransferToUserData = new UserDataReturnResponseDTO();
+            UserDataReturnResponseDTO returnTransferByUserData = new UserDataReturnResponseDTO();
             if (receiptTransferToUserId != null) {
-                transferToUserData = receiptTransferRepository.getUserDataByUserId(receiptTransferToUserId);
-                transferByUserData = receiptTransferRepository.getUserDataByUserId(receiptTransferByUserId);
+                //  transfer to
+                transferToUserData = utilityService.getUserDetailsByUserId(token, receiptTransferToUserId);
+                returnTransferToUserData.setUserId(transferToUserData.getData().getId());
+                returnTransferToUserData.setUserName(transferToUserData.getData().getEmployeeUserName());
+                returnTransferToUserData.setDepartment(transferToUserData.getData().getDepartment());
+                returnTransferToUserData.setName(transferToUserData.getData().getEmployeeName());
+
+                //  transfer by
+                transferByUserData = utilityService.getUserDetailsByUserId(token, receiptTransferByUserId);
+                returnTransferByUserData.setUserId(transferByUserData.getData().getId());
+                returnTransferByUserData.setUserName(transferByUserData.getData().getEmployeeUserName());
+                returnTransferByUserData.setDepartment(transferByUserData.getData().getDepartment());
+                returnTransferByUserData.setName(transferByUserData.getData().getEmployeeName());
+
             }
-            receiptTransferResponseDTO.setTransferToUserData(transferToUserData);
-            receiptTransferResponseDTO.setTransferByUserData(transferByUserData);
+            receiptTransferResponseDTO.setTransferToUserData(returnTransferToUserData);
+            receiptTransferResponseDTO.setTransferByUserData(returnTransferByUserData);
             receiptTransferResponseDTO.setButtonRestriction(buttonRestriction);
-            // temporary work for user data //
             receiptTransferResponseDTO.setReceiptTransferData(receiptTransferEntity);
             receiptTransferResponseDTO.setReceiptData(receiptsData);
             if (collectionLimitUserWiseEntity != null) {
