@@ -17,21 +17,8 @@ public class ProfileService {
 
     public Object getProfileDetails(String token, String username) throws Exception {
         Object res = new Object();
-//        TokenDTOResponse serviceToken ;
         BaseDTOResponse<Object> baseDTOResponse = null;
         try {
-//            HttpHeaders httpHeaders1 = new HttpHeaders();
-////            httpHeaders.add("Authorization", token);
-//            httpHeaders1.add("Content-Type", "application/json");
-//
-//            serviceToken = HTTPRequestService.<Object, TokenDTOResponse>builder()
-//                    .httpMethod(HttpMethod.GET)
-//                    .url("https://api-dev.synofin.tech/get-service-token?access_token=" + token)
-//                    .httpHeaders(httpHeaders1)
-//                    .typeResponseType(TokenDTOResponse.class)
-//                    .build().call();
-
-
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
@@ -42,6 +29,7 @@ public class ProfileService {
                     .httpHeaders(httpHeaders)
                     .typeResponseType(ProfileDetailResponseDTO.class)
                     .build().call();
+
 
             log.info("profile Response {}", res);
         } catch (Exception e) {

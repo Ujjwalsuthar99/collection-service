@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageData;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3DataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.*;
@@ -13,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -184,14 +187,34 @@ public class UtilityService {
         return res;
     }
 
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO) {
+    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String userRefNo, String fileName, String clientId, String systemId) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
+
+        Base64.Encoder encoder = Base64.getEncoder();
+        String base64 = encoder.encodeToString(imageData.getBytes());
+
+        UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO = new UploadImageOnS3RequestDTO();
+        UploadImageOnS3DataRequestDTO uploadImageOnS3DataRequestDTO = new UploadImageOnS3DataRequestDTO();
+        UploadImageData uploadImageData = new UploadImageData();
+        uploadImageData.setUserRefNo(userRefNo);
+        uploadImageData.setFileContentType("");
+        uploadImageData.setFileName(fileName);
+        uploadImageData.setFile(base64);
+        uploadImageOnS3DataRequestDTO.setData(uploadImageData);
+        uploadImageOnS3DataRequestDTO.setSystemId(systemId);
+        uploadImageOnS3DataRequestDTO.setClientId(clientId);
+        uploadImageOnS3RequestDTO.setRequestData(uploadImageOnS3DataRequestDTO);
+        uploadImageOnS3RequestDTO.setUserReferenceNumber("");
+
+
+        log.info("uploadImageOnS3RequestDTO {}", uploadImageOnS3RequestDTO);
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
+            log.info("imageData {}", imageData);
             res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/uploadImageOnS3")

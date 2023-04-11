@@ -97,4 +97,10 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    and date(sr.form->>'date_of_receipt') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
     List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferred(@Param("userName") String userName, @Param("fromDate") String fromDate
             , @Param("toDate") String toDate);
+
+
+    @Query(nativeQuery = true, value = "SELECT case when sum(cast(sr.form->>'receipt_amount' as decimal)) is null then 0.0 else sum(cast(sr.form->>'receipt_amount' as decimal)) end\n" +
+            "            from lms.service_request sr where sr.request_source = 'm_collect' and sr.loan_id = cast(:loanId as bigint) and sr.form->>'payment_mode' = 'cash'\n" +
+            "            and date(sr.created_date) = date(current_date)")
+    double getCollectedAmountToday(@Param("loanId") Long loanId);
 }

@@ -24,6 +24,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
     @Query(nativeQuery = true,value = "select loan_application_number from lms.loan_application where loan_application_id = :loanId")
     String getLoanApplicationNumber(@Param("loanId") Long loanId);
     @Query(nativeQuery = true, value = "select la.loan_application_id,\n" +
+            "    (select branch_name from master.branch where branch_id = la.branch_id) as branch,\n" +
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    p.product_name as product,\n" +
@@ -133,6 +134,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
 
 
     @Query(nativeQuery = true, value = "select la.loan_application_id,\n" +
+            "    (select branch_name from master.branch where branch_id = la.branch_id) as branch,\n" +
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    p.product_name as product,\n" +

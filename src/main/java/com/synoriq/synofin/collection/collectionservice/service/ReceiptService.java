@@ -10,6 +10,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceRequestDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+
 import com.synoriq.synofin.collection.collectionservice.rest.response.createReceiptLms.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.GetReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptDateResponse;
@@ -41,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_FOLLOWUP;
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_RECEIPT;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
@@ -75,6 +75,7 @@ public class ReceiptService {
 
     @Autowired
     private ProfileService profileService;
+
 
     public BaseDTOResponse<Object> getReceiptsByUserIdWithDuration(String userName, String fromDate, String toDate, String status, String paymentMode, Integer page, Integer size) throws Exception {
 
@@ -150,13 +151,16 @@ public class ReceiptService {
             String limitConf = null;
             if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash")) {
                 limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
-            } else {
+            } else if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque")) {
                 limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
+            } else if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi"))  {
+                limitConf = ONLINE_COLLECTION_DEFAULT_LIMIT;
             }
 
 
             Double totalLimitValue = 0.00;
             Double currentReceiptAmountAllowed = 0.00;
+            double receiptAmount = Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
             CollectionLimitUserWiseEntity collectionLimitUser = (CollectionLimitUserWiseEntity) collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode);
 
             if(collectionLimitUser != null) {
@@ -167,8 +171,13 @@ public class ReceiptService {
                 currentReceiptAmountAllowed = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
             }
 
+            // per day cash limit check
+            double perDayCashLimitLoan = Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("per_day_cash_collection_customer_limit"));
+            double receiptCollectedAmountTillToday = receiptRepository.getCollectedAmountToday(Long.valueOf(receiptServiceDtoRequest.getRequestData().getLoanId()));
 
-
+            if (receiptCollectedAmountTillToday + receiptAmount > perDayCashLimitLoan) {
+                throw new Exception("1017004");
+            }
             log.info("Total Limit Value {}", totalLimitValue);
             log.info("Receipt amount can be collected by a user at current situation {}", currentReceiptAmountAllowed);
             log.info("Receipt amount {}", receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
@@ -230,7 +239,7 @@ public class ReceiptService {
 
 //            Map<String, Object> cashInHand = dashboardRepository.getCashInHandByUserIdByDuration(String.valueOf(receiptServiceDtoRequest.getActivityData().getUserId()), "01-01-2023", String.valueOf(new Date()));
 
-                if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque")) {
+                if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi")) {
                     CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
                     log.info("collection limit user wise entity already exist {}", collectionLimitUser);

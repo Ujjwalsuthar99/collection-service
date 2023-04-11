@@ -165,6 +165,7 @@ public class TaskService {
                     basicInfoApplicant.setDpdTextColor(dpdTextColor);
                     basicInfoApplicant.setPos(loanDetailRes.getData().getPrincipalOutstanding());
                     basicInfoApplicant.setLoanAmount(loanDetailRes.getData().getLoanAmount());
+                    basicInfoApplicant.setEmiAmount(loanDetailRes.getData().getEmiAmount());
                     basicInfoApplicant.setLoanTenure(loanDetailRes.getData().getLoanTenure());
                     basicInfoApplicant.setEmiDate("Pending LMS");
                     for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
