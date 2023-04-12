@@ -175,8 +175,12 @@ public class ReceiptService {
             double perDayCashLimitLoan = Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("per_day_cash_collection_customer_limit"));
             double receiptCollectedAmountTillToday = receiptRepository.getCollectedAmountToday(Long.valueOf(receiptServiceDtoRequest.getRequestData().getLoanId()));
 
+            log.info("perDayCashLimitLoan {}", perDayCashLimitLoan);
+            log.info("receiptCollectedAmountTillToday {}", receiptCollectedAmountTillToday);
+            log.info("receiptAmount {}", receiptAmount);
+            
             if (receiptCollectedAmountTillToday + receiptAmount > perDayCashLimitLoan) {
-                throw new Exception("1017004");
+                throw new Exception("1017005");
             }
             log.info("Total Limit Value {}", totalLimitValue);
             log.info("Receipt amount can be collected by a user at current situation {}", currentReceiptAmountAllowed);
