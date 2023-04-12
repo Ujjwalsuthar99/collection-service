@@ -270,6 +270,9 @@ public class ReceiptService {
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                 }
             } else {
+                log.info("codeee {}", res.getError().getCode());
+                log.info("text {}", res.getError().getText());
+                
                 throw new Exception(res.getError().getCode());
 //                return res;
             }
