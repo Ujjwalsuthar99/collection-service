@@ -60,7 +60,7 @@ public class DashboardService {
                 Map<String, Object> newUpiAmount = new HashMap<>();
                 newUpiAmount.put("upi_amount", 0);
                 newUpiAmount.put("upi_limit", totalLimitValue);
-                chequeAmountData = newUpiAmount;
+                upiAmountData = newUpiAmount;
             }
             log.info("my data counts from followup {}", followupDataCounts);
             responseLoans.put("followup", followupDataCounts);
