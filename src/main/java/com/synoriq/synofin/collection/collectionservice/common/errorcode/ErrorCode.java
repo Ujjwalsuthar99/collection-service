@@ -147,7 +147,7 @@ public enum ErrorCode {
 //    INTERNAL_SERVER_ERROR(1016000, "Internal Server Error"),
 //    ATLEAST_30_DAYS_GAP_BETWEEN_INTEREST_START_DATE_AND_REPAYMENT_START_DATE(101825, "There should be atleast 30 days gap between Interest Start Date and Repayment Start Date"),
 //    INVALID_RECEIPT_AMOUNT(1016001, "Invalid Receipt Amount"),
-//    INVALID_RECEIPT_DATE(1016002, "Receipt date cannot be before disbursal date"),
+    INVALID_RECEIPT_DATE(1016002, "Receipt date cannot be before disbursal date"),
 //    RECEIPT_AMOUNT_ALREADY_ALLOCATED(1016003, "Receipt amount is already allocated"),
 //    ALLOCATED_AMOUNT_MORE_THEN_TOTAL_OUTSTANDING_AMOUNT(1016004, "Allocated amount can't be more than net outstanding amount"),
 //    WAIVED_AMOUNT_MORE_THEN_TOTAL_OUTSTANDING_AMOUNT(1016005, "Waived amount can't be more than net outstanding amount"),

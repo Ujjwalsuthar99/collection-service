@@ -178,7 +178,7 @@ public class ReceiptService {
             log.info("perDayCashLimitLoan {}", perDayCashLimitLoan);
             log.info("receiptCollectedAmountTillToday {}", receiptCollectedAmountTillToday);
             log.info("receiptAmount {}", receiptAmount);
-            
+
             if (receiptCollectedAmountTillToday + receiptAmount > perDayCashLimitLoan) {
                 throw new Exception("1017005");
             }
@@ -270,7 +270,7 @@ public class ReceiptService {
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                 }
             } else {
-                throw new CustomException(res.getError().getText());
+                throw new Exception(res.getError().getCode());
 //                return res;
             }
 
