@@ -21,6 +21,5 @@ public interface CollectionLimitUserWiseRepository extends PagingAndSortingRepos
     CollectionLimitUserWiseEntity getCollectionLimitUserWiseByUserId(@Param("userId") Long userId, @Param("strategyKey") String strategyKey);
 
 
-//    CollectionLimitUserWiseEntity findByUserId(Long userId);
 
 }
