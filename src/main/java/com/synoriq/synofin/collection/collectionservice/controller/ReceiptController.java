@@ -3,6 +3,7 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.createReceiptLms.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,11 +106,15 @@ public class ReceiptController {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
-        Object createReceiptResponse;
+        ServiceRequestSaveResponse createReceiptResponse;
 
         try {
             createReceiptResponse = receiptService.createReceipt(receiptServiceDtoRequest, bearerToken);
-            response = new ResponseEntity<>(createReceiptResponse, HttpStatus.OK);
+            if (createReceiptResponse.getData() == null && createReceiptResponse.getError() != null) {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
+            } else {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.OK);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -9,6 +9,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -221,6 +222,28 @@ public class UtilityService {
                     .body(uploadImageOnS3RequestDTO)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UploadImageOnS3ResponseDTO.class)
+                    .build().call();
+
+            log.info("responseData {}", res);
+        } catch (Exception ee) {
+            log.error("{}", ee.getMessage());
+        }
+        return res;
+    }
+
+    public UserDetailByUserIdDTOResponse getUserDetailsByUserId(String token, Long userId) {
+        UserDetailByUserIdDTOResponse res = new UserDetailByUserIdDTOResponse();
+
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, UserDetailByUserIdDTOResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getUserDetailsByUserId?userId="+ userId)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(UserDetailByUserIdDTOResponse.class)
                     .build().call();
 
             log.info("responseData {}", res);

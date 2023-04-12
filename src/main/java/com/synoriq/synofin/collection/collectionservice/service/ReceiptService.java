@@ -138,7 +138,7 @@ public class ReceiptService {
     }
 
     @Transactional
-    public Object createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception {
+    public ServiceRequestSaveResponse createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception {
         ServiceRequestSaveResponse res = new ServiceRequestSaveResponse();
         ReceiptServiceSystemPropertiesResponse lmsBusinessDate = new ReceiptServiceSystemPropertiesResponse();
         ReceiptServiceDtoRequest createReceiptBody = new ObjectMapper().convertValue(receiptServiceDtoRequest, ReceiptServiceDtoRequest.class);
@@ -175,8 +175,12 @@ public class ReceiptService {
             double perDayCashLimitLoan = Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("per_day_cash_collection_customer_limit"));
             double receiptCollectedAmountTillToday = receiptRepository.getCollectedAmountToday(Long.valueOf(receiptServiceDtoRequest.getRequestData().getLoanId()));
 
+            log.info("perDayCashLimitLoan {}", perDayCashLimitLoan);
+            log.info("receiptCollectedAmountTillToday {}", receiptCollectedAmountTillToday);
+            log.info("receiptAmount {}", receiptAmount);
+
             if (receiptCollectedAmountTillToday + receiptAmount > perDayCashLimitLoan) {
-                throw new Exception("1017004");
+                throw new Exception("1017005");
             }
             log.info("Total Limit Value {}", totalLimitValue);
             log.info("Receipt amount can be collected by a user at current situation {}", currentReceiptAmountAllowed);
@@ -266,8 +270,11 @@ public class ReceiptService {
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                 }
             } else {
-                throw new CustomException(res.getError().getText());
-//                return res;
+//                log.info("codeee {}", res.getError().getCode());
+//                log.info("text {}", res.getError().getText());
+
+//                throw new CustomException(res.getError().getText(), Integer.parseInt(res.getError().getCode()));
+                return res;
             }
 
 

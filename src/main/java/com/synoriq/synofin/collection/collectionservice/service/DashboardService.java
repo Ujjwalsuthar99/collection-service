@@ -40,19 +40,27 @@ public class DashboardService {
             Map<String, Object> receiptDataCounts = dashboardRepository.getReceiptCountByUserIdByDuration(userName, startDate, toDate);
             Map<String, Object> cashInHandDataCounts = dashboardRepository.getCashInHandByUserIdByDuration(userId);
             Map<String, Object> chequeAmountData = dashboardRepository.getChequeByUserIdByDuration(userId);
+            Map<String, Object> upiAmountData = dashboardRepository.getUpiByUserIdByDuration(userId);
             if (cashInHandDataCounts.isEmpty()) {
                 Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT));
-                Map<String , Object> newCashInHand = new HashMap<>();
+                Map<String, Object> newCashInHand = new HashMap<>();
                 newCashInHand.put("cash_in_hand", 0);
                 newCashInHand.put("cash_in_hand_limit", totalLimitValue);
                 cashInHandDataCounts = newCashInHand;
             }
             if (chequeAmountData.isEmpty()) {
                 Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT));
-                Map<String , Object> newChequeAmount = new HashMap<>();
+                Map<String, Object> newChequeAmount = new HashMap<>();
                 newChequeAmount.put("cheque_amount", 0);
                 newChequeAmount.put("cheque_limit", totalLimitValue);
                 chequeAmountData = newChequeAmount;
+            }
+            if (upiAmountData.isEmpty()) {
+                Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT));
+                Map<String, Object> newUpiAmount = new HashMap<>();
+                newUpiAmount.put("upi_amount", 0);
+                newUpiAmount.put("upi_limit", totalLimitValue);
+                upiAmountData = newUpiAmount;
             }
             log.info("my data counts from followup {}", followupDataCounts);
             responseLoans.put("followup", followupDataCounts);
@@ -61,6 +69,7 @@ public class DashboardService {
             responseLoans.put("amount_transfer_inprocess", amountTransferInProcessDataCounts);
             responseLoans.put("cash_in_hand", cashInHandDataCounts);
             responseLoans.put("cheque_amount", chequeAmountData);
+            responseLoans.put("upi_amount", upiAmountData);
 
         } catch (Exception e) {
             throw new Exception("1017000");
