@@ -34,4 +34,10 @@ public class ProfileDataDTO {
     @JsonProperty("branch")
     public String branch;
 
+    @JsonProperty("department")
+    public String department;
+
+    @JsonProperty("designation")
+    public String designation;
+
 }
