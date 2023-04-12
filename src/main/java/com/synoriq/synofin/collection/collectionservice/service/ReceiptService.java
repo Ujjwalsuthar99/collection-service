@@ -138,7 +138,7 @@ public class ReceiptService {
     }
 
     @Transactional
-    public Object createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception {
+    public ServiceRequestSaveResponse createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception {
         ServiceRequestSaveResponse res = new ServiceRequestSaveResponse();
         ReceiptServiceSystemPropertiesResponse lmsBusinessDate = new ReceiptServiceSystemPropertiesResponse();
         ReceiptServiceDtoRequest createReceiptBody = new ObjectMapper().convertValue(receiptServiceDtoRequest, ReceiptServiceDtoRequest.class);
@@ -270,11 +270,11 @@ public class ReceiptService {
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                 }
             } else {
-                log.info("codeee {}", res.getError().getCode());
-                log.info("text {}", res.getError().getText());
-                
-                throw new Exception(res.getError().getCode());
-//                return res;
+//                log.info("codeee {}", res.getError().getCode());
+//                log.info("text {}", res.getError().getText());
+
+//                throw new CustomException(res.getError().getText(), Integer.parseInt(res.getError().getCode()));
+                return res;
             }
 
 
