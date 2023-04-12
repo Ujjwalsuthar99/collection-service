@@ -138,7 +138,7 @@ public class TaskService {
             } else {
                 dpdTextColor = "#ffffff";
                 dpdBgColor = "#722F37";
-                dpdBucket = "180++ DPD";
+                dpdBucket = "180+ DPD";
             }
 
             String loanApplicationNumber = taskRepository.getLoanApplicationNumber(loanIdNumber);
