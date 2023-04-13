@@ -175,6 +175,12 @@ public class TaskService {
                             } else if (communicationData.getAddressType().equals("Current Address")) {
                                 addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
                                 numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                            } else if (communicationData.getAddressType().equals("Residential Address")) {
+                                addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
+                                numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                            } else {
+                                numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
                             }
                         } else {
                             numbersReturnResponseDTO.setAlternativeMobile(communicationData.getNumbers());
