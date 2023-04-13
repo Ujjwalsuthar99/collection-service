@@ -9,12 +9,15 @@ import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEnt
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceRequestDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 
 import com.synoriq.synofin.collection.collectionservice.rest.response.createReceiptLms.ServiceRequestSaveResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.msgServiceResponse.FinovaMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.GetReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptServiceSystemPropertiesResponse;
+import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -75,6 +78,12 @@ public class ReceiptService {
 
     @Autowired
     private ProfileService profileService;
+
+    @Autowired
+    private FinovaSmsService finovaSmsService;
+
+    @Autowired
+    private CurrentUserInfo currentUserInfo;
 
 
     public BaseDTOResponse<Object> getReceiptsByUserIdWithDuration(String userName, String fromDate, String toDate, String status, String paymentMode, Integer page, Integer size) throws Exception {
@@ -268,6 +277,26 @@ public class ReceiptService {
                     }
                     log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+
+                    if(currentUserInfo.getClientId().equals("finova")) {
+                        FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
+                        if(receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cash")) {
+                            finovaSmsRequest.setFlow_id(FINOVA_CASH_MSG_FLOW_ID);
+                        } else if (receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cheque")) {
+                            finovaSmsRequest.setFlow_id(FINOVA_CHEQUE_MSG_FLOW_ID);
+                        } else {
+                            finovaSmsRequest.setFlow_id(FINOVA_UPI_MSG_FLOW_ID);
+                        }
+                        finovaSmsRequest.setSender("FINOVA");
+                        finovaSmsRequest.setShort_url("0");
+                        finovaSmsRequest.setMobiles("917805951252");
+                        finovaSmsRequest.setAmount(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
+                        finovaSmsRequest.setLoanNumber(receiptServiceDtoRequest.getLoanApplicationNumber());
+                        finovaSmsRequest.setUrl("https://www.africau.edu/images/default/sample.pdf");
+
+                        FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
+                    }
+
                 }
             } else {
 //                log.info("codeee {}", res.getError().getCode());

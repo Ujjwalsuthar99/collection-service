@@ -100,7 +100,7 @@ public class SearchService {
                     } else {
                         taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
                         taskListDTOReturnResponse.setDpdBgColorKey("#722F37");
-                        taskListDTOReturnResponse.setDaysPastDueBucket("180++ DPD");
+                        taskListDTOReturnResponse.setDaysPastDueBucket("180+ DPD");
                     }
                     result.add(taskListDTOReturnResponse);
                 }
