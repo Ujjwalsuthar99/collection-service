@@ -13,6 +13,9 @@ public class ReceiptServiceDtoRequest {
     @JsonProperty("activity_data")
     private CollectionActivityLogDTO activityData;
 
+    @JsonProperty("loan_application_number")
+    private String loanApplicationNumber;
+
     @JsonProperty("user_reference_number")
     private String userReferenceNumber;
 
