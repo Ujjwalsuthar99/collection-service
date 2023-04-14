@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageData;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3DataRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
@@ -12,6 +14,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.userDetail
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class UtilityService {
+    @Autowired
+    private CollectionConfigurationsRepository collectionConfigurationsRepository;
 
     public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception {
 
@@ -141,6 +146,16 @@ public class UtilityService {
         String to = simpleDateFormat.format(c.getTime());
         SimpleDateFormat simpleDateFormats = new SimpleDateFormat("dd-MM-yyyy");
         return simpleDateFormats.parse(to);
+    }
+
+    public String mobileNumberMasking(String mobile) {
+        String maskedNumberConfiguration = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MASKED_NUMBER_CONFIGURATION);
+        if (Objects.equals(maskedNumberConfiguration, "true")) {
+            if (mobile != null && !mobile.equalsIgnoreCase("")) {
+                return mobile.replaceAll(".(?=.{4})", "*");
+            }
+        }
+        return mobile;
     }
 
     public Object getBankNameByIFSC(String keyword) throws Exception {
