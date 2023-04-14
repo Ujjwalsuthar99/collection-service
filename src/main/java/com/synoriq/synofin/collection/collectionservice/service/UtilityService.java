@@ -5,18 +5,20 @@ import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivit
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageData;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3DataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.msgServiceResponse.FinovaMsgDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.shortenUrl.ShortenUrlResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
-import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -276,13 +278,6 @@ public class UtilityService {
             httpHeaders.add("Content-Type", "application/json");
 
             log.info("imageData {}", imageData);
-            res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
-                    .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:1102/v1/uploadImageOnS3")
-                    .body(uploadImageOnS3RequestDTO)
-                    .httpHeaders(httpHeaders)
-                    .typeResponseType(UploadImageOnS3ResponseDTO.class)
-                    .build().call();
 
             log.info("responseData {}", res);
 
@@ -301,6 +296,33 @@ public class UtilityService {
 
 
             if(clientId.equals("finova")) {
+
+                res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
+                        .httpMethod(HttpMethod.POST)
+                        .url("http://localhost:1102/v1/uploadImageOnS3")
+                        .body(uploadImageOnS3RequestDTO)
+                        .httpHeaders(httpHeaders)
+                        .typeResponseType(UploadImageOnS3ResponseDTO.class)
+                        .build().call();
+
+
+
+                ShortenUrlResponseDTO shortenUrlResponseDTO = new ShortenUrlResponseDTO();
+                ShortenUrlRequestDTO shortenUrlRequestDTO = new ShortenUrlRequestDTO();
+                ShortenUrlDataRequestDTO shortenUrlDataRequestDTO = new ShortenUrlDataRequestDTO();
+
+                shortenUrlResponseDTO = HTTPRequestService.<Object, ShortenUrlResponseDTO>builder()
+                        .httpMethod(HttpMethod.POST)
+                        .url(SHORTEN_URL_UAT)
+                        .body(shortenUrlRequestDTO)
+                        .httpHeaders(httpHeaders)
+                        .typeResponseType(ShortenUrlResponseDTO.class)
+                        .build().call();
+
+                shortenUrlRequestDTO.setClientId(clientId);
+                shortenUrlRequestDTO.setSystemId("collection");
+                shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
+
                 FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
                 if(paymentMode.equals("cash")) {
                     finovaSmsRequest.setFlow_id(FINOVA_CASH_MSG_FLOW_ID);
@@ -315,7 +337,7 @@ public class UtilityService {
                 finovaSmsRequest.setMobiles("917805951252");
                 finovaSmsRequest.setAmount(receiptAmount);
                 finovaSmsRequest.setLoanNumber(loanId[0]);
-                finovaSmsRequest.setUrl("https://www.africau.edu/images/default/sample.pdf");
+                finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
                 FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
             }
