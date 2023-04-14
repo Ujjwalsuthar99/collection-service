@@ -26,6 +26,9 @@ public class TaskService {
     private TaskRepository taskRepository;
 
     @Autowired
+    private UtilityService utilityService;
+
+    @Autowired
     private AdditionalContactDetailsRepository additionalContactDetailsRepository;
 
     public BaseDTOResponse<Object> getTaskDetails(Long userId, Integer pageNo, Integer pageSize) throws Exception {
@@ -172,18 +175,29 @@ public class TaskService {
                         if (!(communicationData.getAddressType() == null)) {
                             if (communicationData.getAddressType().equals("Permanent Address")) {
                                 addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
                             } else if (communicationData.getAddressType().equals("Current Address")) {
                                 addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
-                                numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
                             } else if (communicationData.getAddressType().equals("Residential Address")) {
                                 addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
-                                numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
                             } else {
-                                numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
                                 addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
                             }
                         } else {
-                            numbersReturnResponseDTO.setAlternativeMobile(communicationData.getNumbers());
+                            if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                            }
                         }
                     }
                     customerDetails.setBasicInfo(basicInfoApplicant);
@@ -200,9 +214,9 @@ public class TaskService {
                     for (AdditionalContactDetailsEntity additionalContactDetailsEntity1 : additionalContactDetailsEntity) {
                         NumbersReturnResponseDTO numbersReturnResponseDTO1 = new NumbersReturnResponseDTO();
                         BasicInfoReturnResponseDTO basicInfoOther = new BasicInfoReturnResponseDTO();
-                        numbersReturnResponseDTO1.setMobNo(additionalContactDetailsEntity1.getMobileNumber().toString());
+                        numbersReturnResponseDTO1.setMobNo(utilityService.mobileNumberMasking(additionalContactDetailsEntity1.getMobileNumber().toString()));
                         if (additionalContactDetailsEntity1.getAltMobileNumber() != null) {
-                            numbersReturnResponseDTO1.setAlternativeMobile(additionalContactDetailsEntity1.getAltMobileNumber().toString());
+                            numbersReturnResponseDTO1.setAlternativeMobile(utilityService.mobileNumberMasking(additionalContactDetailsEntity1.getAltMobileNumber().toString()));
                         }
                         basicInfoOther.setRelation(additionalContactDetailsEntity1.getRelationWithApplicant());
                         basicInfoOther.setFirstName(additionalContactDetailsEntity1.getContactName());
