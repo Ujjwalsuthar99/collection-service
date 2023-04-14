@@ -172,18 +172,39 @@ public class TaskService {
                         if (!(communicationData.getAddressType() == null)) {
                             if (communicationData.getAddressType().equals("Permanent Address")) {
                                 addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                } else {
+                                    numbersReturnResponseDTO.setMobileSpouse(communicationData.getNumbers());
+                                }
                             } else if (communicationData.getAddressType().equals("Current Address")) {
                                 addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
-                                numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                } else {
+                                    numbersReturnResponseDTO.setMobileSpouse(communicationData.getNumbers());
+                                }
                             } else if (communicationData.getAddressType().equals("Residential Address")) {
                                 addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
-                                numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                } else {
+                                    numbersReturnResponseDTO.setMobileSpouse(communicationData.getNumbers());
+                                }
                             } else {
-                                numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setAlternativeMobile(communicationData.getNumbers());
+                                } else {
+                                    numbersReturnResponseDTO.setMobileSpouse(communicationData.getNumbers());
+                                }
                                 addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
                             }
                         } else {
-                            numbersReturnResponseDTO.setAlternativeMobile(communicationData.getNumbers());
+                            if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                numbersReturnResponseDTO.setAlternativeMobile(communicationData.getNumbers());
+                            } else {
+                                numbersReturnResponseDTO.setMobileSpouse(communicationData.getNumbers());
+                            }
                         }
                     }
                     customerDetails.setBasicInfo(basicInfoApplicant);
