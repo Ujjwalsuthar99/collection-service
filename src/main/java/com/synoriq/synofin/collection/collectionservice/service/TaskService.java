@@ -26,6 +26,9 @@ public class TaskService {
     private TaskRepository taskRepository;
 
     @Autowired
+    private UtilityService utilityService;
+
+    @Autowired
     private AdditionalContactDetailsRepository additionalContactDetailsRepository;
 
     public BaseDTOResponse<Object> getTaskDetails(Long userId, Integer pageNo, Integer pageSize) throws Exception {
@@ -173,37 +176,27 @@ public class TaskService {
                             if (communicationData.getAddressType().equals("Permanent Address")) {
                                 addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
                                 if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                    numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
-                                } else {
-                                    numbersReturnResponseDTO.setMobileSpouse(communicationData.getNumbers());
+                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
                                 }
                             } else if (communicationData.getAddressType().equals("Current Address")) {
                                 addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
                                 if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                    numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
-                                } else {
-                                    numbersReturnResponseDTO.setMobileSpouse(communicationData.getNumbers());
+                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
                                 }
                             } else if (communicationData.getAddressType().equals("Residential Address")) {
                                 addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
                                 if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                    numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
-                                } else {
-                                    numbersReturnResponseDTO.setMobileSpouse(communicationData.getNumbers());
+                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
                                 }
                             } else {
                                 if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                    numbersReturnResponseDTO.setAlternativeMobile(communicationData.getNumbers());
-                                } else {
-                                    numbersReturnResponseDTO.setMobileSpouse(communicationData.getNumbers());
+                                    numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
                                 }
                                 addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
                             }
                         } else {
                             if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                numbersReturnResponseDTO.setAlternativeMobile(communicationData.getNumbers());
-                            } else {
-                                numbersReturnResponseDTO.setMobileSpouse(communicationData.getNumbers());
+                                numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
                             }
                         }
                     }
