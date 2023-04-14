@@ -301,11 +301,11 @@ public class UtilityService {
             collectionActivityLogsEntity.setDeleted(false);
             collectionActivityLogsEntity.setActivityBy(0L);
             collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
-            collectionActivityLogsEntity.setAddress(null);
+            collectionActivityLogsEntity.setAddress(res);
             collectionActivityLogsEntity.setRemarks(fileName);
             collectionActivityLogsEntity.setImages(res.getData());
             collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
-            collectionActivityLogsEntity.setGeolocation(null);
+            collectionActivityLogsEntity.setGeolocation(res);
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
