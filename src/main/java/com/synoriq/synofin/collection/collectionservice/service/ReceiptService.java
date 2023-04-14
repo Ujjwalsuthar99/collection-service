@@ -278,24 +278,24 @@ public class ReceiptService {
                     log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
 
-                    if(currentUserInfo.getClientId().equals("finova")) {
-                        FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
-                        if(receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cash")) {
-                            finovaSmsRequest.setFlow_id(FINOVA_CASH_MSG_FLOW_ID);
-                        } else if (receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cheque")) {
-                            finovaSmsRequest.setFlow_id(FINOVA_CHEQUE_MSG_FLOW_ID);
-                        } else {
-                            finovaSmsRequest.setFlow_id(FINOVA_UPI_MSG_FLOW_ID);
-                        }
-                        finovaSmsRequest.setSender("FINOVA");
-                        finovaSmsRequest.setShort_url("0");
-                        finovaSmsRequest.setMobiles("917805951252");
-                        finovaSmsRequest.setAmount(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
-                        finovaSmsRequest.setLoanNumber(receiptServiceDtoRequest.getLoanApplicationNumber());
-                        finovaSmsRequest.setUrl("https://www.africau.edu/images/default/sample.pdf");
-
-                        FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
-                    }
+//                    if(currentUserInfo.getClientId().equals("finova")) {
+//                        FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
+//                        if(receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cash")) {
+//                            finovaSmsRequest.setFlow_id(FINOVA_CASH_MSG_FLOW_ID);
+//                        } else if (receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cheque")) {
+//                            finovaSmsRequest.setFlow_id(FINOVA_CHEQUE_MSG_FLOW_ID);
+//                        } else {
+//                            finovaSmsRequest.setFlow_id(FINOVA_UPI_MSG_FLOW_ID);
+//                        }
+//                        finovaSmsRequest.setSender("FINOVA");
+//                        finovaSmsRequest.setShort_url("0");
+//                        finovaSmsRequest.setMobiles("917805951252");
+//                        finovaSmsRequest.setAmount(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
+//                        finovaSmsRequest.setLoanNumber(receiptServiceDtoRequest.getLoanApplicationNumber());
+//                        finovaSmsRequest.setUrl("https://www.africau.edu/images/default/sample.pdf");
+//
+//                        FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
+//                    }
 
                 }
             } else {
