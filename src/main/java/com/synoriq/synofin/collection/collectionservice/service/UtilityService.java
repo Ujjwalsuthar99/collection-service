@@ -297,13 +297,14 @@ public class UtilityService {
 
             CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
             collectionActivityLogsEntity.setActivityName("send receipt message to user");
+            collectionActivityLogsEntity.setActivityDate(new Date());
             collectionActivityLogsEntity.setDeleted(false);
-            collectionActivityLogsEntity.setAddress(null);
             collectionActivityLogsEntity.setActivityBy(0L);
-            collectionActivityLogsEntity.setRemarks(fileName);
-            collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
             collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
+            collectionActivityLogsEntity.setAddress(null);
+            collectionActivityLogsEntity.setRemarks(fileName);
             collectionActivityLogsEntity.setImages(res.getData());
+            collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
             collectionActivityLogsEntity.setGeolocation(null);
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
