@@ -214,9 +214,9 @@ public class TaskService {
                     for (AdditionalContactDetailsEntity additionalContactDetailsEntity1 : additionalContactDetailsEntity) {
                         NumbersReturnResponseDTO numbersReturnResponseDTO1 = new NumbersReturnResponseDTO();
                         BasicInfoReturnResponseDTO basicInfoOther = new BasicInfoReturnResponseDTO();
-                        numbersReturnResponseDTO1.setMobNo(additionalContactDetailsEntity1.getMobileNumber().toString());
+                        numbersReturnResponseDTO1.setMobNo(utilityService.mobileNumberMasking(additionalContactDetailsEntity1.getMobileNumber().toString()));
                         if (additionalContactDetailsEntity1.getAltMobileNumber() != null) {
-                            numbersReturnResponseDTO1.setAlternativeMobile(additionalContactDetailsEntity1.getAltMobileNumber().toString());
+                            numbersReturnResponseDTO1.setAlternativeMobile(utilityService.mobileNumberMasking(additionalContactDetailsEntity1.getAltMobileNumber().toString()));
                         }
                         basicInfoOther.setRelation(additionalContactDetailsEntity1.getRelationWithApplicant());
                         basicInfoOther.setFirstName(additionalContactDetailsEntity1.getContactName());
