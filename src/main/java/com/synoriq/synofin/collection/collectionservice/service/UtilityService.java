@@ -291,8 +291,6 @@ public class UtilityService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
-            log.info("imageData {}", imageData);
-
             if(clientId.equals("finova")) {
 
                 res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
@@ -314,6 +312,9 @@ public class UtilityService {
                 shortenUrlRequestDTO.setClientId(clientId);
                 shortenUrlRequestDTO.setSystemId("collection");
                 shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
+                shortenUrlRequestDTO.setData(shortenUrlDataRequestDTO);
+
+                log.info("shorten url request {}", shortenUrlRequestDTO);
 
                 shortenUrlResponseDTO = HTTPRequestService.<Object, ShortenUrlResponseDTO>builder()
                         .httpMethod(HttpMethod.POST)
@@ -345,8 +346,6 @@ public class UtilityService {
                 log.info("sms service for finova {}", finovaMsgDTOResponse);
             }
 
-            log.info("karya samapti activity se pehle");
-
 
             CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
             collectionActivityLogsEntity.setActivityName("send receipt message to user");
@@ -361,8 +360,6 @@ public class UtilityService {
             collectionActivityLogsEntity.setGeolocation(res);
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
-
-            log.info("karya sampoorna samapti activity k baad");
 
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
