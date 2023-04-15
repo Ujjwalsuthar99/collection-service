@@ -293,23 +293,6 @@ public class UtilityService {
 
             log.info("imageData {}", imageData);
 
-            log.info("responseData {}", res);
-
-            CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
-            collectionActivityLogsEntity.setActivityName("send receipt message to user");
-            collectionActivityLogsEntity.setActivityDate(new Date());
-            collectionActivityLogsEntity.setDeleted(false);
-            collectionActivityLogsEntity.setActivityBy(0L);
-            collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
-            collectionActivityLogsEntity.setAddress(res);
-            collectionActivityLogsEntity.setRemarks(fileName);
-            collectionActivityLogsEntity.setImages(res.getData());
-            collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
-            collectionActivityLogsEntity.setGeolocation(res);
-
-            collectionActivityLogsRepository.save(collectionActivityLogsEntity);
-
-
             if(clientId.equals("finova")) {
 
                 res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
@@ -319,6 +302,8 @@ public class UtilityService {
                         .httpHeaders(httpHeaders)
                         .typeResponseType(UploadImageOnS3ResponseDTO.class)
                         .build().call();
+
+                log.info("upload image s3 for finova {}", res);
 
 
 
@@ -338,6 +323,8 @@ public class UtilityService {
                         .typeResponseType(ShortenUrlResponseDTO.class)
                         .build().call();
 
+                log.info("shorten URL for finova {}", shortenUrlResponseDTO);
+
                 FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
                 if(paymentMode.equals("cash")) {
                     finovaSmsRequest.setFlow_id(FINOVA_CASH_MSG_FLOW_ID);
@@ -355,7 +342,27 @@ public class UtilityService {
                 finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
                 FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
+                log.info("sms service for finova {}", finovaMsgDTOResponse);
             }
+
+            log.info("karya samapti activity se pehle");
+
+
+            CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+            collectionActivityLogsEntity.setActivityName("send receipt message to user");
+            collectionActivityLogsEntity.setActivityDate(new Date());
+            collectionActivityLogsEntity.setDeleted(false);
+            collectionActivityLogsEntity.setActivityBy(0L);
+            collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
+            collectionActivityLogsEntity.setAddress(res);
+            collectionActivityLogsEntity.setRemarks(fileName);
+            collectionActivityLogsEntity.setImages(res.getData());
+            collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
+            collectionActivityLogsEntity.setGeolocation(res);
+
+            collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+
+            log.info("karya sampoorna samapti activity k baad");
 
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
