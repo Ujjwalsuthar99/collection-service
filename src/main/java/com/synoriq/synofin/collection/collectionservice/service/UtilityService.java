@@ -315,6 +315,8 @@ public class UtilityService {
                 shortenUrlRequestDTO.setSystemId("collection");
                 shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
 
+                log.info("shorten url request {}", shortenUrlRequestDTO);
+
                 shortenUrlResponseDTO = HTTPRequestService.<Object, ShortenUrlResponseDTO>builder()
                         .httpMethod(HttpMethod.POST)
                         .url(SHORTEN_URL_UAT)
