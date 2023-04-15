@@ -78,18 +78,23 @@ public class AdditionalContactDetailsService {
 //            Long collectionActivityLogsId = activityLogService.
 //                    createActivityLogs(additionalContactDetailsDtoRequest.getActivityLog());
 
-            AdditionalContactDetailsEntity additionalContactDetailsEntity = new AdditionalContactDetailsEntity();
+            AdditionalContactDetailsEntity alreadyExistAdditionalContact = additionalContactDetailsRepository.getDetailByLoanIdByRelationByMobileNumber(additionalContactDetailsDtoRequest.getLoanId(), additionalContactDetailsDtoRequest.getRelationWithApplicant(),
+                    additionalContactDetailsDtoRequest.getMobileNumber());
+            if (alreadyExistAdditionalContact != null) {
+                return new BaseDTOResponse<>("Additional Contact Detail Created Successfully");
+            } else {
+                AdditionalContactDetailsEntity additionalContactDetailsEntity = new AdditionalContactDetailsEntity();
+                additionalContactDetailsEntity.setCreatedDate(new Date());
+                additionalContactDetailsEntity.setCreatedBy(additionalContactDetailsDtoRequest.getCreatedBy());
+                additionalContactDetailsEntity.setLoanId(additionalContactDetailsDtoRequest.getLoanId());
+                additionalContactDetailsEntity.setContactName(additionalContactDetailsDtoRequest.getContactName());
+                additionalContactDetailsEntity.setMobileNumber(additionalContactDetailsDtoRequest.getMobileNumber());
+                additionalContactDetailsEntity.setAltMobileNumber(additionalContactDetailsDtoRequest.getAltMobileNumber());
+                additionalContactDetailsEntity.setEmail(additionalContactDetailsDtoRequest.getEmail());
+                additionalContactDetailsEntity.setRelationWithApplicant(additionalContactDetailsDtoRequest.getRelationWithApplicant());
 
-            additionalContactDetailsEntity.setCreatedDate(new Date());
-            additionalContactDetailsEntity.setCreatedBy(additionalContactDetailsDtoRequest.getCreatedBy());
-            additionalContactDetailsEntity.setLoanId(additionalContactDetailsDtoRequest.getLoanId());
-            additionalContactDetailsEntity.setContactName(additionalContactDetailsDtoRequest.getContactName());
-            additionalContactDetailsEntity.setMobileNumber(additionalContactDetailsDtoRequest.getMobileNumber());
-            additionalContactDetailsEntity.setAltMobileNumber(additionalContactDetailsDtoRequest.getAltMobileNumber());
-            additionalContactDetailsEntity.setEmail(additionalContactDetailsDtoRequest.getEmail());
-            additionalContactDetailsEntity.setRelationWithApplicant(additionalContactDetailsDtoRequest.getRelationWithApplicant());
-
-            additionalContactDetailsRepository.save(additionalContactDetailsEntity);
+                additionalContactDetailsRepository.save(additionalContactDetailsEntity);
+            }
             log.info("Additional Contact Detail Data Saved Successfully");
             return new BaseDTOResponse<>("Additional Contact Detail Created Successfully");
         } catch (Exception e) {

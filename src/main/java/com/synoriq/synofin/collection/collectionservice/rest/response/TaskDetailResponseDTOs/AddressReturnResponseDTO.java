@@ -12,4 +12,7 @@ public class AddressReturnResponseDTO {
     @JsonProperty("work_address")
     public String WorkAddress;
 
+    @JsonProperty("residential_address")
+    public String residentialAddress;
+
 }

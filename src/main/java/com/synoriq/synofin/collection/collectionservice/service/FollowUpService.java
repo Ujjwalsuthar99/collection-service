@@ -161,9 +161,10 @@ public class FollowUpService {
 
         try {
 
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
             Long collectionActivityLogsId = activityLogService.
                     createActivityLogs(followUpDtoRequest.getActivityLog(), token);
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             FollowUpEntity followUpEntity = new FollowUpEntity();
             followUpEntity.setLoanId(followUpDtoRequest.getLoanId());
             followUpEntity.setIsDeleted(false);

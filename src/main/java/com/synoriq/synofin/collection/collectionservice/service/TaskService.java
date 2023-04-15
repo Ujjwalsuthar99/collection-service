@@ -26,6 +26,9 @@ public class TaskService {
     private TaskRepository taskRepository;
 
     @Autowired
+    private UtilityService utilityService;
+
+    @Autowired
     private AdditionalContactDetailsRepository additionalContactDetailsRepository;
 
     public BaseDTOResponse<Object> getTaskDetails(Long userId, Integer pageNo, Integer pageSize) throws Exception {
@@ -113,11 +116,11 @@ public class TaskService {
 
             if (dpd >= 0 && dpd <= 30) {
                 dpdTextColor = "#323232";
-                dpdBgColor = "#ABCFFF";
+                dpdBgColor = "#61B2FF";
                 dpdBucket = "0-30 DPD";
             } else if (dpd >= 31 && dpd <= 60) {
-                dpdTextColor = "#323232";
-                dpdBgColor = "#FDB4FF";
+                dpdTextColor = "#ffffff";
+                dpdBgColor = "#2F80ED";
                 dpdBucket = "31-60 DPD";
             } else if (dpd >= 61 && dpd <= 90) {
                 dpdTextColor = "#323232";
@@ -125,20 +128,20 @@ public class TaskService {
                 dpdBucket = "61-90 DPD";
             } else if (dpd >= 91 && dpd <= 120) {
                 dpdTextColor = "#323232";
-                dpdBgColor = "#FCDA8B";
+                dpdBgColor = "#F2994A";
                 dpdBucket = "91-120 DPD";
             } else if (dpd >= 121 && dpd <= 150) {
-                dpdTextColor = "#323232";
-                dpdBgColor = "#F2994A";
+                dpdTextColor = "#ffffff";
+                dpdBgColor = "#FF5359";
                 dpdBucket = "121-150 DPD";
             } else if (dpd >= 151 && dpd <= 180) {
                 dpdTextColor = "#ffffff";
-                dpdBgColor = "#FF5359";
+                dpdBgColor = "#C83939";
                 dpdBucket = "151-180 DPD";
             } else {
                 dpdTextColor = "#ffffff";
-                dpdBgColor = "#C83939";
-                dpdBucket = "180++ DPD";
+                dpdBgColor = "#722F37";
+                dpdBucket = "180+ DPD";
             }
 
             String loanApplicationNumber = taskRepository.getLoanApplicationNumber(loanIdNumber);
@@ -165,18 +168,36 @@ public class TaskService {
                     basicInfoApplicant.setDpdTextColor(dpdTextColor);
                     basicInfoApplicant.setPos(loanDetailRes.getData().getPrincipalOutstanding());
                     basicInfoApplicant.setLoanAmount(loanDetailRes.getData().getLoanAmount());
+                    basicInfoApplicant.setEmiAmount(loanDetailRes.getData().getEmiAmount());
                     basicInfoApplicant.setLoanTenure(loanDetailRes.getData().getLoanTenure());
                     basicInfoApplicant.setEmiDate("Pending LMS");
                     for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
                         if (!(communicationData.getAddressType() == null)) {
                             if (communicationData.getAddressType().equals("Permanent Address")) {
                                 addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
                             } else if (communicationData.getAddressType().equals("Current Address")) {
                                 addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
-                                numbersReturnResponseDTO.setMobNo(communicationData.getNumbers());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
+                            } else if (communicationData.getAddressType().equals("Residential Address")) {
+                                addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
+                            } else {
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
+                                addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
                             }
                         } else {
-                            numbersReturnResponseDTO.setAlternativeMobile(communicationData.getNumbers());
+                            if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                            }
                         }
                     }
                     customerDetails.setBasicInfo(basicInfoApplicant);
@@ -193,9 +214,9 @@ public class TaskService {
                     for (AdditionalContactDetailsEntity additionalContactDetailsEntity1 : additionalContactDetailsEntity) {
                         NumbersReturnResponseDTO numbersReturnResponseDTO1 = new NumbersReturnResponseDTO();
                         BasicInfoReturnResponseDTO basicInfoOther = new BasicInfoReturnResponseDTO();
-                        numbersReturnResponseDTO1.setMobNo(additionalContactDetailsEntity1.getMobileNumber().toString());
+                        numbersReturnResponseDTO1.setMobNo(utilityService.mobileNumberMasking(additionalContactDetailsEntity1.getMobileNumber().toString()));
                         if (additionalContactDetailsEntity1.getAltMobileNumber() != null) {
-                            numbersReturnResponseDTO1.setAlternativeMobile(additionalContactDetailsEntity1.getAltMobileNumber().toString());
+                            numbersReturnResponseDTO1.setAlternativeMobile(utilityService.mobileNumberMasking(additionalContactDetailsEntity1.getAltMobileNumber().toString()));
                         }
                         basicInfoOther.setRelation(additionalContactDetailsEntity1.getRelationWithApplicant());
                         basicInfoOther.setFirstName(additionalContactDetailsEntity1.getContactName());

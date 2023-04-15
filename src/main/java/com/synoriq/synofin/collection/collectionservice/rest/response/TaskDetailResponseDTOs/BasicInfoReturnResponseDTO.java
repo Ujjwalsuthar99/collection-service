@@ -54,4 +54,7 @@ public class BasicInfoReturnResponseDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @JsonProperty("emi_date")
     public String emiDate;
+
+    @JsonProperty("emi_amount")
+    public Double emiAmount;
 }

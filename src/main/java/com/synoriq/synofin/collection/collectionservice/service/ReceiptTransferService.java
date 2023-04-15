@@ -6,6 +6,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTran
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDataReturnResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -329,28 +331,49 @@ public class ReceiptTransferService {
         collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
     }
 
-    public ReceiptTransferResponseDTO getReceiptTransferById(Long receiptTransferId, Long userId) throws Exception {
+    public ReceiptTransferResponseDTO getReceiptTransferById(String token ,Long receiptTransferId, Long userId) throws Exception {
         log.info("receipt tranfer idddd {}", receiptTransferId);
         ReceiptTransferEntity receiptTransferEntity;
+        boolean buttonRestriction = false;
         ReceiptTransferResponseDTO receiptTransferResponseDTO = new ReceiptTransferResponseDTO();
         try {
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
             Long receiptTransferToUserId = receiptTransferEntity.getTransferredToUserId();
-            Long receiptTrasnferByUserId = receiptTransferEntity.getTransferredBy();
+            Long receiptTransferByUserId = receiptTransferEntity.getTransferredBy();
 
             List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId);
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, receiptTransferEntity.getTransferMode());
-            //  flagg //
-            // temporary work for user data //
-            Map<String, Object> transferToUserData = null;
-            Map<String, Object> transferByUserData = null;
-            if (receiptTransferToUserId != null) {
-                transferToUserData = receiptTransferRepository.getUserDataByUserId(receiptTransferToUserId);
-                transferByUserData = receiptTransferRepository.getUserDataByUserId(receiptTrasnferByUserId);
+
+            List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferId);
+            Long receiptId =  receiptTransferHistoryEntityList.get(0).getCollectionReceiptsId();
+            List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntity = receiptTransferHistoryRepository.buttonRestriction(receiptTransferId, receiptId);
+
+            if (!receiptTransferHistoryEntity.isEmpty()) {
+                buttonRestriction = true;
             }
-            receiptTransferResponseDTO.setTransferToUserData(transferToUserData);
-            receiptTransferResponseDTO.setTransferByUserData(transferByUserData);
-            // temporary work for user data //
+            UserDetailByUserIdDTOResponse transferToUserData;
+            UserDetailByUserIdDTOResponse transferByUserData;
+            UserDataReturnResponseDTO returnTransferToUserData = new UserDataReturnResponseDTO();
+            UserDataReturnResponseDTO returnTransferByUserData = new UserDataReturnResponseDTO();
+            if (receiptTransferToUserId != null) {
+                //  transfer to
+                transferToUserData = utilityService.getUserDetailsByUserId(token, receiptTransferToUserId);
+                returnTransferToUserData.setUserId(transferToUserData.getData().getId());
+                returnTransferToUserData.setUserName(transferToUserData.getData().getEmployeeUserName());
+                returnTransferToUserData.setDepartment(transferToUserData.getData().getDepartment());
+                returnTransferToUserData.setName(transferToUserData.getData().getEmployeeName());
+
+                //  transfer by
+                transferByUserData = utilityService.getUserDetailsByUserId(token, receiptTransferByUserId);
+                returnTransferByUserData.setUserId(transferByUserData.getData().getId());
+                returnTransferByUserData.setUserName(transferByUserData.getData().getEmployeeUserName());
+                returnTransferByUserData.setDepartment(transferByUserData.getData().getDepartment());
+                returnTransferByUserData.setName(transferByUserData.getData().getEmployeeName());
+
+            }
+            receiptTransferResponseDTO.setTransferToUserData(returnTransferToUserData);
+            receiptTransferResponseDTO.setTransferByUserData(returnTransferByUserData);
+            receiptTransferResponseDTO.setButtonRestriction(buttonRestriction);
             receiptTransferResponseDTO.setReceiptTransferData(receiptTransferEntity);
             receiptTransferResponseDTO.setReceiptData(receiptsData);
             if (collectionLimitUserWiseEntity != null) {
@@ -360,6 +383,8 @@ public class ReceiptTransferService {
             }
 
         } catch (Exception e) {
+            log.info("error {}", e);
+            e.printStackTrace();
             throw new Exception("1016028");
         }
         return receiptTransferResponseDTO;

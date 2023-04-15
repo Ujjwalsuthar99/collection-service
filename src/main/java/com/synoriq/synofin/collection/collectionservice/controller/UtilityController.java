@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.SQLException;
 
@@ -110,13 +111,43 @@ public class UtilityController {
 
 
     @RequestMapping(value = "uploadImageOnS3", method = RequestMethod.POST)
-    public ResponseEntity<Object> uploadImageOnS3(@RequestHeader("Authorization") String token, @RequestBody UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO) throws SQLException {
+    public ResponseEntity<Object> uploadImageOnS3(@RequestHeader("Authorization") String token, @RequestParam("image") MultipartFile imageData,
+                                                  @RequestParam("user_ref_no") String userRefNo,
+                                                  @RequestParam("file_name") String fileName,
+                                                  @RequestParam("client_id") String clientId,
+                                                  @RequestParam("system_id") String systemId) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         UploadImageOnS3ResponseDTO result;
 
         try {
-            result = utilityService.uploadImageOnS3(token, uploadImageOnS3RequestDTO);
+            result = utilityService.uploadImageOnS3(token, imageData, userRefNo, fileName, clientId, systemId);
+            response = new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+
+    @RequestMapping(value = "sendPdfToCustomerUsingS3", method = RequestMethod.POST)
+    public ResponseEntity<Object> sendPdfToCustomerUsingS3(@RequestHeader("Authorization") String token, @RequestParam("image") MultipartFile imageData,
+                                                  @RequestParam("user_ref_no") String userRefNo,
+                                                  @RequestParam("client_id") String clientId,
+                                                  @RequestParam("payment_mode") String paymentMode,
+                                                  @RequestParam("receipt_amount") String receiptAmount,
+                                                  @RequestParam("file_name") String fileName) throws SQLException {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        UploadImageOnS3ResponseDTO result;
+
+        try {
+            result = utilityService.sendPdfToCustomerUsingS3(token, imageData, userRefNo, clientId, paymentMode, receiptAmount, fileName);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

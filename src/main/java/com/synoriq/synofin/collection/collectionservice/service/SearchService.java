@@ -37,15 +37,14 @@ public class SearchService {
             searchBody.getRequestData().setSearchTerm(search);
             searchBody.getRequestData().setFilterBy(searchBody.getRequestData().getFilterBy());
             searchBody.getRequestData().setPaginationDTO(searchBody.getRequestData().getPaginationDTO());
+        } else {
+            final Pattern pattern = Pattern.compile("(?=.*[A-Z])(?=.*\\d).{2,}", Pattern.CASE_INSENSITIVE);
+            final Matcher matcher = pattern.matcher(data);
+
+            if (!matcher.matches()) {
+                throw new Exception("1016034");
+            }
         }
-//        else {
-//            final Pattern pattern = Pattern.compile("(?=.*[A-Z])(?=.*\\d).{2,}", Pattern.CASE_INSENSITIVE);
-//            final Matcher matcher = pattern.matcher(data);
-//
-//            if (!matcher.matches()) {
-//                throw new Exception("1016034");
-//            }
-//        }
         try {
 
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -70,16 +69,17 @@ public class SearchService {
                     taskListDTOReturnResponse.setLoanApplicationId(Long.parseLong(loanDataDTO.getLoanId()));
                     taskListDTOReturnResponse.setLoanApplicationNumber(loanDataDTO.getLoanApplicationNumber());
                     taskListDTOReturnResponse.setOverdueRepayment(loanDataDTO.getOverDueAmount());
+                    taskListDTOReturnResponse.setBranch(loanDataDTO.getBranch());
                     taskListDTOReturnResponse.setDaysPastDue(loanDataDTO.getDpd());
 
                     int dpd = loanDataDTO.getDpd();
                     if (dpd >= 0 && dpd <= 30) {
                         taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#ABCFFF");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#61B2FF");
                         taskListDTOReturnResponse.setDaysPastDueBucket("0-30 DPD");
                     } else if (dpd >= 31 && dpd <= 60) {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#FDB4FF");
+                        taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#2F80ED");
                         taskListDTOReturnResponse.setDaysPastDueBucket("31-60 DPD");
                     } else if (dpd >= 61 && dpd <= 90) {
                         taskListDTOReturnResponse.setDpdTextColorKey("#323232");
@@ -87,20 +87,20 @@ public class SearchService {
                         taskListDTOReturnResponse.setDaysPastDueBucket("61-90 DPD");
                     } else if (dpd >= 91 && dpd <= 120) {
                         taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#FCDA8B");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#F2994A");
                         taskListDTOReturnResponse.setDaysPastDueBucket("91-120 DPD");
                     } else if (dpd >= 121 && dpd <= 150) {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#F2994A");
+                        taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#FF5359");
                         taskListDTOReturnResponse.setDaysPastDueBucket("121-150 DPD");
                     } else if (dpd >= 151 && dpd <= 180) {
                         taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#FF5359");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#C83939");
                         taskListDTOReturnResponse.setDaysPastDueBucket("151-180 DPD");
                     } else {
                         taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#C83939");
-                        taskListDTOReturnResponse.setDaysPastDueBucket("180++ DPD");
+                        taskListDTOReturnResponse.setDpdBgColorKey("#722F37");
+                        taskListDTOReturnResponse.setDaysPastDueBucket("180+ DPD");
                     }
                     result.add(taskListDTOReturnResponse);
                 }

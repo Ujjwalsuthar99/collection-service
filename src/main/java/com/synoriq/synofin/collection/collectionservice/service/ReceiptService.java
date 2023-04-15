@@ -9,11 +9,15 @@ import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEnt
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceRequestDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+
 import com.synoriq.synofin.collection.collectionservice.rest.response.createReceiptLms.ServiceRequestSaveResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.msgServiceResponse.FinovaMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.GetReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptServiceSystemPropertiesResponse;
+import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -41,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_FOLLOWUP;
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_RECEIPT;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
@@ -75,6 +78,13 @@ public class ReceiptService {
 
     @Autowired
     private ProfileService profileService;
+
+    @Autowired
+    private FinovaSmsService finovaSmsService;
+
+    @Autowired
+    private CurrentUserInfo currentUserInfo;
+
 
     public BaseDTOResponse<Object> getReceiptsByUserIdWithDuration(String userName, String fromDate, String toDate, String status, String paymentMode, Integer page, Integer size) throws Exception {
 
@@ -137,7 +147,7 @@ public class ReceiptService {
     }
 
     @Transactional
-    public Object createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception {
+    public ServiceRequestSaveResponse createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception {
         ServiceRequestSaveResponse res = new ServiceRequestSaveResponse();
         ReceiptServiceSystemPropertiesResponse lmsBusinessDate = new ReceiptServiceSystemPropertiesResponse();
         ReceiptServiceDtoRequest createReceiptBody = new ObjectMapper().convertValue(receiptServiceDtoRequest, ReceiptServiceDtoRequest.class);
@@ -150,13 +160,16 @@ public class ReceiptService {
             String limitConf = null;
             if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash")) {
                 limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
-            } else {
+            } else if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque")) {
                 limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
+            } else if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi"))  {
+                limitConf = ONLINE_COLLECTION_DEFAULT_LIMIT;
             }
 
 
             Double totalLimitValue = 0.00;
             Double currentReceiptAmountAllowed = 0.00;
+            double receiptAmount = Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
             CollectionLimitUserWiseEntity collectionLimitUser = (CollectionLimitUserWiseEntity) collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode);
 
             if(collectionLimitUser != null) {
@@ -167,8 +180,17 @@ public class ReceiptService {
                 currentReceiptAmountAllowed = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
             }
 
+            // per day cash limit check
+            double perDayCashLimitLoan = Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("per_day_cash_collection_customer_limit"));
+            double receiptCollectedAmountTillToday = receiptRepository.getCollectedAmountToday(Long.valueOf(receiptServiceDtoRequest.getRequestData().getLoanId()));
 
+            log.info("perDayCashLimitLoan {}", perDayCashLimitLoan);
+            log.info("receiptCollectedAmountTillToday {}", receiptCollectedAmountTillToday);
+            log.info("receiptAmount {}", receiptAmount);
 
+            if (receiptCollectedAmountTillToday + receiptAmount > perDayCashLimitLoan) {
+                throw new Exception("1017005");
+            }
             log.info("Total Limit Value {}", totalLimitValue);
             log.info("Receipt amount can be collected by a user at current situation {}", currentReceiptAmountAllowed);
             log.info("Receipt amount {}", receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
@@ -230,7 +252,7 @@ public class ReceiptService {
 
 //            Map<String, Object> cashInHand = dashboardRepository.getCashInHandByUserIdByDuration(String.valueOf(receiptServiceDtoRequest.getActivityData().getUserId()), "01-01-2023", String.valueOf(new Date()));
 
-                if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque")) {
+                if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi")) {
                     CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
                     log.info("collection limit user wise entity already exist {}", collectionLimitUser);
@@ -255,10 +277,33 @@ public class ReceiptService {
                     }
                     log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+
+//                    if(currentUserInfo.getClientId().equals("finova")) {
+//                        FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
+//                        if(receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cash")) {
+//                            finovaSmsRequest.setFlow_id(FINOVA_CASH_MSG_FLOW_ID);
+//                        } else if (receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cheque")) {
+//                            finovaSmsRequest.setFlow_id(FINOVA_CHEQUE_MSG_FLOW_ID);
+//                        } else {
+//                            finovaSmsRequest.setFlow_id(FINOVA_UPI_MSG_FLOW_ID);
+//                        }
+//                        finovaSmsRequest.setSender("FINOVA");
+//                        finovaSmsRequest.setShort_url("0");
+//                        finovaSmsRequest.setMobiles("917805951252");
+//                        finovaSmsRequest.setAmount(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
+//                        finovaSmsRequest.setLoanNumber(receiptServiceDtoRequest.getLoanApplicationNumber());
+//                        finovaSmsRequest.setUrl("https://www.africau.edu/images/default/sample.pdf");
+//
+//                        FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
+//                    }
+
                 }
             } else {
-                throw new CustomException(res.getError().getText());
-//                return res;
+//                log.info("codeee {}", res.getError().getCode());
+//                log.info("text {}", res.getError().getText());
+
+//                throw new CustomException(res.getError().getText(), Integer.parseInt(res.getError().getCode()));
+                return res;
             }
 
 

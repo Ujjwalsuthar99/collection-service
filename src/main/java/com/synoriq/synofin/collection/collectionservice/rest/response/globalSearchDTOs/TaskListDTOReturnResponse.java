@@ -36,4 +36,7 @@ public class TaskListDTOReturnResponse {
     @JsonProperty("overdue_repayment")
     Double overdueRepayment;
 
+    @JsonProperty("branch")
+    String branch;
+
 }
