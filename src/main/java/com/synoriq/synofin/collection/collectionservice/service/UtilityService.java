@@ -326,6 +326,10 @@ public class UtilityService {
                 ShortenUrlRequestDTO shortenUrlRequestDTO = new ShortenUrlRequestDTO();
                 ShortenUrlDataRequestDTO shortenUrlDataRequestDTO = new ShortenUrlDataRequestDTO();
 
+                shortenUrlRequestDTO.setClientId(clientId);
+                shortenUrlRequestDTO.setSystemId("collection");
+                shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
+
                 shortenUrlResponseDTO = HTTPRequestService.<Object, ShortenUrlResponseDTO>builder()
                         .httpMethod(HttpMethod.POST)
                         .url(SHORTEN_URL_UAT)
@@ -333,10 +337,6 @@ public class UtilityService {
                         .httpHeaders(httpHeaders)
                         .typeResponseType(ShortenUrlResponseDTO.class)
                         .build().call();
-
-                shortenUrlRequestDTO.setClientId(clientId);
-                shortenUrlRequestDTO.setSystemId("collection");
-                shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
 
                 FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
                 if(paymentMode.equals("cash")) {
