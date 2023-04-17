@@ -18,7 +18,6 @@
 		<spring-cloud.version>2020.0.3</spring-cloud.version>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -55,27 +54,21 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.synoriq.synofin</groupId>
-			<artifactId>synofin-event</artifactId>
-			<version>dev-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.synoriq.synofin.lms</groupId>
 			<artifactId>common-dto</artifactId>
-			<version>1.0</version>
+			<version>uat-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.synoriq.synofin</groupId>
 			<artifactId>utility-service</artifactId>
-			<version>1.0</version>
+			<version>uat-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.synoriq.synofin.lms</groupId>
 			<artifactId>common-persistence</artifactId>
-			<version>1.0</version>
+			<version>uat-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -125,7 +118,7 @@
 		<dependency>
 			<groupId>com.synoriq.synofin</groupId>
 			<artifactId>elastic-search</artifactId>
-			<version>1.0</version>
+			<version>uat-SNAPSHOT</version>
 		</dependency>
 
 		<!--		<dependency>-->
