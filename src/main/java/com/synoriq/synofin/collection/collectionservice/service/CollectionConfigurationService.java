@@ -25,18 +25,21 @@ public class CollectionConfigurationService {
         List<CollectionConfigurationsEntity> collectionConfigurationsEntityList = collectionConfigurationsRepository.findAll();
         try {
             Map<String, String> objectData = new HashMap<>();
-            String logoFileName = null;
+//            String logoFileName = null;
+//            for (CollectionConfigurationsEntity collectionConfigurationsEntity : collectionConfigurationsEntityList) {
+//                if (Objects.equals(collectionConfigurationsEntity.getConfigurationName(), "client_app_logo")) {
+//                    logoFileName = collectionConfigurationsEntity.getConfigurationValue();
+//                } else {
+//                    objectData.put(collectionConfigurationsEntity.getConfigurationName(), collectionConfigurationsEntity.getConfigurationValue());
+//                }
+//            }
+//            if (logoFileName != null) {
+//                String clientId = logoFileName.split("/")[0];
+//                DownloadBase64FromS3 res = utilityService.downloadBase64FromS3(token, "", logoFileName, clientId);
+//                objectData.put("client_app_logo", res.getData());
+//            }
             for (CollectionConfigurationsEntity collectionConfigurationsEntity : collectionConfigurationsEntityList) {
-                if (Objects.equals(collectionConfigurationsEntity.getConfigurationName(), "client_app_logo")) {
-                    logoFileName = collectionConfigurationsEntity.getConfigurationValue();
-                } else {
-                    objectData.put(collectionConfigurationsEntity.getConfigurationName(), collectionConfigurationsEntity.getConfigurationValue());
-                }
-            }
-            if (logoFileName != null) {
-                String clientId = logoFileName.split("/")[0];
-                DownloadBase64FromS3 res = utilityService.downloadBase64FromS3(token, "", logoFileName, clientId);
-                objectData.put("client_app_logo", res.getData());
+                objectData.put(collectionConfigurationsEntity.getConfigurationName(), collectionConfigurationsEntity.getConfigurationValue());
             }
             return objectData;
         } catch(Exception e) {
