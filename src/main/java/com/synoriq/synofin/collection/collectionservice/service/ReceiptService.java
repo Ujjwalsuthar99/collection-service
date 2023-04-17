@@ -181,13 +181,13 @@ public class ReceiptService {
             }
 
             // per day cash limit check
-            double perDayCashLimitLoan = Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("per_day_cash_collection_customer_limit"));
-            double receiptCollectedAmountTillToday = receiptRepository.getCollectedAmountToday(Long.valueOf(receiptServiceDtoRequest.getRequestData().getLoanId()));
-
-            log.info("perDayCashLimitLoan {}", perDayCashLimitLoan);
-            log.info("receiptCollectedAmountTillToday {}", receiptCollectedAmountTillToday);
-            log.info("receiptAmount {}", receiptAmount);
             if (receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cash")) {
+                double perDayCashLimitLoan = Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("per_day_cash_collection_customer_limit"));
+                double receiptCollectedAmountTillToday = receiptRepository.getCollectedAmountToday(Long.valueOf(receiptServiceDtoRequest.getRequestData().getLoanId()));
+
+                log.info("perDayCashLimitLoan {}", perDayCashLimitLoan);
+                log.info("receiptCollectedAmountTillToday {}", receiptCollectedAmountTillToday);
+                log.info("receiptAmount {}", receiptAmount);
                 if (receiptCollectedAmountTillToday + receiptAmount > perDayCashLimitLoan) {
                     throw new Exception("1017005");
                 }
@@ -248,10 +248,6 @@ public class ReceiptService {
                 collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityId);
 
                 collectionReceiptRepository.save(collectionReceiptEntity);
-
-//                DummyProfileDetailDTO profileData = (DummyProfileDetailDTO) profileService.getProfileDetails(bearerToken, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
-
-//            Map<String, Object> cashInHand = dashboardRepository.getCashInHandByUserIdByDuration(String.valueOf(receiptServiceDtoRequest.getActivityData().getUserId()), "01-01-2023", String.valueOf(new Date()));
 
                 if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi")) {
                     CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();

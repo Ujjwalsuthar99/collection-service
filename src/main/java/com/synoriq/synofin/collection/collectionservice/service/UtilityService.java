@@ -13,6 +13,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionCon
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.*;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.msgServiceResponse.FinovaMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.shortenUrl.ShortenUrlResponseDTO;
@@ -253,6 +254,28 @@ public class UtilityService {
                     .body(uploadImageOnS3RequestDTO)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UploadImageOnS3ResponseDTO.class)
+                    .build().call();
+
+            log.info("responseData {}", res);
+        } catch (Exception ee) {
+            log.error("{}", ee.getMessage());
+        }
+        return res;
+    }
+
+    public DownloadBase64FromS3 downloadBase64FromS3(String token, String userRefNo, String fileName, String clientId) throws IOException {
+        DownloadBase64FromS3 res = new DownloadBase64FromS3();
+
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, DownloadBase64FromS3>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getBase64ByFileName?clientId=" + clientId + "&fileName=" + fileName + "&userRefNo=" + userRefNo)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(DownloadBase64FromS3.class)
                     .build().call();
 
             log.info("responseData {}", res);
