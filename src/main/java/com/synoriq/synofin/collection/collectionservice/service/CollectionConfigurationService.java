@@ -3,8 +3,6 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionConfigurationsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionConfigurationDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
