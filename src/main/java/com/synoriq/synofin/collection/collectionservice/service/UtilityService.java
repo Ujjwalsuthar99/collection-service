@@ -263,7 +263,7 @@ public class UtilityService {
         return res;
     }
 
-    public DownloadBase64FromS3 downloadBase64FromS3(String token, String userRefNo, String fileName, String clientId) throws IOException {
+    public DownloadBase64FromS3 downloadBase64FromS3(String token, String userRefNo, String fileName, String clientId, boolean isNativeFolder) throws IOException {
         DownloadBase64FromS3 res = new DownloadBase64FromS3();
 
         try {
@@ -273,7 +273,7 @@ public class UtilityService {
 
             res = HTTPRequestService.<Object, DownloadBase64FromS3>builder()
                     .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getBase64ByFileName?clientId=" + clientId + "&fileName=" + fileName + "&userRefNo=" + userRefNo)
+                    .url("http://localhost:1102/v1/getBase64ByFileName?clientId=" + clientId + "&fileName=" + fileName + "&userRefNo=" + userRefNo + "&isNativeFolder=" + isNativeFolder)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(DownloadBase64FromS3.class)
                     .build().call();

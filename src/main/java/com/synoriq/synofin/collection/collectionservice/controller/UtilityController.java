@@ -164,13 +164,15 @@ public class UtilityController {
     @RequestMapping(value = "downloadBase64FromS3", method = RequestMethod.GET)
     public ResponseEntity<Object> downloadBase64FromS3(@RequestHeader("Authorization") String token,
                                                   @RequestParam("file_name") String fileName,
-                                                  @RequestParam("client_id") String clientId) throws SQLException {
+                                                  @RequestParam("client_id") String clientId,
+                                                  @RequestParam("user_ref_no") String userRefNo,
+                                                  @RequestParam(value = "isNativeFolder", defaultValue = "true", required = false) boolean isNativeFolder) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         DownloadBase64FromS3 result;
 
         try {
-            result = utilityService.downloadBase64FromS3(token, "", fileName, clientId);
+            result = utilityService.downloadBase64FromS3(token, userRefNo, fileName, clientId, isNativeFolder);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
