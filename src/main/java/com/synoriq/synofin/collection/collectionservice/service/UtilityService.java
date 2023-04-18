@@ -13,7 +13,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionCon
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.*;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.msgServiceResponse.FinovaMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.shortenUrl.ShortenUrlResponseDTO;
@@ -34,8 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
 @Service
 @Slf4j
@@ -263,19 +261,19 @@ public class UtilityService {
         return res;
     }
 
-    public DownloadBase64FromS3 downloadBase64FromS3(String token, String userRefNo, String fileName, String clientId, boolean isNativeFolder) throws IOException {
-        DownloadBase64FromS3 res = new DownloadBase64FromS3();
+    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, String clientId, boolean isNativeFolder) throws IOException {
+        DownloadBase64FromS3ResponseDTO res = new DownloadBase64FromS3ResponseDTO();
 
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
-            res = HTTPRequestService.<Object, DownloadBase64FromS3>builder()
+            res = HTTPRequestService.<Object, DownloadBase64FromS3ResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getBase64ByFileName?clientId=" + clientId + "&fileName=" + fileName + "&userRefNo=" + userRefNo + "&isNativeFolder=" + isNativeFolder)
                     .httpHeaders(httpHeaders)
-                    .typeResponseType(DownloadBase64FromS3.class)
+                    .typeResponseType(DownloadBase64FromS3ResponseDTO.class)
                     .build().call();
 
             log.info("responseData {}", res);

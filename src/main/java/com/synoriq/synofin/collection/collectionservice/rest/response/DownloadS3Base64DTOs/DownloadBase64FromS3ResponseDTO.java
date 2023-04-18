@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class DownloadBase64FromS3 {
+public class DownloadBase64FromS3ResponseDTO {
 
     @JsonProperty("response")
     public Boolean response;
@@ -13,5 +13,5 @@ public class DownloadBase64FromS3 {
     public String data;
 
     @JsonProperty("error")
-    public Object error;
+    public String error;
 }
