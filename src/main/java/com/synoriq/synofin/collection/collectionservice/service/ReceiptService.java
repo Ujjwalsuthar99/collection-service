@@ -351,7 +351,8 @@ public class ReceiptService {
                 String bDate = lmsBusinessDate.data.businessDate;
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 Date date = formatter.parse(bDate);
-                getReceiptDateResponse.setReceiptDate(String.valueOf(date));
+                String busDate = formatter.format(date);
+                getReceiptDateResponse.setReceiptDate(busDate);
                 baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
             } else {
                 LocalDate dateObj = LocalDate.now();
