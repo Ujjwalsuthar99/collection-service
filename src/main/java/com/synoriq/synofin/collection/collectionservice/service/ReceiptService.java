@@ -20,6 +20,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.systemProp
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.utils.DateUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -351,8 +352,8 @@ public class ReceiptService {
                 String bDate = lmsBusinessDate.data.businessDate;
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 Date date = formatter.parse(bDate);
-                String busDate = formatter.format(date);
-                getReceiptDateResponse.setReceiptDate(busDate);
+                String formattedDate = DateUtils.formatDate(date);
+                getReceiptDateResponse.setReceiptDate(formattedDate);
                 baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
             } else {
                 LocalDate dateObj = LocalDate.now();
