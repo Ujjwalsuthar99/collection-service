@@ -50,7 +50,6 @@ public class KafkaListnerService {
     @Autowired
     private CollectionActivityLogsRepository collectionActivityLogsRepository;
 
-    @Transactional
     @SynofinEventServiceListener(topics = "${spring.kafka.events.topic}", groupId = "collection", containerFactory = "kafkaListenerContainerFactory")
     public void consumerTest(@Payload MessageContainerTemplate message, @Headers MessageHeaders headers) {
         try {
