@@ -336,6 +336,7 @@ public class ReceiptService {
         try {
 
             String businessDateConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(USE_BUSINESS_DATE_AS_RECEIPT_DATE);
+            String transactionDateConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(USE_BUSINESS_DATE_AS_TRANSACTION_DATE);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", bearerToken);
@@ -354,15 +355,29 @@ public class ReceiptService {
                 SimpleDateFormat outputFormatter = new SimpleDateFormat("yyyy-MM-dd");
                 Date date = inputFormatter.parse(bDate);
                 String busDate = outputFormatter.format(date);
-                getReceiptDateResponse.setReceiptDate(busDate);
-                baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
+                getReceiptDateResponse.setBusinessDate(busDate);
             } else {
                 LocalDate dateObj = LocalDate.now();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 String cDate = dateObj.format(formatter);
-                getReceiptDateResponse.setReceiptDate(cDate);
-                baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
+                getReceiptDateResponse.setBusinessDate(cDate);
             }
+            baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
+
+            if (transactionDateConf.equals("true")) {
+                String bDate = lmsBusinessDate.data.businessDate;
+                SimpleDateFormat inputFormatter = new SimpleDateFormat("dd-MM-yyyy");
+                SimpleDateFormat outputFormatter = new SimpleDateFormat("yyyy-MM-dd");
+                Date date = inputFormatter.parse(bDate);
+                String busDate = outputFormatter.format(date);
+                getReceiptDateResponse.setTransactionDate(busDate);
+            } else {
+                LocalDate dateObj = LocalDate.now();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                String cDate = dateObj.format(formatter);
+                getReceiptDateResponse.setTransactionDate(cDate);
+            }
+            baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
             log.info("Receipt Date {}", baseResponse);
         } catch (Exception ee) {
             throw new Exception(ee);
