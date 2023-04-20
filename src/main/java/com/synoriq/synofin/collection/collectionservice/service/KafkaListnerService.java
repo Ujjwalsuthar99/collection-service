@@ -28,10 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -50,6 +47,7 @@ public class KafkaListnerService {
     @Autowired
     private CollectionActivityLogsRepository collectionActivityLogsRepository;
 
+    @Transactional
     @SynofinEventServiceListener(topics = "${spring.kafka.events.topic}", groupId = "collection", containerFactory = "kafkaListenerContainerFactory")
     public void consumerTest(@Payload MessageContainerTemplate message, @Headers MessageHeaders headers) {
         try {
@@ -60,7 +58,7 @@ public class KafkaListnerService {
             CollectionLimitUserWiseEntity collectionLimitUser = (CollectionLimitUserWiseEntity) collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(messageObject.getUserId(), messageObject.getPaymentMode());
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
-            List<Object> serviceRequestData = receiptRepository.getServiceRequestId(String.valueOf(messageObject.getServiceRequestId()));
+            List<Map<String, Object>> serviceRequestData = receiptRepository.getServiceRequestId(String.valueOf(messageObject.getServiceRequestId()));
 
             if(collectionLimitUser != null && serviceRequestData != null) {
                 collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
