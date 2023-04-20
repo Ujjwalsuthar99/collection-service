@@ -56,11 +56,14 @@ public class KafkaListnerService {
             CollectionRequestActionEvent messageObject = new ObjectMapper().convertValue(message.getMessage(), CollectionRequestActionEvent.class);
             log.info("message object, {}", messageObject);
             CollectionLimitUserWiseEntity collectionLimitUser = (CollectionLimitUserWiseEntity) collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(messageObject.getUserId(), messageObject.getPaymentMode());
+            log.info("collection limit user wise surpassed");
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
             List<Map<String, Object>> serviceRequestData = receiptRepository.getServiceRequestId(String.valueOf(messageObject.getServiceRequestId()));
+            log.info("check service request, {}", serviceRequestData);
 
             if(collectionLimitUser != null && serviceRequestData != null) {
+                log.info("in iffff");
                 collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
                 collectionLimitUserWiseEntity.setCreatedDate(new Date());
                 collectionLimitUserWiseEntity.setDeleted(collectionLimitUser.getDeleted());
