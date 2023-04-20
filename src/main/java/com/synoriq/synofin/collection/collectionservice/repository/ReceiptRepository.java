@@ -103,4 +103,8 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "            from lms.service_request sr where sr.request_source = 'm_collect' and sr.loan_id = cast(:loanId as bigint) and sr.form->>'payment_mode' = 'cash'\n" +
             "            and date(sr.created_date) = date(current_date)")
     double getCollectedAmountToday(@Param("loanId") Long loanId);
+
+
+    @Query(nativeQuery = true, value = "select * from lms.service_request sr join collection_receipts cr on sr.service_request_id = cr.receipt_id where sr.service_request_id = :serviceRequestId and sr.request_source = 'm_collect' and sr.is_deleted = false")
+    List<Object> getServiceRequestId(@Param("serviceRequestId") String serviceRequestId);
 }
