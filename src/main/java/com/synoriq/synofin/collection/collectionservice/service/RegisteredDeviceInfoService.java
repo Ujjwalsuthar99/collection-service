@@ -47,7 +47,7 @@ public class RegisteredDeviceInfoService {
 
     public BaseDTOResponse<Object> createRegisteredDeviceInfo(RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, String userId) throws Exception {
         List<RegisteredDeviceInfoEntity> registeredDeviceInfoEntityList = registeredDeviceInfoRepository.findDeviceInfoByUserId(Long.valueOf(userId));
-        log.info("my user data from device info table {}", registeredDeviceInfoEntityList);
+//        log.info("my user data from device info table {}", registeredDeviceInfoEntityList);
         BaseDTOResponse<Object> response = null;
 
 

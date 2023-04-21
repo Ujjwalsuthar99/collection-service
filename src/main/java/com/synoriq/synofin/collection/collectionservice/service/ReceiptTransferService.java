@@ -316,6 +316,7 @@ public class ReceiptTransferService {
         receiptTransferEntity.setActionRemarks(receiptTransferStatusUpdateDtoRequest.getActionRemarks());
         receiptTransferEntity.setActionBy(receiptTransferStatusUpdateDtoRequest.getActionBy());
         receiptTransferEntity.setCollectionActivityLogsId(collectionActivityLogsId);
+        receiptTransferEntity.setReceiptImage(receiptTransferStatusUpdateDtoRequest.getImages());
         receiptTransferRepository.save(receiptTransferEntity);
     }
 

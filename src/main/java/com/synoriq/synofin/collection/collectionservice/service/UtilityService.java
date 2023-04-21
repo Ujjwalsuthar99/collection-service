@@ -239,7 +239,7 @@ public class UtilityService {
         uploadImageOnS3RequestDTO.setUserReferenceNumber("");
 
 
-        log.info("uploadImageOnS3RequestDTO {}", uploadImageOnS3RequestDTO);
+//        log.info("uploadImageOnS3RequestDTO {}", uploadImageOnS3RequestDTO);
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
@@ -254,7 +254,7 @@ public class UtilityService {
                     .typeResponseType(UploadImageOnS3ResponseDTO.class)
                     .build().call();
 
-            log.info("responseData {}", res);
+//            log.info("responseData {}", res);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -276,7 +276,7 @@ public class UtilityService {
                     .typeResponseType(DownloadBase64FromS3ResponseDTO.class)
                     .build().call();
 
-            log.info("responseData {}", res);
+//            log.info("responseData {}", res);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -306,7 +306,7 @@ public class UtilityService {
         String[] loanId = fileName.split("_");
 
 
-        log.info("uploadImageOnS3RequestDTO {}", uploadImageOnS3RequestDTO);
+//        log.info("uploadImageOnS3RequestDTO {}", uploadImageOnS3RequestDTO);
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
@@ -335,7 +335,7 @@ public class UtilityService {
                 shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
                 shortenUrlRequestDTO.setData(shortenUrlDataRequestDTO);
 
-                log.info("shorten url request {}", shortenUrlRequestDTO);
+//                log.info("shorten url request {}", shortenUrlRequestDTO);
 
                 shortenUrlResponseDTO = HTTPRequestService.<Object, ShortenUrlResponseDTO>builder()
                         .httpMethod(HttpMethod.POST)

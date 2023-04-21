@@ -35,7 +35,7 @@ public class ReceiptTransferController {
 
     @RequestMapping(value = "/receipt-transfer/generate", method = RequestMethod.POST)
     public ResponseEntity<Object> createReceiptTransfer(@RequestBody ReceiptTransferDtoRequest receiptTransferDtoRequest, @RequestHeader("Authorization") String bearerToken) {
-        log.info("my request body {}", receiptTransferDtoRequest);
+//        log.info("my request body {}", receiptTransferDtoRequest);
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
