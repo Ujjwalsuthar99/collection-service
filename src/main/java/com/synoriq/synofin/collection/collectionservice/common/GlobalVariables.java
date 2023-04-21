@@ -17,6 +17,7 @@ public class GlobalVariables {
     public static final String SHORTEN_URL_UAT = "http://3.111.153.160:7011/integration/v1/url/shortan";
     public static final String FINOVA_MSG_API_URL = "https://api.msg91.com/api/v5/flow/";
     public static final String USE_BUSINESS_DATE_AS_RECEIPT_DATE = "use_business_date_as_receipt_trx_date";
+    public static final String USE_BUSINESS_DATE_AS_TRANSACTION_DATE = "use_business_date_as_transaction_date";
     public static final String FINOVA_CASH_MSG_FLOW_ID = "638b914a3ef07b5a0221ed82";
     public static final String FINOVA_CHEQUE_MSG_FLOW_ID = "638b9491907adf51817999c6";
     public static final String FINOVA_UPI_MSG_FLOW_ID = "638b94373ef07b5a0221ed83";

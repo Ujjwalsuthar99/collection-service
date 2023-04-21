@@ -8,7 +8,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class GetReceiptDateResponse {
 
-    @JsonProperty("receipt_date")
-    public String receiptDate;
+    @JsonProperty("business_date")
+    public String businessDate;
+
+    @JsonProperty("transaction_date")
+    public String transactionDate;
 
 }
