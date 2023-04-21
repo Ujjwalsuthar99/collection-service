@@ -230,6 +230,7 @@ public class TaskService {
             }
             log.info("customerList {}", customerList);
             loanRes.getData().setLoanBranch(loanDetailRes.getData().getSourcingBranch());
+            loanRes.getData().setEmiCycle(loanDetailRes.getData().getEmiCycle());
             loanRes.getData().setLoanApplicationNumber(loanApplicationNumber);
             response.setCustomerDetails(customerList);
             response.setLoanDetails(loanRes.getData());

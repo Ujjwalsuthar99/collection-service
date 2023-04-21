@@ -98,7 +98,10 @@ public class LoanBasicDetailsDTO {
     
     @JsonProperty("scheme")
     private String scheme;
-    
+
+    @JsonProperty("emi_cycle")
+    private Integer emiCycle;
+
     @JsonProperty("loan_type")
     private Object loanType;
     
