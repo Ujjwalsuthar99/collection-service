@@ -100,6 +100,7 @@ public class ReceiptTransferService {
                 receiptTransferEntity.setAmount(receiptTransferDtoRequest.getAmount());
                 receiptTransferEntity.setReceiptImage(receiptTransferDtoRequest.getReceiptImage());
                 receiptTransferEntity.setStatus(receiptTransferDtoRequest.getStatus());
+                receiptTransferEntity.setRemarks(receiptTransferDtoRequest.getRemarks());
                 receiptTransferEntity.setTransferBankCode(receiptTransferDtoRequest.getTransferBankCode());
                 receiptTransferEntity.setActionDatetime(receiptTransferDtoRequest.getActionDatetime());
                 receiptTransferEntity.setActionReason(receiptTransferDtoRequest.getActionReason());
