@@ -102,7 +102,7 @@ public class ReceiptController {
 
     @RequestMapping(value = "/create-receipt", method = RequestMethod.POST)
     public ResponseEntity<Object> createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, @RequestHeader("Authorization") String bearerToken) {
-        log.info("my request body {}", receiptServiceDtoRequest);
+//        log.info("my request body {}", receiptServiceDtoRequest);
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;

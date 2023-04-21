@@ -45,7 +45,7 @@ public class AdditionalContactDetailsService {
                .deleted(additionalContact.getDeleted())
                .relationWithApplicant(additionalContact.getRelationWithApplicant())
                .build()));
-        log.info("additional Contact Data {}", additionalContactDetailsDTO);
+//        log.info("additional Contact Data {}", additionalContactDetailsDTO);
         log.info("additional Contact Data isEmpty {}", additionalContactDetailsDTO.isEmpty());
 
         return additionalContactDetailsDTO;

@@ -155,7 +155,7 @@ public class ReceiptService {
 
         ReceiptServiceRequestDataDTO receiptServiceRequestDataDTO = new ReceiptServiceRequestDataDTO();
         ReceiptDateResponse receiptDateResponse = new ReceiptDateResponse();
-        log.info("createReceiptBody {}", createReceiptBody);
+//        log.info("createReceiptBody {}", createReceiptBody);
         try {
 
             String limitConf = null;

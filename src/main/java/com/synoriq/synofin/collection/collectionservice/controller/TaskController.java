@@ -58,7 +58,6 @@ public class TaskController {
 
         Object baseResponse;
         ResponseEntity<Object> response;
-        log.info("in ifff");
 
         try {
             baseResponse = taskService.getTaskDetailByLoanId(bearerToken, taskDetailRequestDTO);

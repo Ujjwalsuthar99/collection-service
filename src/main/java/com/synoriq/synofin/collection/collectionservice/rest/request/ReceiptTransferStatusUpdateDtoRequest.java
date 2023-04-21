@@ -12,6 +12,7 @@ public class ReceiptTransferStatusUpdateDtoRequest {
     String status;
     String actionReason;
     String actionRemarks;
+    Object images;
     Long actionBy;
     CollectionActivityLogDTO activityLog;
 

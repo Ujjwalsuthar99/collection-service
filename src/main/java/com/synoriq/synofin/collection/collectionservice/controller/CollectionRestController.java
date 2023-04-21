@@ -77,7 +77,7 @@ public class CollectionRestController {
 
     @RequestMapping(value = "/users/{userId}/device-register", method = RequestMethod.POST)
     public ResponseEntity<Object> createRegisteredDeviceInfo(@RequestBody RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, @PathVariable("userId") String userId) {
-        log.info("my request body {}", registeredDeviceInfoDtoRequest);
+//        log.info("my request body {}", registeredDeviceInfoDtoRequest);
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
