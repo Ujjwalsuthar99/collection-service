@@ -21,5 +21,8 @@ public class LoanDataDTO {
     @JsonProperty("loan_application_number")
     String loanApplicationNumber;
 
+    @JsonProperty("loan_branch")
+    String loanBranch;
+
 }
 
