@@ -25,7 +25,7 @@ public class LoanDataDTO {
     String loanBranch;
 
     @JsonProperty("emi_cycle")
-    Integer emiCycle;
+    String emiCycle;
 
 }
 
