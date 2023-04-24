@@ -189,7 +189,7 @@ public class UtilityService {
             }
             return i + "th";
         }
-        return null;
+        return "--";
     }
 
     public Object getBankNameByIFSC(String keyword) throws Exception {
