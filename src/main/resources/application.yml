@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: uat
+    active: pre-prod
   application:
     name: collection-service
   config:
