@@ -29,6 +29,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -171,6 +172,24 @@ public class UtilityService {
             }
         }
         return mobile;
+    }
+
+    public String addSuffix(Integer i) {
+        if (i != null) {
+            int j = i % 10;
+            int k = i % 100;
+            if (j == 1 && k != 11) {
+                return i + "st";
+            }
+            if (j == 2 && k != 12) {
+                return i + "nd";
+            }
+            if (j == 3 && k != 13) {
+                return i + "rd";
+            }
+            return i + "th";
+        }
+        return null;
     }
 
     public Object getBankNameByIFSC(String keyword) throws Exception {
