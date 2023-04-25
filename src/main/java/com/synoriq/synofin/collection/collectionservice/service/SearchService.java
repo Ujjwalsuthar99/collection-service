@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,17 +33,19 @@ public class SearchService {
         int stringSize = searchBody.getRequestData().getSearchTerm().length();
         String data = searchBody.getRequestData().getSearchTerm();
        //  Restrict Global Search Loan id for user with last 7 digit
-        if (stringSize >= 7) {
-            String search = data.substring((stringSize- 7));
-            searchBody.getRequestData().setSearchTerm(search);
-            searchBody.getRequestData().setFilterBy(searchBody.getRequestData().getFilterBy());
-            searchBody.getRequestData().setPaginationDTO(searchBody.getRequestData().getPaginationDTO());
-        } else {
-            final Pattern pattern = Pattern.compile("(?=.*[A-Z])(?=.*\\d).{2,}", Pattern.CASE_INSENSITIVE);
-            final Matcher matcher = pattern.matcher(data);
+        if (Objects.equals(requestBody.getRequestData().getFilterBy(), "loan_account_number")) {
+            if (stringSize >= 7) {
+                String search = data.substring((stringSize - 7));
+                searchBody.getRequestData().setSearchTerm(search);
+                searchBody.getRequestData().setFilterBy(searchBody.getRequestData().getFilterBy());
+                searchBody.getRequestData().setPaginationDTO(searchBody.getRequestData().getPaginationDTO());
+            } else {
+                final Pattern pattern = Pattern.compile("(?=.*[A-Z])(?=.*\\d).{2,}", Pattern.CASE_INSENSITIVE);
+                final Matcher matcher = pattern.matcher(data);
 
-            if (!matcher.matches()) {
-                throw new Exception("1016034");
+                if (!matcher.matches()) {
+                    throw new Exception("1016034");
+                }
             }
         }
         try {
