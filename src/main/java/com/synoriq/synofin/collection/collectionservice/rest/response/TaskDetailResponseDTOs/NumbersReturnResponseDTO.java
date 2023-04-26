@@ -13,7 +13,5 @@ public class NumbersReturnResponseDTO {
     @JsonProperty("alternative_mobile")
     public String alternativeMobile;
 
-    @JsonProperty("mobile_spouse")
-    public String MobileSpouse;
 
 }
