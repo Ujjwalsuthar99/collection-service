@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: pre-prod
+    active: uat
   application:
     name: collection-service
   config:
@@ -21,5 +21,5 @@ spring:
     client-specific-Migration-files-location: classpath:db/migration/clients/
   kafka:
     events:
-      topic: collection_receipt_checked_preprod
+      topic: collection_receipt_checked_uat
 

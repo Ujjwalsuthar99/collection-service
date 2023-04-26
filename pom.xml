@@ -56,19 +56,19 @@
 		<dependency>
 			<groupId>com.synoriq.synofin.lms</groupId>
 			<artifactId>common-dto</artifactId>
-			<version>preprod-SNAPSHOT</version>
+			<version>uat-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.synoriq.synofin</groupId>
 			<artifactId>utility-service</artifactId>
-			<version>preprod-SNAPSHOT</version>
+			<version>uat-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.synoriq.synofin.lms</groupId>
 			<artifactId>common-persistence</artifactId>
-			<version>preprod-SNAPSHOT</version>
+			<version>uat-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -124,7 +124,7 @@
 		<dependency>
 			<groupId>com.synoriq.synofin</groupId>
 			<artifactId>elastic-search</artifactId>
-			<version>preprod-SNAPSHOT</version>
+			<version>uat-SNAPSHOT</version>
 		</dependency>
 
 		<!--		<dependency>-->
