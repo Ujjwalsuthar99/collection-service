@@ -1,4 +1,4 @@
-ALTER TABLE collection.collection_configurations add column if not exists modified_date timestamptz NOT NULL;
+ALTER TABLE collection.collection_configurations add column if not exists modified_date timestamptz;
 
 ALTER TABLE collection.collection_configurations add column if not exists modified_by varchar;
 
