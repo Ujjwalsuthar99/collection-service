@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -48,7 +49,7 @@ public class KafkaListnerService {
     private CollectionActivityLogsRepository collectionActivityLogsRepository;
 
     @Transactional
-    @SynofinEventServiceListener(topics = "${spring.kafka.events.topic}", groupId = "collection", containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "${spring.kafka.events.topic}", containerFactory = "kafkaListenerContainerFactory")
     public void consumerTest(@Payload MessageContainerTemplate message, @Headers MessageHeaders headers) {
         try {
 //            changeAnnotationValue();
