@@ -7,6 +7,6 @@ public class ActivityRemarks {
     public static final String CREATE_TRANSFER = "Transfer Request ID {transfer_request} initiated by ";
     public static final String TRANSFER_STATUS = "Transfer Request ID {transfer_request} is {transfer_action} by ";
     public static final String LOGOUT_REMARKS = "The user {user_name} has been Logged Out";
-    public static final String KAFKA_RECEIPT_STATUS = "The receipt has been {status} from LMS";
+    public static final String KAFKA_RECEIPT_STATUS = "The receipt {receipt_id} has been {status} from LMS";
 
 }

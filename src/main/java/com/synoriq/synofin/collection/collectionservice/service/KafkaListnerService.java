@@ -79,6 +79,7 @@ public class KafkaListnerService {
                 collectionActivityLogsEntity.setActivityBy(messageObject.getUserId());
                 String updatedRemarks = KAFKA_RECEIPT_STATUS;
                 updatedRemarks = updatedRemarks.replace("{status}", messageObject.getStatus());
+                updatedRemarks = updatedRemarks.replace("{receipt_id}", String.valueOf(messageObject.getServiceRequestId()));
                 collectionActivityLogsEntity.setRemarks(updatedRemarks);
                 collectionActivityLogsEntity.setActivityDate(new Date());
                 collectionActivityLogsEntity.setActivityName("receipt_" + messageObject.getStatus());

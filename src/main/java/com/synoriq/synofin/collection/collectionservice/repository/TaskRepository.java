@@ -62,7 +62,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    join lms.customer c on clm.customer_id = c.customer_id\n" +
             "    join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
             "    join (select product_code, product_name from master.product) as p on p.product_code = la.product\n" +
-            "    join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
+            "    left join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
             "    and la.deleted = false\n" +
@@ -112,7 +112,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    join lms.customer c on clm.customer_id = c.customer_id\n" +
             "join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
             "join (select product_code, product_name from master.product) as p on p.product_code = la.product \n" +
-            "join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
+            "left join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
             "    and la.deleted = false\n" +
