@@ -24,7 +24,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
     @Query(nativeQuery = true,value = "select loan_application_number from lms.loan_application where loan_application_id = :loanId")
     String getLoanApplicationNumber(@Param("loanId") Long loanId);
     @Query(nativeQuery = true, value = "select la.loan_application_id,\n" +
-            "    (select branch_name from master.branch where branch_id = la.branch_id) as branch,\n" +
+            "    branch.branch_name as branch,\n" +
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    p.product_name as product,\n" +
@@ -62,6 +62,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    join lms.customer c on clm.customer_id = c.customer_id\n" +
             "    join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
             "    join (select product_code, product_name from master.product) as p on p.product_code = la.product\n" +
+            "    join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
             "    and la.deleted = false\n" +
@@ -73,7 +74,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
 
 
     @Query(nativeQuery = true, value = "select la.loan_application_id,\n" +
-            "    (select branch_name from master.branch where branch_id = la.branch_id) as branch,\n" +
+            "    branch.branch_name as branch,\n" +
             "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    p.product_name as product,\n" +
@@ -111,12 +112,13 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    join lms.customer c on clm.customer_id = c.customer_id\n" +
             "join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
             "join (select product_code, product_name from master.product) as p on p.product_code = la.product \n" +
+            "join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
             "    and la.deleted = false\n" +
             "    and la.loan_status in ( 'active', 'maturity_closure')\n" +
             "    and la2.allocated_to_user_id = :userId\n" +
-            "    and (LOWER(concat_ws(' ', c.first_name, c.last_name)) like LOWER(concat('%', :searchKey,'%')) or LOWER(la.product) like LOWER(concat('%', :searchKey, '%')) or LOWER(la.loan_application_number) like LOWER(concat('%', :searchKey, '%')))\n" +
+            "    and (LOWER(concat_ws(' ', c.first_name, c.last_name)) like LOWER(concat('%', :searchKey,'%')) or LOWER(la.product) like LOWER(concat('%', :searchKey, '%')) or LOWER(la.loan_application_number) like LOWER(concat('%', :searchKey, '%')) or LOWER(branch.branch_name) like LOWER(concat('%',:searchKey, '%')))\n" +
             "order by\n" +
             "    la.loan_application_id asc")
     List<Map<String,Object>> getTaskDetailsBySearchKey(@Param("userId") Long userId, String searchKey, Pageable pageRequest);
