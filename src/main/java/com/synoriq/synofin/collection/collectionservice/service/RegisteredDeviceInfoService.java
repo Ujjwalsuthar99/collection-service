@@ -69,6 +69,7 @@ public class RegisteredDeviceInfoService {
             registeredDeviceInfoEntity.setStatus(registeredDeviceInfoDtoRequest.getStatus());
 
             registeredDeviceInfoRepository.save(registeredDeviceInfoEntity);
+            return new BaseDTOResponse<Object>(registeredDeviceInfoEntity);
         } else {
             //update logic for device
             log.info("Device Found");
