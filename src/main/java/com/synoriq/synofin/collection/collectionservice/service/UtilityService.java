@@ -3,6 +3,7 @@ package com.synoriq.synofin.collection.collectionservice.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
@@ -11,6 +12,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImage
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3DataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
+import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
@@ -44,6 +46,9 @@ public class UtilityService {
 
     @Autowired
     FinovaSmsService finovaSmsService;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Autowired
     CollectionActivityLogsRepository collectionActivityLogsRepository;
@@ -303,7 +308,7 @@ public class UtilityService {
     }
 
 
-    public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName) throws IOException {
+    public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
 
@@ -385,16 +390,18 @@ public class UtilityService {
                 FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
                 log.info("sms service for finova {}", finovaMsgDTOResponse);
             }
-
+            String loanApplicationNumber = taskRepository.getLoanApplicationNumber(Long.parseLong(loanId[0]));
+            String remarks = USER_MESSAGE;
+            remarks = remarks.replace("{loan_number}", loanApplicationNumber);
 
             CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
-            collectionActivityLogsEntity.setActivityName("send receipt message to user");
+            collectionActivityLogsEntity.setActivityName("send_message_to_user");
             collectionActivityLogsEntity.setActivityDate(new Date());
             collectionActivityLogsEntity.setDeleted(false);
-            collectionActivityLogsEntity.setActivityBy(0L);
+            collectionActivityLogsEntity.setActivityBy(Long.parseLong(userId));
             collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
             collectionActivityLogsEntity.setAddress(res);
-            collectionActivityLogsEntity.setRemarks(fileName);
+            collectionActivityLogsEntity.setRemarks(remarks);
             collectionActivityLogsEntity.setImages(res.getData());
             collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
             collectionActivityLogsEntity.setGeolocation(res);
