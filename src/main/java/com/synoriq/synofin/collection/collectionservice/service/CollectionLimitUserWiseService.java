@@ -52,7 +52,6 @@ public class CollectionLimitUserWiseService {
 
 
     public String createCollectionLimitUserWise(String token, String userId, CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws Exception {
-        try {
             log.info("cash limit {}", collectionLimitUserWiseDtoRequest.getCash());
             log.info("cheque limit {}", collectionLimitUserWiseDtoRequest.getCheque());
             log.info("upi limit {}", collectionLimitUserWiseDtoRequest.getUpi());
@@ -118,9 +117,6 @@ public class CollectionLimitUserWiseService {
 
 
             return "Data saved successfully";
-        } catch (Exception e) {
-            throw new Exception("1017002");
-        }
 
     }
 }
