@@ -66,6 +66,9 @@ public class CollectionLimitUserWiseService {
             String digitalDefaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT);
 
             if (existingCashLimit != null) {
+                if(collectionLimitUserWiseDtoRequest.getCash() < existingCashLimit.getUtilizedLimitValue()) {
+                    throw new Exception("1017006");
+                }
                 existingCashLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getCash());
                 collectionLimitUserWiseRepository.save(existingCashLimit);
             } else {
@@ -80,6 +83,9 @@ public class CollectionLimitUserWiseService {
             }
 
             if (existingChequeLimit != null) {
+                if(collectionLimitUserWiseDtoRequest.getCheque() < existingChequeLimit.getUtilizedLimitValue()) {
+                    throw new Exception("1017007");
+                }
                 existingChequeLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getCheque());
                 collectionLimitUserWiseRepository.save(existingChequeLimit);
             } else {
@@ -94,6 +100,9 @@ public class CollectionLimitUserWiseService {
             }
 
             if (existingUpiLimit != null) {
+                if(collectionLimitUserWiseDtoRequest.getUpi() < existingUpiLimit.getUtilizedLimitValue()) {
+                    throw new Exception("1017008");
+                }
                 existingUpiLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getUpi());
                 collectionLimitUserWiseRepository.save(existingUpiLimit);
             } else {
