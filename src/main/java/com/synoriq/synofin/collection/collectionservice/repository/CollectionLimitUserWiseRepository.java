@@ -22,4 +22,9 @@ public interface CollectionLimitUserWiseRepository extends PagingAndSortingRepos
 
 
 
+    @Query(nativeQuery = true,value = "select * from collection.collection_limit_userwise where user_id = :userId " +
+            "and deleted is false")
+    List<CollectionLimitUserWiseEntity> getAllCollectionLimitUserWiseByUserId(@Param("userId") Long userId);
+
+
 }
