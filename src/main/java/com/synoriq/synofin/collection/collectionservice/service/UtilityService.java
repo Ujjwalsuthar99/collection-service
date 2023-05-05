@@ -2,15 +2,14 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
-import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
-import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageData;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3DataRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
+
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
@@ -23,6 +22,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDT
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
+import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +49,12 @@ public class UtilityService {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private ReceiptRepository receiptRepository;
+
+    @Autowired
+    private PrintServiceImplementation printServiceImplementation;
 
     @Autowired
     CollectionActivityLogsRepository collectionActivityLogsRepository;
@@ -434,5 +440,41 @@ public class UtilityService {
             log.error("{}", ee.getMessage());
         }
         return res;
+    }
+
+    public Object getThermalPrintData(String receiptId) throws Exception {
+
+        ThermalPrintDataDTO thermalPrintDataDTO = new ThermalPrintDataDTO();
+        CurrentUserInfo currentUserInfo = new CurrentUserInfo();
+        String base64 = "";
+
+        Map<String, Object> serviceRequestData = receiptRepository.getServiceRequestData(Long.parseLong(receiptId));
+        if (serviceRequestData != null) {
+
+            thermalPrintDataDTO.setBranchName(String.valueOf(serviceRequestData.get("branch_name")));
+            thermalPrintDataDTO.setDateTime(String.valueOf(serviceRequestData.get("date_time")));
+            thermalPrintDataDTO.setReceiptNo(String.valueOf(serviceRequestData.get("receipt_no")));
+            thermalPrintDataDTO.setCollectedFrom(String.valueOf(serviceRequestData.get("collected_from")));
+            thermalPrintDataDTO.setPaymentMode(String.valueOf(serviceRequestData.get("payment_mode")));
+            thermalPrintDataDTO.setCustomerName(String.valueOf(serviceRequestData.get("customer_name")));
+            thermalPrintDataDTO.setMobileNumber(String.valueOf(serviceRequestData.get("mobile_number")));
+            thermalPrintDataDTO.setIfsc(String.valueOf(serviceRequestData.get("ifsc")));
+            thermalPrintDataDTO.setChequeNo(String.valueOf(serviceRequestData.get("cheque_no")));
+            thermalPrintDataDTO.setBankName(String.valueOf(serviceRequestData.get("bank_name")));
+            thermalPrintDataDTO.setBankAccountNumber(String.valueOf(serviceRequestData.get("bank_account_number")));
+            thermalPrintDataDTO.setLoanNumber(String.valueOf(serviceRequestData.get("loan_number")));
+            thermalPrintDataDTO.setUserCode(String.valueOf(serviceRequestData.get("user_code")));
+            thermalPrintDataDTO.setUserName(String.valueOf(serviceRequestData.get("user_name")));
+            thermalPrintDataDTO.setActualEmi(String.valueOf(serviceRequestData.get("actual_emi")));
+            thermalPrintDataDTO.setReceiptAmount(String.valueOf(serviceRequestData.get("receipt_amount")));
+            thermalPrintDataDTO.setTotal(String.valueOf(serviceRequestData.get("total")));
+
+            byte[] receiptBytes = printServiceImplementation.printDesign(thermalPrintDataDTO, currentUserInfo.getClientId());
+            base64 = Base64.getEncoder().encodeToString(receiptBytes);
+        } else {
+            throw new Exception("1017002");
+        }
+
+        return new BaseDTOResponse<>(base64);
     }
 }

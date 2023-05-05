@@ -107,4 +107,40 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
 
     @Query(nativeQuery = true, value = "select sr.service_request_id from lms.service_request sr join collection.collection_receipts cr on sr.service_request_id = cr.receipt_id where sr.service_request_id = cast(:serviceRequestId as bigint) and sr.request_source = 'm_collect' and sr.is_deleted = false")
     List<Map<String, Object>> getServiceRequestId(@Param("serviceRequestId") Long serviceRequestId);
+
+
+    @Query(nativeQuery = true, value = "select\n" +
+            "\tb.branch_name,\n" +
+            "\tsr.created_date,\n" +
+            "\tsr.service_request_id,\n" +
+            "\tsr.form->>'received_from' as collected_from,\n" +
+            "\tsr.form->>'payment_mode' as payment_mode,\n" +
+            "\tconcat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+            "\tcast(c.phone1_json->>'mobile' as text) as mobile_number,\n" +
+            "\tsr.form->>'ifsc' as ifsc,\n" +
+            "\tsr.form->>'instrument_number' as cheque_no,\n" +
+            "\tsr.form->>'payment_bank' as bank_name,\n" +
+            "\tsr.form->>'bank_account_number' as bank_account_number,\n" +
+            "\tla.loan_application_number as loan_number,\n" +
+            "\tsr.form->>'created_by' as user_code, \n" +
+            "\tu.\"name\" as user_name,\n" +
+            "\tla.emi_amount as actual_emi,\n" +
+            "\tsr.form->>'receipt_amount' as receipt_amount,\n" +
+            "\tsr.form->>'receipt_amount' as total\n" +
+            "from\n" +
+            "\tlms.service_request sr\n" +
+            "join lms.loan_application la on\n" +
+            "\tla.loan_application_id = sr.loan_id\n" +
+            "join master.branch b on\n" +
+            "\tb.branch_id = la.branch_id\n" +
+            "join lms.customer_loan_mapping clm on\n" +
+            "\tclm.loan_id = la.loan_application_id\n" +
+            "\tand clm.customer_type = 'applicant'\n" +
+            "join lms.customer c on\n" +
+            "\tclm.customer_id = c.customer_id \n" +
+            "join master.users u on \n" +
+            "\tu.username = sr.form->>'created_by'\n" +
+            "where\n" +
+            "\tsr.service_request_id = :receiptId")
+    Map<String, Object> getServiceRequestData(@Param("receiptId") Long receiptId);
 }
