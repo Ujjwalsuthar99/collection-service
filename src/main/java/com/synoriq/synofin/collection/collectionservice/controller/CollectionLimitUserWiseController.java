@@ -43,7 +43,7 @@ public class CollectionLimitUserWiseController {
     }
 
 
-    @RequestMapping(value = "/createCollectionLimitUserWise", method = RequestMethod.GET)
+    @RequestMapping(value = "/createCollectionLimitUserWise", method = RequestMethod.POST)
     public ResponseEntity<Object> createCollectionLimitUserWise(@RequestHeader("Authorization") String bearerToken, @RequestParam("userId") String userId, @RequestBody CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
