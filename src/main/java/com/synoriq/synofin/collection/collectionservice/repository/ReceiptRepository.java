@@ -129,16 +129,16 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tsr.form->>'receipt_amount' as total\n" +
             "from\n" +
             "\tlms.service_request sr\n" +
-            "join lms.loan_application la on\n" +
+            "left join lms.loan_application la on\n" +
             "\tla.loan_application_id = sr.loan_id\n" +
-            "join master.branch b on\n" +
+            "left join master.branch b on\n" +
             "\tb.branch_id = la.branch_id\n" +
-            "join lms.customer_loan_mapping clm on\n" +
+            "left join lms.customer_loan_mapping clm on\n" +
             "\tclm.loan_id = la.loan_application_id\n" +
             "\tand clm.customer_type = 'applicant'\n" +
-            "join lms.customer c on\n" +
+            "left join lms.customer c on\n" +
             "\tclm.customer_id = c.customer_id \n" +
-            "join master.users u on \n" +
+            "left join master.users u on \n" +
             "\tu.username = sr.form->>'created_by'\n" +
             "where\n" +
             "\tsr.service_request_id = :receiptId")
