@@ -13,7 +13,7 @@ public class OcrCheckDataResponseDTO {
     @JsonProperty("type")
     private String type;
 
-    @JsonProperty("result")
+    @JsonProperty("details")
     public OcrCheckDetailsResponseDTO details;
 
 }
