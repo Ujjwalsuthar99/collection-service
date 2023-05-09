@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -14,7 +16,7 @@ public class OcrCheckResponseDTO {
     private Boolean response;
 
     @JsonProperty("data")
-    private OcrCheckDataResponseDTO data;
+    private List<OcrCheckDataResponseDTO> data;
 
     @JsonProperty("request_id")
     private String requestId;
