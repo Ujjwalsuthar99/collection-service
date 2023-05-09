@@ -110,9 +110,9 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
 
 
     @Query(nativeQuery = true, value = "select\n" +
-            "\tb.branch_name,\n" +
-            "\tsr.created_date,\n" +
-            "\tsr.service_request_id,\n" +
+            "\tb.branch_name as branch_name,\n" +
+            "\tcast(sr.created_date as text) as created_date,\n" +
+            "\tsr.service_request_id as receipt_no,\n" +
             "\tsr.form->>'received_from' as collected_from,\n" +
             "\tsr.form->>'payment_mode' as payment_mode,\n" +
             "\tconcat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +

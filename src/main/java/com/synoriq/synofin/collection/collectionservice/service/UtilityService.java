@@ -5,6 +5,7 @@ import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivit
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageData;
@@ -15,6 +16,7 @@ import static com.synoriq.synofin.collection.collectionservice.common.ActivityRe
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOS.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.msgServiceResponse.FinovaMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.shortenUrl.ShortenUrlResponseDTO;
@@ -476,5 +478,30 @@ public class UtilityService {
         }
 
         return new BaseDTOResponse<>(base64);
+    }
+
+    public OcrCheckResponseDTO ocrCheck(String token, OcrCheckRequestDTO requestBody) throws Exception {
+        OcrCheckResponseDTO res = new OcrCheckResponseDTO();
+        try {
+            OcrCheckRequestDTO ocrCheckBody = new ObjectMapper().convertValue(requestBody, OcrCheckRequestDTO.class);
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, OcrCheckResponseDTO>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/ocrCheck")
+                    .httpHeaders(httpHeaders)
+                    .body(ocrCheckBody)
+                    .typeResponseType(OcrCheckResponseDTO.class)
+                    .build().call();
+
+            log.info("responseData {}", res);
+        } catch (Exception ee) {
+            log.error("{}", ee.getMessage());
+        }
+
+        return res;
     }
 }
