@@ -114,15 +114,13 @@ public class UtilityController {
     @RequestMapping(value = "uploadImageOnS3", method = RequestMethod.POST)
     public ResponseEntity<Object> uploadImageOnS3(@RequestHeader("Authorization") String token, @RequestParam("image") MultipartFile imageData,
                                                   @RequestParam("user_ref_no") String userRefNo,
-                                                  @RequestParam("file_name") String fileName,
-                                                  @RequestParam("client_id") String clientId,
-                                                  @RequestParam("system_id") String systemId) throws SQLException {
+                                                  @RequestParam("file_name") String fileName) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         UploadImageOnS3ResponseDTO result;
 
         try {
-            result = utilityService.uploadImageOnS3(token, imageData, userRefNo, fileName, clientId, systemId);
+            result = utilityService.uploadImageOnS3(token, imageData, userRefNo, fileName);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -164,7 +162,6 @@ public class UtilityController {
     @RequestMapping(value = "downloadBase64FromS3", method = RequestMethod.GET)
     public ResponseEntity<Object> downloadBase64FromS3(@RequestHeader("Authorization") String token,
                                                   @RequestParam("file_name") String fileName,
-                                                  @RequestParam("client_id") String clientId,
                                                   @RequestParam("user_ref_no") String userRefNo,
                                                   @RequestParam(value = "isNativeFolder", defaultValue = "true", required = false) boolean isNativeFolder) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
@@ -172,7 +169,7 @@ public class UtilityController {
         DownloadBase64FromS3ResponseDTO result;
 
         try {
-            result = utilityService.downloadBase64FromS3(token, userRefNo, fileName, clientId, isNativeFolder);
+            result = utilityService.downloadBase64FromS3(token, userRefNo, fileName, isNativeFolder);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

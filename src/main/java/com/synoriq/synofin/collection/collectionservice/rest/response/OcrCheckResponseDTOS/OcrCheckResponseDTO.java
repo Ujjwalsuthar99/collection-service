@@ -22,7 +22,7 @@ public class OcrCheckResponseDTO {
     private String requestId;
 
     @JsonProperty("error")
-    private OcrCheckErrorResponseDTO error;
+    private IntegrationServiceErrorResponseDTO error;
 
     @JsonProperty("errorFields")
     private Object errorFields;

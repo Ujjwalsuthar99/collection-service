@@ -250,7 +250,7 @@ public class UtilityService {
         return res;
     }
 
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String userRefNo, String fileName, String clientId, String systemId) throws IOException {
+    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String userRefNo, String fileName) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
 
@@ -259,16 +259,14 @@ public class UtilityService {
 
         UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO = new UploadImageOnS3RequestDTO();
         UploadImageOnS3DataRequestDTO uploadImageOnS3DataRequestDTO = new UploadImageOnS3DataRequestDTO();
-        UploadImageData uploadImageData = new UploadImageData();
-        uploadImageData.setUserRefNo(userRefNo);
-        uploadImageData.setFileContentType("");
-        uploadImageData.setFileName(fileName);
-        uploadImageData.setFile(base64);
-        uploadImageOnS3DataRequestDTO.setData(uploadImageData);
-        uploadImageOnS3DataRequestDTO.setSystemId(systemId);
-        uploadImageOnS3DataRequestDTO.setClientId(clientId);
-        uploadImageOnS3RequestDTO.setRequestData(uploadImageOnS3DataRequestDTO);
+        uploadImageOnS3DataRequestDTO.setUserRefNo(userRefNo);
+        uploadImageOnS3DataRequestDTO.setFileContentType("");
+        uploadImageOnS3DataRequestDTO.setFileName(fileName);
+        uploadImageOnS3DataRequestDTO.setFile(base64);
+        uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
+        uploadImageOnS3RequestDTO.setSystemId("collection");
         uploadImageOnS3RequestDTO.setUserReferenceNumber("");
+        uploadImageOnS3RequestDTO.setSpecificPartnerName("");
 
 
 //        log.info("uploadImageOnS3RequestDTO {}", uploadImageOnS3RequestDTO);
@@ -293,7 +291,7 @@ public class UtilityService {
         return res;
     }
 
-    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, String clientId, boolean isNativeFolder) throws IOException {
+    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder) throws IOException {
         DownloadBase64FromS3ResponseDTO res = new DownloadBase64FromS3ResponseDTO();
 
         try {
@@ -303,7 +301,7 @@ public class UtilityService {
 
             res = HTTPRequestService.<Object, DownloadBase64FromS3ResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getBase64ByFileName?clientId=" + clientId + "&fileName=" + fileName + "&userRefNo=" + userRefNo + "&isNativeFolder=" + isNativeFolder)
+                    .url("http://localhost:1102/v1/getBase64ByFileName?fileName=" + fileName + "&userRefNo=" + userRefNo + "&isNativeFolder=" + isNativeFolder)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(DownloadBase64FromS3ResponseDTO.class)
                     .build().call();
@@ -325,16 +323,14 @@ public class UtilityService {
 
         UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO = new UploadImageOnS3RequestDTO();
         UploadImageOnS3DataRequestDTO uploadImageOnS3DataRequestDTO = new UploadImageOnS3DataRequestDTO();
-        UploadImageData uploadImageData = new UploadImageData();
-        uploadImageData.setUserRefNo(userRefNo);
-        uploadImageData.setFileContentType("");
-        uploadImageData.setFileName(fileName);
-        uploadImageData.setFile(base64);
-        uploadImageOnS3DataRequestDTO.setData(uploadImageData);
-        uploadImageOnS3DataRequestDTO.setSystemId("collection");
-        uploadImageOnS3DataRequestDTO.setClientId(clientId);
-        uploadImageOnS3RequestDTO.setRequestData(uploadImageOnS3DataRequestDTO);
+        uploadImageOnS3DataRequestDTO.setUserRefNo(userRefNo);
+        uploadImageOnS3DataRequestDTO.setFileContentType("");
+        uploadImageOnS3DataRequestDTO.setFileName(fileName);
+        uploadImageOnS3DataRequestDTO.setFile(base64);
+        uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
+        uploadImageOnS3RequestDTO.setSystemId("collection");
         uploadImageOnS3RequestDTO.setUserReferenceNumber("");
+        uploadImageOnS3RequestDTO.setSpecificPartnerName("");
         String[] loanId = fileName.split("_");
 
 
