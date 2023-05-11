@@ -13,7 +13,7 @@ public class IntegrationServiceErrorResponseDTO {
     @JsonProperty("code")
     public String code;
 
-    @JsonProperty("text")
-    public String text;
+    @JsonProperty("message")
+    public String message;
 
 }
