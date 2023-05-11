@@ -5,6 +5,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOS.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
@@ -207,11 +208,15 @@ public class UtilityController {
     public ResponseEntity<Object> ocrCheck(@RequestHeader("Authorization") String token, @RequestBody OcrCheckRequestDTO reqBody) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
-        Object result;
+        OcrCheckResponseDTO result;
 
         try {
             result = utilityService.ocrCheck(token, reqBody);
-            response = new ResponseEntity<>(result, HttpStatus.OK);
+            if (result.getData() == null && result.getError() != null) {
+                response = new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+            } else {
+                response = new ResponseEntity<>(result, HttpStatus.OK);
+            }
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
