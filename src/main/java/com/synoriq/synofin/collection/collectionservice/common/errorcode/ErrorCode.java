@@ -17,6 +17,7 @@ public enum ErrorCode {
     CASH_LIMIT_IS_LESS_THAN_UTILIZED_AMOUNT(1017006, "Total limit of cash cannot be less than utilized limit"),
     CHEQUE_LIMIT_IS_LESS_THAN_UTILIZED_AMOUNT(1017007, "Total limit of cheque cannot be less than utilized limit"),
     UPI_LIMIT_IS_LESS_THAN_UTILIZED_AMOUNT(1017008, "Total limit of upi cannot be less than utilized limit"),
+    LIMIT_IS_LESS_THAN_UTILIZED_AMOUNT(1017009, "Total limit of cannot be less than utilized limit"),
 //    CREDENTIALS_ERROR(1017002, "Incorrect username or password"),
 //    LOGIN_ERROR(1017003, "An Exception occurred in login. Please try again"),
 //    LOGIN_SUCCESS_CODE(1017004, "Login successfully"),
