@@ -1,21 +1,22 @@
-package com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO;
+package com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOS;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOS.IntegrationServiceErrorResponseDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UploadImageOnS3ResponseDTO {
+public class OcrCheckResponseDTO {
 
     @JsonProperty("response")
     private Boolean response;
 
     @JsonProperty("data")
-    private UploadImageOnS3DataResponse data;
+    private List<OcrCheckDataResponseDTO> data;
 
     @JsonProperty("request_id")
     private String requestId;
@@ -25,4 +26,5 @@ public class UploadImageOnS3ResponseDTO {
 
     @JsonProperty("errorFields")
     private Object errorFields;
+
 }

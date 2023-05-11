@@ -6,12 +6,15 @@ import lombok.Data;
 @Data
 public class UploadImageOnS3DataRequestDTO {
 
-    @JsonProperty("data")
-    public UploadImageData data;
+    @JsonProperty("user_ref_no")
+    private String userRefNo;
 
-    @JsonProperty("client_id")
-    public String clientId;
+    @JsonProperty("file_name")
+    private String fileName;
 
-    @JsonProperty("system_id")
-    public String systemId;
+    @JsonProperty("file")
+    private String file;
+
+    @JsonProperty("file_content_type")
+    private String fileContentType;
 }

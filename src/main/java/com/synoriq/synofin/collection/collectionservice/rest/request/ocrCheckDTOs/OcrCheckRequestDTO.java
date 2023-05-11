@@ -1,20 +1,21 @@
-package com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3;
+package com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class UploadImageOnS3RequestDTO {
+public class OcrCheckRequestDTO {
 
     @JsonProperty("data")
-    private UploadImageOnS3DataRequestDTO data;
-
-    @JsonProperty("system_id")
-    private String systemId;
+    private OcrCheckRequestDataDTO data;
 
     @JsonProperty("user_reference_number")
     private String userReferenceNumber;
 
+    @JsonProperty("system_id")
+    private String systemId;
+
     @JsonProperty("specific_partner_name")
     private String specificPartnerName;
+
 }

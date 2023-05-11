@@ -99,7 +99,7 @@ public class CslPrintDesign implements PrintServiceInterface {
         // Loan Details
         Paragraph rightAligned5 = new Paragraph();
         rightAligned5.add(new Phrase("Actual Emi: " + thermalPrintDataDTO.getActualEmi() + "\n", contentFont));
-        rightAligned5.add(new Phrase("Receipt Amount " + thermalPrintDataDTO.getReceiptAmount() + "\n", contentFont));
+        rightAligned5.add(new Phrase("Receipt Amount: " + thermalPrintDataDTO.getReceiptAmount() + "\n", contentFont));
         rightAligned5.setAlignment(Element.ALIGN_RIGHT);
         content.add(rightAligned5);
 
