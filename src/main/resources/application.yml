@@ -22,4 +22,4 @@ spring:
   kafka:
     events:
       topic: collection_receipt_checked_uat
-
+    groupId: collection-uat

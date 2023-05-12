@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ProfileService {
 
-    public Object getProfileDetails(String token, String username) throws Exception {
-        Object res = new Object();
+    public ProfileDetailResponseDTO getProfileDetails(String token, String username) throws Exception {
+        ProfileDetailResponseDTO res = new ProfileDetailResponseDTO();
         BaseDTOResponse<Object> baseDTOResponse = null;
         try {
             HttpHeaders httpHeaders = new HttpHeaders();

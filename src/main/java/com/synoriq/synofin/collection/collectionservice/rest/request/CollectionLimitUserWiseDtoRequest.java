@@ -6,12 +6,15 @@ import lombok.Data;
 @Data
 public class CollectionLimitUserWiseDtoRequest {
 
-    @JsonProperty("cash")
-    private Double cash;
+    @JsonProperty("collectionLimitStrategiesKey")
+    private String collectionLimitStrategiesKey;
 
-    @JsonProperty("cheque")
-    private Double cheque;
+    @JsonProperty("username")
+    private String username;
 
-    @JsonProperty("upi")
-    private Double upi;
+    @JsonProperty("totalLimitValue")
+    private Double totalLimitValue;
+
+    @JsonProperty("utilizedLimitValue")
+    private Double utilizedLimitValue;
 }

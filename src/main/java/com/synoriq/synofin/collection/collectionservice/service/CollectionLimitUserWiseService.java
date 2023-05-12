@@ -6,6 +6,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionCon
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionLimitUserWiseRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionLimitUserWiseDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.collectionLimitUserWise.CollectionLimitUserWiseFetchDataResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class CollectionLimitUserWiseService {
 
     @Autowired
     CollectionConfigurationsRepository collectionConfigurationsRepository;
+
+    @Autowired
+    ProfileService profileService;
 
     public Object getCollectionLimitUserWise(String token, String userId) throws Exception {
         try {
@@ -51,72 +55,40 @@ public class CollectionLimitUserWiseService {
     }
 
 
-    public String createCollectionLimitUserWise(String token, String userId, CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws Exception {
-            log.info("cash limit {}", collectionLimitUserWiseDtoRequest.getCash());
-            log.info("cheque limit {}", collectionLimitUserWiseDtoRequest.getCheque());
-            log.info("upi limit {}", collectionLimitUserWiseDtoRequest.getUpi());
+    public String createCollectionLimitUserWise(String token, CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws Exception {
 
-            CollectionLimitUserWiseEntity existingCashLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(Long.valueOf(userId), "cash");
-            CollectionLimitUserWiseEntity existingChequeLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(Long.valueOf(userId), "cheque");
-            CollectionLimitUserWiseEntity existingUpiLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(Long.valueOf(userId), "upi");
 
-            String cashDefaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
-            String chequeDefaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT);
-            String digitalDefaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT);
+        ProfileDetailResponseDTO profileDetailResponseDTO = profileService.getProfileDetails(token, collectionLimitUserWiseDtoRequest.getUsername());
 
-            if (existingCashLimit != null) {
-                if(collectionLimitUserWiseDtoRequest.getCash() < existingCashLimit.getUtilizedLimitValue()) {
-                    throw new Exception("1017006");
-                }
-                existingCashLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getCash());
-                collectionLimitUserWiseRepository.save(existingCashLimit);
-            } else {
-                CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
-                collectionLimitUserWiseEntity.setCreatedDate(new Date());
-                collectionLimitUserWiseEntity.setDeleted(false);
-                collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey("cash");
-                collectionLimitUserWiseEntity.setUserId(Long.valueOf(userId));
-                collectionLimitUserWiseEntity.setTotalLimitValue(Double.valueOf(cashDefaultLimit));
-                collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
-                collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+        CollectionLimitUserWiseEntity existingLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(profileDetailResponseDTO.getData().getUserId(), collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
+
+        String defaultLimit = null;
+        if(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cash")) {
+            defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
+        } else if(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cheque")) {
+            defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT);
+        } else {
+            defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT);
+        }
+
+        if (existingLimit != null) {
+            if (collectionLimitUserWiseDtoRequest.getTotalLimitValue() < existingLimit.getUtilizedLimitValue()) {
+                throw new Exception("1017009");
             }
+            existingLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getTotalLimitValue());
+            collectionLimitUserWiseRepository.save(existingLimit);
+        } else {
+            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
+            collectionLimitUserWiseEntity.setCreatedDate(new Date());
+            collectionLimitUserWiseEntity.setDeleted(false);
+            collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
+            collectionLimitUserWiseEntity.setUserId(profileDetailResponseDTO.getData().getUserId());
+            collectionLimitUserWiseEntity.setTotalLimitValue(Double.valueOf(defaultLimit));
+            collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
+            collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+        }
 
-            if (existingChequeLimit != null) {
-                if(collectionLimitUserWiseDtoRequest.getCheque() < existingChequeLimit.getUtilizedLimitValue()) {
-                    throw new Exception("1017007");
-                }
-                existingChequeLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getCheque());
-                collectionLimitUserWiseRepository.save(existingChequeLimit);
-            } else {
-                CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
-                collectionLimitUserWiseEntity.setCreatedDate(new Date());
-                collectionLimitUserWiseEntity.setDeleted(false);
-                collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey("cheque");
-                collectionLimitUserWiseEntity.setUserId(Long.valueOf(userId));
-                collectionLimitUserWiseEntity.setTotalLimitValue(Double.valueOf(chequeDefaultLimit));
-                collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
-                collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
-            }
-
-            if (existingUpiLimit != null) {
-                if(collectionLimitUserWiseDtoRequest.getUpi() < existingUpiLimit.getUtilizedLimitValue()) {
-                    throw new Exception("1017008");
-                }
-                existingUpiLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getUpi());
-                collectionLimitUserWiseRepository.save(existingUpiLimit);
-            } else {
-                CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
-                collectionLimitUserWiseEntity.setCreatedDate(new Date());
-                collectionLimitUserWiseEntity.setDeleted(false);
-                collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey("upi");
-                collectionLimitUserWiseEntity.setUserId(Long.valueOf(userId));
-                collectionLimitUserWiseEntity.setTotalLimitValue(Double.valueOf(digitalDefaultLimit));
-                collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
-                collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
-            }
-
-
-            return "Data saved successfully";
+        return "Data saved successfully";
 
     }
 }
