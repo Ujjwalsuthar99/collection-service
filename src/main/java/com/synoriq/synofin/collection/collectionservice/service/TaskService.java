@@ -48,12 +48,8 @@ public class TaskService {
                     return new BaseDTOResponse<>(taskDetailPages);
                 }
             }
-            if (!taskDetailPages.isEmpty()) {
-                baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
-            } else {
-                baseDTOResponse = new BaseDTOResponse<>(new ArrayList<>());
-//                throw new Exception("1016025");
-            }
+
+            baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
         } catch (Exception e) {
             throw new Exception("1017002");
         }
