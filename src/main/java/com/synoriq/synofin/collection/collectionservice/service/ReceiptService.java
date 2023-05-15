@@ -110,12 +110,12 @@ public class ReceiptService {
     }
 
 
-    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferred(String userName, String fromDate, String toDate) throws Exception {
+    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferred(String userName) throws Exception {
 
 
         BaseDTOResponse<Object> baseDTOResponse;
         try {
-            List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferred(userName, fromDate, toDate);
+            List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferred(userName);
             baseDTOResponse = new BaseDTOResponse<>(receiptsData);
         } catch (Exception e) {
             throw new Exception("1017002");

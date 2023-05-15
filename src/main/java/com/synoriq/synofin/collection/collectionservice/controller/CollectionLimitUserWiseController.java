@@ -44,13 +44,13 @@ public class CollectionLimitUserWiseController {
 
 
     @RequestMapping(value = "/createCollectionLimitUserWise", method = RequestMethod.POST)
-    public ResponseEntity<Object> createCollectionLimitUserWise(@RequestHeader("Authorization") String bearerToken, @RequestParam("userId") String userId, @RequestBody CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws SQLException {
+    public ResponseEntity<Object> createCollectionLimitUserWise(@RequestHeader("Authorization") String bearerToken, @RequestBody CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         String result;
 
         try {
-            result = collectionLimitUserWiseService.createCollectionLimitUserWise(bearerToken, userId, collectionLimitUserWiseDtoRequest);
+            result = collectionLimitUserWiseService.createCollectionLimitUserWise(bearerToken, collectionLimitUserWiseDtoRequest);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {

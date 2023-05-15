@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class UploadImageOnS3DataRequestDTO {
 
-    @JsonProperty("user_ref_no")
+    @JsonProperty("reference_path")
     private String userRefNo;
 
     @JsonProperty("file_name")

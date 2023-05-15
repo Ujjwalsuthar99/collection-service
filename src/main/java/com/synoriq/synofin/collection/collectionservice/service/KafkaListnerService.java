@@ -49,8 +49,8 @@ public class KafkaListnerService {
     private CollectionActivityLogsRepository collectionActivityLogsRepository;
 
     @Transactional
-    @KafkaListener(topics = "${spring.kafka.events.topic}", containerFactory = "kafkaListenerContainerFactory")
-    public void consumerTest(@Payload MessageContainerTemplate message, @Headers MessageHeaders headers) {
+    @KafkaListener(topics = "${spring.kafka.events.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "${spring.kafka.groupId}")
+    public void consumerTest(@Payload MessageContainerTemplate message, @Headers MessageHeaders headers, Acknowledgment acknowledgment) {
         try {
 //            changeAnnotationValue();
             log.info("message datatatatat ->  {}", message.getMessage());
@@ -91,6 +91,7 @@ public class KafkaListnerService {
                 collectionActivityLogsEntity.setGeolocation("{}");
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
             }
+            acknowledgment.acknowledge();
             log.info(" ---------- Things acknowledged -------------");
         } catch (Exception ee) {
             ee.printStackTrace();
