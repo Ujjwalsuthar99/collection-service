@@ -42,6 +42,7 @@ public class TaskService {
             }
             pageRequest = PageRequest.of(pageNo, pageSize);
             List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsByPages(userId, pageRequest);
+            log.info("taskDetailPages {}", taskDetailPages);
             if (pageNo > 0) {
                 if (taskDetailPages.size() == 0) {
                     return new BaseDTOResponse<>(taskDetailPages);
@@ -50,7 +51,7 @@ public class TaskService {
             if (!taskDetailPages.isEmpty()) {
                 baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
             } else {
-                baseDTOResponse = new BaseDTOResponse<>(new ArrayList<>());
+                baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
 //                throw new Exception("1016025");
             }
         } catch (Exception e) {
