@@ -83,6 +83,7 @@ public class CollectionLimitUserWiseService {
             collectionLimitUserWiseEntity.setDeleted(false);
             collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
             collectionLimitUserWiseEntity.setUserId(profileDetailResponseDTO.getData().getUserId());
+            collectionLimitUserWiseEntity.setUserName(profileDetailResponseDTO.getData().getUserName());
             collectionLimitUserWiseEntity.setTotalLimitValue(Double.valueOf(defaultLimit));
             collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
             collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);

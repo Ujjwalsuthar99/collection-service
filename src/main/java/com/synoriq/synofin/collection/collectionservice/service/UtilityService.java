@@ -23,6 +23,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.shortenUrl
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.service.msgservice.CslSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
@@ -35,6 +36,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -60,6 +63,9 @@ public class UtilityService {
 
     @Autowired
     CollectionActivityLogsRepository collectionActivityLogsRepository;
+
+    @Autowired
+    CslSmsService cslSmsService;
 
     public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception {
 
@@ -314,7 +320,7 @@ public class UtilityService {
     }
 
 
-    public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId) throws IOException {
+    public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId, String customerType, String customerName, String applicantMobileNumber, String collectedFromMobileNumber, String loanNumber) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
 
@@ -340,41 +346,40 @@ public class UtilityService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
-            if(clientId.equals("finova")) {
+            res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/uploadImageOnS3")
+                    .body(uploadImageOnS3RequestDTO)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(UploadImageOnS3ResponseDTO.class)
+                    .build().call();
 
-                res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
-                        .httpMethod(HttpMethod.POST)
-                        .url("http://localhost:1102/v1/uploadImageOnS3")
-                        .body(uploadImageOnS3RequestDTO)
-                        .httpHeaders(httpHeaders)
-                        .typeResponseType(UploadImageOnS3ResponseDTO.class)
-                        .build().call();
-
-                log.info("upload image s3 for finova {}", res);
+            log.info("upload image on s3 {}", res);
 
 
 
-                ShortenUrlResponseDTO shortenUrlResponseDTO = new ShortenUrlResponseDTO();
-                ShortenUrlRequestDTO shortenUrlRequestDTO = new ShortenUrlRequestDTO();
-                ShortenUrlDataRequestDTO shortenUrlDataRequestDTO = new ShortenUrlDataRequestDTO();
+            ShortenUrlResponseDTO shortenUrlResponseDTO = new ShortenUrlResponseDTO();
+            ShortenUrlRequestDTO shortenUrlRequestDTO = new ShortenUrlRequestDTO();
+            ShortenUrlDataRequestDTO shortenUrlDataRequestDTO = new ShortenUrlDataRequestDTO();
 
-                shortenUrlRequestDTO.setClientId(clientId);
-                shortenUrlRequestDTO.setSystemId("collection");
-                shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
-                shortenUrlRequestDTO.setData(shortenUrlDataRequestDTO);
+            shortenUrlRequestDTO.setClientId(clientId);
+            shortenUrlRequestDTO.setSystemId("collection");
+            shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
+            shortenUrlRequestDTO.setData(shortenUrlDataRequestDTO);
 
 //                log.info("shorten url request {}", shortenUrlRequestDTO);
 
-                shortenUrlResponseDTO = HTTPRequestService.<Object, ShortenUrlResponseDTO>builder()
-                        .httpMethod(HttpMethod.POST)
-                        .url(SHORTEN_URL_UAT)
-                        .body(shortenUrlRequestDTO)
-                        .httpHeaders(httpHeaders)
-                        .typeResponseType(ShortenUrlResponseDTO.class)
-                        .build().call();
+            shortenUrlResponseDTO = HTTPRequestService.<Object, ShortenUrlResponseDTO>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url(SHORTEN_URL_UAT)
+                    .body(shortenUrlRequestDTO)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(ShortenUrlResponseDTO.class)
+                    .build().call();
 
-                log.info("shorten URL for finova {}", shortenUrlResponseDTO);
+            log.info("shorten URL {}", shortenUrlResponseDTO);
 
+            if(clientId.equals("finova")) {
                 FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
                 if(paymentMode.equals("cash")) {
                     finovaSmsRequest.setFlow_id(FINOVA_CASH_MSG_FLOW_ID);
@@ -384,16 +389,58 @@ public class UtilityService {
                     finovaSmsRequest.setFlow_id(FINOVA_UPI_MSG_FLOW_ID);
                 }
 //                String[] loanId = fileName.split("_");
-                finovaSmsRequest.setSender("FINOVA");
-                finovaSmsRequest.setShort_url("0");
-                finovaSmsRequest.setMobiles("917805951252");
-                finovaSmsRequest.setAmount(receiptAmount);
-                finovaSmsRequest.setLoanNumber(loanId[0]);
-                finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
+                if(customerType.equals("applicant")) {
+                    finovaSmsRequest.setSender("FINOVA");
+                    finovaSmsRequest.setShort_url("0");
+                    finovaSmsRequest.setMobiles("917805951252");
+//                    finovaSmsRequest.setMobiles(applicantMobileNumber); // when we are deploying the code on PROD, then will enable this line and comment above line.
+                    finovaSmsRequest.setAmount(receiptAmount);
+                    finovaSmsRequest.setLoanNumber(loanId[0]);
+                    finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
-                FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
-                log.info("sms service for finova {}", finovaMsgDTOResponse);
+                    FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
+                    log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
+                } else {
+                    finovaSmsRequest.setSender("FINOVA");
+                    finovaSmsRequest.setShort_url("0");
+                    finovaSmsRequest.setMobiles("917805951252");
+//                    finovaSmsRequest.setMobiles(applicantMobileNumber); // when we are deploying the code on PROD, then will enable this line and comment above line.
+                    finovaSmsRequest.setAmount(receiptAmount);
+                    finovaSmsRequest.setLoanNumber(loanId[0]);
+                    finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
+
+                    FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
+                    log.info("sms service for applicant & collected from finova {}", finovaMsgDTOResponse);
+
+
+                    finovaSmsRequest.setSender("FINOVA");
+                    finovaSmsRequest.setShort_url("0");
+                    finovaSmsRequest.setMobiles("917805951252");
+//                    finovaSmsRequest.setMobiles(collectedFromMobileNumber); // when we are deploying the code on PROD, then will enable this line and comment above line.
+                    finovaSmsRequest.setAmount(receiptAmount);
+                    finovaSmsRequest.setLoanNumber(loanId[0]);
+                    finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
+
+                    finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
+                    log.info("sms service for collected from finova {}", finovaMsgDTOResponse);
+                }
+
             }
+
+            if(clientId.equals("csl")) {
+                String decodedString = URLDecoder.decode(CSL_TEMPLATE_ENCODED_MESSAGE, StandardCharsets.UTF_8);
+                String message = decodedString.replace("Vinay", customerName);
+                message = message.replace("500", receiptAmount);
+                message = message.replace("1-1-2032", String.valueOf(new Date()));
+                message = message.replace("1234567", loanNumber);
+                message = message.replace("6778990000", shortenUrlResponseDTO.getData().getResult());
+                String receivedMobileNumber = "7805951252";
+//                String receivedMobileNumber = applicantMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
+                String postField = "user=CSLFIN&message=" + message + "&key=974130e696XX&mobile=" + receivedMobileNumber + "&senderid=CSLSME&accusage=1&tempid=1707165942499421494&entityid=1701159697926729192&unicode=1";
+                String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
+                log.info("sms service for csl {}", smsServiceResponse);
+            }
+
             String loanApplicationNumber = taskRepository.getLoanApplicationNumber(Long.parseLong(loanId[0]));
             String remarks = USER_MESSAGE;
             remarks = remarks.replace("{loan_number}", loanApplicationNumber);

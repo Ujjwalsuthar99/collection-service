@@ -32,6 +32,9 @@ public class CollectionLimitUserWiseEntity {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(name = "user_name")
+    private String userName;
+
     @Column(name = "total_limit_value")
     private Double totalLimitValue;
 
