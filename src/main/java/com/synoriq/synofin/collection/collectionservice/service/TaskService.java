@@ -51,7 +51,7 @@ public class TaskService {
             if (!taskDetailPages.isEmpty()) {
                 baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
             } else {
-                baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
+                baseDTOResponse = new BaseDTOResponse<>(new ArrayList<>());
 //                throw new Exception("1016025");
             }
         } catch (Exception e) {
