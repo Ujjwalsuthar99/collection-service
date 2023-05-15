@@ -2,11 +2,13 @@ package com.synoriq.synofin.collection.collectionservice.rest.response;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class ThermalPrintDataDTO {
 
     private String branchName;
-    private String dateTime;
+    private Date dateTime;
     private String receiptNo;
     private String collectedFrom;
     private String paymentMode;
@@ -31,11 +33,11 @@ public class ThermalPrintDataDTO {
         this.branchName = branchName;
     }
 
-    public String getDateTime() {
+    public Date getDateTime() {
         return dateTime;
     }
 
-    public void setDateTime(String dateTime) {
+    public void setDateTime(Date dateTime) {
         this.dateTime = dateTime;
     }
 

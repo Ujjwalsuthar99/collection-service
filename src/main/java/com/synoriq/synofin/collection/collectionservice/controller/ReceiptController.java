@@ -55,14 +55,12 @@ public class ReceiptController {
     }
 
     @RequestMapping(value = "/users/{userName}/receipts-not-transferred", method = RequestMethod.GET)
-    public ResponseEntity<Object> getReceiptsByUserIdWhichNotTransferred(@PathVariable(value = "userName") String userName,
-                                                                  @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String fromDate,
-                                                                  @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate) throws SQLException {
+    public ResponseEntity<Object> getReceiptsByUserIdWhichNotTransferred(@PathVariable(value = "userName") String userName) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            baseResponse = receiptService.getReceiptsByUserIdWhichNotTransferred(userName, fromDate, toDate);
+            baseResponse = receiptService.getReceiptsByUserIdWhichNotTransferred(userName);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

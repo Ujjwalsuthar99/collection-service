@@ -497,7 +497,7 @@ public class UtilityService {
         if (serviceRequestData != null) {
 
             thermalPrintDataDTO.setBranchName(String.valueOf(serviceRequestData.get("branch_name")));
-            thermalPrintDataDTO.setDateTime(String.valueOf(serviceRequestData.get("date_time")));
+            thermalPrintDataDTO.setDateTime((Date) serviceRequestData.get("created_date"));
             thermalPrintDataDTO.setReceiptNo(String.valueOf(serviceRequestData.get("receipt_no")));
             thermalPrintDataDTO.setCollectedFrom(String.valueOf(serviceRequestData.get("collected_from")));
             thermalPrintDataDTO.setPaymentMode(String.valueOf(serviceRequestData.get("payment_mode")));
