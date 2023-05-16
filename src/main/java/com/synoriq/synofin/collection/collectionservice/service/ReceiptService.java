@@ -149,12 +149,11 @@ public class ReceiptService {
 
     @Transactional
     public ServiceRequestSaveResponse createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception {
-        ServiceRequestSaveResponse res = new ServiceRequestSaveResponse();
-        ReceiptServiceSystemPropertiesResponse lmsBusinessDate = new ReceiptServiceSystemPropertiesResponse();
+        ServiceRequestSaveResponse res;
+        Long collectionActivityId = null;
         ReceiptServiceDtoRequest createReceiptBody = new ObjectMapper().convertValue(receiptServiceDtoRequest, ReceiptServiceDtoRequest.class);
 
         ReceiptServiceRequestDataDTO receiptServiceRequestDataDTO = new ReceiptServiceRequestDataDTO();
-        ReceiptDateResponse receiptDateResponse = new ReceiptDateResponse();
 //        log.info("createReceiptBody {}", createReceiptBody);
         try {
 
@@ -205,7 +204,7 @@ public class ReceiptService {
             httpHeaders.add("Authorization", bearerToken);
             httpHeaders.add("Content-Type", "application/json");
 
-            Long collectionActivityId = activityLogService.createActivityLogs(receiptServiceDtoRequest.getActivityData(), bearerToken);
+
 
             String bDate = receiptServiceDtoRequest.getRequestData().getRequestData().getDateOfReceipt();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -223,7 +222,6 @@ public class ReceiptService {
             res = HTTPRequestService.<Object, ServiceRequestSaveResponse>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/createReceipt")
-//                    .url("http://13.232.9.69:1102/v1/createReceipt")
                     .httpHeaders(httpHeaders)
                     .body(createReceiptBody)
                     .typeResponseType(ServiceRequestSaveResponse.class)
@@ -234,6 +232,7 @@ public class ReceiptService {
                 if (res.getData().getServiceRequestId() == null) {
                     throw new Exception("1016035");
                 }
+                collectionActivityId = activityLogService.createActivityLogs(receiptServiceDtoRequest.getActivityData(), bearerToken);
 
                 CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
                 String updatedRemarks = CREATE_RECEIPT;
@@ -275,32 +274,8 @@ public class ReceiptService {
                     }
                     log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
-
-//                    if(currentUserInfo.getClientId().equals("finova")) {
-//                        FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
-//                        if(receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cash")) {
-//                            finovaSmsRequest.setFlow_id(FINOVA_CASH_MSG_FLOW_ID);
-//                        } else if (receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cheque")) {
-//                            finovaSmsRequest.setFlow_id(FINOVA_CHEQUE_MSG_FLOW_ID);
-//                        } else {
-//                            finovaSmsRequest.setFlow_id(FINOVA_UPI_MSG_FLOW_ID);
-//                        }
-//                        finovaSmsRequest.setSender("FINOVA");
-//                        finovaSmsRequest.setShort_url("0");
-//                        finovaSmsRequest.setMobiles("917805951252");
-//                        finovaSmsRequest.setAmount(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
-//                        finovaSmsRequest.setLoanNumber(receiptServiceDtoRequest.getLoanApplicationNumber());
-//                        finovaSmsRequest.setUrl("https://www.africau.edu/images/default/sample.pdf");
-//
-//                        FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
-//                    }
-
                 }
             } else {
-//                log.info("codeee {}", res.getError().getCode());
-//                log.info("text {}", res.getError().getText());
-
-//                throw new CustomException(res.getError().getText(), Integer.parseInt(res.getError().getCode()));
                 return res;
             }
 
@@ -308,6 +283,9 @@ public class ReceiptService {
 
 
         } catch (Exception ee) {
+//            if (collectionActivityId != null) {
+//                collectionActivityLogsRepository.deleteById(collectionActivityId);
+//            }
             throw new Exception(ee.getMessage());
         }
         return res;

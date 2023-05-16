@@ -59,7 +59,6 @@ public class ReceiptTransferService {
         ResponseEntity<Object> response = null;
         try {
             Long receiptTransferTableId = receiptTransferDtoRequest.getReceiptTransferId();
-            Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
             String limitConf;
             String updatedRemarks;
 
@@ -87,6 +86,7 @@ public class ReceiptTransferService {
                 totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
             }
             if ((utilizedAmount + transferredAmount) < totalLimitValue) {
+                Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
 
 
                 ReceiptTransferEntity receiptTransferEntity = new ReceiptTransferEntity();
