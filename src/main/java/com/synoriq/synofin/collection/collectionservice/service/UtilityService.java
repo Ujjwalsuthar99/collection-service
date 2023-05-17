@@ -435,7 +435,7 @@ public class UtilityService {
                 message = message.replace("1-1-2032", String.valueOf(new Date()));
                 message = message.replace("1234567", loanNumber);
                 message = message.replace("6778990000", shortenUrlResponseDTO.getData().getResult());
-                String receivedMobileNumber = "7805951252";
+                String receivedMobileNumber = "9560716582";
 //                String receivedMobileNumber = applicantMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
                 String encodedMessageString = URLEncoder.encode(message, StandardCharsets.UTF_8);
                 String postField = "user=CSLFIN&message=" + encodedMessageString + "&key=974130e696XX&mobile=" + receivedMobileNumber + "&senderid=CSLSME&accusage=1&tempid=1707165942499421494&entityid=1701159697926729192&unicode=1";
