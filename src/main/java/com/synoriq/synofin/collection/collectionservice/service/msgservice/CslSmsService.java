@@ -21,12 +21,13 @@ public class CslSmsService {
         httpHeaders.add("Cookie", "JSESSIONID=D52F7C9914A1B8C31622CAD0E1400C08; JSESSIONID=803E40A8BDBE4B66041D37918607F71E");
 
 
-        String res = HTTPRequestService.<Object, String>builder()
+        String res = null;
+        res = HTTPRequestService.<Object, String>builder()
                 .httpMethod(HttpMethod.POST)
                 .url(CSL_MSG_API_URL)
                 .httpHeaders(httpHeaders)
                 .body(postBody)
-//                .typeResponseType(res)
+                .typeResponseType(String.class)
                 .build().call();
 
         return res;
