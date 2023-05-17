@@ -20,6 +20,7 @@ public class CslSmsService {
         httpHeaders.add("Content-Type", "application/x-www-form-urlencoded");
         httpHeaders.add("Cookie", "JSESSIONID=D52F7C9914A1B8C31622CAD0E1400C08; JSESSIONID=803E40A8BDBE4B66041D37918607F71E");
 
+        log.info("csl sms post body {}", postBody);
 
         String res = null;
         res = HTTPRequestService.<Object, String>builder()
