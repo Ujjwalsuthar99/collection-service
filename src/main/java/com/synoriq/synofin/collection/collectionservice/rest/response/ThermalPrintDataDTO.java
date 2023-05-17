@@ -24,6 +24,14 @@ public class ThermalPrintDataDTO {
     private String actualEmi;
     private String receiptAmount;
     private String total;
+    private String transactionNumber;
+    public String getTransactionNumber() {
+        return transactionNumber;
+    }
+
+    public void setTransactionNumber(String transactionNumber) {
+        this.transactionNumber = transactionNumber;
+    }
 
     public String getBranchName() {
         return branchName;

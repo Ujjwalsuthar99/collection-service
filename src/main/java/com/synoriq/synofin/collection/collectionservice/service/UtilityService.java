@@ -498,13 +498,24 @@ public class UtilityService {
         Map<String, Object> serviceRequestData = receiptRepository.getServiceRequestData(Long.parseLong(receiptId));
         if (serviceRequestData != null) {
 
-            String[] str = String.valueOf(serviceRequestData.get("created_date")).split(".");
-            thermalPrintDataDTO.setDateTime(str[0]);
+            String dateTime = String.valueOf(serviceRequestData.get("created_date"));
+
+            String paymentMode = String.valueOf(serviceRequestData.get("payment_mode"));
+            if (paymentMode.equals("upi")) {
+                paymentMode = "UPI/NEFT";
+            } else if (paymentMode.equals("cash")) {
+                paymentMode = "Cash";
+            } else if (paymentMode.equals("cheque")){
+                paymentMode = "Cheque";
+            }
+
+            dateTime = dateTime.substring(0, dateTime.lastIndexOf("."));
+            thermalPrintDataDTO.setDateTime(dateTime);
             thermalPrintDataDTO.setBranchName(String.valueOf(serviceRequestData.get("branch_name")));
-//            thermalPrintDataDTO.setDateTime((Date) serviceRequestData.get("created_date"));
+            thermalPrintDataDTO.setTransactionNumber(String.valueOf(serviceRequestData.get("transaction_reference")));
             thermalPrintDataDTO.setReceiptNo(String.valueOf(serviceRequestData.get("receipt_no")));
             thermalPrintDataDTO.setCollectedFrom(String.valueOf(serviceRequestData.get("collected_from")));
-            thermalPrintDataDTO.setPaymentMode(String.valueOf(serviceRequestData.get("payment_mode")));
+            thermalPrintDataDTO.setPaymentMode(paymentMode);
             thermalPrintDataDTO.setCustomerName(String.valueOf(serviceRequestData.get("customer_name")));
             thermalPrintDataDTO.setMobileNumber(String.valueOf(serviceRequestData.get("mobile_number")));
             thermalPrintDataDTO.setIfsc(String.valueOf(serviceRequestData.get("ifsc")));
