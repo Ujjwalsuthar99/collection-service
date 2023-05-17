@@ -496,8 +496,10 @@ public class UtilityService {
         Map<String, Object> serviceRequestData = receiptRepository.getServiceRequestData(Long.parseLong(receiptId));
         if (serviceRequestData != null) {
 
+            String[] str = String.valueOf(serviceRequestData.get("created_date")).split(".");
+            thermalPrintDataDTO.setDateTime(str[0]);
             thermalPrintDataDTO.setBranchName(String.valueOf(serviceRequestData.get("branch_name")));
-            thermalPrintDataDTO.setDateTime((Date) serviceRequestData.get("created_date"));
+//            thermalPrintDataDTO.setDateTime((Date) serviceRequestData.get("created_date"));
             thermalPrintDataDTO.setReceiptNo(String.valueOf(serviceRequestData.get("receipt_no")));
             thermalPrintDataDTO.setCollectedFrom(String.valueOf(serviceRequestData.get("collected_from")));
             thermalPrintDataDTO.setPaymentMode(String.valueOf(serviceRequestData.get("payment_mode")));

@@ -8,7 +8,7 @@ import java.util.Date;
 public class ThermalPrintDataDTO {
 
     private String branchName;
-    private Date dateTime;
+    private String dateTime;
     private String receiptNo;
     private String collectedFrom;
     private String paymentMode;
@@ -33,11 +33,11 @@ public class ThermalPrintDataDTO {
         this.branchName = branchName;
     }
 
-    public Date getDateTime() {
+    public String getDateTime() {
         return dateTime;
     }
 
-    public void setDateTime(Date dateTime) {
+    public void setDateTime(String dateTime) {
         this.dateTime = dateTime;
     }
 
