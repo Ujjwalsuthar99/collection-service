@@ -168,6 +168,7 @@ public class TaskService {
                     basicInfoApplicant.setLoanAmount(loanDetailRes.getData().getLoanAmount());
                     basicInfoApplicant.setEmiAmount(loanDetailRes.getData().getEmiAmount());
                     basicInfoApplicant.setLoanTenure(loanDetailRes.getData().getLoanTenure());
+                    basicInfoApplicant.setAssetClassification(loanDetailRes.getData().getAssetClassification());
                     basicInfoApplicant.setEmiDate("Pending LMS");
                     for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
                         if (!(communicationData.getAddressType() == null)) {

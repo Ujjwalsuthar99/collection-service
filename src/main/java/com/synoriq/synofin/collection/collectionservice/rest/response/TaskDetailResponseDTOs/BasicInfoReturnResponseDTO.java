@@ -48,6 +48,9 @@ public class BasicInfoReturnResponseDTO {
     @JsonProperty("pos")
     public Double pos;
 
+    @JsonProperty("asset_classification")
+    public String assetClassification;
+
     @JsonProperty("loan_tenure")
     public Integer loanTenure;
 
