@@ -124,6 +124,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tsr.form->>'created_by' as user_code, \n" +
             "\tu.\"name\" as user_name,\n" +
             "\tla.installment_amount as actual_emi,\n" +
+            "\tla.sanctioned_amount as loan_amount,\n" +
             "\tsr.form->>'receipt_amount' as receipt_amount,\n" +
             "\tsr.form->>'receipt_amount' as total\n" +
             "from\n" +

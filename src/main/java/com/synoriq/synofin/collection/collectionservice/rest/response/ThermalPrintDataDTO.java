@@ -2,8 +2,6 @@ package com.synoriq.synofin.collection.collectionservice.rest.response;
 
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
 public class ThermalPrintDataDTO {
 
@@ -24,7 +22,16 @@ public class ThermalPrintDataDTO {
     private String actualEmi;
     private String receiptAmount;
     private String total;
+    private String loanAmount;
     private String transactionNumber;
+
+    public String getLoanAmount() {
+        return loanAmount;
+    }
+
+    public void setLoanAmount(String loanAmount) {
+        this.loanAmount = loanAmount;
+    }
     public String getTransactionNumber() {
         return transactionNumber;
     }

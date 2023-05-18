@@ -499,6 +499,15 @@ public class UtilityService {
         if (serviceRequestData != null) {
 
             String dateTime = String.valueOf(serviceRequestData.get("created_date"));
+            dateTime = dateTime.substring(0, dateTime.lastIndexOf("."));
+            String[] splitDateTime = dateTime.split(" ");
+            // date format change
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date date = simpleDateFormat.parse(splitDateTime[0]);
+            SimpleDateFormat newDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            String newFormatDate = newDateFormat.format(date);
+
+            String newDate =  newFormatDate + " " + splitDateTime[1];
 
             String paymentMode = String.valueOf(serviceRequestData.get("payment_mode"));
             if (paymentMode.equals("upi")) {
@@ -509,12 +518,12 @@ public class UtilityService {
                 paymentMode = "Cheque";
             }
 
-            dateTime = dateTime.substring(0, dateTime.lastIndexOf("."));
-            thermalPrintDataDTO.setDateTime(dateTime);
+            thermalPrintDataDTO.setDateTime(newDate);
             thermalPrintDataDTO.setBranchName(String.valueOf(serviceRequestData.get("branch_name")));
             thermalPrintDataDTO.setTransactionNumber(String.valueOf(serviceRequestData.get("transaction_reference")));
             thermalPrintDataDTO.setReceiptNo(String.valueOf(serviceRequestData.get("receipt_no")));
             thermalPrintDataDTO.setCollectedFrom(String.valueOf(serviceRequestData.get("collected_from")));
+            thermalPrintDataDTO.setLoanAmount(String.valueOf(serviceRequestData.get("loan_amount")));
             thermalPrintDataDTO.setPaymentMode(paymentMode);
             thermalPrintDataDTO.setCustomerName(String.valueOf(serviceRequestData.get("customer_name")));
             thermalPrintDataDTO.setMobileNumber(String.valueOf(serviceRequestData.get("mobile_number")));

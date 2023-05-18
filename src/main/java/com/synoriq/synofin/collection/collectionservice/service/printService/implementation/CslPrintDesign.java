@@ -82,6 +82,7 @@ public class CslPrintDesign implements PrintServiceInterface {
 
         Paragraph loanNumber = new Paragraph();
         loanNumber.add(new Phrase("Loan ID: " + thermalPrintDataDTO.getLoanNumber() + "\n", new Font(baseFont, 11)));
+        loanNumber.add(new Phrase("Loan Amount: " + thermalPrintDataDTO.getLoanAmount() + "\n", contentFont));
         loanNumber.setAlignment(Element.ALIGN_RIGHT);
         content.add(loanNumber);
 
