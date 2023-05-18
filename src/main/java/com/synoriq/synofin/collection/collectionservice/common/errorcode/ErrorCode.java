@@ -187,7 +187,9 @@ public enum ErrorCode {
     REGEX_NOT_MATCHING(1016034, "Input is not matched with the REGEX"),
     DATA_NOT_FOUND_IN_LMS(1016035, "Receipt id is getting null from LMS"),
     TRANSFER_TO_USER_ID(1016036, "Transfer to user id is getting null against this entry"),
-    LIMIT_CHECK_ON_APPROVAL(1016037, "Cannot process the request as your collection limit is exceeded");
+    LIMIT_CHECK_ON_APPROVAL(1016037, "Cannot process the request as your collection limit is exceeded"),
+    RECEIPT_TIME_BOUND_LIMIT(1016038, "Receipt collection time bound on same loan, try after 10 min"),
+    TRANSACTION_NUMBER_VALIDATE(1016039, "Kindly insert correct UTR number");
     private Integer codeValue;
     private String responseMessage;
 

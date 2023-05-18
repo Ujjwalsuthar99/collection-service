@@ -154,8 +154,29 @@ public class ReceiptService {
         ReceiptServiceDtoRequest createReceiptBody = new ObjectMapper().convertValue(receiptServiceDtoRequest, ReceiptServiceDtoRequest.class);
 
         ReceiptServiceRequestDataDTO receiptServiceRequestDataDTO = new ReceiptServiceRequestDataDTO();
-//        log.info("createReceiptBody {}", createReceiptBody);
         try {
+            // always in minutes
+            long validationTime = Long.parseLong(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(RECEIPT_TIME_VALIDATE));
+
+            // check for duplicate receipt generate under 10 min
+            Map<String, Object> createReceiptTimeError = receiptRepository.getReceiptData(createReceiptBody.getRequestData().getLoanId(), createReceiptBody.getRequestData().getRequestData().getReceiptAmount());
+            if (createReceiptTimeError != null) {
+                String dateTime = String.valueOf(createReceiptTimeError.get("date")); // 2023-05-18 18:23:30.292
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date newDate = dateFormat.parse(dateTime);
+                Date currentDateTime = new Date();
+                long timeDifference = (currentDateTime.getTime() - newDate.getTime()) / (60 * 1000);
+                if (timeDifference < validationTime) {
+                    throw new Exception("1016038");
+                }
+            }
+            // check for duplicate transaction reference number
+            if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi")) {
+                Map<String, Object> transactionNumberCheck = receiptRepository.transactionNumberCheck(receiptServiceDtoRequest.getRequestData().getRequestData().getTransactionReference());
+                if (transactionNumberCheck != null) {
+                    throw new Exception("1016039");
+                }
+            }
 
             String limitConf = null;
             if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash")) {
@@ -170,7 +191,7 @@ public class ReceiptService {
             Double totalLimitValue = 0.00;
             Double currentReceiptAmountAllowed = 0.00;
             double receiptAmount = Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
-            CollectionLimitUserWiseEntity collectionLimitUser = (CollectionLimitUserWiseEntity) collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode);
+            CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode);
 
             if(collectionLimitUser != null) {
                 totalLimitValue = collectionLimitUser.getTotalLimitValue();
