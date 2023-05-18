@@ -3,23 +3,15 @@ package com.synoriq.synofin.collection.collectionservice.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
+import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionLimitUserWiseRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionReceiptRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.*;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
-import com.synoriq.synofin.events.common.interfaces.SynofinEventServiceListener;
 import com.synoriq.synofin.events.template.MessageContainerTemplate;
 import com.synoriq.synofin.events.template.lms.CollectionRequestActionEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.MessageHeaders;
@@ -28,12 +20,9 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.Date;
 
-import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.*;
+import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.KAFKA_RECEIPT_STATUS;
 
 @Service
 @Slf4j
@@ -46,6 +35,9 @@ public class KafkaListnerService {
     private ReceiptRepository receiptRepository;
 
     @Autowired
+    private CollectionReceiptRepository collectionReceiptRepository;
+
+    @Autowired
     private CollectionActivityLogsRepository collectionActivityLogsRepository;
 
     @Transactional
@@ -56,15 +48,15 @@ public class KafkaListnerService {
             log.info("message datatatatat ->  {}", message.getMessage());
             CollectionRequestActionEvent messageObject = new ObjectMapper().convertValue(message.getMessage(), CollectionRequestActionEvent.class);
             log.info("message object, {}", messageObject);
-            CollectionLimitUserWiseEntity collectionLimitUser = (CollectionLimitUserWiseEntity) collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(messageObject.getUserId(), messageObject.getPaymentMode());
+            CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(messageObject.getUserId(), messageObject.getPaymentMode());
             log.info("collection limit user wise surpassed {}", collectionLimitUser);
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
             log.info("service request id {}", messageObject.getServiceRequestId());
-            String serviceRequestData = receiptRepository.getServiceRequestId(messageObject.getServiceRequestId());
-            log.info("check service request, {}", serviceRequestData);
+            CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
+            log.info("check service request, {}", collectionReceiptEntity);
 
-            if(collectionLimitUser != null && serviceRequestData != null) {
+            if(collectionLimitUser != null && collectionReceiptEntity != null) {
                 log.info("in iffff");
                 collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
                 collectionLimitUserWiseEntity.setCreatedDate(new Date());
