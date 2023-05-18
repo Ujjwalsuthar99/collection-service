@@ -60,7 +60,8 @@ public class KafkaListnerService {
             log.info("collection limit user wise surpassed");
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
-            List<Map<String, Object>> serviceRequestData = receiptRepository.getServiceRequestId(messageObject.getServiceRequestId());
+            log.info("service request id {}", messageObject.getServiceRequestId());
+            String serviceRequestData = receiptRepository.getServiceRequestId(messageObject.getServiceRequestId());
             log.info("check service request, {}", serviceRequestData);
 
             if(collectionLimitUser != null && serviceRequestData != null) {
