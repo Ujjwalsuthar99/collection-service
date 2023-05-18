@@ -30,6 +30,7 @@ public class CslPrintDesign implements PrintServiceInterface {
         Paragraph heading1 = new Paragraph();
         heading1.setAlignment(Element.ALIGN_CENTER);
         heading1.setFont(headingFont);
+
         heading1.add("CSL Finance Limited\n");
         heading1.add("Receipt");
         document.add(heading1);
@@ -72,6 +73,7 @@ public class CslPrintDesign implements PrintServiceInterface {
         rightAligned3.add(new Phrase("Bank Name: " + thermalPrintDataDTO.getBankName() + "\n", contentFont));
         rightAligned3.add(new Phrase("IFSC Code: " + thermalPrintDataDTO.getIfsc() + "\n", contentFont));
         rightAligned3.add(new Phrase("Account No: " + thermalPrintDataDTO.getBankAccountNumber() + "\n", contentFont));
+        rightAligned3.add(new Phrase("Transaction Reference: " + thermalPrintDataDTO.getTransactionNumber() + "\n", contentFont));
         rightAligned3.setAlignment(Element.ALIGN_RIGHT);
         content.add(rightAligned3);
 

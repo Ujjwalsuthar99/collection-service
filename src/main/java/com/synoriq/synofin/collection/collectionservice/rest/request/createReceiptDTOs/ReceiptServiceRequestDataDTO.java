@@ -33,6 +33,9 @@ public class ReceiptServiceRequestDataDTO {
     @JsonProperty("payment_bank")
     public String paymentBank;
 
+    @JsonProperty("instrument_bank_name")
+    public String instrumentBankName;
+
     @JsonProperty("upi")
     public String upi;
 
@@ -63,11 +66,14 @@ public class ReceiptServiceRequestDataDTO {
     @JsonProperty("receipts_allocation")
     public String receiptsAllocation;
 
+    @JsonProperty("bank_account_number")
+    public String bankAccountNumber;
+
 //    @JsonProperty("bounce_reason_for_nach")
 //    public String bounceReasonForNach;
 
     @JsonProperty("transaction_reference")
-    public Object transactionReference;
+    public String transactionReference;
 
     @JsonProperty("ifsc")
     public String ifsc;

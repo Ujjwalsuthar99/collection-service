@@ -117,7 +117,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tcast(c.phone1_json->>'mobile' as text) as mobile_number,\n" +
             "\tsr.form->>'ifsc' as ifsc,\n" +
             "\tsr.form->>'instrument_number' as cheque_no,\n" +
-            "\tsr.form->>'payment_bank' as bank_name,\n" +
+            "\tsr.form->>'instrument_bank_name' as bank_name,\n" +
             "\tsr.form->>'bank_account_number' as bank_account_number,\n" +
             "\tsr.form->>'transaction_reference' as transaction_reference, \n" +
             "\tla.loan_application_number as loan_number,\n" +
