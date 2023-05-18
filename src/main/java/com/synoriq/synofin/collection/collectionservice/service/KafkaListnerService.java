@@ -63,8 +63,9 @@ public class KafkaListnerService {
             log.info("service request id {}", messageObject.getServiceRequestId());
             String serviceRequestData = receiptRepository.getServiceRequestId(messageObject.getServiceRequestId());
             log.info("check service request, {}", serviceRequestData);
+            log.info("check service request size, {}", serviceRequestData.size());
 
-            if(collectionLimitUser != null && serviceRequestData != null) {
+            if(collectionLimitUser != null && serviceRequestData.size() > 0) {
                 log.info("in iffff");
                 collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
                 collectionLimitUserWiseEntity.setCreatedDate(new Date());
