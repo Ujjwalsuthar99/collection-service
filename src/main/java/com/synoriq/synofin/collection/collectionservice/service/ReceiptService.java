@@ -282,6 +282,7 @@ public class ReceiptService {
                         collectionLimitUserWiseEntity.setDeleted(collectionLimitUser.getDeleted());
                         collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUser.getCollectionLimitStrategiesKey());
                         collectionLimitUserWiseEntity.setUserId(collectionLimitUser.getUserId());
+                        collectionLimitUserWiseEntity.setUserName(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
                         collectionLimitUserWiseEntity.setTotalLimitValue(collectionLimitUser.getTotalLimitValue());
                         collectionLimitUserWiseEntity.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() + Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
 
@@ -290,6 +291,7 @@ public class ReceiptService {
                         collectionLimitUserWiseEntity.setDeleted(false);
                         collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode());
                         collectionLimitUserWiseEntity.setUserId(receiptServiceDtoRequest.getActivityData().getUserId());
+                        collectionLimitUserWiseEntity.setUserName(receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
                         collectionLimitUserWiseEntity.setTotalLimitValue(currentReceiptAmountAllowed);
                         collectionLimitUserWiseEntity.setUtilizedLimitValue(Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
                     }

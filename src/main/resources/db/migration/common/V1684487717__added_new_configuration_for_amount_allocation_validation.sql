@@ -1,0 +1,3 @@
+INSERT INTO collection.collection_configurations
+(created_date, created_by, deleted, configuration_name, configuration_value, configuration_description, modified_date, modified_by, active, stage)
+VALUES('2023-05-18 18:41:04.340', 1, false, 'receipt_amount_allocation_validation', 'true', 'Set the value false to remove the validation for collecting any amount from customer or set true to collect due EMI first then only charges', '2023-05-18 18:41:04.340', NULL, true, NULL);
