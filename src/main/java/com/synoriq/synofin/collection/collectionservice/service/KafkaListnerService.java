@@ -49,6 +49,8 @@ public class KafkaListnerService {
             log.info("message datatatatat ->  {}", message.getMessage());
             CollectionRequestActionEvent messageObject = new ObjectMapper().convertValue(message.getMessage(), CollectionRequestActionEvent.class);
             log.info("message object, {}", messageObject);
+            log.info("messageObject.getUserId() {}", messageObject.getUserId());
+            log.info("messageObject.getPaymentMode() {}", messageObject.getPaymentMode());
             CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserIdNew(messageObject.getUserId(), messageObject.getPaymentMode());
             log.info("collection limit user wise surpassed {}", collectionLimitUser);
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
