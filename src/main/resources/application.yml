@@ -7,8 +7,8 @@ spring:
     import: "optional:configserver:"
   cloud:
     config:
-      label: dev
-      uri: http://13.232.9.69:8888
+      label: preprod
+#      uri: http://13.232.9.69:8888
   flyway:
     enabled: false
     default-schema: flyway
