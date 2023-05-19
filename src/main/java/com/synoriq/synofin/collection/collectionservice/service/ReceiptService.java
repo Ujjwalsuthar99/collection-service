@@ -159,7 +159,7 @@ public class ReceiptService {
             long validationTime = Long.parseLong(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(RECEIPT_TIME_VALIDATE));
 
             // check for duplicate receipt generate under 10 min
-            Map<String, Object> createReceiptTimeError = receiptRepository.getReceiptData(createReceiptBody.getRequestData().getLoanId(), createReceiptBody.getRequestData().getRequestData().getReceiptAmount());
+            Map<String, Object> createReceiptTimeError = receiptRepository.getReceiptData(Long.parseLong(createReceiptBody.getRequestData().getLoanId()), createReceiptBody.getRequestData().getRequestData().getReceiptAmount());
             if (createReceiptTimeError != null) {
                 String dateTime = String.valueOf(createReceiptTimeError.get("created_date")); // 2023-05-18 18:23:30.292
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
