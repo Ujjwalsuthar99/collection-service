@@ -173,7 +173,7 @@ public class ReceiptService {
             // check for duplicate transaction reference number
             if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi")) {
                 Map<String, Object> transactionNumberCheck = receiptRepository.transactionNumberCheck(receiptServiceDtoRequest.getRequestData().getRequestData().getTransactionReference());
-                if (transactionNumberCheck != null) {
+                if (transactionNumberCheck.size() != 0) {
                     throw new Exception("1016039");
                 }
             }
