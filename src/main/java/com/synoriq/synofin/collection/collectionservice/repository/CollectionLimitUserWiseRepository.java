@@ -21,6 +21,9 @@ public interface CollectionLimitUserWiseRepository extends PagingAndSortingRepos
     CollectionLimitUserWiseEntity getCollectionLimitUserWiseByUserId(@Param("userId") Long userId, @Param("strategyKey") String strategyKey);
 
 
+    @Query(nativeQuery = true,value = "select * from collection.collection_limit_userwise where user_id = cast(:userId as bigint) " +
+            "and deleted = false and collection_limit_strategies_key = :strategyKey")
+    CollectionLimitUserWiseEntity getCollectionLimitUserWiseByUserIdNew(@Param("userId") Long userId, @Param("strategyKey") String strategyKey);
 
     @Query(nativeQuery = true,value = "select * from collection.collection_limit_userwise where user_id = :userId " +
             "and deleted is false")

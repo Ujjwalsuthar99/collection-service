@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Map;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.KAFKA_RECEIPT_STATUS;
 
@@ -48,12 +49,15 @@ public class KafkaListnerService {
             log.info("message datatatatat ->  {}", message.getMessage());
             CollectionRequestActionEvent messageObject = new ObjectMapper().convertValue(message.getMessage(), CollectionRequestActionEvent.class);
             log.info("message object, {}", messageObject);
-            CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(messageObject.getUserId(), messageObject.getPaymentMode());
+            CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserIdNew(messageObject.getUserId(), messageObject.getPaymentMode());
             log.info("collection limit user wise surpassed {}", collectionLimitUser);
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
             log.info("service request id {}", messageObject.getServiceRequestId());
             CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
+//            Map<String, Object> collectionReceiptEntity = null;
+//            collectionReceiptEntity = collectionReceiptRepository.findDataByReceiptId(messageObject.getServiceRequestId());
+
             log.info("check service request, {}", collectionReceiptEntity);
 
             if(collectionLimitUser != null && collectionReceiptEntity != null) {
