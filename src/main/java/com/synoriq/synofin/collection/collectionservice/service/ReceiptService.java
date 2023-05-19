@@ -159,8 +159,8 @@ public class ReceiptService {
             long validationTime = Long.parseLong(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(RECEIPT_TIME_VALIDATE));
 
             // check for duplicate receipt generate under 10 min
-            Map<String, Object> createReceiptTimeError = receiptRepository.getReceiptData(createReceiptBody.getRequestData().getLoanId(), createReceiptBody.getRequestData().getRequestData().getReceiptAmount());
-            if (createReceiptTimeError != null) {
+            Map<String, Object> createReceiptTimeError = receiptRepository.getReceiptData(Long.parseLong(createReceiptBody.getRequestData().getLoanId()), createReceiptBody.getRequestData().getRequestData().getReceiptAmount());
+            if (createReceiptTimeError.size() != 0) {
                 String dateTime = String.valueOf(createReceiptTimeError.get("created_date")); // 2023-05-18 18:23:30.292
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date newDate = dateFormat.parse(dateTime);
@@ -173,7 +173,7 @@ public class ReceiptService {
             // check for duplicate transaction reference number
             if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi")) {
                 Map<String, Object> transactionNumberCheck = receiptRepository.transactionNumberCheck(receiptServiceDtoRequest.getRequestData().getRequestData().getTransactionReference());
-                if (transactionNumberCheck != null) {
+                if (transactionNumberCheck.size() != 0) {
                     throw new Exception("1016039");
                 }
             }
