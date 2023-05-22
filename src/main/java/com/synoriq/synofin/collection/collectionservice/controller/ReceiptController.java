@@ -153,6 +153,28 @@ public class ReceiptController {
         return response;
 
     }
+    @RequestMapping(value = "/users/{userName}/receipts/search-receipts", method = RequestMethod.GET)
+    public ResponseEntity<Object> getReceiptsBySearchKey(@PathVariable("userName") String userName, @RequestParam(value = "searchKey") String searchKey,
+                                                         @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
+                                                         @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws Exception {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+
+        try {
+            baseResponse = receiptService.getReceiptsBySearchKey(userName, searchKey, pageNo, pageSize);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
 
 
     @RequestMapping(value = "/get-pdf", method = RequestMethod.GET)

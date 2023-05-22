@@ -24,6 +24,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "                c.address1_json->>'address' as address,\n" +
             "                cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
             "                sr.status as status,\n" +
+            "                sr.form->>'payment_mode' as payment_mode,\n" +
             "                (case \n" +
             "                    when sr.status = 'approved' then '#229A16'\n" +
             "                    when sr.status = 'rejected' then '#EC1C24'\n" +
@@ -57,6 +58,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "                c.address1_json->>'address' as address,\n" +
             "                cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
             "                sr.status as status,\n" +
+            "                sr.form->>'payment_mode' as payment_mode,\n" +
             "                (case \n" +
             "                    when sr.status = 'approved' then '#229A16'\n" +
             "                    when sr.status = 'rejected' then '#EC1C24'\n" +
@@ -149,4 +151,42 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "where\n" +
             "\tsr.service_request_id = :receiptId")
     Map<String, Object> getServiceRequestData(@Param("receiptId") Long receiptId);
+
+    @Query(nativeQuery = true, value = "select \n" +
+            "sr.service_request_id ,\n" +
+            "date(sr.form->>'date_of_receipt') as date_of_receipt,\n" +
+            "sr.created_date as created_date,\n" +
+            "clm.loan_id,\n" +
+            "la.loan_application_number,\n" +
+            "concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+            "c.address1_json->>'address' as address,\n" +
+            "cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
+            "sr.status as status,\n" +
+            "sr.form->>'payment_mode' as payment_mode,\n" +
+            "(case \n" +
+            "    when sr.status = 'approved' then '#229A16'\n" +
+            "    when sr.status = 'rejected' then '#EC1C24'\n" +
+            "    when sr.status = 'initiated' then '#2F80ED'\n" +
+            "    else '#B78103'\n" +
+            "end) as status_text_color_key,\n" +
+            "(case \n" +
+            "    when sr.status = 'approved' then '#E3F8DD'\n" +
+            "    when sr.status = 'rejected' then '#FFCECC'\n" +
+            "    when sr.status = 'initiated' then '#D0E1F7'\n" +
+            "    else '#FCEBDB'\n" +
+            "end) as status_bg_color_key\n" +
+            "from lms.service_request sr \n" +
+            "join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id\n" +
+            "join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id \n" +
+            "join lms.customer_loan_mapping clm on clm.loan_id = sr.loan_id \n" +
+            "join lms.customer c on clm.customer_id = c.customer_id \n" +
+            "where clm.customer_type = 'applicant' and sr.request_source = 'm_collect' \n" +
+            "and sr.form->>'created_by' = :userName\n" +
+            "and (\n" +
+            "\tLOWER(la.loan_application_number) like LOWER(concat('%', :searchKey, '%'))\n" +
+            "\tor LOWER(cast(sr.status as text)) like LOWER(concat('%', :searchKey, '%'))\n" +
+            "\tor LOWER(sr.form->>'payment_mode') like LOWER(concat('%',:searchKey, '%'))\n" +
+            "\tor LOWER(cast(sr.service_request_id as text)) like LOWER(concat('%', :searchKey, '%'))\n" +
+            ")")
+    List<Map<String, Object>> getReceiptsBySearchKey(@Param("userName") String userName, @Param("searchKey") String searchKey, Pageable pageRequest);
 }

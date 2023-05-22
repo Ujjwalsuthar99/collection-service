@@ -1,26 +1,23 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 
-import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEntity;
+import com.synoriq.synofin.collection.collectionservice.implementations.ReceiptServiceImpl;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceRequestDataDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 
 import com.synoriq.synofin.collection.collectionservice.rest.response.createReceiptLms.ServiceRequestSaveResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.msgServiceResponse.FinovaMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.GetReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptServiceSystemPropertiesResponse;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.utils.DateUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -145,6 +142,21 @@ public class ReceiptService {
 
         return baseDTOResponse;
 
+    }
+    public BaseDTOResponse<Object> getReceiptsBySearchKey(String userName, String searchKey, Integer page, Integer size) throws Exception {
+        BaseDTOResponse<Object> baseDTOResponse;
+        try {
+            Pageable pageRequest;
+            if (page > 0) {
+                page = page - 1;
+            }
+            pageRequest = PageRequest.of(page, size);
+            List<Map<String, Object>> taskDetailPages = receiptRepository.getReceiptsBySearchKey(userName, searchKey, pageRequest);
+            baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
+        } catch (Exception e) {
+            throw new Exception("1017002");
+        }
+        return baseDTOResponse;
     }
 
     @Transactional
