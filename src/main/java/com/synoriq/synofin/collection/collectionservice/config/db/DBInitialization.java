@@ -47,9 +47,9 @@ public class DBInitialization {
     }
 
     public Map<Object, Object> getDataSourceHashMap() {
-//        List<String> clientMasterList = fetchClientList();
-        List<String> clientMasterList = new ArrayList<>();
-        clientMasterList.add("finova");
+        List<String> clientMasterList = fetchClientList();
+//        List<String> clientMasterList = new ArrayList<>();
+//        clientMasterList.add("finova");
 
         Assert.notEmpty(clientMasterList, "Client master list must not be empty");
 
