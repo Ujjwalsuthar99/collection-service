@@ -84,18 +84,22 @@ public class ReceiptService {
     private CurrentUserInfo currentUserInfo;
 
 
-    public BaseDTOResponse<Object> getReceiptsByUserIdWithDuration(String userName, String fromDate, String toDate, String status, String paymentMode, Integer page, Integer size) throws Exception {
+    public BaseDTOResponse<Object> getReceiptsByUserIdWithDuration(String userName, String fromDate, String toDate, String searchKey, Integer page, Integer size) throws Exception {
 
 
         BaseDTOResponse<Object> baseDTOResponse;
         try {
-            paymentMode = paymentMode == "" ? paymentMode = "cash" : paymentMode;
+            List<Map<String, Object>> taskDetailPages;
             Pageable pageRequest;
             if (page > 0) {
                 page = page - 1;
             }
             pageRequest = PageRequest.of(page, size);
-            List<Map<String, Object>> taskDetailPages = receiptRepository.getReceiptsByUserIdWithDuration(userName, fromDate, toDate, pageRequest);
+            if (!Objects.equals(searchKey, "")) {
+                taskDetailPages = receiptRepository.getReceiptsBySearchKey(userName, searchKey, pageRequest);
+            } else {
+                taskDetailPages = receiptRepository.getReceiptsByUserIdWithDuration(userName, fromDate, toDate, pageRequest);
+            }
 
             baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
         } catch (Exception e) {
