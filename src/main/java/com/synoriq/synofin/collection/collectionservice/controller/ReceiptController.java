@@ -31,8 +31,7 @@ public class ReceiptController {
 
     @RequestMapping(value = "/users/{userName}/receipts", method = RequestMethod.GET)
     public ResponseEntity<Object> getReceiptsByUserIdWithDuration(@PathVariable(value = "userName") String userName,
-                                                                  @RequestParam(value = "status", required = false) String status,
-                                                                  @RequestParam(value = "paymentmode", required = false) String paymentMode,
+                                                                  @RequestParam(value = "searchKey", defaultValue = "", required = false) String searchKey,
                                                                   @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String fromDate,
                                                                   @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate,
                                                                   @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
@@ -41,7 +40,7 @@ public class ReceiptController {
         ResponseEntity<Object> response = null;
 
         try {
-            baseResponse = receiptService.getReceiptsByUserIdWithDuration(userName, fromDate, toDate, status, paymentMode, pageNo, pageSize);
+            baseResponse = receiptService.getReceiptsByUserIdWithDuration(userName, fromDate, toDate, searchKey, pageNo, pageSize);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -152,6 +151,28 @@ public class ReceiptController {
 
         return response;
 
+    }
+    @RequestMapping(value = "/users/{userName}/receipts/search-receipts", method = RequestMethod.GET)
+    public ResponseEntity<Object> getReceiptsBySearchKey(@PathVariable("userName") String userName, @RequestParam(value = "searchKey") String searchKey,
+                                                         @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
+                                                         @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws Exception {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+
+        try {
+            baseResponse = receiptService.getReceiptsBySearchKey(userName, searchKey, pageNo, pageSize);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
     }
 
 

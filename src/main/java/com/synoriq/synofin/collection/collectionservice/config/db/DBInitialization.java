@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.config.datasource;
+package com.synoriq.synofin.collection.collectionservice.config.db;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -46,8 +46,10 @@ public class DBInitialization {
         return configUtility.getProperty("datasource.collection.connection-properties");
     }
 
-    public Map<Object, Object> getDataSourceHashMap(String type) {
+    public Map<Object, Object> getDataSourceHashMap() {
         List<String> clientMasterList = fetchClientList();
+//        List<String> clientMasterList = new ArrayList<>();
+//        clientMasterList.add("finova");
 
         Assert.notEmpty(clientMasterList, "Client master list must not be empty");
 

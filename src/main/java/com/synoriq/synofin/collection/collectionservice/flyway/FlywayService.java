@@ -1,6 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.flyway;
 
-import com.synoriq.synofin.collection.collectionservice.config.datasource.CustomDBRouting;
+import com.synoriq.synofin.collection.collectionservice.config.db.CustomDBRouting;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;

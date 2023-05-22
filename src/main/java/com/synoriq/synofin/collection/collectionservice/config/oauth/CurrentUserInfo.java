@@ -1,5 +1,6 @@
-package com.synoriq.synofin.collection.collectionservice.service;
+package com.synoriq.synofin.collection.collectionservice.config.oauth;
 
+import com.synoriq.synofin.collection.collectionservice.config.DatabaseContextHolder;
 import com.synoriq.synofin.master.entity.usersmgmt.UserEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,7 +30,7 @@ public class CurrentUserInfo {
             return principal.getOAuth2Request().getClientId();
         } else {
             log.info("Get client else block");
-            return "finova";
+            return DatabaseContextHolder.getEnvironment();
 //            return tokenClients.get(Thread.currentThread().getName());
         }
     }

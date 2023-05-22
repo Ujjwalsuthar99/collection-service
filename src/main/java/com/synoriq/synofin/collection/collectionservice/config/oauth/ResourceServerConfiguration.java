@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.config.datasource;
+package com.synoriq.synofin.collection.collectionservice.config.oauth;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
