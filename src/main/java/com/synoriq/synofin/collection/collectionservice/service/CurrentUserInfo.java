@@ -29,7 +29,7 @@ public class CurrentUserInfo {
             return principal.getOAuth2Request().getClientId();
         } else {
             log.info("Get client else block");
-            return null;
+            return "finova";
 //            return tokenClients.get(Thread.currentThread().getName());
         }
     }
