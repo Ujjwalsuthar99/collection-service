@@ -90,9 +90,9 @@ public class KafkaListnerService {
                 collectionActivityLogsEntity.setImages(null);
                 collectionActivityLogsEntity.setGeolocation("{}");
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+                acknowledgment.acknowledge();
+                log.info(" ---------- Things acknowledged -------------");
             }
-            acknowledgment.acknowledge();
-            log.info(" ---------- Things acknowledged -------------");
         } catch (Exception ee) {
             ee.printStackTrace();
         }
