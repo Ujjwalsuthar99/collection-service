@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synoriq.synofin.collection.collectionservice.config.DatabaseContextHolder;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
@@ -46,6 +47,7 @@ public class KafkaListnerService {
     public void consumerTest(@Payload MessageContainerTemplate message, @Headers MessageHeaders headers, Acknowledgment acknowledgment) {
         try {
 //            changeAnnotationValue();
+            DatabaseContextHolder.set(message.getClientId());
             log.info("message datatatatat ->  {}", message.getMessage());
             CollectionRequestActionEvent messageObject = new ObjectMapper().convertValue(message.getMessage(), CollectionRequestActionEvent.class);
             log.info("message object, {}", messageObject);

@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 
+import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;

@@ -1,6 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.flyway;
 
-import com.synoriq.synofin.collection.collectionservice.config.datasource.CustomDBRouting;
+import com.synoriq.synofin.collection.collectionservice.config.db.CustomDBRouting;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
@@ -36,7 +36,7 @@ public class FlywayService {
      * Funtion to migrate schema for all the clients with client specific file
      * @throws Exception
      */
-    @PostConstruct
+//    @PostConstruct
     public void migrateAllClient() throws Exception {
         for (Map.Entry<Object, DataSource> entry : (
                 ((CustomDBRouting) flywayProps.getDataSource()).getResolvedDataSources().entrySet())

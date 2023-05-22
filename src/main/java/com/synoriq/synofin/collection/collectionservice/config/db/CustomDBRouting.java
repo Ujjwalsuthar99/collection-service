@@ -1,6 +1,6 @@
-package com.synoriq.synofin.collection.collectionservice.config.datasource;
+package com.synoriq.synofin.collection.collectionservice.config.db;
 
-import com.synoriq.synofin.collection.collectionservice.service.CurrentUserInfo;
+import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -75,7 +75,7 @@ public class CustomDBRouting extends AbstractRoutingDataSource {
         Object lookupKey = this.determineCurrentLookupKey();
         DataSource dataSource = (DataSource) this.resolvedDataSources.get(lookupKey);
         if (lookupKey != null && !lookupKey.equals("null") && dataSource == null) {
-            targetDataSources = new DBInitialization(env).getDataSourceHashMap(null); //fetching the data sources from DB
+            targetDataSources = new DBInitialization(env).getDataSourceHashMap(); //fetching the data sources from DB
             setResolvedDataSources(); //Setting the resolved data sources
             dataSource = (DataSource) this.resolvedDataSources.get(lookupKey);
         }
