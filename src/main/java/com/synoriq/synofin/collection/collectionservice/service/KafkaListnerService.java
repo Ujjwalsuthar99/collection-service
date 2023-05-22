@@ -42,11 +42,11 @@ public class KafkaListnerService {
     @Autowired
     private CollectionActivityLogsRepository collectionActivityLogsRepository;
 
-    @Transactional
     @KafkaListener(topics = "${spring.kafka.events.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "${spring.kafka.groupId}")
     public void consumerTest(@Payload MessageContainerTemplate message, @Headers MessageHeaders headers, Acknowledgment acknowledgment) {
         try {
 //            changeAnnotationValue();
+            log.info("client id in kafka {}", message.getClientId());
             DatabaseContextHolder.set(message.getClientId());
             log.info("message datatatatat ->  {}", message.getMessage());
             CollectionRequestActionEvent messageObject = new ObjectMapper().convertValue(message.getMessage(), CollectionRequestActionEvent.class);
