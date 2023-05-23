@@ -2,10 +2,10 @@ package com.synoriq.synofin.collection.collectionservice.service.printService.im
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ThermalPrintDataDTO;
 import com.synoriq.synofin.collection.collectionservice.service.printService.interfaces.PrintServiceInterface;
 import org.springframework.stereotype.Service;
-import com.itextpdf.text.pdf.PdfWriter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

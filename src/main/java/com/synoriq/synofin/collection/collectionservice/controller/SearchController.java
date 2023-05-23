@@ -3,7 +3,7 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.searchDTOs.SearchDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.service.SearchService;
+import com.synoriq.synofin.collection.collectionservice.service.GlobalSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import java.sql.SQLException;
 public class SearchController {
 
     @Autowired
-    SearchService searchService;
+    GlobalSearchService searchService;
 
     @RequestMapping(value = "index/search", method = RequestMethod.POST)
     public ResponseEntity<Object> getReceiptsByUserIdWithDuration(@RequestHeader("Authorization") String bearerToken, @RequestBody SearchDtoRequest searchDtoRequest) throws SQLException {

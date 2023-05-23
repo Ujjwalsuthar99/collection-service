@@ -1,21 +1,18 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
-import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionConfigurationDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.service.ActivityNameService;
-import com.synoriq.synofin.collection.collectionservice.rest.request.searchDTOs.SearchDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.service.CollectionConfigurationService;
+import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.service.ActivityNameService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 @RestController
 @RequestMapping("/v1")
 @EnableTransactionManagement

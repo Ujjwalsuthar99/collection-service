@@ -5,8 +5,6 @@ import com.synoriq.synofin.collection.collectionservice.service.printService.int
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 @Component
 public class PrintServiceImplementation {
