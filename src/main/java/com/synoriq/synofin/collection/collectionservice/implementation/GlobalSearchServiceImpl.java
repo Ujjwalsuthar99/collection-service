@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.service;
+package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.rest.request.searchDTOs.SearchDtoRequest;
@@ -8,6 +8,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.globalSear
 import com.synoriq.synofin.collection.collectionservice.rest.response.globalSearchDTOs.SearchDTOReturnResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.globalSearchDTOs.TaskListDTOReturnResponse;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
+import com.synoriq.synofin.collection.collectionservice.service.GlobalSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,8 +22,8 @@ import java.util.regex.Pattern;
 
 @Service
 @Slf4j
-public class SearchService {
-
+public class GlobalSearchServiceImpl implements GlobalSearchService {
+    @Override
     public BaseDTOResponse<Object> getLoanDataBySearch(String token, SearchDtoRequest requestBody) throws Exception {
 
         BaseDTOResponse<Object> baseDTOResponse = null;
