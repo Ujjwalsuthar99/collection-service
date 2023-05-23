@@ -1,0 +1,3 @@
+ALTER SEQUENCE collection.collection_limit_definitions_collection_limit_definitions_i_seq RENAME TO collection_limit_userwise_collection_limit_definitions_id_seq;
+
+ALTER TABLE collection.collection_limit_userwise ALTER COLUMN collection_limit_definitions_id SET DEFAULT nextval('collection.collection_limit_userwise_collection_limit_definitions_id_seq'::regclass);
