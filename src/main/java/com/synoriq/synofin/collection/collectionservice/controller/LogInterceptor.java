@@ -1,6 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
-import com.synoriq.synofin.collection.collectionservice.service.CurrentUserInfo;
+import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
