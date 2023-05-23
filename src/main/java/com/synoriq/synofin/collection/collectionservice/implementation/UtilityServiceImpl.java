@@ -22,7 +22,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.shortenUrl
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.service.CurrentUserInfo;
+import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.CslSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;

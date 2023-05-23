@@ -14,7 +14,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.systemProp
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.systemProperties.ReceiptServiceSystemPropertiesResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
-import com.synoriq.synofin.collection.collectionservice.service.CurrentUserInfo;
+import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
