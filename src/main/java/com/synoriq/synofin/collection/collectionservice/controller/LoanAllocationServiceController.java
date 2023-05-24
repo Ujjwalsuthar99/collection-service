@@ -2,7 +2,8 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEntity;
-import com.synoriq.synofin.collection.collectionservice.rest.request.LoanAllocationDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.loanAllocationDTOs.LoanAllocationDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.loanAllocationDTOs.LoanAllocationMultiUsersDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.LoanAllocationService;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -51,6 +53,30 @@ public class LoanAllocationServiceController {
 
     }
 
+    @RequestMapping(value = "/loan-allocation/multi-users/create", method = RequestMethod.POST)
+    public ResponseEntity<Object> createLoanAllocationToMultipleUserId(@RequestBody LoanAllocationMultiUsersDtoRequest loanAllocationMultiUsersDtoRequest) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+
+        try {
+            BaseDTOResponse<Object> result = loanAllocationService.createLoanAllocationToMultipleUserId(loanAllocationMultiUsersDtoRequest);
+            response = new ResponseEntity<>(result, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        return response;
+
+    }
+
 
 
     @RequestMapping(value = "/users/{allocatedToUserId}/loans", method = RequestMethod.GET)
@@ -62,6 +88,26 @@ public class LoanAllocationServiceController {
         try {
             log.info("Loan from user id {}", allocatedToUserId);
             result = loanAllocationService.getLoansByUserId(allocatedToUserId);
+            baseResponse = new BaseDTOResponse<>(result);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+    @RequestMapping(value = "/loan-allocation/loans/{loanId}", method = RequestMethod.GET)
+    public ResponseEntity<Object> getAllocatedUsersByLoanId(@PathVariable("loanId") Long loanId) throws SQLException {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+        List<Map<String, Object>> result;
+        try {
+            result = loanAllocationService.getAllocatedUsersByLoanId(loanId);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {

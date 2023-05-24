@@ -320,17 +320,6 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    public List<LoanAllocationEntity> getLoansByUserId(Long allocatedToUserId) throws Exception {
-        List<LoanAllocationEntity> loanAllocationEntities;
-        try {
-            loanAllocationEntities = loanAllocationRepository.getLoansByAllocatedToUserId(allocatedToUserId);
-        } catch (Exception e) {
-            throw new Exception("1016028");
-        }
-        return loanAllocationEntities;
-    }
-
-    @Override
     public Object getReceiptDate(String bearerToken) throws Exception {
         ReceiptServiceSystemPropertiesResponse lmsBusinessDate = new ReceiptServiceSystemPropertiesResponse();
 
