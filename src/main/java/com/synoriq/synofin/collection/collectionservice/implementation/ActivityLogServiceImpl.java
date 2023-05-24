@@ -93,27 +93,18 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         }
     }
     @Override
-    public BaseDTOResponse<Object> getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date endDate) throws Exception {
+    public BaseDTOResponse<Object> getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date endDate, String filterBy) throws Exception {
 
         Date toDate = checkToDate(endDate);
-        BaseDTOResponse<Object> response;
         Pageable pageable = PageRequest.of(page,size);
+        List<Map<String, Object>> collectionActivityLogs;
 
-        List<Map<String, Object>> collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
-        if (page > 0) {
-            if (collectionActivityLogs.size() == 0) {
-                return new BaseDTOResponse<>(collectionActivityLogs);
-            }
-        }
-
-        if (!collectionActivityLogs.isEmpty()) {
-            log.info("Getting activity log for loanId {} ", loanId);
-            response = new BaseDTOResponse<>(collectionActivityLogs);
-            return response;
+        if (!filterBy.equals("")) {
+            collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDurationByFilter(loanId, fromDate, toDate, filterBy, pageable);
         } else {
-            log.error("Activity log loan id {} not found", loanId);
-            throw new Exception("1016025");
+            collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
         }
+        return new BaseDTOResponse<>(collectionActivityLogs);
     }
     @Override
     public Long createActivityLogs(CollectionActivityLogDTO activityLogRequest, String token) throws Exception {

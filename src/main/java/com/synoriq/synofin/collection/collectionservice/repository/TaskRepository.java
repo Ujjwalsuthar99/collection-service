@@ -15,10 +15,6 @@ import java.util.Map;
 @Repository
 public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long> {
 
-//    @Query(nativeQuery = true,value = "select * from collection.followups where loan_id = :loanId " +
-//            "and created_date between :fromDate and :toDate ")
-//    Page<Object> getFollowupsLoanWiseByDuration(@Param("loanId") Long loanId, @Param("fromDate") Date fromDate
-//            , @Param("toDate") Date toDate, Pageable pageable);
 
 
     @Query(nativeQuery = true,value = "select loan_application_number from lms.loan_application where loan_application_id = :loanId")

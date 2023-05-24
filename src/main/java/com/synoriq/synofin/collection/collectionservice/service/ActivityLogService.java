@@ -9,7 +9,7 @@ public interface ActivityLogService {
 
     public BaseDTOResponse<Object> getActivityLogsById(Long activityLogsId) throws Exception;
     public BaseDTOResponse<Object> getActivityLogsByUserIdWithDuration(Integer page, Integer size, Long userId, Date fromDate, Date endDate) throws Exception;
-    public BaseDTOResponse<Object> getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date endDate) throws Exception;
+    public BaseDTOResponse<Object> getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date endDate, String filterBy) throws Exception;
     public Long createActivityLogs(CollectionActivityLogDTO activityLogRequest, String token) throws Exception;
 
 

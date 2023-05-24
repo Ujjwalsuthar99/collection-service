@@ -35,6 +35,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -70,6 +71,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Autowired
     CslSmsService cslSmsService;
+
+    @Autowired
+    HttpServletRequest httpServletRequest;
 
     @Override
     public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception {
@@ -339,6 +343,11 @@ public class UtilityServiceImpl implements UtilityService {
         uploadImageOnS3RequestDTO.setSpecificPartnerName("");
         String[] loanId = fileName.split("_");
 
+        String apiUrl = httpServletRequest.getRequestURL().toString();
+        log.info("API URL: {}", apiUrl);
+
+        boolean isProd = apiUrl.contains("api-prod.synofin.tech");
+
 
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -387,8 +396,11 @@ public class UtilityServiceImpl implements UtilityService {
                 if(customerType.equals("applicant")) {
                     finovaSmsRequest.setSender("FINOVA");
                     finovaSmsRequest.setShort_url("0");
-                    finovaSmsRequest.setMobiles("917805951252");
-//                    finovaSmsRequest.setMobiles(applicantMobileNumber); // when we are deploying the code on PROD, then will enable this line and comment above line.
+                    if(isProd) {
+                        finovaSmsRequest.setMobiles(applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
+                    } else {
+                        finovaSmsRequest.setMobiles("917805951252");
+                    }
                     finovaSmsRequest.setAmount(receiptAmount);
                     finovaSmsRequest.setLoanNumber(loanId[0]);
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
@@ -398,8 +410,11 @@ public class UtilityServiceImpl implements UtilityService {
                 } else {
                     finovaSmsRequest.setSender("FINOVA");
                     finovaSmsRequest.setShort_url("0");
-                    finovaSmsRequest.setMobiles("917805951252");
-//                    finovaSmsRequest.setMobiles(applicantMobileNumber); // when we are deploying the code on PROD, then will enable this line and comment above line.
+                    if(isProd) {
+                        finovaSmsRequest.setMobiles(applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
+                    } else {
+                        finovaSmsRequest.setMobiles("917805951252");
+                    }
                     finovaSmsRequest.setAmount(receiptAmount);
                     finovaSmsRequest.setLoanNumber(loanId[0]);
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
@@ -410,8 +425,11 @@ public class UtilityServiceImpl implements UtilityService {
 
                     finovaSmsRequest.setSender("FINOVA");
                     finovaSmsRequest.setShort_url("0");
-                    finovaSmsRequest.setMobiles("917805951252");
-//                    finovaSmsRequest.setMobiles(collectedFromMobileNumber); // when we are deploying the code on PROD, then will enable this line and comment above line.
+                    if(isProd) {
+                        finovaSmsRequest.setMobiles(collectedFromMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
+                    } else {
+                        finovaSmsRequest.setMobiles("917805951252");
+                    }
                     finovaSmsRequest.setAmount(receiptAmount);
                     finovaSmsRequest.setLoanNumber(loanId[0]);
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
@@ -429,8 +447,12 @@ public class UtilityServiceImpl implements UtilityService {
                 message = message.replace("1-1-2032", String.valueOf(new Date()));
                 message = message.replace("1234567", loanNumber);
                 message = message.replace("6778990000", shortenUrlResponseDTO.getData().getResult());
-                String receivedMobileNumber = "9649916989";
-//                String receivedMobileNumber = applicantMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
+                String receivedMobileNumber = null;
+                if(isProd) {
+                    receivedMobileNumber = applicantMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
+                } else {
+                    receivedMobileNumber = "9649916989";
+                }
                 String encodedMessageString = URLEncoder.encode(message, StandardCharsets.UTF_8);
                 String postField = "user=CSLFIN&message=" + encodedMessageString + "&key=974130e696XX&mobile=" + receivedMobileNumber + "&senderid=CSLSME&accusage=1&tempid=1707165942499421494&entityid=1701159697926729192&unicode=1";
                 String smsServiceResponse = cslSmsService.sendSmsCsl(postField);

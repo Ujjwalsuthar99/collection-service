@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Map;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.KAFKA_RECEIPT_STATUS;
 
@@ -59,6 +60,8 @@ public class KafkaListnerService {
 
             log.info("service request id {}", messageObject.getServiceRequestId());
             CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
+            Map<String, Object> loanIdByServiceId = receiptRepository.getLoanIdByServiceId(messageObject.getServiceRequestId());
+            Long loanId = Long.valueOf(loanIdByServiceId.get("loanId").toString());
 
             log.info("check service request, {}", collectionReceiptEntity);
 
@@ -83,7 +86,7 @@ public class KafkaListnerService {
                 collectionActivityLogsEntity.setActivityDate(new Date());
                 collectionActivityLogsEntity.setActivityName("receipt_" + messageObject.getStatus());
                 collectionActivityLogsEntity.setDeleted(false);
-                collectionActivityLogsEntity.setLoanId(0L);
+                collectionActivityLogsEntity.setLoanId(loanId);
                 collectionActivityLogsEntity.setDistanceFromUserBranch(0.0);
                 collectionActivityLogsEntity.setAddress("{}");
                 collectionActivityLogsEntity.setImages(null);
