@@ -78,12 +78,13 @@ public class ActivityLogRestController {
                                                                       @RequestParam(value = "page",defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
                                                                       @RequestParam(value = "size",defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
                                                                       @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date fromDate,
-                                                                      @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate) {
+                                                                      @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate,
+                                                                      @RequestParam(value = "filterBy", defaultValue = "", required = false) String filterBy) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = activityLogService.getActivityLogsByLoanIdWithDuration(page, size, loanId, fromDate, toDate);
+            baseResponse = activityLogService.getActivityLogsByLoanIdWithDuration(page, size, loanId, fromDate, toDate, filterBy);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {
