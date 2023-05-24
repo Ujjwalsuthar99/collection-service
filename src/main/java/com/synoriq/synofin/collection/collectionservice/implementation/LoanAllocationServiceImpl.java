@@ -2,7 +2,8 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.LoanAllocationRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.request.LoanAllocationDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.loanAllocationDTOs.LoanAllocationDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.loanAllocationDTOs.LoanAllocationMultiUsersDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.LoanAllocationService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,16 +29,15 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
             List<Object> savedLoans = new ArrayList<>();
             Map<String, List<Object>> responseLoans = new HashMap<>();
 
-            LoanAllocationEntity loanAllocationEntity = null;
             for (Long loanId : loanAllocationDtoRequest.getLoanId()) {
                 log.info("loan id from iteration {}", loanId);
-                loanDetail = loanAllocationRepository.getLoansByLoanId(loanId);
+                loanDetail = loanAllocationRepository.getLoansByLoanIdAndDeleted(loanId, false);
                 if(!loanDetail.isEmpty()) {
                     duplicate.add(loanId);
                     continue;
                 }
 
-                loanAllocationEntity = new LoanAllocationEntity();
+                LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
 
                 loanAllocationEntity.setCreatedDate(new Date());
                 loanAllocationEntity.setCreatedBy(loanAllocationDtoRequest.getCreatedBy());
@@ -62,11 +62,50 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
     public List<LoanAllocationEntity> getLoansByUserId(Long allocatedToUserId) throws Exception {
         List<LoanAllocationEntity> loanAllocationEntities;
         try {
-            loanAllocationEntities = loanAllocationRepository.getLoansByAllocatedToUserId(allocatedToUserId);
+            loanAllocationEntities = loanAllocationRepository.getLoansByAllocatedToUserIdAndDeleted(allocatedToUserId, false);
         } catch (Exception e) {
             throw new Exception("1016028");
         }
         return loanAllocationEntities;
+    }
+
+    @Override
+    public List<Map<String, Object>> getAllocatedUsersByLoanId(Long loanId) throws Exception {
+        List<Map<String, Object>> loanAllocationEntities;
+        try {
+            loanAllocationEntities = loanAllocationRepository.getAllocatedToUserIdsByLoanIdAndDeleted(loanId);
+        } catch (Exception e) {
+            throw new Exception("1016028");
+        }
+        return loanAllocationEntities;
+    }
+
+    @Override
+    public BaseDTOResponse<Object> createLoanAllocationToMultipleUserId(LoanAllocationMultiUsersDtoRequest loanAllocationMultiUsersDtoRequest) throws Exception {
+
+        List<Long> allocatedUserIds = loanAllocationMultiUsersDtoRequest.getAllocatedToUserId();
+        List<Long> removeUserIds = loanAllocationMultiUsersDtoRequest.getRemovedUserId();
+
+        if(removeUserIds.size() > 0) {
+            for (Long removeUserId: removeUserIds) {
+                LoanAllocationEntity loanAllocation = loanAllocationRepository.findByAllocatedToUserIdAndDeleted(removeUserId, false);
+                loanAllocation.setDeleted(true);
+                loanAllocationRepository.save(loanAllocation);
+            }
+        }
+
+
+        for (Long userId: allocatedUserIds) {
+            LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
+
+            loanAllocationEntity.setCreatedDate(new Date());
+            loanAllocationEntity.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
+            loanAllocationEntity.setDeleted(false);
+            loanAllocationEntity.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
+            loanAllocationEntity.setAllocatedToUserId(userId);
+            loanAllocationRepository.save(loanAllocationEntity);
+        }
+        return new BaseDTOResponse<>("Data Saved Successfully");
     }
 
 }
