@@ -64,7 +64,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
                     .build().call();
 
             log.info("responseData {}", res);
-            if (res.getData().getLoanDetails() != null) {
+            if (res.getData() != null && res.getData().getLoanDetails() != null) {
                 for (LMSLoanDataDTO loanDataDTO : res.getData().getLoanDetails()) {
                     TaskListDTOReturnResponse taskListDTOReturnResponse = new TaskListDTOReturnResponse();
                     taskListDTOReturnResponse.setAddress(loanDataDTO.getCustomerDetails().getCustomerAddress());
