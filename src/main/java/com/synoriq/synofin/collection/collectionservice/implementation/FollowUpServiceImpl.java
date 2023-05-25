@@ -6,7 +6,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionAct
 import com.synoriq.synofin.collection.collectionservice.repository.FollowUpRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.FollowUpDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.FollowupResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.FollowupResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
 import com.synoriq.synofin.collection.collectionservice.service.FollowUpService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,23 +38,23 @@ public class FollowUpServiceImpl implements FollowUpService {
     public BaseDTOResponse<Object> getFollowupById(Long followupById) throws Exception {
 
         BaseDTOResponse<Object> response;
-        FollowupResponse followupResponse = new FollowupResponse();
+        FollowupResponseDTO followupResponseDTO = new FollowupResponseDTO();
 
         FollowUpEntity followUpEntity = followUpRepository.findByFollowupId(followupById);
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         if(followUpEntity != null){
 
-            followupResponse.setFollowUpId(followUpEntity.getFollowupId());
-            followupResponse.setFollowUpReason(followUpEntity.getFollowUpReason());
-            followupResponse.setOtherFollowupReason(followUpEntity.getOtherFollowUpReason());
-            followupResponse.setLoanId(followUpEntity.getLoanId());
-            followupResponse.setRemarks(followUpEntity.getRemarks());
-            followupResponse.setCreatedBy(followUpEntity.getCreatedBy());
-            followupResponse.setCreatedDate(followUpEntity.getCreatedDate());
-            followupResponse.setNextFollowUpDateTime(formatter.format(followUpEntity.getNextFollowUpDateTime()));
-            followupResponse.setIsDeleted(followUpEntity.getIsDeleted());
+            followupResponseDTO.setFollowUpId(followUpEntity.getFollowupId());
+            followupResponseDTO.setFollowUpReason(followUpEntity.getFollowUpReason());
+            followupResponseDTO.setOtherFollowupReason(followUpEntity.getOtherFollowUpReason());
+            followupResponseDTO.setLoanId(followUpEntity.getLoanId());
+            followupResponseDTO.setRemarks(followUpEntity.getRemarks());
+            followupResponseDTO.setCreatedBy(followUpEntity.getCreatedBy());
+            followupResponseDTO.setCreatedDate(followUpEntity.getCreatedDate());
+            followupResponseDTO.setNextFollowUpDateTime(formatter.format(followUpEntity.getNextFollowUpDateTime()));
+            followupResponseDTO.setIsDeleted(followUpEntity.getIsDeleted());
 
-            response = new BaseDTOResponse<Object>(followupResponse);
+            response = new BaseDTOResponse<Object>(followupResponseDTO);
             return response;
 
         }else{

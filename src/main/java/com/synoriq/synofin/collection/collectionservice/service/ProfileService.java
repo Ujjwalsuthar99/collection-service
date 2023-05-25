@@ -1,6 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
-import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailsDTOs.ProfileDetailResponseDTO;
 
 public interface ProfileService {
 

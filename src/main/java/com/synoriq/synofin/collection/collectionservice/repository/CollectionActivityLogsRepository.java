@@ -28,7 +28,14 @@ public interface CollectionActivityLogsRepository extends PagingAndSortingReposi
             "\tcal.activity_name as activity_name,\n" +
             "\tcal.remarks as remarks,\n" +
             "\tcal.loan_id as loan_id,\n" +
+            "\tcal.distance_from_user_branch as distance_from_user_branch,\n" +
             "\tcast(cal.geo_location_data as text) as geo_location_data,\n" +
+            "\tcast(cal.address as text) as address,\n" +
+            "\tcast(cal.images as text) as images,\n" +
+            "\t(case\n" +
+            "\t\twhen cal.activity_name = 'create_receipt' then true\n" +
+            "\t\telse false\n" +
+            "\tend) as is_receipt,\n" +
             "\tcr.receipt_id as receipt_id\n" +
             "from\n" +
             "\tcollection.collection_activity_logs cal\n" +
