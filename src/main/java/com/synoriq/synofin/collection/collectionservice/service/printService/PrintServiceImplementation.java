@@ -1,6 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.service.printService;
 
-import com.synoriq.synofin.collection.collectionservice.rest.response.ThermalPrintDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ThermalPrintDataDTO;
 import com.synoriq.synofin.collection.collectionservice.service.printService.interfaces.PrintServiceInterface;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;

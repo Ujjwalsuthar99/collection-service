@@ -89,21 +89,24 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
         if(removeUserIds.size() > 0) {
             for (Long removeUserId: removeUserIds) {
                 LoanAllocationEntity loanAllocation = loanAllocationRepository.findByAllocatedToUserIdAndDeleted(removeUserId, false);
-                loanAllocation.setDeleted(true);
-                loanAllocationRepository.save(loanAllocation);
+                if (loanAllocation != null) {
+                    loanAllocation.setDeleted(true);
+                    loanAllocationRepository.save(loanAllocation);
+                }
             }
         }
 
+        if(allocatedUserIds.size() > 0) {
+            for (Long userId : allocatedUserIds) {
+                LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
 
-        for (Long userId: allocatedUserIds) {
-            LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
-
-            loanAllocationEntity.setCreatedDate(new Date());
-            loanAllocationEntity.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
-            loanAllocationEntity.setDeleted(false);
-            loanAllocationEntity.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
-            loanAllocationEntity.setAllocatedToUserId(userId);
-            loanAllocationRepository.save(loanAllocationEntity);
+                loanAllocationEntity.setCreatedDate(new Date());
+                loanAllocationEntity.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
+                loanAllocationEntity.setDeleted(false);
+                loanAllocationEntity.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
+                loanAllocationEntity.setAllocatedToUserId(userId);
+                loanAllocationRepository.save(loanAllocationEntity);
+            }
         }
         return new BaseDTOResponse<>("Data Saved Successfully");
     }

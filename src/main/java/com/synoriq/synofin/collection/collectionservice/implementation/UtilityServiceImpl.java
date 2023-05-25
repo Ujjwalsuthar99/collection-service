@@ -15,14 +15,17 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImage
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOS.OcrCheckResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.msgServiceResponse.FinovaMsgDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.shortenUrl.ShortenUrlResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.userDataDTO.UsersDataDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.FinovaMsgDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrlDTOs.ShortenUrlResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.UsersDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.BankNameIFSCResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ContactResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ThermalPrintDataDTO;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.CslSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
@@ -166,11 +169,11 @@ public class UtilityServiceImpl implements UtilityService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
-            res = HTTPRequestService.<Object, ContactDTOResponse>builder()
+            res = HTTPRequestService.<Object, ContactResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getContactSupport?keyword="+keyword+"&model="+model)
                     .httpHeaders(httpHeaders)
-                    .typeResponseType(ContactDTOResponse.class)
+                    .typeResponseType(ContactResponseDTO.class)
                     .build().call();
 
             log.info("responseData {}", res);
@@ -228,11 +231,11 @@ public class UtilityServiceImpl implements UtilityService {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Content-Type", "application/json");
 
-            res = HTTPRequestService.<Object, BankNameIFSCDTOResponse>builder()
+            res = HTTPRequestService.<Object, BankNameIFSCResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getBankNameByIFSC?keyword=" + keyword)
                     .httpHeaders(httpHeaders)
-                    .typeResponseType(BankNameIFSCDTOResponse.class)
+                    .typeResponseType(BankNameIFSCResponseDTO.class)
                     .build().call();
 
             log.info("responseData {}", res);
@@ -469,11 +472,11 @@ public class UtilityServiceImpl implements UtilityService {
             collectionActivityLogsEntity.setDeleted(false);
             collectionActivityLogsEntity.setActivityBy(Long.parseLong(userId));
             collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
-            collectionActivityLogsEntity.setAddress(res);
+            collectionActivityLogsEntity.setAddress("{}");
             collectionActivityLogsEntity.setRemarks(remarks);
             collectionActivityLogsEntity.setImages(res.getData());
             collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
-            collectionActivityLogsEntity.setGeolocation(res);
+            collectionActivityLogsEntity.setGeolocation("{}");
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 

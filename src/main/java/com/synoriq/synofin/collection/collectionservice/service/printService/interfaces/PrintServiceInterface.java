@@ -1,7 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.service.printService.interfaces;
 
 import com.itextpdf.text.DocumentException;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ThermalPrintDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ThermalPrintDataDTO;
 
 import java.io.IOException;
 

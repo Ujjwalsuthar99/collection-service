@@ -6,8 +6,8 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionCon
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionLimitUserWiseRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionLimitUserWiseDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.collectionLimitUserWise.CollectionLimitUserWiseFetchDataResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailsDTOs.ProfileDetailResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.CollectionLimitUserWise.CollectionLimitUserWiseFetchDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
 import com.synoriq.synofin.collection.collectionservice.service.CollectionLimitUserWiseService;
 import lombok.extern.slf4j.Slf4j;
