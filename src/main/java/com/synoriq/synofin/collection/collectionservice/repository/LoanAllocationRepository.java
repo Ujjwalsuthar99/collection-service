@@ -18,7 +18,8 @@ public interface LoanAllocationRepository extends JpaRepository<LoanAllocationEn
 
     @Query(nativeQuery = true, value = "select\n" +
             "\tla.allocated_to_user_id as id,\n" +
-            "\tconcat(u.\"name\", ' ', '(', u.employee_code, ')') as full_name\n" +
+            "\tu.\"name\" as full_name,\n" +
+            "\tu.employee_code as employee_code\n" +
             "from\n" +
             "\tcollection.loan_allocation la\n" +
             "join (select user_id, employee_code, name from master.users) as u on\n" +
