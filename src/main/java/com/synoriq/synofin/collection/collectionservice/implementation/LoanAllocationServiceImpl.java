@@ -98,14 +98,16 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
 
         if(allocatedUserIds.size() > 0) {
             for (Long userId : allocatedUserIds) {
-                LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
-
-                loanAllocationEntity.setCreatedDate(new Date());
-                loanAllocationEntity.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
-                loanAllocationEntity.setDeleted(false);
-                loanAllocationEntity.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
-                loanAllocationEntity.setAllocatedToUserId(userId);
-                loanAllocationRepository.save(loanAllocationEntity);
+                LoanAllocationEntity loanAllocation = loanAllocationRepository.findByAllocatedToUserIdAndDeleted(userId, false);
+                if (loanAllocation != null) {
+                    LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
+                    loanAllocationEntity.setCreatedDate(new Date());
+                    loanAllocationEntity.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
+                    loanAllocationEntity.setDeleted(false);
+                    loanAllocationEntity.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
+                    loanAllocationEntity.setAllocatedToUserId(userId);
+                    loanAllocationRepository.save(loanAllocationEntity);
+                }
             }
         }
         return new BaseDTOResponse<>("Data Saved Successfully");
