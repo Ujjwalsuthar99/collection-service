@@ -7,7 +7,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogBaseResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogCustomResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
@@ -97,11 +99,13 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         }
     }
     @Override
-    public BaseDTOResponse<Object> getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date endDate, String filterBy) throws Exception {
+    public ActivityLogBaseResponseDTO getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date endDate, String filterBy) throws Exception {
 
         Date toDate = checkToDate(endDate);
         Pageable pageable = PageRequest.of(page,size);
         List<Map<String, Object>> collectionActivityLogs;
+        ActivityLogBaseResponseDTO activityLogBaseResponseDTO = new ActivityLogBaseResponseDTO();
+        ActivityLogDataDTO activityLogDataDTO = new ActivityLogDataDTO();
         List<ActivityLogCustomResponseDTO> responseData = new ArrayList<>();
 
         if (!filterBy.equals("")) {
@@ -131,7 +135,10 @@ public class ActivityLogServiceImpl implements ActivityLogService {
 
             responseData.add(activityLogCustomResponseDTO);
         }
-        return new BaseDTOResponse<>(responseData);
+        activityLogDataDTO.setData(responseData);
+        activityLogDataDTO.setTotalCount(Long.parseLong(String.valueOf(collectionActivityLogs.get(0).get("total_rows"))));
+        activityLogBaseResponseDTO.setData(activityLogDataDTO);
+        return activityLogBaseResponseDTO;
     }
     @Override
     public Long createActivityLogs(CollectionActivityLogDTO activityLogRequest, String token) throws Exception {

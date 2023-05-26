@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogBaseResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
 import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
@@ -81,11 +82,12 @@ public class ActivityLogRestController {
                                                                       @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate,
                                                                       @RequestParam(value = "filterBy", defaultValue = "", required = false) String filterBy) {
         BaseDTOResponse<Object> baseResponse;
+        ActivityLogBaseResponseDTO result;
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = activityLogService.getActivityLogsByLoanIdWithDuration(page, size, loanId, fromDate, toDate, filterBy);
-            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+            result = activityLogService.getActivityLogsByLoanIdWithDuration(page, size, loanId, fromDate, toDate, filterBy);
+            response = new ResponseEntity<>(result, HttpStatus.OK);
 
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
