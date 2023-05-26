@@ -99,7 +99,7 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
         if(allocatedUserIds.size() > 0) {
             for (Long userId : allocatedUserIds) {
                 LoanAllocationEntity loanAllocation = loanAllocationRepository.findByAllocatedToUserIdAndDeleted(userId, false);
-                if (loanAllocation != null) {
+                if (loanAllocation == null) {
                     LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
                     loanAllocationEntity.setCreatedDate(new Date());
                     loanAllocationEntity.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
