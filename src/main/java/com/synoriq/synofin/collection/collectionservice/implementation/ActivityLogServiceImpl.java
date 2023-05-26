@@ -113,31 +113,33 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         } else {
             collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
         }
-        for (Map<String, Object> collectionActivityLog : collectionActivityLogs) {
-            ActivityLogCustomResponseDTO activityLogCustomResponseDTO = new ActivityLogCustomResponseDTO();
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode addressNode = objectMapper.readTree(String.valueOf(collectionActivityLog.get("address")));
-            JsonNode imagesNode = objectMapper.readTree(String.valueOf(collectionActivityLog.get("images")));
-            JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(collectionActivityLog.get("geo_location_data")));
+        if (collectionActivityLogs.size() > 0) {
+            for (Map<String, Object> collectionActivityLog : collectionActivityLogs) {
+                ActivityLogCustomResponseDTO activityLogCustomResponseDTO = new ActivityLogCustomResponseDTO();
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode addressNode = objectMapper.readTree(String.valueOf(collectionActivityLog.get("address")));
+                JsonNode imagesNode = objectMapper.readTree(String.valueOf(collectionActivityLog.get("images")));
+                JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(collectionActivityLog.get("geo_location_data")));
 
-            activityLogCustomResponseDTO.setCollectionActivityLogsId(Long.parseLong(String.valueOf(collectionActivityLog.get("collection_activity_logs_id"))));
-            activityLogCustomResponseDTO.setActivityDate(String.valueOf(collectionActivityLog.get("activity_date")));
-            activityLogCustomResponseDTO.setActivityBy(Long.parseLong(String.valueOf(collectionActivityLog.get("activity_by"))));
-            activityLogCustomResponseDTO.setActivityName(String.valueOf(collectionActivityLog.get("activity_name")));
-            activityLogCustomResponseDTO.setDistanceFromUserBranch(Double.parseDouble(String.valueOf(collectionActivityLog.get("distance_from_user_branch"))));
-            activityLogCustomResponseDTO.setRemarks(String.valueOf(collectionActivityLog.get("remarks")));
-            activityLogCustomResponseDTO.setLoanId(Long.parseLong(String.valueOf(collectionActivityLog.get("loan_id"))));
-            activityLogCustomResponseDTO.setIsReceipt(Boolean.valueOf(String.valueOf(collectionActivityLog.get("is_receipt"))));
-            activityLogCustomResponseDTO.setReceiptId((!Objects.equals(collectionActivityLog.get("receipt_id"), null) ? Long.parseLong(String.valueOf(collectionActivityLog.get("receipt_id"))) : null));
-            activityLogCustomResponseDTO.setAddress(new Gson().fromJson(String.valueOf(addressNode), Object.class));
-            activityLogCustomResponseDTO.setImages(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
-            activityLogCustomResponseDTO.setGeolocation(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                activityLogCustomResponseDTO.setCollectionActivityLogsId(Long.parseLong(String.valueOf(collectionActivityLog.get("collection_activity_logs_id"))));
+                activityLogCustomResponseDTO.setActivityDate(String.valueOf(collectionActivityLog.get("activity_date")));
+                activityLogCustomResponseDTO.setActivityBy(Long.parseLong(String.valueOf(collectionActivityLog.get("activity_by"))));
+                activityLogCustomResponseDTO.setActivityName(String.valueOf(collectionActivityLog.get("activity_name")));
+                activityLogCustomResponseDTO.setDistanceFromUserBranch(Double.parseDouble(String.valueOf(collectionActivityLog.get("distance_from_user_branch"))));
+                activityLogCustomResponseDTO.setRemarks(String.valueOf(collectionActivityLog.get("remarks")));
+                activityLogCustomResponseDTO.setLoanId(Long.parseLong(String.valueOf(collectionActivityLog.get("loan_id"))));
+                activityLogCustomResponseDTO.setIsReceipt(Boolean.valueOf(String.valueOf(collectionActivityLog.get("is_receipt"))));
+                activityLogCustomResponseDTO.setReceiptId((!Objects.equals(collectionActivityLog.get("receipt_id"), null) ? Long.parseLong(String.valueOf(collectionActivityLog.get("receipt_id"))) : null));
+                activityLogCustomResponseDTO.setAddress(new Gson().fromJson(String.valueOf(addressNode), Object.class));
+                activityLogCustomResponseDTO.setImages(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
+                activityLogCustomResponseDTO.setGeolocation(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
 
-            responseData.add(activityLogCustomResponseDTO);
+                responseData.add(activityLogCustomResponseDTO);
+            }
+            activityLogDataDTO.setData(responseData);
+            activityLogDataDTO.setTotalCount(Long.parseLong(String.valueOf(collectionActivityLogs.get(0).get("total_rows"))));
+            activityLogBaseResponseDTO.setData(activityLogDataDTO);
         }
-        activityLogDataDTO.setData(responseData);
-        activityLogDataDTO.setTotalCount(Long.parseLong(String.valueOf(collectionActivityLogs.get(0).get("total_rows"))));
-        activityLogBaseResponseDTO.setData(activityLogDataDTO);
         return activityLogBaseResponseDTO;
     }
     @Override
