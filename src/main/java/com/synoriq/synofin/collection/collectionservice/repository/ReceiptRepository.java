@@ -92,10 +92,9 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    from lms.service_request sr \n" +
             "    join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id \n" +
             "    join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id\n" +
-            "    join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id = sr.loan_id\n" +
+            "    join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id = sr.loan_id and clm.customer_type = 'applicant' \n" +
             "    join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
-            "    where cr.receipt_id not in (select collection_receipts_id from collection.receipt_transfer_history where collection.receipt_transfer_history.deleted=false) and clm.customer_type = 'applicant' and\n" +
-            "    sr.request_source = 'm_collect' and sr.status = 'initiated' and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque') and sr.form->>'created_by' = :userName")
+            "    where sr.request_source = 'm_collect' and sr.status = 'initiated' and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque') and cr.receipt_holder_user_id = (select user_id from master.users where username = :userName)")
     List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferred(@Param("userName") String userName);
 
 
