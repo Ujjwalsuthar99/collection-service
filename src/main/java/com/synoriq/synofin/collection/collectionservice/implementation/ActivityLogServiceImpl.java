@@ -139,6 +139,10 @@ public class ActivityLogServiceImpl implements ActivityLogService {
             activityLogDataDTO.setData(responseData);
             activityLogDataDTO.setTotalCount(Long.parseLong(String.valueOf(collectionActivityLogs.get(0).get("total_rows"))));
             activityLogBaseResponseDTO.setData(activityLogDataDTO);
+        } else {
+            activityLogDataDTO.setData(new ArrayList<>());
+            activityLogDataDTO.setTotalCount(0L);
+            activityLogBaseResponseDTO.setData(activityLogDataDTO);
         }
         return activityLogBaseResponseDTO;
     }

@@ -87,7 +87,8 @@ public class ActivityLogRestController {
 
         try {
             result = activityLogService.getActivityLogsByLoanIdWithDuration(page, size, loanId, fromDate, toDate, filterBy);
-            response = new ResponseEntity<>(result, HttpStatus.OK);
+            baseResponse = new BaseDTOResponse<Object>(result.getData());
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
