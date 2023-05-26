@@ -11,7 +11,7 @@ import java.util.Map;
 @Repository
 public interface LoanAllocationRepository extends JpaRepository<LoanAllocationEntity, Long> {
 
-    LoanAllocationEntity findByAllocatedToUserIdAndDeleted(Long userId, boolean deleted);
+    LoanAllocationEntity findByAllocatedToUserIdAndLoanId(Long userId, Long loanId);
     List<LoanAllocationEntity> getLoansByAllocatedToUserIdAndDeleted(Long allocatedToUserId, boolean deleted);
 
     List<Object> getLoansByLoanIdAndDeleted(Long loanId, boolean deleted);
