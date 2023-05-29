@@ -1,7 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
 
-import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailsDTOs.ProfileDetailResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
 import lombok.extern.slf4j.Slf4j;

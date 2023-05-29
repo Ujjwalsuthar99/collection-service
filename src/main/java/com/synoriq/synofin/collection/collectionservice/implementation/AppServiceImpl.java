@@ -5,7 +5,7 @@ import com.synoriq.synofin.collection.collectionservice.common.exception.Collect
 import com.synoriq.synofin.collection.collectionservice.constant.PlatformTypeEnum;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.CheckAppUpdateResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.CheckAppUpdateResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.AppService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -50,13 +50,13 @@ public class AppServiceImpl implements AppService {
                 log.error(ErrorCode.RECORD_NOT_FOUND.getResponseMessage());
                 throw new CollectionException(ErrorCode.RECORD_NOT_FOUND);
             }
-            CheckAppUpdateResponse checkAppUpdateResponse =  CheckAppUpdateResponse.builder().
+            CheckAppUpdateResponseDTO checkAppUpdateResponseDTO =  CheckAppUpdateResponseDTO.builder().
                     currentAppVersion(currentAppVersion.toString()).
                     currentAppUpdateVersion(currentAppUpdateVersion.toString()).
                     forceAppUpdateVersion(forceAppUpdateVersion.toString())
                     .isUpdate(isUpdate)
                     .isForceUpdate(isForceUpdate).build();
-            response = new BaseDTOResponse<>(checkAppUpdateResponse);
+            response = new BaseDTOResponse<>(checkAppUpdateResponseDTO);
             return response;
         } else {
             log.error("Requested parameters cannot be null");

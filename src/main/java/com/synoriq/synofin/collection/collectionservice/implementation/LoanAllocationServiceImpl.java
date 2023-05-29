@@ -88,22 +88,35 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
 
         if(removeUserIds.size() > 0) {
             for (Long removeUserId: removeUserIds) {
-                LoanAllocationEntity loanAllocation = loanAllocationRepository.findByAllocatedToUserIdAndDeleted(removeUserId, false);
-                loanAllocation.setDeleted(true);
-                loanAllocationRepository.save(loanAllocation);
+                LoanAllocationEntity loanAllocation = loanAllocationRepository.findByAllocatedToUserIdAndLoanId(removeUserId, loanAllocationMultiUsersDtoRequest.getLoanId());
+                if (loanAllocation != null && !loanAllocation.getDeleted()) {
+                    loanAllocation.setDeleted(true);
+                    loanAllocationRepository.save(loanAllocation);
+                }
             }
         }
 
-
-        for (Long userId: allocatedUserIds) {
-            LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
-
-            loanAllocationEntity.setCreatedDate(new Date());
-            loanAllocationEntity.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
-            loanAllocationEntity.setDeleted(false);
-            loanAllocationEntity.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
-            loanAllocationEntity.setAllocatedToUserId(userId);
-            loanAllocationRepository.save(loanAllocationEntity);
+        if(allocatedUserIds.size() > 0) {
+            for (Long userId : allocatedUserIds) {
+                LoanAllocationEntity loanAllocation = loanAllocationRepository.findByAllocatedToUserIdAndLoanId(userId, loanAllocationMultiUsersDtoRequest.getLoanId());
+                if (loanAllocation == null) {
+                    LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
+                    loanAllocationEntity.setCreatedDate(new Date());
+                    loanAllocationEntity.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
+                    loanAllocationEntity.setDeleted(false);
+                    loanAllocationEntity.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
+                    loanAllocationEntity.setAllocatedToUserId(userId);
+                    loanAllocationRepository.save(loanAllocationEntity);
+                } else if (loanAllocation.getDeleted()) {
+                    LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
+                    loanAllocationEntity.setCreatedDate(new Date());
+                    loanAllocationEntity.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
+                    loanAllocationEntity.setDeleted(false);
+                    loanAllocationEntity.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
+                    loanAllocationEntity.setAllocatedToUserId(userId);
+                    loanAllocationRepository.save(loanAllocationEntity);
+                }
+            }
         }
         return new BaseDTOResponse<>("Data Saved Successfully");
     }

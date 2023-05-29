@@ -2,7 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.rest.response.UploadIma
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOS.IntegrationServiceErrorResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.IntegrationServiceErrorResponseDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

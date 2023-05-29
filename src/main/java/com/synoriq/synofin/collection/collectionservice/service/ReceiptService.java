@@ -1,20 +1,14 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 
-import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
-import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEntity;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.createReceiptLms.ServiceRequestSaveResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
-import java.util.List;
 
 public interface ReceiptService {
 

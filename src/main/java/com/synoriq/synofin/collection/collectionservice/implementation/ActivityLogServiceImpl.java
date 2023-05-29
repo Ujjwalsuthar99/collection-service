@@ -1,24 +1,30 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogBaseResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogCustomResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.userDetailByTokenDTOs.UserDetailByTokenDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
 import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.LOGOUT_REMARKS;
 
@@ -36,17 +42,17 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         BaseDTOResponse<Object> response;
         CollectionActivityLogsEntity collectionActivityLogsEntity = collectionActivityLogsRepository.findByCollectionActivityLogsId(activityLogsId);
         if (collectionActivityLogsEntity != null) {
-            ActivityLogResponse activityLogResponse = new ActivityLogResponse();
-            activityLogResponse.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
-            activityLogResponse.setLoanId(collectionActivityLogsEntity.getLoanId());
-            activityLogResponse.setUserId(collectionActivityLogsEntity.getActivityBy());
-            activityLogResponse.setActivityDate(collectionActivityLogsEntity.getActivityDate());
-            activityLogResponse.setActivityName(collectionActivityLogsEntity.getActivityName());
-            activityLogResponse.setAddress(collectionActivityLogsEntity.getAddress());
-            activityLogResponse.setGeolocation(collectionActivityLogsEntity.getGeolocation());
-            activityLogResponse.setImages(collectionActivityLogsEntity.getImages());
+            ActivityLogResponseDTO activityLogResponseDTO = new ActivityLogResponseDTO();
+            activityLogResponseDTO.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+            activityLogResponseDTO.setLoanId(collectionActivityLogsEntity.getLoanId());
+            activityLogResponseDTO.setUserId(collectionActivityLogsEntity.getActivityBy());
+            activityLogResponseDTO.setActivityDate(collectionActivityLogsEntity.getActivityDate());
+            activityLogResponseDTO.setActivityName(collectionActivityLogsEntity.getActivityName());
+            activityLogResponseDTO.setAddress(collectionActivityLogsEntity.getAddress());
+            activityLogResponseDTO.setGeolocation(collectionActivityLogsEntity.getGeolocation());
+            activityLogResponseDTO.setImages(collectionActivityLogsEntity.getImages());
 
-            response = new BaseDTOResponse<>(activityLogResponse);
+            response = new BaseDTOResponse<>(activityLogResponseDTO);
             return response;
         } else {
             throw new Exception("1016025");
@@ -68,43 +74,77 @@ public class ActivityLogServiceImpl implements ActivityLogService {
             }
         }
 
-        List<ActivityLogResponse> activityLogResponses = new LinkedList<>();
+        List<ActivityLogResponseDTO> activityLogResponsDTOS = new LinkedList<>();
         if (!collectionActivityLogs.isEmpty()) {
             for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogs){
 
-                ActivityLogResponse activityLogResponse = new ActivityLogResponse();
-                activityLogResponse.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
-                activityLogResponse.setLoanId(collectionActivityLogsEntity.getLoanId());
-                activityLogResponse.setUserId(collectionActivityLogsEntity.getActivityBy());
-                activityLogResponse.setActivityDate(collectionActivityLogsEntity.getActivityDate());
-                activityLogResponse.setActivityName(collectionActivityLogsEntity.getActivityName());
-                activityLogResponse.setAddress(collectionActivityLogsEntity.getAddress());
-                activityLogResponse.setGeolocation(collectionActivityLogsEntity.getGeolocation());
-                activityLogResponse.setImages(collectionActivityLogsEntity.getImages());
-                activityLogResponse.setRemarks(collectionActivityLogsEntity.getRemarks());
+                ActivityLogResponseDTO activityLogResponseDTO = new ActivityLogResponseDTO();
+                activityLogResponseDTO.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+                activityLogResponseDTO.setLoanId(collectionActivityLogsEntity.getLoanId());
+                activityLogResponseDTO.setUserId(collectionActivityLogsEntity.getActivityBy());
+                activityLogResponseDTO.setActivityDate(collectionActivityLogsEntity.getActivityDate());
+                activityLogResponseDTO.setActivityName(collectionActivityLogsEntity.getActivityName());
+                activityLogResponseDTO.setAddress(collectionActivityLogsEntity.getAddress());
+                activityLogResponseDTO.setGeolocation(collectionActivityLogsEntity.getGeolocation());
+                activityLogResponseDTO.setImages(collectionActivityLogsEntity.getImages());
+                activityLogResponseDTO.setRemarks(collectionActivityLogsEntity.getRemarks());
 
-                activityLogResponses.add(activityLogResponse);
+                activityLogResponsDTOS.add(activityLogResponseDTO);
             }
 
-            response = new BaseDTOResponse<>(activityLogResponses);
+            response = new BaseDTOResponse<>(activityLogResponsDTOS);
             return response;
         } else {
             throw new Exception("1016025");
         }
     }
     @Override
-    public BaseDTOResponse<Object> getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date endDate, String filterBy) throws Exception {
+    public ActivityLogBaseResponseDTO getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date endDate, String filterBy) throws Exception {
 
         Date toDate = checkToDate(endDate);
         Pageable pageable = PageRequest.of(page,size);
         List<Map<String, Object>> collectionActivityLogs;
+        ActivityLogBaseResponseDTO activityLogBaseResponseDTO = new ActivityLogBaseResponseDTO();
+        ActivityLogDataDTO activityLogDataDTO = new ActivityLogDataDTO();
+        List<ActivityLogCustomResponseDTO> responseData = new ArrayList<>();
 
         if (!filterBy.equals("")) {
             collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDurationByFilter(loanId, fromDate, toDate, filterBy, pageable);
         } else {
             collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
         }
-        return new BaseDTOResponse<>(collectionActivityLogs);
+        if (collectionActivityLogs.size() > 0) {
+            for (Map<String, Object> collectionActivityLog : collectionActivityLogs) {
+                ActivityLogCustomResponseDTO activityLogCustomResponseDTO = new ActivityLogCustomResponseDTO();
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode addressNode = objectMapper.readTree(String.valueOf(collectionActivityLog.get("address")));
+                JsonNode imagesNode = objectMapper.readTree(String.valueOf(collectionActivityLog.get("images")));
+                JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(collectionActivityLog.get("geo_location_data")));
+
+                activityLogCustomResponseDTO.setCollectionActivityLogsId(Long.parseLong(String.valueOf(collectionActivityLog.get("collection_activity_logs_id"))));
+                activityLogCustomResponseDTO.setActivityDate(String.valueOf(collectionActivityLog.get("activity_date")));
+                activityLogCustomResponseDTO.setActivityBy(Long.parseLong(String.valueOf(collectionActivityLog.get("activity_by"))));
+                activityLogCustomResponseDTO.setActivityName(String.valueOf(collectionActivityLog.get("activity_name")));
+                activityLogCustomResponseDTO.setDistanceFromUserBranch(Double.parseDouble(String.valueOf(collectionActivityLog.get("distance_from_user_branch"))));
+                activityLogCustomResponseDTO.setRemarks(String.valueOf(collectionActivityLog.get("remarks")));
+                activityLogCustomResponseDTO.setLoanId(Long.parseLong(String.valueOf(collectionActivityLog.get("loan_id"))));
+                activityLogCustomResponseDTO.setIsReceipt(Boolean.valueOf(String.valueOf(collectionActivityLog.get("is_receipt"))));
+                activityLogCustomResponseDTO.setReceiptId((!Objects.equals(collectionActivityLog.get("receipt_id"), null) ? Long.parseLong(String.valueOf(collectionActivityLog.get("receipt_id"))) : null));
+                activityLogCustomResponseDTO.setAddress(new Gson().fromJson(String.valueOf(addressNode), Object.class));
+                activityLogCustomResponseDTO.setImages(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
+                activityLogCustomResponseDTO.setGeolocation(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+
+                responseData.add(activityLogCustomResponseDTO);
+            }
+            activityLogDataDTO.setData(responseData);
+            activityLogDataDTO.setTotalCount(Long.parseLong(String.valueOf(collectionActivityLogs.get(0).get("total_rows"))));
+            activityLogBaseResponseDTO.setData(activityLogDataDTO);
+        } else {
+            activityLogDataDTO.setData(new ArrayList<>());
+            activityLogDataDTO.setTotalCount(0L);
+            activityLogBaseResponseDTO.setData(activityLogDataDTO);
+        }
+        return activityLogBaseResponseDTO;
     }
     @Override
     public Long createActivityLogs(CollectionActivityLogDTO activityLogRequest, String token) throws Exception {

@@ -3,10 +3,10 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.rest.request.searchDTOs.SearchDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.globalSearchDTOs.LMSLoanDataDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.globalSearchDTOs.SearchDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.globalSearchDTOs.SearchDTOReturnResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.globalSearchDTOs.TaskListDTOReturnResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSearchDTOs.LMSLoanDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSearchDTOs.SearchDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSearchDTOs.SearchDTOReturnResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSearchDTOs.TaskListDTOReturnResponse;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.collection.collectionservice.service.GlobalSearchService;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +64,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
                     .build().call();
 
             log.info("responseData {}", res);
-            if (res.getData().getLoanDetails() != null) {
+            if (res.getData() != null && res.getData().getLoanDetails() != null) {
                 for (LMSLoanDataDTO loanDataDTO : res.getData().getLoanDetails()) {
                     TaskListDTOReturnResponse taskListDTOReturnResponse = new TaskListDTOReturnResponse();
                     taskListDTOReturnResponse.setAddress(loanDataDTO.getCustomerDetails().getCustomerAddress());
