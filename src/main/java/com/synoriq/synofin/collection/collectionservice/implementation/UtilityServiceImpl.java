@@ -108,6 +108,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             log.info("responseData {}", res);
+            // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, masterBody, res, "success", null, token);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
@@ -131,7 +132,8 @@ public class UtilityServiceImpl implements UtilityService {
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UserDTOResponse.class)
                     .build().call();
-
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, res.getResponse() + res.getError(), "success", null, token);
             List<UsersDataDTO> userData = res.getData();
             for (int i = 0; i < userData.toArray().length; i++) {
                 userData.get(i).setTransferTo(userData.get(i).getName() + " - " + userData.get(i).getEmployeeCode());
@@ -148,9 +150,9 @@ public class UtilityServiceImpl implements UtilityService {
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);
             } else {
                 List<UsersDataDTO> filteredList = userData.
-                                                stream().
-                                                filter(user -> (user.getUsername() != null && user.getName() != null && user.getEmployeeCode() != null) && (Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getUsername()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getName()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getEmployeeCode()).find())).
-                                                collect(Collectors.toList());
+                        stream().
+                        filter(user -> (user.getUsername() != null && user.getName() != null && user.getEmployeeCode() != null) && (Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getUsername()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getName()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getEmployeeCode()).find())).
+                        collect(Collectors.toList());
                 int length;
                 int filterSize = filteredList.size();
                 filterSize = filterSize - pageRequest ;
@@ -188,6 +190,8 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             log.info("responseData {}", res);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, res, "success", null, token);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -255,6 +259,8 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             log.info("responseData {}", res);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, res, "success", null, "");
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -277,6 +283,8 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             log.info("responseData {}", res);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, res, "success", null, token);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -316,6 +324,8 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(UploadImageOnS3ResponseDTO.class)
                     .build().call();
 
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, null, res, "success", null, token);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
