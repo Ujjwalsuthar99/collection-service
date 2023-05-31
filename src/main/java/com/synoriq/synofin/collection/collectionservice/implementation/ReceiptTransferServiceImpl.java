@@ -431,4 +431,17 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         return newObjResponse;
     }
 
+//    @Override
+//    public Object getReceiptTransferByReceiptId(String token, Long receiptId) throws Exception {
+//        Map<String, Object> receiptTransferEntity;
+//        try {
+//
+//            receiptTransferEntity = receiptTransferHistoryRepository.getReceiptTransferByReceiptId(receiptId);
+//        } catch (Exception e) {
+//            throw new Exception("1016028");
+//        }
+////        return receiptTransferEntity;
+//        return new Object();
+//    }
+
 }

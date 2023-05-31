@@ -25,5 +25,6 @@ public interface ReceiptTransferService {
     public ReceiptTransferResponseDTO getReceiptTransferById(String token , Long receiptTransferId, Long userId) throws Exception;
     public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date endDate, String status, Integer pageNo, Integer pageSize) throws Exception;
     public Map<String, List<Map<String, Object>>> getReceiptTransferByUserIdWithAllStatus(Long transferredBy, Date fromDate, Date endDate, Integer pageNo, Integer pageSize) throws Exception;
+//    public Object getReceiptTransferByReceiptId(String token , Long receiptId) throws Exception;
 
 }
