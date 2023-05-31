@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.entity;
 
+import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.Data;
 import org.hibernate.annotations.Type;
@@ -12,7 +13,8 @@ import java.util.Date;
 @Transactional
 @Entity
 @TypeDef(name = "json", typeClass = JsonType.class)
-@Table(name = "collection_activity_logs", schema = "collection")
+@TypeDef(name = "enum_type", typeClass = com.synoriq.synofin.collection.collectionservice.entity.EnumTypeCast.class)
+@Table(name = "consumed_api_logs", schema = "collection")
 @Data
 public class ConsumedApiLogsEntity {
 
@@ -31,28 +33,29 @@ public class ConsumedApiLogsEntity {
     @Column(name = "deleted")
     private Boolean deleted;
 
-    @Column(name = "activity_name")
-    private String activityName;
-
-    @Column(name = "distance_from_user_branch")
-    private Double distanceFromUserBranch;
-
-    @Column(name = "remarks", columnDefinition = "TEXT")
-    private String remarks;
+    @Column(name = "log_name", columnDefinition = "collection.consumed_api_logs_log_name")
+    @Enumerated(EnumType.STRING)
+    @Type(type = "enum_type")
+    private EnumSQLConstants.LogNames logName;
 
     @Column(name = "loan_id")
     private Long loanId;
 
-    @Column(name = "address")
-    @Type(type = "json")
-    private Object address;
+    @Column(name = "api_type")
+    private String apiType;
 
-    @Column(name = "images")
     @Type(type = "json")
-    private Object images;
+    @Column(name = "request_body")
+    private Object requestBody;
 
-    @Column(name = "geo_location_data")
     @Type(type = "json")
-    private Object geolocation;
+    @Column(name = "response_data")
+    private Object responseData;
+
+    @Column(name = "response_status")
+    private String responseStatus;
+
+    @Column(name = "end_point", columnDefinition = "TEXT")
+    private String endPoint;
 
 }

@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
@@ -26,13 +27,16 @@ import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUser
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.BankNameIFSCResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ContactResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ThermalPrintDataDTO;
+import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.CslSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.StickyAssignor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -60,6 +64,9 @@ public class UtilityServiceImpl implements UtilityService {
     @Autowired
     FinovaSmsService finovaSmsService;
 
+    @Value("${spring.profiles.active}")
+    private String springProfile;
+
     @Autowired
     private TaskRepository taskRepository;
 
@@ -78,12 +85,15 @@ public class UtilityServiceImpl implements UtilityService {
     @Autowired
     HttpServletRequest httpServletRequest;
 
+    @Autowired
+    ConsumedApiLogService consumedApiLogService;
+
     @Override
     public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception {
 
         Object res = new Object();
         try {
-        MasterDtoRequest masterBody = new ObjectMapper().convertValue(requestBody, MasterDtoRequest.class);
+            MasterDtoRequest masterBody = new ObjectMapper().convertValue(requestBody, MasterDtoRequest.class);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
@@ -98,6 +108,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             log.info("responseData {}", res);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, masterBody, res, "success", null, token);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -223,6 +234,11 @@ public class UtilityServiceImpl implements UtilityService {
         return "--";
     }
     @Override
+    public String getApiUrl() {
+//        httpServletRequest.getRequestURI() = "/collection-service/v1/getMasterType";
+        return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI();
+    }
+    @Override
     public Object getBankNameByIFSC(String keyword) throws Exception {
 
         Object res = new Object();
@@ -346,10 +362,14 @@ public class UtilityServiceImpl implements UtilityService {
         uploadImageOnS3RequestDTO.setSpecificPartnerName("");
         String[] loanId = fileName.split("_");
 
-        String apiUrl = httpServletRequest.getRequestURL().toString();
-        log.info("API URL: {}", apiUrl);
+        boolean isProd = false;
+        if (springProfile.equals("prod")) {
+            isProd = true;
+        }
+//        String apiUrl = httpServletRequest.getRequestURL().toString();
+//        log.info("API URL: {}", apiUrl);
 
-        boolean isProd = apiUrl.contains("api-prod.synofin.tech");
+//        boolean isProd = apiUrl.contains("api-prod.synofin.tech");
 
 
         try {
