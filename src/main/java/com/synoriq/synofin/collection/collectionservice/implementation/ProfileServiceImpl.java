@@ -1,10 +1,13 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
 
+import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailsDTOs.ProfileDetailResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -12,6 +15,8 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class ProfileServiceImpl implements ProfileService {
+    @Autowired
+    ConsumedApiLogService consumedApiLogService;
     @Override
     public ProfileDetailResponseDTO getProfileDetails(String token, String username) throws Exception {
         ProfileDetailResponseDTO res;
@@ -28,6 +33,8 @@ public class ProfileServiceImpl implements ProfileService {
                     .build().call();
 
             log.info("profile Response {}", res);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, res, "success", null, token);
         } catch (Exception e) {
             throw new Exception("1017002");
         }

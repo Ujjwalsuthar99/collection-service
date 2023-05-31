@@ -1,15 +1,18 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.rest.request.searchDTOs.SearchDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSearchDTOs.LMSLoanDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSearchDTOs.SearchDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSearchDTOs.SearchDTOReturnResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSearchDTOs.TaskListDTOReturnResponse;
+import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.collection.collectionservice.service.GlobalSearchService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,8 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 public class GlobalSearchServiceImpl implements GlobalSearchService {
+    @Autowired
+    ConsumedApiLogService consumedApiLogService;
     @Override
     public BaseDTOResponse<Object> getLoanDataBySearch(String token, SearchDtoRequest requestBody) throws Exception {
 
@@ -64,6 +69,8 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
                     .build().call();
 
             log.info("responseData {}", res);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.global_search, null, searchBody, res, "success", null, token);
             if (res.getData() != null && res.getData().getLoanDetails() != null) {
                 for (LMSLoanDataDTO loanDataDTO : res.getData().getLoanDetails()) {
                     TaskListDTOReturnResponse taskListDTOReturnResponse = new TaskListDTOReturnResponse();

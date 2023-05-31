@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
 
+import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
@@ -14,6 +15,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.SystemProp
 import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.ReceiptServiceSystemPropertiesResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
+import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
@@ -80,6 +82,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Autowired
     private FinovaSmsService finovaSmsService;
+
+    @Autowired
+    ConsumedApiLogService consumedApiLogService;
 
     @Autowired
     private CurrentUserInfo currentUserInfo;
@@ -253,6 +258,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .build().call();
 
             log.info("response create receipt {}", res);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, res, "success", createReceiptBody.getActivityData().getLoanId(), bearerToken);
             if (res.getData() != null) {
                 if (res.getData().getServiceRequestId() == null) {
                     throw new Exception("1016035");
@@ -320,7 +327,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public Object getReceiptDate(String bearerToken) throws Exception {
-        ReceiptServiceSystemPropertiesResponse lmsBusinessDate = new ReceiptServiceSystemPropertiesResponse();
+        ReceiptServiceSystemPropertiesResponse lmsBusinessDate;
 
         GetReceiptDateResponse getReceiptDateResponse = new GetReceiptDateResponse();
         ReceiptDateResponse receiptDateResponse = new ReceiptDateResponse();
@@ -341,6 +348,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .httpHeaders(httpHeaders)
                     .typeResponseType(ReceiptServiceSystemPropertiesResponse.class)
                     .build().call();
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_receipt_date, null, null, lmsBusinessDate, "success", null, bearerToken);
 
             if (businessDateConf.equals("true")) {
                 String bDate = lmsBusinessDate.data.businessDate;

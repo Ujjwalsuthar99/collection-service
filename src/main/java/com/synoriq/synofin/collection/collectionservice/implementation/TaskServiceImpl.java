@@ -1,12 +1,14 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.entity.AdditionalContactDetailsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.AdditionalContactDetailsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.*;
+import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.collection.collectionservice.service.TaskService;
@@ -32,6 +34,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private UtilityService utilityService;
+
+    @Autowired
+    ConsumedApiLogService consumedApiLogService;
 
     @Autowired
     private AdditionalContactDetailsRepository additionalContactDetailsRepository;
@@ -93,6 +98,8 @@ public class TaskServiceImpl implements TaskService {
                     .build().call();
 
             log.info("loan details {}", loanRes);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()), token);
 
             loanDetailRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
@@ -102,6 +109,8 @@ public class TaskServiceImpl implements TaskService {
                     .build().call();
 
             log.info("getBasicLoanDetails {}", loanDetailRes);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()), token);
 
             customerRes = HTTPRequestService.<Object, CustomerDetailDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
@@ -111,6 +120,8 @@ public class TaskServiceImpl implements TaskService {
                     .build().call();
 
             log.info("customer details {}", customerRes);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()), token);
 
             int dpd = loanDetailRes.getData().getDpd();
             String dpdTextColor;
