@@ -70,7 +70,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
 
             log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.global_search, null, searchBody, res, "success", null, token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.global_search, null, searchBody, res, "success", null);
             if (res.getData() != null && res.getData().getLoanDetails() != null) {
                 for (LMSLoanDataDTO loanDataDTO : res.getData().getLoanDetails()) {
                     TaskListDTOReturnResponse taskListDTOReturnResponse = new TaskListDTOReturnResponse();

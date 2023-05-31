@@ -28,14 +28,13 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
     UtilityService utilityService;
 
     @Override
-    public void createConsumedApiLog(EnumSQLConstants.LogNames logName, Long userId, Object requestBody, Object responseBody, String responseStatus, Long loanId, String token) {
+    public void createConsumedApiLog(EnumSQLConstants.LogNames logName, Long userId, Object requestBody, Object responseBody, String responseStatus, Long loanId) {
 
         String apiType = httpServletRequest.getMethod();
         String endPoint = utilityService.getApiUrl();
 
         if (userId == null) {
-            UserDetailByTokenDTOResponse res = utilityService.getUserDetailsByToken(token);
-            userId = res.getData().getUserData().getUserId();
+            userId = 0L;
         }
 
         ConsumedApiLogRequestDTO consumedApiLogRequestDTO = new ConsumedApiLogRequestDTO();

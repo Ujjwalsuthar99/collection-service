@@ -109,7 +109,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, masterBody, res, "success", null, token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, masterBody, res, "success", null);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -133,7 +133,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(UserDTOResponse.class)
                     .build().call();
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, res.getResponse() + res.getError(), "success", null, token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, res.getResponse() + res.getError(), "success", null);
             List<UsersDataDTO> userData = res.getData();
             for (int i = 0; i < userData.toArray().length; i++) {
                 userData.get(i).setTransferTo(userData.get(i).getName() + " - " + userData.get(i).getEmployeeCode());
@@ -191,7 +191,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, res, "success", null, token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, res, "success", null);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -260,7 +260,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, res, "success", null, "");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, res, "success", null);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -284,7 +284,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, res, "success", null, token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, res, "success", null);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -327,7 +327,7 @@ public class UtilityServiceImpl implements UtilityService {
             // creating api logs
             uploadImageOnS3DataRequestDTO.setFile("base64 string");
             uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, res, "success", null, token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, res, "success", null);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -350,7 +350,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, "response: " + res.getResponse() + "requestId: " + res.getRequestId() + "error: " + res.getError() , "success", null, token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, "response: " + res.getResponse() + "requestId: " + res.getRequestId() + "error: " + res.getError() , "success", null);
 
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
@@ -398,7 +398,7 @@ public class UtilityServiceImpl implements UtilityService {
             // creating api logs
             uploadImageOnS3DataRequestDTO.setFile("base64 string");
             uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, Long.parseLong(userId), uploadImageOnS3RequestDTO, res, "success", Long.parseLong(loanId[0]), token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, Long.parseLong(userId), uploadImageOnS3RequestDTO, res, "success", Long.parseLong(loanId[0]));
 
 
 
@@ -422,7 +422,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.shorten_url, Long.parseLong(userId), shortenUrlRequestDTO, shortenUrlResponseDTO, "success", Long.parseLong(loanId[0]), token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.shorten_url, Long.parseLong(userId), shortenUrlRequestDTO, shortenUrlResponseDTO, "success", Long.parseLong(loanId[0]));
 
 
 
@@ -450,7 +450,7 @@ public class UtilityServiceImpl implements UtilityService {
                     FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
                     log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
                     // creating api logs
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]), token);
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]));
 
                 } else {
                     finovaSmsRequest.setSender("FINOVA");
@@ -482,7 +482,7 @@ public class UtilityServiceImpl implements UtilityService {
                     finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
                     log.info("sms service for collected from finova {}", finovaMsgDTOResponse);
                     // creating api logs
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]), token);
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]));
                 }
 
             }
@@ -505,7 +505,7 @@ public class UtilityServiceImpl implements UtilityService {
                 String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
                 log.info("sms service for csl {}", smsServiceResponse);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), postField, smsServiceResponse, "success", Long.parseLong(loanId[0]), token);
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), postField, smsServiceResponse, "success", Long.parseLong(loanId[0]));
             }
 
             String loanApplicationNumber = taskRepository.getLoanApplicationNumber(Long.parseLong(loanId[0]));
@@ -549,7 +549,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, res, "success", null, token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, res, "success", null);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }
@@ -633,7 +633,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null, token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
         }

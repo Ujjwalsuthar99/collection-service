@@ -99,7 +99,7 @@ public class TaskServiceImpl implements TaskService {
 
             log.info("loan details {}", loanRes);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()), token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()));
 
             loanDetailRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
@@ -110,7 +110,7 @@ public class TaskServiceImpl implements TaskService {
 
             log.info("getBasicLoanDetails {}", loanDetailRes);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()), token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()));
 
             customerRes = HTTPRequestService.<Object, CustomerDetailDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
@@ -121,7 +121,7 @@ public class TaskServiceImpl implements TaskService {
 
             log.info("customer details {}", customerRes);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()), token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()));
 
             int dpd = loanDetailRes.getData().getDpd();
             String dpdTextColor;

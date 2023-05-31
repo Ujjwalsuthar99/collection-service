@@ -34,7 +34,7 @@ public class ProfileServiceImpl implements ProfileService {
 
             log.info("profile Response {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, res, "success", null, token);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, res, "success", null);
         } catch (Exception e) {
             throw new Exception("1017002");
         }

@@ -259,7 +259,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             log.info("response create receipt {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, res, "success", createReceiptBody.getActivityData().getLoanId(), bearerToken);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, res, "success", createReceiptBody.getActivityData().getLoanId());
             if (res.getData() != null) {
                 if (res.getData().getServiceRequestId() == null) {
                     throw new Exception("1016035");
@@ -349,7 +349,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .typeResponseType(ReceiptServiceSystemPropertiesResponse.class)
                     .build().call();
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_receipt_date, null, null, lmsBusinessDate, "success", null, bearerToken);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_receipt_date, null, null, lmsBusinessDate, "success", null);
 
             if (businessDateConf.equals("true")) {
                 String bDate = lmsBusinessDate.data.businessDate;
