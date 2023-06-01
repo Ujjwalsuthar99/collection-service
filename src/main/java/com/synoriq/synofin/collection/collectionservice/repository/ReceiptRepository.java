@@ -96,7 +96,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
             "    where sr.request_source = 'm_collect' and sr.status = 'initiated' and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque') \n" +
             "    and (cr.receipt_holder_user_id = (select user_id from master.users where username = 'col1')\n" +
-            "    and cr.receipt_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending'))")
+            "    and cr.receipt_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending'))")
     List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferred(@Param("userName") String userName);
 
 
