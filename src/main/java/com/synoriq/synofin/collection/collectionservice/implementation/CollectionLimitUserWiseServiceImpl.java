@@ -24,11 +24,11 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWiseService {
 
     @Autowired
-    CollectionLimitUserWiseRepository collectionLimitUserWiseRepository;
+    private CollectionLimitUserWiseRepository collectionLimitUserWiseRepository;
     @Autowired
-    CollectionConfigurationsRepository collectionConfigurationsRepository;
+    private CollectionConfigurationsRepository collectionConfigurationsRepository;
     @Autowired
-    ProfileService profileService;
+    private ProfileService profileService;
 
     @Override
     public Object getCollectionLimitUserWise(String token, String userId) throws Exception {

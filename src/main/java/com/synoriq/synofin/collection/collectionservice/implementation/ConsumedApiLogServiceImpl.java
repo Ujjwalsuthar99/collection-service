@@ -22,10 +22,10 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
     private ConsumedApiLogRepository consumedApiLogRepository;
 
     @Autowired
-    HttpServletRequest httpServletRequest;
+    private HttpServletRequest httpServletRequest;
 
     @Autowired
-    UtilityService utilityService;
+    private UtilityService utilityService;
 
     @Override
     public void createConsumedApiLog(EnumSQLConstants.LogNames logName, Long userId, Object requestBody, Object responseBody, String responseStatus, Long loanId) {

@@ -1,7 +1,9 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
@@ -14,16 +16,17 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3DataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.*;
+import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.FinovaMsgDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrlDTOs.ShortenUrlResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UserDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.BankNameIFSCResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ContactResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ThermalPrintDataDTO;
@@ -34,7 +37,6 @@ import com.synoriq.synofin.collection.collectionservice.service.msgservice.Finov
 import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.StickyAssignor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -111,6 +113,9 @@ public class UtilityServiceImpl implements UtilityService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, masterBody, res, "success", null);
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, requestBody, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
 
@@ -132,8 +137,10 @@ public class UtilityServiceImpl implements UtilityService {
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UserDTOResponse.class)
                     .build().call();
+
+            String modifiedResponse = "response: " + res.getResponse() + " error: " + res.getError();
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, res.getResponse() + res.getError(), "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, convertToJSON(modifiedResponse), "success", null);
             List<UsersDataDTO> userData = res.getData();
             for (int i = 0; i < userData.toArray().length; i++) {
                 userData.get(i).setTransferTo(userData.get(i).getName() + " - " + userData.get(i).getEmployeeCode());
@@ -168,6 +175,11 @@ public class UtilityServiceImpl implements UtilityService {
             }
 
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, modifiedErrorMessage, "failure", null);
+
             log.error("{}", ee.getMessage());
         }
 
@@ -193,6 +205,9 @@ public class UtilityServiceImpl implements UtilityService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, res, "success", null);
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
 
@@ -239,8 +254,9 @@ public class UtilityServiceImpl implements UtilityService {
     }
     @Override
     public String getApiUrl() {
+        String queryString = httpServletRequest.getQueryString();
 //        httpServletRequest.getRequestURI() = "/collection-service/v1/getMasterType";
-        return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI();
+        return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI() + "?" + queryString;
     }
     @Override
     public Object getBankNameByIFSC(String keyword) throws Exception {
@@ -262,6 +278,9 @@ public class UtilityServiceImpl implements UtilityService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, res, "success", null);
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -286,6 +305,9 @@ public class UtilityServiceImpl implements UtilityService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, res, "success", null);
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -329,12 +351,15 @@ public class UtilityServiceImpl implements UtilityService {
             uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, res, "success", null);
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
         return res;
     }
     @Override
-    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder) throws IOException {
+    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder) throws Exception {
         DownloadBase64FromS3ResponseDTO res = new DownloadBase64FromS3ResponseDTO();
 
         try {
@@ -349,13 +374,33 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(DownloadBase64FromS3ResponseDTO.class)
                     .build().call();
 
+            String modifiedResponse = "response: " + res.getResponse() + " requestId: " + res.getRequestId() + " error: " + res.getError();
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, "response: " + res.getResponse() + "requestId: " + res.getRequestId() + "error: " + res.getError() , "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, convertToJSON(modifiedResponse), "success", null);
 
         } catch (Exception ee) {
-            log.error("{}", ee.getMessage());
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, modifiedErrorMessage, "failure", null);
+            log.error("juuju{}", ee.getMessage());
+            res.setResponse(false);
+            res.setData(null);
+            res.setErrorFields(ee.getMessage());
+
         }
         return res;
+    }
+
+    @Override
+    public String convertToJSON(String input) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(input);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     @Override
     public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId, String customerType, String customerName, String applicantMobileNumber, String collectedFromMobileNumber, String loanNumber) throws IOException {
@@ -527,6 +572,9 @@ public class UtilityServiceImpl implements UtilityService {
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), null, modifiedErrorMessage, "failure", Long.parseLong(loanId[0]));
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -551,6 +599,9 @@ public class UtilityServiceImpl implements UtilityService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, res, "success", null);
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -635,6 +686,9 @@ public class UtilityServiceImpl implements UtilityService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, null, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
 

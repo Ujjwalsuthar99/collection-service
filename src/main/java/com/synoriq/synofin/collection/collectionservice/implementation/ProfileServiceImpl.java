@@ -4,8 +4,9 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailsDTOs.ProfileDetailResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
-import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
+import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
+import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +17,10 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ProfileServiceImpl implements ProfileService {
     @Autowired
-    ConsumedApiLogService consumedApiLogService;
+    private ConsumedApiLogService consumedApiLogService;
+
+    @Autowired
+    private UtilityService utilityService;
     @Override
     public ProfileDetailResponseDTO getProfileDetails(String token, String username) throws Exception {
         ProfileDetailResponseDTO res;
@@ -36,6 +40,10 @@ public class ProfileServiceImpl implements ProfileService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, res, "success", null);
         } catch (Exception e) {
+            String errorMessage = e.getMessage();
+            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, modifiedErrorMessage, "failure", null);
             throw new Exception("1017002");
         }
 

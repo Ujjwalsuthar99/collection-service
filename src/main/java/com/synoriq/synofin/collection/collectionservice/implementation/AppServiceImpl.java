@@ -19,7 +19,7 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @Slf4j
 public class AppServiceImpl implements AppService {
     @Autowired
-    CollectionConfigurationsRepository collectionConfigurationsRepository;
+    private CollectionConfigurationsRepository collectionConfigurationsRepository;
 
     @Override
     public BaseDTOResponse<Object> checkAppVersion(String platform, String currentVersion) throws Exception {
