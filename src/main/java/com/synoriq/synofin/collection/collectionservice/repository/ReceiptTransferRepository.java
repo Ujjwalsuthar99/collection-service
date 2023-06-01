@@ -50,7 +50,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             , @Param("toDate") Date toDate, @Param("status") String status, Pageable pageRequest);
 
     @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount\n" +
-            "            ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else uu.name end) as transferred_by_name\n" +
+            "            ,(case when rt.transferred_to_user_id is null then (select ba.bank_name from master.bank_accounts ba where ba.bank_account_id = cast(rt.transfer_bank_code as bigint)) else u.name end) as transferred_to_name ,uu.name as transferred_by_name\n" +
             "               ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "                (case \n" +
             "                         when rt.transfer_mode = 'cash' then '#136AD5'\n" +
@@ -86,7 +86,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             , @Param("toDate") Date toDate, Pageable pageRequest);
 
     @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount  " +
-            "            ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else uu.name end) as transferred_by_name\n" +
+            "            ,(case when rt.transferred_to_user_id is null then (select ba.bank_name from master.bank_accounts ba where ba.bank_account_id = cast(rt.transfer_bank_code as bigint)) else u.name end) as transferred_to_name ,uu.name as transferred_by_name\n" +
             "               ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "                (case \n" +
             "                         when rt.transfer_mode = 'cash' then '#136AD5'\n" +
@@ -131,4 +131,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "         join (select customer_id, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id \n" +
             "         where rt.receipt_transfer_id = :receiptTransferId and clm.customer_type = 'applicant'")
     List<Map<String, Object>> getDataByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
+
+    @Query(nativeQuery = true, value = "select ba.bank_branch as bank_branch, ba.account_number as account_number, ba.bank_name from master.bank_accounts ba where ba.bank_account_id = :bankCode")
+    Map<String, Object> getBankData(@Param("bankCode") Long bankCode);
 }
