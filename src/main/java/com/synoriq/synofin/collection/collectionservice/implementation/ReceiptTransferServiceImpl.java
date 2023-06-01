@@ -339,12 +339,15 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         log.info("receipt tranfer idddd {}", receiptTransferId);
         ReceiptTransferEntity receiptTransferEntity;
         boolean buttonRestriction = false;
+        Map<String, Object> bankData = null;
         ReceiptTransferResponseDTO receiptTransferResponseDTO = new ReceiptTransferResponseDTO();
         try {
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
             Long receiptTransferToUserId = receiptTransferEntity.getTransferredToUserId();
             Long receiptTransferByUserId = receiptTransferEntity.getTransferredBy();
-
+            if (receiptTransferEntity.getTransferBankCode() != null) {
+                bankData = receiptTransferRepository.getBankData(Long.parseLong(receiptTransferEntity.getTransferBankCode()));
+            }
             List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId);
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, receiptTransferEntity.getTransferMode());
 
@@ -379,6 +382,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             receiptTransferResponseDTO.setTransferByUserData(returnTransferByUserData);
             receiptTransferResponseDTO.setButtonRestriction(buttonRestriction);
             receiptTransferResponseDTO.setReceiptTransferData(receiptTransferEntity);
+            receiptTransferResponseDTO.setBankData(bankData);
             receiptTransferResponseDTO.setReceiptData(receiptsData);
             if (collectionLimitUserWiseEntity != null) {
                 receiptTransferResponseDTO.setAmountInHand(collectionLimitUserWiseEntity.getUtilizedLimitValue());
