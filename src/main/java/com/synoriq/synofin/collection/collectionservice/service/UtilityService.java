@@ -25,10 +25,11 @@ public interface UtilityService {
     public Object getBankNameByIFSC(String keyword) throws Exception;
     public UserDetailByTokenDTOResponse getUserDetailsByToken(String token);
     public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String userRefNo, String fileName) throws IOException;
-    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder) throws IOException;
+    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder) throws Exception;
     public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId, String customerType, String customerName, String applicantMobileNumber, String collectedFromMobileNumber, String loanNumber) throws IOException;
     public UserDetailByUserIdDTOResponse getUserDetailsByUserId(String token, Long userId);
     public Object getThermalPrintData(String receiptId) throws Exception;
     public OcrCheckResponseDTO ocrCheck(String token, OcrCheckRequestDTO requestBody) throws Exception;
+    public String convertToJSON(String input);
 
 }

@@ -32,9 +32,9 @@ import static com.synoriq.synofin.collection.collectionservice.common.ActivityRe
 @Service
 public class ActivityLogServiceImpl implements ActivityLogService {
     @Autowired
-    CollectionActivityLogsRepository collectionActivityLogsRepository;
+    private CollectionActivityLogsRepository collectionActivityLogsRepository;
     @Autowired
-    UtilityService utilityService;
+    private UtilityService utilityService;
 
     @Override
     public BaseDTOResponse<Object> getActivityLogsById(Long activityLogsId) throws Exception {

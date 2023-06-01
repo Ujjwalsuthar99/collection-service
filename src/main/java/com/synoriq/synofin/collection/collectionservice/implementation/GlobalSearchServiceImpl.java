@@ -9,6 +9,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSear
 import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSearchDTOs.SearchDTOReturnResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GlobalSearchDTOs.TaskListDTOReturnResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
+import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.collection.collectionservice.service.GlobalSearchService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,9 @@ import java.util.regex.Pattern;
 @Slf4j
 public class GlobalSearchServiceImpl implements GlobalSearchService {
     @Autowired
-    ConsumedApiLogService consumedApiLogService;
+    private ConsumedApiLogService consumedApiLogService;
+    @Autowired
+    private UtilityService utilityService;
     @Override
     public BaseDTOResponse<Object> getLoanDataBySearch(String token, SearchDtoRequest requestBody) throws Exception {
 
@@ -38,7 +41,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
         SearchDtoRequest searchBody = new ObjectMapper().convertValue(requestBody, SearchDtoRequest.class);
         int stringSize = searchBody.getRequestData().getSearchTerm().length();
         String data = searchBody.getRequestData().getSearchTerm();
-       //  Restrict Global Search Loan id for user with last 7 digit
+        //  Restrict Global Search Loan id for user with last 7 digit
         if (Objects.equals(requestBody.getRequestData().getFilterBy(), "loan_account_number")) {
             if (stringSize >= 7) {
                 String search = data.substring((stringSize - 7));
@@ -121,6 +124,10 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
             searchDataResponse.setData(result);
             baseDTOResponse = new BaseDTOResponse<>(searchDataResponse.getData());
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.global_search, null, searchBody, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
             throw new Exception(ee.getMessage());
         }

@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 
 
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
@@ -13,13 +14,9 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.CreateRece
 import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.GetReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.ReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.ReceiptServiceSystemPropertiesResponse;
-import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
-import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
-import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
-import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
+import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
-import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +85,10 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Autowired
     private CurrentUserInfo currentUserInfo;
+
+    @Autowired
+    private UtilityService utilityService;
+
 
     @Override
     public BaseDTOResponse<Object> getReceiptsByUserIdWithDuration(String userName, String fromDate, String toDate, String searchKey, Integer page, Integer size) throws Exception {
@@ -320,6 +321,10 @@ public class ReceiptServiceImpl implements ReceiptService {
 //            if (collectionActivityId != null) {
 //                collectionActivityLogsRepository.deleteById(collectionActivityId);
 //            }
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, modifiedErrorMessage, "failure", createReceiptBody.getActivityData().getLoanId());
             throw new Exception(ee.getMessage());
         }
         return res;
@@ -382,6 +387,10 @@ public class ReceiptServiceImpl implements ReceiptService {
             baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
             log.info("Receipt Date {}", baseResponse);
         } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_receipt_date, null, null, modifiedErrorMessage, "failure", null);
             throw new Exception(ee);
         }
         return baseResponse;

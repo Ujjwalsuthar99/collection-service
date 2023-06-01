@@ -17,7 +17,7 @@ import java.util.Map;
 public class CollectionConfigurationServiceImpl implements CollectionConfigurationService {
 
     @Autowired
-    CollectionConfigurationsRepository collectionConfigurationsRepository;
+    private CollectionConfigurationsRepository collectionConfigurationsRepository;
 
     @Override
     public Map<String, String> getCollectionConfiguration(String token) throws Exception {
