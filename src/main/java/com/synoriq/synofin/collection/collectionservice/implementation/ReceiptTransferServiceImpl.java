@@ -345,7 +345,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
             Long receiptTransferToUserId = receiptTransferEntity.getTransferredToUserId();
             Long receiptTransferByUserId = receiptTransferEntity.getTransferredBy();
-            if (receiptTransferEntity.getTransferBankCode() != null) {
+            if (receiptTransferEntity.getTransferBankCode() != null && !Objects.equals(receiptTransferEntity.getTransferBankCode(), "")) {
                 bankData = receiptTransferRepository.getBankData(Long.parseLong(receiptTransferEntity.getTransferBankCode()));
             }
             List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId);
