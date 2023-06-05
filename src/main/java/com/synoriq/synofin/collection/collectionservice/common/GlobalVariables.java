@@ -20,6 +20,7 @@ public class GlobalVariables {
     public static final String CSL_MSG_API_URL = "http://foxxsms.net/sms//submitsms.jsp";
     public static final String USE_BUSINESS_DATE_AS_RECEIPT_DATE = "use_business_date_as_receipt_trx_date";
     public static final String USE_BUSINESS_DATE_AS_TRANSACTION_DATE = "use_business_date_as_transaction_date";
+    public static final String RECEIPT_TRANSFER_MODE_READ_ONLY = "receipt_transfer_mode_read_only";
     public static final String FINOVA_CASH_MSG_FLOW_ID = "638b914a3ef07b5a0221ed82";
     public static final String FINOVA_CHEQUE_MSG_FLOW_ID = "638b9491907adf51817999c6";
     public static final String FINOVA_UPI_MSG_FLOW_ID = "638b94373ef07b5a0221ed83";

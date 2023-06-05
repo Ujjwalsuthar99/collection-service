@@ -1,10 +1,15 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferCustomDataResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferDataByReceiptIdResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDataReturnResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
@@ -435,17 +440,58 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         return newObjResponse;
     }
 
-//    @Override
-//    public Object getReceiptTransferByReceiptId(String token, Long receiptId) throws Exception {
-//        Map<String, Object> receiptTransferEntity;
-//        try {
-//
-//            receiptTransferEntity = receiptTransferHistoryRepository.getReceiptTransferByReceiptId(receiptId);
-//        } catch (Exception e) {
-//            throw new Exception("1016028");
-//        }
-////        return receiptTransferEntity;
-//        return new Object();
-//    }
+    @Override
+    public ReceiptTransferDataByReceiptIdResponseDTO getReceiptTransferByReceiptId(String token, Long receiptId) throws Exception {
+        List<Map<String, Object>> receiptTransferDataList;
+        List<ReceiptTransferCustomDataResponseDTO> userTransferArr = new ArrayList<>();
+        List<ReceiptTransferCustomDataResponseDTO> bankTransferArr = new ArrayList<>();
+        ReceiptTransferDataByReceiptIdResponseDTO receiptTransferDataByReceiptIdResponseDTO = new ReceiptTransferDataByReceiptIdResponseDTO();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String receiptTransferReadOnlyMode = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(RECEIPT_TRANSFER_MODE_READ_ONLY);
+            if (receiptTransferReadOnlyMode.equals("true")) {
+                receiptTransferDataByReceiptIdResponseDTO.setTransferHistoryButton(false);
+            } else {
+                receiptTransferDataByReceiptIdResponseDTO.setTransferHistoryButton(true);
+            }
+            receiptTransferDataList = receiptTransferHistoryRepository.getReceiptTransferByReceiptId(receiptId);
+            for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
+                JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("geo_location_data")));
+                JsonNode imagesNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("receipt_image")));
+                if (String.valueOf(receiptTransferData.get("transfer_type")).equals("bank")) {
+                    ReceiptTransferCustomDataResponseDTO bankTransferDTO = new ReceiptTransferCustomDataResponseDTO();
+                    bankTransferDTO.setReceiptTransferId(Long.parseLong(String.valueOf(receiptTransferData.get("receipt_transfer_id"))));
+                    bankTransferDTO.setCreatedDate(String.valueOf(receiptTransferData.get("created_date")));
+                    bankTransferDTO.setTransferByName(String.valueOf(receiptTransferData.get("transfer_by_name")));
+                    bankTransferDTO.setTransferToName(String.valueOf(receiptTransferData.get("transfer_to_name")));
+                    bankTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
+                    bankTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
+                    bankTransferDTO.setBankName(String.valueOf(receiptTransferData.get("bank_name")));
+                    bankTransferDTO.setAccountNumber(String.valueOf(receiptTransferData.get("account_number")));
+                    bankTransferDTO.setGeolocation(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                    bankTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
+                    bankTransferArr.add(bankTransferDTO);
+                } else {
+                    ReceiptTransferCustomDataResponseDTO userTransferDTO = new ReceiptTransferCustomDataResponseDTO();
+                    userTransferDTO.setReceiptTransferId(Long.parseLong(String.valueOf(receiptTransferData.get("receipt_transfer_id"))));
+                    userTransferDTO.setCreatedDate(String.valueOf(receiptTransferData.get("created_date")));
+                    userTransferDTO.setTransferByName(String.valueOf(receiptTransferData.get("transfer_by_name")));
+                    userTransferDTO.setTransferToName(String.valueOf(receiptTransferData.get("transfer_to_name")));
+                    userTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
+                    userTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
+                    userTransferDTO.setBankName(null);
+                    userTransferDTO.setAccountNumber(null);
+                    userTransferDTO.setGeolocation(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                    userTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
+                    userTransferArr.add(userTransferDTO);
+                }
+            }
+            receiptTransferDataByReceiptIdResponseDTO.setUserTransfer(userTransferArr);
+            receiptTransferDataByReceiptIdResponseDTO.setBankTransfer(bankTransferArr);
+        } catch (Exception e) {
+            throw new Exception("1016028");
+        }
+        return receiptTransferDataByReceiptIdResponseDTO;
+    }
 
 }
