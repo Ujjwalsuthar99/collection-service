@@ -489,7 +489,7 @@ public class UtilityServiceImpl implements UtilityService {
                         finovaSmsRequest.setMobiles("917805951252");
                     }
                     finovaSmsRequest.setAmount(receiptAmount);
-                    finovaSmsRequest.setLoanNumber(loanId[0]);
+                    finovaSmsRequest.setLoanNumber(loanNumber);
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
                     FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
@@ -506,7 +506,7 @@ public class UtilityServiceImpl implements UtilityService {
                         finovaSmsRequest.setMobiles("917805951252");
                     }
                     finovaSmsRequest.setAmount(receiptAmount);
-                    finovaSmsRequest.setLoanNumber(loanId[0]);
+                    finovaSmsRequest.setLoanNumber(loanNumber);
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
                     FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
@@ -521,7 +521,7 @@ public class UtilityServiceImpl implements UtilityService {
                         finovaSmsRequest.setMobiles("917805951252");
                     }
                     finovaSmsRequest.setAmount(receiptAmount);
-                    finovaSmsRequest.setLoanNumber(loanId[0]);
+                    finovaSmsRequest.setLoanNumber(loanNumber);
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
                     finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);

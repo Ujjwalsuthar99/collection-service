@@ -10,6 +10,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTran
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferCustomDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferDataByReceiptIdResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferReceiptDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDataReturnResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
@@ -36,6 +37,8 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @Slf4j
 @Transactional
 public class ReceiptTransferServiceImpl implements ReceiptTransferService {
+    @Autowired
+    private ReceiptRepository receiptRepository;
     @Autowired
     private CollectionReceiptRepository collectionReceiptRepository;
 
@@ -229,7 +232,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                                 if (collectionReceiptEntity != null) {
                                     collectionReceiptEntity.setLastReceiptTransferId(receiptTransferId);
                                     collectionReceiptEntity.setReceiptHolderUserId(requestActionBy);
-                                    collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityLogsId);
+//                                    collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityLogsId);
                                     collectionReceiptRepository.save(collectionReceiptEntity);
                                 }
                             }
@@ -443,9 +446,11 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     @Override
     public ReceiptTransferDataByReceiptIdResponseDTO getReceiptTransferByReceiptId(String token, Long receiptId) throws Exception {
         List<Map<String, Object>> receiptTransferDataList;
+        Map<String, Object> receiptData;
         List<ReceiptTransferCustomDataResponseDTO> userTransferArr = new ArrayList<>();
         List<ReceiptTransferCustomDataResponseDTO> bankTransferArr = new ArrayList<>();
         ReceiptTransferDataByReceiptIdResponseDTO receiptTransferDataByReceiptIdResponseDTO = new ReceiptTransferDataByReceiptIdResponseDTO();
+        ReceiptTransferReceiptDataResponseDTO receiptTransferReceiptDataResponseDTO = new ReceiptTransferReceiptDataResponseDTO();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String receiptTransferReadOnlyMode = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(RECEIPT_TRANSFER_MODE_READ_ONLY);
@@ -454,6 +459,12 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             } else {
                 receiptTransferDataByReceiptIdResponseDTO.setTransferHistoryButton(true);
             }
+            receiptData = receiptRepository.getReceiptDataByReceiptId(receiptId);
+            JsonNode geoLocationDataNode1 = objectMapper.readTree(String.valueOf(receiptData.get("geo_location_data")));
+            JsonNode imagesNode1 = objectMapper.readTree(String.valueOf(receiptData.get("images")));
+            receiptTransferReceiptDataResponseDTO.setImages(new Gson().fromJson(String.valueOf(imagesNode1), Object.class));
+            receiptTransferReceiptDataResponseDTO.setLocation(new Gson().fromJson(String.valueOf(geoLocationDataNode1), Object.class));
+
             receiptTransferDataList = receiptTransferHistoryRepository.getReceiptTransferByReceiptId(receiptId);
             for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
                 JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("geo_location_data")));
@@ -488,6 +499,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             }
             receiptTransferDataByReceiptIdResponseDTO.setUserTransfer(userTransferArr);
             receiptTransferDataByReceiptIdResponseDTO.setBankTransfer(bankTransferArr);
+            receiptTransferDataByReceiptIdResponseDTO.setReceiptData(receiptTransferReceiptDataResponseDTO);
         } catch (Exception e) {
             throw new Exception("1016028");
         }
