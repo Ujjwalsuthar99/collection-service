@@ -31,6 +31,9 @@ public class ReceiptTransferCustomDataResponseDTO {
     @JsonProperty("bank_name")
     private String bankName;
 
+    @JsonProperty("status")
+    private String status;
+
     @JsonProperty("account_number")
     private String accountNumber;
 
