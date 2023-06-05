@@ -491,6 +491,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     userTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
                     userTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
                     userTransferDTO.setBankName(null);
+                    userTransferDTO.setStatus(String.valueOf(receiptTransferData.get("status")));
                     userTransferDTO.setAccountNumber(null);
                     userTransferDTO.setGeolocation(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
                     userTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));

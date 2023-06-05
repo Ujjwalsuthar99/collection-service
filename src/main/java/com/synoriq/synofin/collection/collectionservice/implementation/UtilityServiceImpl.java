@@ -534,19 +534,25 @@ public class UtilityServiceImpl implements UtilityService {
 
             if(clientId.equals("csl")) {
                 String decodedString = URLDecoder.decode(CSL_TEMPLATE_ENCODED_MESSAGE, StandardCharsets.UTF_8);
+                log.info("decodedString {}", decodedString);
                 String message = decodedString.replace("Vinay", customerName);
+                log.info("message1 {}", message);
                 message = message.replace("500", receiptAmount);
                 message = message.replace("1-1-2032", String.valueOf(new Date()));
                 message = message.replace("1234567", loanNumber);
                 message = message.replace("6778990000", shortenUrlResponseDTO.getData().getResult());
+                log.info("message2 {}", message);
                 String receivedMobileNumber = null;
                 if(isProd) {
                     receivedMobileNumber = applicantMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
                 } else {
                     receivedMobileNumber = "9649916989";
                 }
+                log.info("message3 {}", message);
                 String encodedMessageString = URLEncoder.encode(message, StandardCharsets.UTF_8);
+                log.info("encodedMessageString {}", encodedMessageString);
                 String postField = "user=CSLFIN&message=" + encodedMessageString + "&key=974130e696XX&mobile=" + receivedMobileNumber + "&senderid=CSLSME&accusage=1&tempid=1707165942499421494&entityid=1701159697926729192&unicode=1";
+                log.info("postField {}", postField);
                 String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
                 log.info("sms service for csl {}", smsServiceResponse);
                 // creating api logs
@@ -572,6 +578,7 @@ public class UtilityServiceImpl implements UtilityService {
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
         } catch (Exception ee) {
+            log.info("ee messages", ee);
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), null, modifiedErrorMessage, "failure", Long.parseLong(loanId[0]));
