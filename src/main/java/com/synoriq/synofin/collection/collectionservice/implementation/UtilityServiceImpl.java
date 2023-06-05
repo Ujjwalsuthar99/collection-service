@@ -556,7 +556,7 @@ public class UtilityServiceImpl implements UtilityService {
                 String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
                 log.info("sms service for csl {}", smsServiceResponse);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), postField, smsServiceResponse, "success", Long.parseLong(loanId[0]));
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON(postField), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
             }
 
             String loanApplicationNumber = taskRepository.getLoanApplicationNumber(Long.parseLong(loanId[0]));
