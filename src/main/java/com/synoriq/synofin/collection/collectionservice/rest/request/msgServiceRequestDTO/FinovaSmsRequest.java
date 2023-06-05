@@ -6,8 +6,8 @@ import lombok.Data;
 @Data
 public class FinovaSmsRequest {
 
-    @JsonProperty("flow_id")
-    private String flowId;
+    @JsonProperty("template_id")
+    private String templateId;
 
     @JsonProperty("sender")
     String sender;
@@ -27,13 +27,13 @@ public class FinovaSmsRequest {
 //    @JsonProperty("url")
 //    String url;
 
-    @JsonProperty("val1")
+    @JsonProperty("var1")
     String amount;
 
-    @JsonProperty("val2")
+    @JsonProperty("var2")
     String loanNumber;
 
-    @JsonProperty("val3")
+    @JsonProperty("var3")
     String url;
 
 }
