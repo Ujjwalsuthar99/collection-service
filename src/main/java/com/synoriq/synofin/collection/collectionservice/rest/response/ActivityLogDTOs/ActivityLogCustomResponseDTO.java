@@ -1,12 +1,13 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
 
 @Setter
+@Getter
 @NoArgsConstructor
 public class ActivityLogCustomResponseDTO {
 

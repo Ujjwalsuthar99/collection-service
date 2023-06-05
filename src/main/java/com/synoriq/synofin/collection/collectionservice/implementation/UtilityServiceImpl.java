@@ -158,7 +158,7 @@ public class UtilityServiceImpl implements UtilityService {
             } else {
                 List<UsersDataDTO> filteredList = userData.
                         stream().
-                        filter(user -> (user.getUsername() != null && user.getName() != null && user.getEmployeeCode() != null) && (Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getUsername()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getName()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getEmployeeCode()).find())).
+                        filter(user -> (user.getUsername() != null && user.getName() != null && user.getEmployeeCode() != null && user.getActive()) && (Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getUsername()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getName()).find() || Pattern.compile(Pattern.quote(key), Pattern.CASE_INSENSITIVE).matcher(user.getEmployeeCode()).find())).
                         collect(Collectors.toList());
                 int length;
                 int filterSize = filteredList.size();
@@ -474,15 +474,15 @@ public class UtilityServiceImpl implements UtilityService {
             if(clientId.equals("finova")) {
                 FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
                 if(paymentMode.equals("cash")) {
-                    finovaSmsRequest.setFlow_id(FINOVA_CASH_MSG_FLOW_ID);
+                    finovaSmsRequest.setFlowId(FINOVA_CASH_MSG_FLOW_ID);
                 } else if (paymentMode.equals("cheque")) {
-                    finovaSmsRequest.setFlow_id(FINOVA_CHEQUE_MSG_FLOW_ID);
+                    finovaSmsRequest.setFlowId(FINOVA_CHEQUE_MSG_FLOW_ID);
                 } else {
-                    finovaSmsRequest.setFlow_id(FINOVA_UPI_MSG_FLOW_ID);
+                    finovaSmsRequest.setFlowId(FINOVA_UPI_MSG_FLOW_ID);
                 }
                 if(customerType.equals("applicant")) {
                     finovaSmsRequest.setSender("FINOVA");
-                    finovaSmsRequest.setShort_url("0");
+                    finovaSmsRequest.setShortUrl("0");
                     if(isProd) {
                         finovaSmsRequest.setMobiles(applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
@@ -499,7 +499,7 @@ public class UtilityServiceImpl implements UtilityService {
 
                 } else {
                     finovaSmsRequest.setSender("FINOVA");
-                    finovaSmsRequest.setShort_url("0");
+                    finovaSmsRequest.setShortUrl("0");
                     if(isProd) {
                         finovaSmsRequest.setMobiles(applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
@@ -514,7 +514,7 @@ public class UtilityServiceImpl implements UtilityService {
 
 
                     finovaSmsRequest.setSender("FINOVA");
-                    finovaSmsRequest.setShort_url("0");
+                    finovaSmsRequest.setShortUrl("0");
                     if(isProd) {
                         finovaSmsRequest.setMobiles(collectedFromMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
