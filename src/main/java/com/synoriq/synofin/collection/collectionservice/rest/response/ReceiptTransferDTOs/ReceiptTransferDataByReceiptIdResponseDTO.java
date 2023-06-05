@@ -24,4 +24,7 @@ public class ReceiptTransferDataByReceiptIdResponseDTO {
     @JsonProperty("user_transfer")
     private List<ReceiptTransferCustomDataResponseDTO> userTransfer;
 
+    @JsonProperty("receipt_data")
+    private ReceiptTransferReceiptDataResponseDTO receiptData;
+
 }

@@ -115,6 +115,8 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
     @Query(nativeQuery = true, value = "select sr.service_request_id as serviceRequestId from lms.service_request sr join collection.collection_receipts cr on sr.service_request_id = cr.receipt_id where sr.form->>'transaction_reference' = :transactionReferenceNumber and sr.request_source = 'm_collect' and sr.is_deleted = false")
     Map<String, Object> transactionNumberCheck(@Param("transactionReferenceNumber") String transactionReferenceNumber);
 
+    @Query(nativeQuery = true, value = "select cast(cal.images as text) as images, cast(cal.geo_location_data as text) as geo_location_data from collection.collection_receipts cr join collection.collection_activity_logs cal on cal.collection_activity_logs_id = cr.collection_activity_logs_id where cr.receipt_id = :receiptId")
+    Map<String, Object> getReceiptDataByReceiptId(@Param("receiptId") Long receiptId);
 
     @Query(nativeQuery = true, value = "select\n" +
             "\tb.branch_name as branch_name,\n" +
