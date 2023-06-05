@@ -462,8 +462,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             receiptData = receiptRepository.getReceiptDataByReceiptId(receiptId);
             JsonNode geoLocationDataNode1 = objectMapper.readTree(String.valueOf(receiptData.get("geo_location_data")));
             JsonNode imagesNode1 = objectMapper.readTree(String.valueOf(receiptData.get("images")));
-            receiptTransferReceiptDataResponseDTO.setImages(new Gson().fromJson(String.valueOf(geoLocationDataNode1), Object.class));
-            receiptTransferReceiptDataResponseDTO.setLocation(new Gson().fromJson(String.valueOf(imagesNode1), Object.class));
+            receiptTransferReceiptDataResponseDTO.setImages(new Gson().fromJson(String.valueOf(imagesNode1), Object.class));
+            receiptTransferReceiptDataResponseDTO.setLocation(new Gson().fromJson(String.valueOf(geoLocationDataNode1), Object.class));
 
             receiptTransferDataList = receiptTransferHistoryRepository.getReceiptTransferByReceiptId(receiptId);
             for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
