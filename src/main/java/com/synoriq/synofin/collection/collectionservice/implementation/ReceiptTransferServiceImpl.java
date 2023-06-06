@@ -498,7 +498,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     userTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
                     userTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
                     userTransferDTO.setBankName(null);
-                    userTransferDTO.setStatus(String.valueOf(receiptTransferData.get("status")));
+                    userTransferDTO.setStatus(utilityService.capitalizeName(String.valueOf(receiptTransferData.get("status"))));
                     userTransferDTO.setAccountNumber(null);
                     userTransferDTO.setGeolocation(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
                     userTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
@@ -528,7 +528,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 receiptsDataResponseDTO.setReceiptAmount(Double.parseDouble(String.valueOf(receipt.get("receipt_amount"))));
                 receiptsDataResponseDTO.setLoanApplicationNumber(String.valueOf(receipt.get("loan_application_number")));
                 receiptsDataResponseDTO.setCreatedBy(String.valueOf(receipt.get("created_by")));
-                receiptsDataResponseDTO.setStatus(String.valueOf(receipt.get("status")));
+                receiptsDataResponseDTO.setStatus(utilityService.capitalizeName(String.valueOf(receipt.get("status"))));
 
                 JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receipt.get("geo_location_data")));
                 JsonNode imagesNode = objectMapper.readTree(String.valueOf(receipt.get("receipt_images")));

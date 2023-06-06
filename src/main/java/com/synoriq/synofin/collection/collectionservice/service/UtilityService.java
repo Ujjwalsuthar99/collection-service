@@ -21,6 +21,7 @@ public interface UtilityService {
     public Date addOneDay(Date date) throws Exception;
     public String mobileNumberMasking(String mobile);
     public String addSuffix(Integer i);
+    public String capitalizeName(String name);
     public String getApiUrl();
     public Object getBankNameByIFSC(String keyword) throws Exception;
     public UserDetailByTokenDTOResponse getUserDetailsByToken(String token);

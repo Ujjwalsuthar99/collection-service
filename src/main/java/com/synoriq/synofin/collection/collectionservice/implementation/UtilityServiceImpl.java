@@ -253,6 +253,17 @@ public class UtilityServiceImpl implements UtilityService {
         return "--";
     }
     @Override
+    public String capitalizeName(String name) {
+        String[] strArr = name.split(" ");
+        String newStr = "";
+        for (int i = 0; i < strArr.length; i++) {
+            newStr += strArr[i].substring(0, 1).toUpperCase() + strArr[i].substring(1) + " ";
+
+//            newStr.append(strArr[i].substring(0, 1).toUpperCase()).append(strArr[i].substring(1, strArr[i].length)).append(" ");
+        }
+        return newStr.trim();
+    };
+    @Override
     public String getApiUrl() {
         String queryString = httpServletRequest.getQueryString();
 //        httpServletRequest.getRequestURI() = "/collection-service/v1/getMasterType";

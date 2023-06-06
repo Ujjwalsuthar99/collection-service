@@ -8,8 +8,10 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionL
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailsDTOs.ProfileDetailResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.CollectionLimitUserWise.CollectionLimitUserWiseFetchDataResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
 import com.synoriq.synofin.collection.collectionservice.service.CollectionLimitUserWiseService;
+import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,7 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
     @Autowired
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
     @Autowired
-    private ProfileService profileService;
+    private UtilityService utilityService;
 
     @Override
     public Object getCollectionLimitUserWise(String token, String userId) throws Exception {
@@ -58,12 +60,14 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
     @Override
     public String createCollectionLimitUserWise(String token, CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws Exception {
 
+        UserDetailByUserIdDTOResponse userDetailByUserIdDTOResponse = new UserDetailByUserIdDTOResponse();
+        if (collectionLimitUserWiseDtoRequest.getUserId() != null) {
+            userDetailByUserIdDTOResponse = utilityService.getUserDetailsByUserId(token, collectionLimitUserWiseDtoRequest.getUserId());
+        }
 
-        ProfileDetailResponseDTO profileDetailResponseDTO = profileService.getProfileDetails(token, collectionLimitUserWiseDtoRequest.getUsername());
+        CollectionLimitUserWiseEntity existingLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(collectionLimitUserWiseDtoRequest.getUserId(), collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
 
-        CollectionLimitUserWiseEntity existingLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(profileDetailResponseDTO.getData().getUserId(), collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
-
-        String defaultLimit = null;
+        String defaultLimit;
         if(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cash")) {
             defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
         } else if(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cheque")) {
@@ -83,8 +87,8 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
             collectionLimitUserWiseEntity.setCreatedDate(new Date());
             collectionLimitUserWiseEntity.setDeleted(false);
             collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
-            collectionLimitUserWiseEntity.setUserId(profileDetailResponseDTO.getData().getUserId());
-            collectionLimitUserWiseEntity.setUserName(profileDetailResponseDTO.getData().getUserName());
+            collectionLimitUserWiseEntity.setUserId(collectionLimitUserWiseDtoRequest.getUserId());
+            collectionLimitUserWiseEntity.setUserName(userDetailByUserIdDTOResponse.getData().getEmployeeUserName());
             collectionLimitUserWiseEntity.setTotalLimitValue(Double.valueOf(defaultLimit));
             collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
             collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
