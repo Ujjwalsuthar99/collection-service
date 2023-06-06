@@ -12,9 +12,13 @@ public class CollectionLimitUserWiseDtoRequest {
     @JsonProperty("username")
     private String username;
 
+    @JsonProperty("userId")
+    private Long userId;
+
     @JsonProperty("totalLimitValue")
     private Double totalLimitValue;
 
     @JsonProperty("utilizedLimitValue")
     private Double utilizedLimitValue;
+
 }

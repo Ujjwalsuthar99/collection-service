@@ -134,4 +134,16 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
 
     @Query(nativeQuery = true, value = "select ba.bank_branch as bank_branch, ba.account_number as account_number, ba.bank_name from master.bank_accounts ba where ba.bank_account_id = :bankCode")
     Map<String, Object> getBankData(@Param("bankCode") Long bankCode);
+
+    @Query(nativeQuery = true,value = "select cast(sr.form->>'receipt_amount' as decimal) as receipt_amount, sr.created_date as created_date, \n" +
+            "\t\tsr.service_request_id as receipt_id, la.loan_application_number, sr.form->>'created_by' as created_by,\n" +
+            "\t\tsr.status as status, cast(cal.images as text) as receipt_images, cast(cal.geo_location_data as text) as geo_location_data\n" +
+            "         from collection.receipt_transfer rt \n" +
+            "         join (select collection_receipts_id, receipt_transfer_id from collection.receipt_transfer_history) as rth on rt.receipt_transfer_id  = rth.receipt_transfer_id \n" +
+            "         join collection.collection_receipts cr on cr.receipt_id = rth.collection_receipts_id\n" +
+            "         join (select service_request_id, loan_id, form, created_date, status from lms.service_request) as sr on sr.service_request_id = rth.collection_receipts_id \n" +
+            "         join (select loan_application_id, loan_application_number from lms.loan_application) as la on la.loan_application_id = sr.loan_id \n" +
+            "         join collection.collection_activity_logs cal on cal.collection_activity_logs_id = cr.collection_activity_logs_id\n" +
+            "         where rt.receipt_transfer_id = :receiptTransferId")
+    List<Map<String, Object>> getReceiptsDataByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
 }

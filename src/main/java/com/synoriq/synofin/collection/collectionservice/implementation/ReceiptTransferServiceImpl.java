@@ -11,6 +11,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferCustomDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferDataByReceiptIdResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferReceiptDataResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptsDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDataReturnResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
@@ -462,7 +463,13 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             receiptData = receiptRepository.getReceiptDataByReceiptId(receiptId);
             JsonNode geoLocationDataNode1 = objectMapper.readTree(String.valueOf(receiptData.get("geo_location_data")));
             JsonNode imagesNode1 = objectMapper.readTree(String.valueOf(receiptData.get("images")));
-            receiptTransferReceiptDataResponseDTO.setImages(new Gson().fromJson(String.valueOf(imagesNode1), Object.class));
+            Map<String, String> obj = new HashMap<>();
+            for (int i = 1; i <= imagesNode1.size(); i++) {
+                String sr = String.valueOf(imagesNode1.get("url" + i));
+                String newStr = "bankDepositSlip/" + receiptData.get("created_by") + "/" + new Gson().fromJson(String.valueOf(sr), String.class);
+                obj.put("url" + i, newStr);
+            }
+            receiptTransferReceiptDataResponseDTO.setImages(obj);
             receiptTransferReceiptDataResponseDTO.setLocation(new Gson().fromJson(String.valueOf(geoLocationDataNode1), Object.class));
 
             receiptTransferDataList = receiptTransferHistoryRepository.getReceiptTransferByReceiptId(receiptId);
@@ -491,7 +498,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     userTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
                     userTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
                     userTransferDTO.setBankName(null);
-                    userTransferDTO.setStatus(String.valueOf(receiptTransferData.get("status")));
+                    userTransferDTO.setStatus(utilityService.capitalizeName(String.valueOf(receiptTransferData.get("status"))));
                     userTransferDTO.setAccountNumber(null);
                     userTransferDTO.setGeolocation(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
                     userTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
@@ -507,4 +514,39 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         return receiptTransferDataByReceiptIdResponseDTO;
     }
 
+    @Override
+    public List<ReceiptsDataResponseDTO> getReceiptsDataByReceiptTransferId(String Token, Long receiptTransferId) throws Exception {
+        List<Map<String, Object>> receiptsData;
+        List<ReceiptsDataResponseDTO> receiptsDataList = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            receiptsData = receiptTransferRepository.getReceiptsDataByReceiptTransferId(receiptTransferId);
+            for (Map<String, Object> receipt : receiptsData) {
+                ReceiptsDataResponseDTO receiptsDataResponseDTO = new ReceiptsDataResponseDTO();
+                receiptsDataResponseDTO.setReceiptId(Long.parseLong(String.valueOf(receipt.get("receipt_id"))));
+                receiptsDataResponseDTO.setCreatedDate(String.valueOf(receipt.get("created_date")));
+                receiptsDataResponseDTO.setReceiptAmount(Double.parseDouble(String.valueOf(receipt.get("receipt_amount"))));
+                receiptsDataResponseDTO.setLoanApplicationNumber(String.valueOf(receipt.get("loan_application_number")));
+                receiptsDataResponseDTO.setCreatedBy(String.valueOf(receipt.get("created_by")));
+                receiptsDataResponseDTO.setStatus(utilityService.capitalizeName(String.valueOf(receipt.get("status"))));
+
+                JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receipt.get("geo_location_data")));
+                JsonNode imagesNode = objectMapper.readTree(String.valueOf(receipt.get("receipt_images")));
+                Map<String, String> imagesObj = new HashMap<>();
+                for (int i = 1; i <= imagesNode.size(); i++) {
+                    String imageVal = String.valueOf(imagesNode.get("url" + i));
+                    String updatedImageVal = "bankDepositSlip/" + receiptsDataResponseDTO.getCreatedBy() + "/" + new Gson().fromJson(String.valueOf(imageVal), String.class);
+                    imagesObj.put("url" + i, updatedImageVal);
+                }
+
+                receiptsDataResponseDTO.setReceiptImages(imagesObj);
+                receiptsDataResponseDTO.setGeoLocationData(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                receiptsDataList.add(receiptsDataResponseDTO);
+            }
+
+        } catch (Exception e) {
+            throw new Exception("1016028");
+        }
+        return receiptsDataList;
+    }
 }

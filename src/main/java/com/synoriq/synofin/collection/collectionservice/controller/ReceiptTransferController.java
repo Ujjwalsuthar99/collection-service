@@ -204,5 +204,27 @@ public class ReceiptTransferController {
         return response;
     }
 
+    @RequestMapping(value = "/receipt-transfer/receipts-data/{receiptTransferId}", method = RequestMethod.GET)
+    public ResponseEntity<Object> getReceiptsDataByReceiptTransferId(@RequestHeader("Authorization") String bearerToken, @PathVariable("receiptTransferId") Long receiptTransferId) throws Exception {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+        Object result;
+        try {
+            log.info("receiptTransferId {}", receiptTransferId);
+            result = receiptTransferService.getReceiptsDataByReceiptTransferId(bearerToken, receiptTransferId);
+            baseResponse = new BaseDTOResponse<>(result);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
 
 }
