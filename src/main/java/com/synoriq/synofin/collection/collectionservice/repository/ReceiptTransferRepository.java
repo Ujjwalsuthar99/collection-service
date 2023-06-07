@@ -19,7 +19,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
 
 
     @Query(nativeQuery = true,value = "select rt.receipt_transfer_id, rt.transfer_mode, rt.transfer_bank_code , rt.transfer_type , rt.transferred_to_user_id , rt.transferred_by, rt.status , rt.created_date , rt.amount \n" +
-            "                ,(case when rt.transferred_to_user_id is null then rt.transfer_bank_code else u.name end) as transferred_to_name ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
+            "            ,(case when rt.transferred_to_user_id is null then (select ba.bank_name from master.bank_accounts ba where ba.bank_account_id = cast(rt.transfer_bank_code as bigint)) else u.name end) as transferred_to_name ,case when rt.transferred_by = :transferredBy then 'transfer' else 'receiver' end as user_type, \n" +
             "                (case \n" +
             "                         when rt.transfer_mode = 'cash' then '#136AD5'\n" +
             "                         when rt.transfer_mode = 'cheque' then '#136AD5'\n" +

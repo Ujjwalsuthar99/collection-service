@@ -495,7 +495,7 @@ public class UtilityServiceImpl implements UtilityService {
                     finovaSmsRequest.setSender("FINOVA");
                     finovaSmsRequest.setShortUrl("0");
                     if(isProd) {
-                        finovaSmsRequest.setMobiles(applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
+                        finovaSmsRequest.setMobiles("91" + applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
                         finovaSmsRequest.setMobiles("917805951252");
                     }
@@ -512,7 +512,7 @@ public class UtilityServiceImpl implements UtilityService {
                     finovaSmsRequest.setSender("FINOVA");
                     finovaSmsRequest.setShortUrl("0");
                     if(isProd) {
-                        finovaSmsRequest.setMobiles(applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
+                        finovaSmsRequest.setMobiles("91" + applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
                         finovaSmsRequest.setMobiles("917805951252");
                     }
@@ -527,7 +527,7 @@ public class UtilityServiceImpl implements UtilityService {
                     finovaSmsRequest.setSender("FINOVA");
                     finovaSmsRequest.setShortUrl("0");
                     if(isProd) {
-                        finovaSmsRequest.setMobiles(collectedFromMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
+                        finovaSmsRequest.setMobiles("91" + collectedFromMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
                         finovaSmsRequest.setMobiles("917805951252");
                     }
