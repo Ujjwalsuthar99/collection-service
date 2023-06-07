@@ -107,17 +107,9 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
             "    la.product as loan_type,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment\n" +
+            "    (select coalesce(sum(rs.pending_amount), 0) from lms.repayment_schedule rs where rs.status = 'outstanding' and rs.loan_id = la.loan_application_id group by rs.loan_id) as overdue_repayment\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due, product, loan_application_number from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
-            "            left join (\n" +
-            "    select\n" +
-            "        max(SUM(rs.pending_amount)) over (partition by rs.loan_id ) as overdue_repayment ,\n" +
-            "            rs.loan_id\n" +
-            "        from\n" +
-            "            lms.repayment_schedule rs\n" +
-            "        where\n" +
-            "            rs.status = 'outstanding' group by rs.loan_id ) repay on la.loan_application_id = repay.loan_id\n" +
             "                join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  \n" +
             " where f.created_by = :userId and clm.customer_type = 'applicant' \n" +
@@ -165,17 +157,9 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
             "    la.product as loan_type,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment\n" +
+            "    (select coalesce(sum(rs.pending_amount), 0) from lms.repayment_schedule rs where rs.status = 'outstanding' and rs.loan_id = la.loan_application_id group by rs.loan_id) as overdue_repayment\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due,product, loan_application_number from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
-            "            left join (\n" +
-            "    select\n" +
-            "        max(SUM(rs.pending_amount)) over (partition by rs.loan_id ) as overdue_repayment ,\n" +
-            "            rs.loan_id\n" +
-            "        from\n" +
-            "            lms.repayment_schedule rs\n" +
-            "        where\n" +
-            "            rs.status = 'outstanding' group by rs.loan_id ) repay on la.loan_application_id = repay.loan_id\n" +
             "                join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  \n" +
             " where f.created_by = :userId and clm.customer_type = 'applicant' \n" +
@@ -221,17 +205,11 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
-            "    (case when overdue_repayment is null then 0 else overdue_repayment end) as overdue_repayment,\n" +
+            "    (select coalesce(sum(rs.pending_amount), 0) from lms.repayment_schedule rs where rs.status = 'outstanding' and rs.loan_id = la.loan_application_id group by rs.loan_id) as overdue_repayment,\n" +
             "    CAST(cal.geo_location_data as TEXT) as geo_location_data,\n" +
             "    CAST(cal.images as TEXT) as images\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
-            "             left join (SELECT DISTINCT loan_id, overdue_repayment\n" +
-            "            FROM (\n" +
-            "            SELECT SUM(rs.pending_amount) OVER (PARTITION BY rs.loan_id) AS overdue_repayment, rs.loan_id\n" +
-            "            FROM lms.repayment_schedule rs\n" +
-            "            WHERE rs.status = 'outstanding'\n" +
-            "            ) subquery_alias ) repay on la.loan_application_id = repay.loan_id \n" +
             "            join (select loan_id, customer_id from lms.customer_loan_mapping where customer_type = 'applicant') as clm on clm.loan_id  = la.loan_application_id \n" +
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id\n" +
             "           join (select collection_activity_logs_id, geo_location_data, images from collection.collection_activity_logs) as cal on cal.collection_activity_logs_id  = f.collection_activity_logs_id\n" +
