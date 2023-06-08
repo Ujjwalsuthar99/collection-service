@@ -12,7 +12,6 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetail
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
 import com.synoriq.synofin.collection.collectionservice.service.CollectionLimitUserWiseService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
-import com.synoriq.synofin.dataencryptionservice.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
