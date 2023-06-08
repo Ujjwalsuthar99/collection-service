@@ -12,6 +12,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetail
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
 import com.synoriq.synofin.collection.collectionservice.service.CollectionLimitUserWiseService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
+import com.synoriq.synofin.dataencryptionservice.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,8 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
     @Autowired
     private UtilityService utilityService;
+    @Autowired
+    private ProfileService profileService;
 
     @Override
     public Object getCollectionLimitUserWise(String token, String userId) throws Exception {
@@ -60,20 +63,31 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
     @Override
     public String createCollectionLimitUserWise(String token, CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws Exception {
 
-        UserDetailByUserIdDTOResponse userDetailByUserIdDTOResponse = new UserDetailByUserIdDTOResponse();
-        if (collectionLimitUserWiseDtoRequest.getUserId() != null) {
+        Long userId;
+        String userName;
+        UserDetailByUserIdDTOResponse userDetailByUserIdDTOResponse;
+        ProfileDetailResponseDTO profileDetailResponseDTO;
+        if (collectionLimitUserWiseDtoRequest.getUserId() != null) { // update
             userDetailByUserIdDTOResponse = utilityService.getUserDetailsByUserId(token, collectionLimitUserWiseDtoRequest.getUserId());
+            userId = collectionLimitUserWiseDtoRequest.getUserId();
+            userName = userDetailByUserIdDTOResponse.getData().getEmployeeUserName();
+        } else {
+            profileDetailResponseDTO = profileService.getProfileDetails(token, collectionLimitUserWiseDtoRequest.getUsername());
+            userId = profileDetailResponseDTO.getData().getUserId();
+            userName = collectionLimitUserWiseDtoRequest.getUsername();
         }
 
-        CollectionLimitUserWiseEntity existingLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(collectionLimitUserWiseDtoRequest.getUserId(), collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
+        CollectionLimitUserWiseEntity existingLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
 
-        String defaultLimit;
-        if(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cash")) {
-            defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
-        } else if(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cheque")) {
-            defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT);
-        } else {
-            defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT);
+        String defaultLimit = collectionLimitUserWiseDtoRequest.getTotalLimitValue().toString();
+        if (collectionLimitUserWiseDtoRequest.getTotalLimitValue() == null) {
+            if (collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cash")) {
+                defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
+            } else if (collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cheque")) {
+                defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT);
+            } else {
+                defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT);
+            }
         }
 
         if (existingLimit != null) {
@@ -87,9 +101,9 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
             collectionLimitUserWiseEntity.setCreatedDate(new Date());
             collectionLimitUserWiseEntity.setDeleted(false);
             collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
-            collectionLimitUserWiseEntity.setUserId(collectionLimitUserWiseDtoRequest.getUserId());
-            collectionLimitUserWiseEntity.setUserName(userDetailByUserIdDTOResponse.getData().getEmployeeUserName());
-            collectionLimitUserWiseEntity.setTotalLimitValue(Double.valueOf(defaultLimit));
+            collectionLimitUserWiseEntity.setUserId(userId);
+            collectionLimitUserWiseEntity.setUserName(userName);
+            collectionLimitUserWiseEntity.setTotalLimitValue(Double.parseDouble(defaultLimit));
             collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
             collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
         }
