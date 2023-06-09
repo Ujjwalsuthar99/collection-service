@@ -537,6 +537,7 @@ public class UtilityServiceImpl implements UtilityService {
 
                     finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
                     log.info("sms service for collected from finova {}", finovaMsgDTOResponse);
+                    saveSendSMSActivityData(loanId, res, userId);
                     // creating api logs
                     consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]));
                 }
@@ -566,27 +567,11 @@ public class UtilityServiceImpl implements UtilityService {
                 log.info("postField {}", postField);
                 String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
                 log.info("sms service for csl {}", smsServiceResponse);
+                saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
                 consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON(postField), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
             }
 
-            String loanApplicationNumber = taskRepository.getLoanApplicationNumber(Long.parseLong(loanId[0]));
-            String remarks = USER_MESSAGE;
-            remarks = remarks.replace("{loan_number}", loanApplicationNumber);
-
-            CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
-            collectionActivityLogsEntity.setActivityName("send_message_to_user");
-            collectionActivityLogsEntity.setActivityDate(new Date());
-            collectionActivityLogsEntity.setDeleted(false);
-            collectionActivityLogsEntity.setActivityBy(Long.parseLong(userId));
-            collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
-            collectionActivityLogsEntity.setAddress("{}");
-            collectionActivityLogsEntity.setRemarks(remarks);
-            collectionActivityLogsEntity.setImages(res.getData());
-            collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
-            collectionActivityLogsEntity.setGeolocation("{}");
-
-            collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
         } catch (Exception ee) {
             log.info("ee messages", ee);
@@ -596,6 +581,26 @@ public class UtilityServiceImpl implements UtilityService {
             log.error("{}", ee.getMessage());
         }
         return res;
+    }
+
+    private void saveSendSMSActivityData(String[] loanId, UploadImageOnS3ResponseDTO res, String userId) {
+        String loanApplicationNumber = taskRepository.getLoanApplicationNumber(Long.parseLong(loanId[0]));
+        String remarks = USER_MESSAGE;
+        remarks = remarks.replace("{loan_number}", loanApplicationNumber);
+
+        CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+        collectionActivityLogsEntity.setActivityName("send_message_to_user");
+        collectionActivityLogsEntity.setActivityDate(new Date());
+        collectionActivityLogsEntity.setDeleted(false);
+        collectionActivityLogsEntity.setActivityBy(Long.parseLong(userId));
+        collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
+        collectionActivityLogsEntity.setAddress("{}");
+        collectionActivityLogsEntity.setRemarks(remarks);
+        collectionActivityLogsEntity.setImages(res.getData());
+        collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
+        collectionActivityLogsEntity.setGeolocation("{}");
+
+        collectionActivityLogsRepository.save(collectionActivityLogsEntity);
     }
     @Override
     public UserDetailByUserIdDTOResponse getUserDetailsByUserId(String token, Long userId) {
