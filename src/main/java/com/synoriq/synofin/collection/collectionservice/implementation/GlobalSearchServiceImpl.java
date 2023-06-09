@@ -44,10 +44,10 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
         //  Restrict Global Search Loan id for user with last 7 digit
         if (Objects.equals(requestBody.getRequestData().getFilterBy(), "loan_account_number")) {
             if (stringSize >= 7) {
-                String search = data.substring((stringSize - 7));
-                searchBody.getRequestData().setSearchTerm(search);
-                searchBody.getRequestData().setFilterBy(searchBody.getRequestData().getFilterBy());
-                searchBody.getRequestData().setPaginationDTO(searchBody.getRequestData().getPaginationDTO());
+//                String search = data.substring((stringSize - 7));
+//                searchBody.getRequestData().setSearchTerm(search);
+//                searchBody.getRequestData().setFilterBy(searchBody.getRequestData().getFilterBy());
+//                searchBody.getRequestData().setPaginationDTO(searchBody.getRequestData().getPaginationDTO());
             } else {
                 final Pattern pattern = Pattern.compile("(?=.*[A-Z])(?=.*\\d).{2,}", Pattern.CASE_INSENSITIVE);
                 final Matcher matcher = pattern.matcher(data);
