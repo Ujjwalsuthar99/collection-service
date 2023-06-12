@@ -97,7 +97,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 utilizedAmount = 0.00;
                 totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
             }
-            if (!Objects.equals(receiptTransferDtoRequest.getTransferMode(), "bank")) {
+            if (!Objects.equals(receiptTransferDtoRequest.getTransferType(), "bank")) {
                 if ((utilizedAmount + transferredAmount) < totalLimitValue) {
                     Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
 
