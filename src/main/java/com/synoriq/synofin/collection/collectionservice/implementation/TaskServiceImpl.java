@@ -188,26 +188,31 @@ public class TaskServiceImpl implements TaskService {
                     basicInfoApplicant.setEmiDate("Pending LMS");
                     for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
                         if (!(communicationData.getAddressType() == null)) {
-                            if (communicationData.getAddressType().equals("Permanent Address")) {
-                                addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
-                                if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-                                }
-                            } else if (communicationData.getAddressType().equals("Current Address")) {
-                                addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
-                                if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-                                }
-                            } else if (communicationData.getAddressType().equals("Residential Address")) {
-                                addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
-                                if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-                                }
-                            } else {
-                                if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                    numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-                                }
-                                addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
+                            switch (communicationData.getAddressType()) {
+                                case "Permanent Address":
+                                    addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
+                                    if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                    }
+                                    break;
+                                case "Current Address":
+                                    addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
+                                    if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                    }
+                                    break;
+                                case "Residential Address":
+                                    addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
+                                    if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                    }
+                                    break;
+                                default:
+                                    if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                    }
+                                    addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
+                                    break;
                             }
                         } else {
                             if (!Objects.equals(communicationData.getNumbers(), "")) {
