@@ -77,6 +77,9 @@ public class ReceiptTransferEntity {
     @Column(name = "collection_activity_logs_id")
     private Long collectionActivityLogsId;
 
+    @Column(name = "action_activity_logs_id")
+    private Long actionActivityLogsId;
+
 
     
 

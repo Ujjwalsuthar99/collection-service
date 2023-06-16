@@ -333,7 +333,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         receiptTransferEntity.setActionReason(receiptTransferStatusUpdateDtoRequest.getActionReason());
         receiptTransferEntity.setActionRemarks(receiptTransferStatusUpdateDtoRequest.getActionRemarks());
         receiptTransferEntity.setActionBy(receiptTransferStatusUpdateDtoRequest.getActionBy());
-        receiptTransferEntity.setCollectionActivityLogsId(collectionActivityLogsId);
+        receiptTransferEntity.setActionActivityLogsId(collectionActivityLogsId);
         receiptTransferEntity.setReceiptImage(receiptTransferStatusUpdateDtoRequest.getImages());
         receiptTransferRepository.save(receiptTransferEntity);
     }
