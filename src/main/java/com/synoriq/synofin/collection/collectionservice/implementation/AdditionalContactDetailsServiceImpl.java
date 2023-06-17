@@ -22,9 +22,11 @@ public class AdditionalContactDetailsServiceImpl implements AdditionalContactDet
 
     @Override
     public List<AdditionalContactDetailsDtoRequest> getAdditionalContactDetailsByLoanId(Long loanId) throws Exception {
-        List<AdditionalContactDetailsEntity> additionalContactDetails = additionalContactDetailsRepository.findAllByLoanId(loanId);
+        List<AdditionalContactDetailsEntity> additionalContactDetails;
+        List<AdditionalContactDetailsDtoRequest> additionalContactDetailsDtoRequests = new ArrayList<>();
+        additionalContactDetails = additionalContactDetailsRepository.findAllByLoanId(loanId);
         if (additionalContactDetails.isEmpty()) {
-            throw new Exception("1017002");
+            return additionalContactDetailsDtoRequests;
         }
         List<AdditionalContactDetailsDtoRequest> additionalContactDetailsDTO = new ArrayList<>();
 
