@@ -40,7 +40,9 @@ public class ReceiptTransferCustomDataResponseDTO {
     @JsonProperty("receipt_transfer_proofs")
     private Object receiptTransferProofs;
 
-    @JsonProperty("geo_location_data")
-    private Object geolocation;
+    @JsonProperty("transfer_location_data")
+    private Object transferLocationData;
 
+    @JsonProperty("approval_location_data")
+    private Object approvalLocationData;
 }
