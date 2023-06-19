@@ -2,12 +2,13 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.AdditionalContactDetailsDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.DeviceStatusUpdateDTORequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.RegisteredDeviceInfoDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.AdditionalContactDetailsService;
 import com.synoriq.synofin.collection.collectionservice.service.AppService;
 import com.synoriq.synofin.collection.collectionservice.service.RegisteredDeviceInfoService;
-import com.synoriq.synofin.lms.commondto.dto.collection.RegisteredDeviceInfoDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.RegisteredDeviceInfoDTO;
 import com.synoriq.synofin.lms.commondto.rest.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,31 @@ public class CollectionRestController {
         try {
             BaseDTOResponse result = registeredDeviceInfoService.createRegisteredDeviceInfo(registeredDeviceInfoDtoRequest, userId);
             baseResponse = new BaseDTOResponse<>(result.getData());
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        return response;
+
+    }
+
+    @RequestMapping(value = "/device/device-update", method = RequestMethod.POST)
+    public ResponseEntity<Object> deviceStatusUpdate(@RequestBody DeviceStatusUpdateDTORequest deviceStatusUpdateDTORequest) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        Object result;
+
+        try {
+            result = registeredDeviceInfoService.deviceStatusUpdate(deviceStatusUpdateDTORequest);
+            baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {

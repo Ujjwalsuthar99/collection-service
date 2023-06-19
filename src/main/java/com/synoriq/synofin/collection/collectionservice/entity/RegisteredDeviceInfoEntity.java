@@ -17,7 +17,7 @@ public class RegisteredDeviceInfoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "registered_device_info_id", nullable = false)
-    private Long registeredDeviceInfo;
+    private Long registeredDeviceInfoId;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date")
