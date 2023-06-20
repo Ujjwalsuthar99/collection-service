@@ -119,7 +119,7 @@ public class TaskServiceImpl implements TaskService {
                     .typeResponseType(CustomerDetailDTOResponse.class)
                     .build().call();
 
-            log.info("customer details {}", customerRes);
+            log.info("customer details {}", customerRes.getData());
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", Long.parseLong(loanId));
 

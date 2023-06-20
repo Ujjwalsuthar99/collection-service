@@ -480,7 +480,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
 
             receiptTransferDataList = receiptTransferHistoryRepository.getReceiptTransferByReceiptId(receiptId);
             for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
-                JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("geo_location_data")));
+                JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("transfer_location_data")));
+                JsonNode approvalLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("approval_location_data")));
                 JsonNode imagesNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("receipt_image")));
                 if (String.valueOf(receiptTransferData.get("transfer_type")).equals("bank")) {
                     ReceiptTransferCustomDataResponseDTO bankTransferDTO = new ReceiptTransferCustomDataResponseDTO();
@@ -492,7 +493,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     bankTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
                     bankTransferDTO.setBankName(String.valueOf(receiptTransferData.get("bank_name")));
                     bankTransferDTO.setAccountNumber(String.valueOf(receiptTransferData.get("account_number")));
-                    bankTransferDTO.setGeolocation(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                    bankTransferDTO.setTransferLocationData(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                    bankTransferDTO.setApprovalLocationData(new Gson().fromJson("{}", Object.class));
                     bankTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
                     bankTransferArr.add(bankTransferDTO);
                 } else {
@@ -506,7 +508,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     userTransferDTO.setBankName(null);
                     userTransferDTO.setStatus(utilityService.capitalizeName(String.valueOf(receiptTransferData.get("status"))));
                     userTransferDTO.setAccountNumber(null);
-                    userTransferDTO.setGeolocation(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                    userTransferDTO.setTransferLocationData(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                    userTransferDTO.setApprovalLocationData(new Gson().fromJson(String.valueOf(approvalLocationDataNode), Object.class));
                     userTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
                     userTransferArr.add(userTransferDTO);
                 }

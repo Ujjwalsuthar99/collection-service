@@ -15,4 +15,6 @@ public interface RegisteredDeviceInfoRepository extends JpaRepository<Registered
 
     List<RegisteredDeviceInfoEntity> findDeviceInfoByUserId(Long userId);
 
+    RegisteredDeviceInfoEntity findByRegisteredDeviceInfoId(Long registeredDeviceInfoId);
+
 }

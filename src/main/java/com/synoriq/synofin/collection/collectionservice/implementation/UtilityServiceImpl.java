@@ -109,7 +109,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(MasterDTOResponse.class)
                     .build().call();
 
-            log.info("responseData {}", res);
+//            log.info("responseData {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, masterBody, res, "success", null);
         } catch (Exception ee) {
@@ -201,7 +201,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(ContactResponseDTO.class)
                     .build().call();
 
-            log.info("responseData {}", res);
+//            log.info("responseData {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, res, "success", null);
         } catch (Exception ee) {
@@ -267,7 +267,11 @@ public class UtilityServiceImpl implements UtilityService {
     public String getApiUrl() {
         String queryString = httpServletRequest.getQueryString();
 //        httpServletRequest.getRequestURI() = "/collection-service/v1/getMasterType";
-        return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI() + "?" + queryString;
+        log.info("queryString {}", queryString);
+        if (queryString != null) {
+            return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI() + "?" + queryString;
+        }
+        return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI();
     }
     @Override
     public Object getBankNameByIFSC(String keyword) throws Exception {
@@ -312,7 +316,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(UserDetailByTokenDTOResponse.class)
                     .build().call();
 
-            log.info("responseData {}", res);
+//            log.info("responseData {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, res, "success", null);
         } catch (Exception ee) {
@@ -618,7 +622,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(UserDetailByUserIdDTOResponse.class)
                     .build().call();
 
-            log.info("responseData {}", res);
+//            log.info("responseData {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, res, "success", null);
         } catch (Exception ee) {
