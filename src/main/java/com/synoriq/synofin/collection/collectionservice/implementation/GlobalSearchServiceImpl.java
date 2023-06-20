@@ -71,7 +71,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
                     .typeResponseType(SearchDTOResponse.class)
                     .build().call();
 
-            log.info("responseData {}", res);
+//            log.info("responseData {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.global_search, null, searchBody, res, "success", null);
             if (res.getData() != null && res.getData().getLoanDetails() != null) {
