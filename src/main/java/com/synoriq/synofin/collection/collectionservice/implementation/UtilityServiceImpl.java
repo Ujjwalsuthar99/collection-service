@@ -558,9 +558,9 @@ public class UtilityServiceImpl implements UtilityService {
                 message = message.replace("1234567", loanNumber);
                 message = message.replace("6778990000", shortenUrlResponseDTO.getData().getResult());
                 log.info("message2 {}", message);
-                String receivedMobileNumber = null;
+                String receivedMobileNumber;
                 if(isProd) {
-                    receivedMobileNumber = applicantMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
+                    receivedMobileNumber = applicantMobileNumber != null ? applicantMobileNumber : collectedFromMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
                 } else {
                     receivedMobileNumber = "9649916989";
                 }
