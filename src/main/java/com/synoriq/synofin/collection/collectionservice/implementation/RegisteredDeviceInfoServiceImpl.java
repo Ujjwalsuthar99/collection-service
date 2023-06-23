@@ -6,14 +6,15 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.DeviceStatu
 import com.synoriq.synofin.collection.collectionservice.rest.request.RegisteredDeviceInfoDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.RegisteredDeviceInfoService;
-import com.synoriq.synofin.collection.collectionservice.rest.response.RegisteredDeviceInfoDTO;
+import com.synoriq.synofin.master.repository.usersmgmt.UsersRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -22,27 +23,10 @@ public class RegisteredDeviceInfoServiceImpl implements RegisteredDeviceInfoServ
     @Autowired
     private RegisteredDeviceInfoRepository registeredDeviceInfoRepository;
     @Override
-    public List<RegisteredDeviceInfoDTO> findDeviceInfoByUserId(Long userId) {
-        List<RegisteredDeviceInfoEntity> registeredDeviceInfoEntityList = registeredDeviceInfoRepository.findDeviceInfoByUserId(userId);
-        List<RegisteredDeviceInfoDTO> registeredDeviceInfoDTOList = new ArrayList<>();
-        for (RegisteredDeviceInfoEntity registeredDeviceInfoEntity : registeredDeviceInfoEntityList) {
-            RegisteredDeviceInfoDTO registeredDeviceInfoEntityDTO = new RegisteredDeviceInfoDTO();
-            registeredDeviceInfoEntityDTO.setId(registeredDeviceInfoEntity.getRegisteredDeviceInfoId());
-            registeredDeviceInfoEntityDTO.setCreatedDate(registeredDeviceInfoEntity.getCreatedDate());
-            registeredDeviceInfoEntityDTO.setCreatedBy(registeredDeviceInfoEntity.getCreatedBy());
-            registeredDeviceInfoEntityDTO.setUserId(userId);
-            registeredDeviceInfoEntityDTO.setDeleted(registeredDeviceInfoEntity.getDeleted());
-            registeredDeviceInfoEntityDTO.setLastAppUsage(registeredDeviceInfoEntity.getLastAppUsage());
-            registeredDeviceInfoEntityDTO.setCurrentAppVersion(registeredDeviceInfoEntity.getCurrentAppVersion());
-            registeredDeviceInfoEntityDTO.setPlatform(registeredDeviceInfoEntity.getPlatform());
-            registeredDeviceInfoEntityDTO.setPlatformVersion(registeredDeviceInfoEntity.getPlatformVersion());
-            registeredDeviceInfoEntityDTO.setDeviceUniqueId(registeredDeviceInfoEntity.getDeviceUniqueId());
-            registeredDeviceInfoEntityDTO.setDeviceManufacturerName(registeredDeviceInfoEntity.getDeviceManufacturerName());
-            registeredDeviceInfoEntityDTO.setDeviceModel(registeredDeviceInfoEntity.getDeviceModel());
-            registeredDeviceInfoEntityDTO.setStatus(registeredDeviceInfoEntity.getStatus());
-            registeredDeviceInfoDTOList.add(registeredDeviceInfoEntityDTO);
-        }
-        return registeredDeviceInfoDTOList;
+    public List<Map<String, Object>> findDeviceInfoByUserId(Long userId) {
+        List<Map<String, Object>> getDeviceDataByUserIdList;
+        getDeviceDataByUserIdList = registeredDeviceInfoRepository.getDeviceDataByUserId(userId);
+        return getDeviceDataByUserIdList;
     }
     @Override
     public BaseDTOResponse<Object> createRegisteredDeviceInfo(RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, String userId) throws Exception {
@@ -100,10 +84,19 @@ public class RegisteredDeviceInfoServiceImpl implements RegisteredDeviceInfoServ
 
     @Override
     public String deviceStatusUpdate(DeviceStatusUpdateDTORequest deviceStatusUpdateDTORequest) {
-        RegisteredDeviceInfoEntity registeredDeviceInfoEntityList = registeredDeviceInfoRepository.findByRegisteredDeviceInfoId(deviceStatusUpdateDTORequest.getRegisteredDeviceInfoId());
-        if (registeredDeviceInfoEntityList != null) {
-            registeredDeviceInfoEntityList.setStatus(deviceStatusUpdateDTORequest.getStatus());
-            registeredDeviceInfoRepository.save(registeredDeviceInfoEntityList);
+        List<Map<String, Object>> getDeviceDataByUserIdList = findDeviceInfoByUserId(deviceStatusUpdateDTORequest.getUserId());
+        RegisteredDeviceInfoEntity registeredDeviceInfoData;
+        for (Map<String, Object> data: getDeviceDataByUserIdList) {
+            if (data.get("id") != deviceStatusUpdateDTORequest.getRegisteredDeviceInfoId() && Objects.equals(data.get("status").toString(), "active")) {
+                registeredDeviceInfoData = registeredDeviceInfoRepository.findByRegisteredDeviceInfoId(Long.parseLong(String.valueOf(data.get("id"))));
+                registeredDeviceInfoData.setStatus("inactive");
+                registeredDeviceInfoRepository.save(registeredDeviceInfoData);
+            }
+        }
+        registeredDeviceInfoData = registeredDeviceInfoRepository.findByRegisteredDeviceInfoId(deviceStatusUpdateDTORequest.getRegisteredDeviceInfoId());
+        if (registeredDeviceInfoData != null) {
+            registeredDeviceInfoData.setStatus(deviceStatusUpdateDTORequest.getStatus());
+            registeredDeviceInfoRepository.save(registeredDeviceInfoData);
             return "updated";
         } else {
             return "not_updated";
