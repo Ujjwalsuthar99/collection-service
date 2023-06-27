@@ -16,6 +16,9 @@ public class DeviceStatusUpdateDTORequest {
     @JsonProperty("registered_device_info_id")
     private Long registeredDeviceInfoId;
 
+    @JsonProperty("user_id")
+    private Long userId;
+
     @JsonProperty("status")
     private String status;
 

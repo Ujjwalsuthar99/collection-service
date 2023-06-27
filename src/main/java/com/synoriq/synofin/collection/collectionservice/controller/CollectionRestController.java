@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -62,7 +63,7 @@ public class CollectionRestController {
 
         BaseResponse<Object> baseResponse;
         ResponseEntity<Object> response;
-        List<RegisteredDeviceInfoDTO> result;
+        List<Map<String, Object>> result;
         try {
             result = registeredDeviceInfoService.findDeviceInfoByUserId(userId);
             baseResponse = new BaseResponse<>(result);
