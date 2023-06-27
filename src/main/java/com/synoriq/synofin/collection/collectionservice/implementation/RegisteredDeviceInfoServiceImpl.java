@@ -6,7 +6,6 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.DeviceStatu
 import com.synoriq.synofin.collection.collectionservice.rest.request.RegisteredDeviceInfoDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.RegisteredDeviceInfoService;
-import com.synoriq.synofin.master.repository.usersmgmt.UsersRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

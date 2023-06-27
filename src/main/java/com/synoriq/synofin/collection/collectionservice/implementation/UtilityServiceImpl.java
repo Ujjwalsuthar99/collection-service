@@ -576,6 +576,30 @@ public class UtilityServiceImpl implements UtilityService {
                 consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON(postField), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
             }
 
+//            if(clientId.equals("deccan")) {
+//                String paymentMode1 = Objects.equals(paymentMode, "cash") ? "Cash" : (Objects.equals(paymentMode, "upi") ? "Online" : "Cheque") ;
+//                String message = DECCAN_TEMPLATE_MESSAGE.replace("{Var1}", receiptAmount);
+//                message = message.replace("{paymentMode}", paymentMode1);
+//                message = message.replace("{Var2}", loanNumber);
+//                message = message.replace("{Var3}", shortenUrlResponseDTO.getData().getResult());
+//                String receivedMobileNumber;
+//                if(isProd) {
+//                    receivedMobileNumber = applicantMobileNumber != null ? applicantMobileNumber : collectedFromMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
+//                } else {
+//                    receivedMobileNumber = "9649916989";
+//                }
+//                log.info("message3 {}", message);
+//                String encodedMessageString = URLEncoder.encode(message, StandardCharsets.UTF_8);
+//                log.info("encodedMessageString {}", encodedMessageString);
+//                String postField = "user=CSLFIN&message=" + encodedMessageString + "&key=974130e696XX&mobile=" + receivedMobileNumber + "&senderid=CSLSME&accusage=1&tempid=1707165942499421494&entityid=1701159697926729192&unicode=1";
+//                log.info("postField {}", postField);
+//                String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
+//                log.info("sms service for csl {}", smsServiceResponse);
+//                saveSendSMSActivityData(loanId, res, userId);
+//                // creating api logs
+//                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON(postField), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
+//            }
+
 
         } catch (Exception ee) {
             log.info("ee messages", ee);
