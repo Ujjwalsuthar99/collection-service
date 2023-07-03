@@ -29,7 +29,6 @@ public class LoanAllocationServiceController {
 
     @RequestMapping(value = "/loan-allocation/create", method = RequestMethod.POST)
     public ResponseEntity<Object> createLoanAllocationByAllocatedToUserId(@RequestBody LoanAllocationDtoRequest loanAllocationDtoRequest) {
-        log.info("my request body {}", loanAllocationDtoRequest);
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -86,7 +85,6 @@ public class LoanAllocationServiceController {
         ResponseEntity<Object> response;
         List<LoanAllocationEntity> result;
         try {
-            log.info("Loan from user id {}", allocatedToUserId);
             result = loanAllocationService.getLoansByUserId(allocatedToUserId);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);

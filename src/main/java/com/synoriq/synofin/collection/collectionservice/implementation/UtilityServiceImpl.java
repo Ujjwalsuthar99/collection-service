@@ -289,7 +289,6 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(BankNameIFSCResponseDTO.class)
                     .build().call();
 
-            log.info("responseData {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, res, "success", null);
         } catch (Exception ee) {
@@ -352,7 +351,7 @@ public class UtilityServiceImpl implements UtilityService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
-            log.info("imageData {}", imageData);
+
             res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/uploadImageOnS3")
@@ -508,7 +507,7 @@ public class UtilityServiceImpl implements UtilityService {
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
                     FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
-                    log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
+//                    log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
                     // creating api logs
                     consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]));
 
@@ -525,7 +524,7 @@ public class UtilityServiceImpl implements UtilityService {
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
                     FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
-                    log.info("sms service for applicant & collected from finova {}", finovaMsgDTOResponse);
+//                    log.info("sms service for applicant & collected from finova {}", finovaMsgDTOResponse);
 
 
                     finovaSmsRequest.setSender("FINOVA");
@@ -540,7 +539,7 @@ public class UtilityServiceImpl implements UtilityService {
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
                     finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
-                    log.info("sms service for collected from finova {}", finovaMsgDTOResponse);
+//                    log.info("sms service for collected from finova {}", finovaMsgDTOResponse);
                     saveSendSMSActivityData(loanId, res, userId);
                     // creating api logs
                     consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]));
@@ -550,27 +549,20 @@ public class UtilityServiceImpl implements UtilityService {
 
             if(clientId.equals("csl")) {
                 String decodedString = URLDecoder.decode(CSL_TEMPLATE_ENCODED_MESSAGE, StandardCharsets.UTF_8);
-                log.info("decodedString {}", decodedString);
                 String message = decodedString.replace("Vinay", customerName);
-                log.info("message1 {}", message);
                 message = message.replace("500", receiptAmount);
                 message = message.replace("1-1-2032", String.valueOf(new Date()));
                 message = message.replace("1234567", loanNumber);
                 message = message.replace("6778990000", shortenUrlResponseDTO.getData().getResult());
-                log.info("message2 {}", message);
                 String receivedMobileNumber;
                 if(isProd) {
                     receivedMobileNumber = applicantMobileNumber != null ? applicantMobileNumber : collectedFromMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
                 } else {
                     receivedMobileNumber = "9649916989";
                 }
-                log.info("message3 {}", message);
                 String encodedMessageString = URLEncoder.encode(message, StandardCharsets.UTF_8);
-                log.info("encodedMessageString {}", encodedMessageString);
                 String postField = "user=CSLFIN&message=" + encodedMessageString + "&key=974130e696XX&mobile=" + receivedMobileNumber + "&senderid=CSLSME&accusage=1&tempid=1707165942499421494&entityid=1701159697926729192&unicode=1";
-                log.info("postField {}", postField);
                 String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
-                log.info("sms service for csl {}", smsServiceResponse);
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
                 consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON(postField), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
@@ -733,7 +725,6 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(OcrCheckResponseDTO.class)
                     .build().call();
 
-            log.info("responseData {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
         } catch (Exception ee) {

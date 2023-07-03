@@ -53,7 +53,6 @@ public class ProfileController {
             profileDetailResponse = profileService.getProfileDetails(bearerToken, username);
             response = new ResponseEntity<>(profileDetailResponse, HttpStatus.OK);
 
-            log.info("Get Profile Details success", username);
 
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

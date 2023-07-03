@@ -68,7 +68,6 @@ public class CollectionRestController {
             result = registeredDeviceInfoService.findDeviceInfoByUserId(userId);
             baseResponse = new BaseResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-            log.info("Get followup details API response success | userId=[{}]", userId);
         } catch (Exception e) {
             baseResponse = new BaseResponse<>(ErrorCode.DATA_FETCH_ERROR);
             response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
@@ -137,7 +136,6 @@ public class CollectionRestController {
             result = additionalContactDetailsService.getAdditionalContactDetailsByLoanId(loanId);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-            log.info("Get Additional Contact Details By Loan Id API response success | loanId=[{}]", loanId);
         } catch (Exception e){
             if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
@@ -159,7 +157,6 @@ public class CollectionRestController {
             result = additionalContactDetailsService.getAdditionalContactDetailsById(id);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-            log.info("Get Additional Contact Details By Id API response success | loanId=[{}]", id);
         } catch (Exception e){
             if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
@@ -173,7 +170,6 @@ public class CollectionRestController {
 
     @RequestMapping(value = "/additional-contact", method = RequestMethod.POST)
     public ResponseEntity<Object> createAdditionalContactDetail(@RequestBody AdditionalContactDetailsDtoRequest additionalContactDetailsDtoRequest) {
-        log.info("my request body {}", additionalContactDetailsDtoRequest);
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;

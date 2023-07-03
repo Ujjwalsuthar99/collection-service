@@ -65,7 +65,6 @@ public class DashboardServiceImpl implements DashboardService {
                 newUpiAmount.put("upi_limit", totalLimitValue);
                 upiAmountData = newUpiAmount;
             }
-            log.info("my data counts from followup {}", followupDataCounts);
             responseLoans.put("followup", followupDataCounts);
             responseLoans.put("receipt", receiptDataCounts);
             responseLoans.put("amount_transfer", amountTransferDataCounts);

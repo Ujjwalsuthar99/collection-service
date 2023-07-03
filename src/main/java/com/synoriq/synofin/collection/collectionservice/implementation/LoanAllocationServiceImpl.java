@@ -30,7 +30,6 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
             Map<String, List<Object>> responseLoans = new HashMap<>();
 
             for (Long loanId : loanAllocationDtoRequest.getLoanId()) {
-                log.info("loan id from iteration {}", loanId);
                 loanDetail = loanAllocationRepository.getLoansByLoanIdAndDeleted(loanId, false);
                 if(!loanDetail.isEmpty()) {
                     duplicate.add(loanId);

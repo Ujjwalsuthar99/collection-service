@@ -40,7 +40,6 @@ public class DashboardController {
             result = dashboardService.getDashboardCountByUserId(userId, userName, fromDate, toDate);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-            log.info("Get Dashboard Count By UserId | userId={}", userId);
         } catch (Exception e){
             if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));

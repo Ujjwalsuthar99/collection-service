@@ -1,0 +1,1 @@
+update collection.collection_configurations set configuration_value='branch_name/loan_account_number/vehicle_number/customer_name' where configuration_name='global_search_types';

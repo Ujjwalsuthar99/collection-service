@@ -53,7 +53,6 @@ public class TaskServiceImpl implements TaskService {
             }
             pageRequest = PageRequest.of(pageNo, pageSize);
             List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsByPages(userId, pageRequest);
-            log.info("taskDetailPages {}", taskDetailPages);
             if (pageNo > 0) {
                 if (taskDetailPages.size() == 0) {
                     return new BaseDTOResponse<>(taskDetailPages);
@@ -97,7 +96,7 @@ public class TaskServiceImpl implements TaskService {
                     .typeResponseType(TaskDetailDTOResponse.class)
                     .build().call();
 
-            log.info("loan details {}", loanRes);
+//            log.info("loan details {}", loanRes);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, "success", Long.parseLong(loanId));
 
@@ -108,7 +107,7 @@ public class TaskServiceImpl implements TaskService {
                     .typeResponseType(LoanBasicDetailsDTOResponse.class)
                     .build().call();
 
-            log.info("getBasicLoanDetails {}", loanDetailRes);
+//            log.info("getBasicLoanDetails {}", loanDetailRes);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", Long.parseLong(loanId));
 
@@ -119,7 +118,7 @@ public class TaskServiceImpl implements TaskService {
                     .typeResponseType(CustomerDetailDTOResponse.class)
                     .build().call();
 
-            log.info("customer details {}", customerRes.getData());
+//            log.info("customer details {}", customerRes.getData());
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", Long.parseLong(loanId));
 
@@ -226,7 +225,7 @@ public class TaskServiceImpl implements TaskService {
                     customerList.add(customerDetails);
 
 
-                    log.info("applicantDetails {}", customerDetails);
+//                    log.info("applicantDetails {}", customerDetails);
                 }
             }
             List<AdditionalContactDetailsEntity> additionalContactDetailsEntity = additionalContactDetailsRepository.findAllByLoanId(loanIdNumber);
@@ -248,7 +247,7 @@ public class TaskServiceImpl implements TaskService {
                     customerList.add(customerDetailsOther);
                 }
             }
-            log.info("customerList {}", customerList);
+//            log.info("customerList {}", customerList);
             loanRes.getData().setLoanBranch(loanDetailRes.getData().getSourcingBranch());
             loanRes.getData().setEmiCycle(utilityService.addSuffix(loanDetailRes.getData().getEmiCycle()));
             loanRes.getData().setLoanApplicationNumber(loanApplicationNumber);
