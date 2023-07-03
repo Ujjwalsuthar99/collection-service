@@ -39,7 +39,7 @@ public class TaskController {
             baseResponse = taskService.getTaskDetails(userId, pageNo, pageSize);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
-            log.info("Get Task Details success | size=[{}]", pageNo);
+
 
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -106,7 +106,7 @@ public class TaskController {
             baseResponse = taskService.getLoanIdsByLoanId(loanId);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
-            log.info("Get Loan Id {}", loanId);
+
 
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

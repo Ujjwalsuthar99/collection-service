@@ -216,16 +216,16 @@ public class ReceiptServiceImpl implements ReceiptService {
                 double perDayCashLimitLoan = Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("per_day_cash_collection_customer_limit"));
                 double receiptCollectedAmountTillToday = receiptRepository.getCollectedAmountToday(Long.valueOf(receiptServiceDtoRequest.getRequestData().getLoanId()));
 
-                log.info("perDayCashLimitLoan {}", perDayCashLimitLoan);
-                log.info("receiptCollectedAmountTillToday {}", receiptCollectedAmountTillToday);
-                log.info("receiptAmount {}", receiptAmount);
+//                log.info("perDayCashLimitLoan {}", perDayCashLimitLoan);
+//                log.info("receiptCollectedAmountTillToday {}", receiptCollectedAmountTillToday);
+//                log.info("receiptAmount {}", receiptAmount);
                 if (receiptCollectedAmountTillToday + receiptAmount > perDayCashLimitLoan) {
                     throw new Exception("1017005");
                 }
             }
-            log.info("Total Limit Value {}", totalLimitValue);
-            log.info("Receipt amount can be collected by a user at current situation {}", currentReceiptAmountAllowed);
-            log.info("Receipt amount {}", receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
+//            log.info("Total Limit Value {}", totalLimitValue);
+//            log.info("Receipt amount can be collected by a user at current situation {}", currentReceiptAmountAllowed);
+//            log.info("Receipt amount {}", receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
 
             if(currentReceiptAmountAllowed < Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount())) {
                 throw new Exception("1017003");
@@ -247,7 +247,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             receiptServiceRequestDataDTO.setDateOfReceipt(newFormattedBusinessDate);
 
-            log.info("create receipt LMS body {}", createReceiptBody);
+//            log.info("create receipt LMS body {}", createReceiptBody);
 
 
             res = HTTPRequestService.<Object, ServiceRequestSaveResponse>builder()
@@ -285,7 +285,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                 if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi")) {
                     CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
-                    log.info("collection limit user wise entity already exist {}", collectionLimitUser);
+//                    log.info("collection limit user wise entity already exist {}", collectionLimitUser);
 
 
                     if (collectionLimitUser != null) {
@@ -307,7 +307,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                         collectionLimitUserWiseEntity.setTotalLimitValue(currentReceiptAmountAllowed);
                         collectionLimitUserWiseEntity.setUtilizedLimitValue(Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
                     }
-                    log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
+//                    log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
                     collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
                 }
             } else {
@@ -336,7 +336,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         GetReceiptDateResponse getReceiptDateResponse = new GetReceiptDateResponse();
         ReceiptDateResponse receiptDateResponse = new ReceiptDateResponse();
-        log.info("get receipt date {}", receiptDateResponse);
+//        log.info("get receipt date {}", receiptDateResponse);
         BaseDTOResponse<Object> baseResponse = null;
         try {
 
@@ -385,7 +385,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                 getReceiptDateResponse.setTransactionDate(cDate);
             }
             baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
-            log.info("Receipt Date {}", baseResponse);
+//            log.info("Receipt Date {}", baseResponse);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);

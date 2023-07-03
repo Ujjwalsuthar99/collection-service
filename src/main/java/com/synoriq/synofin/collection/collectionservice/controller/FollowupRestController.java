@@ -38,7 +38,7 @@ public class FollowupRestController {
             baseResponse = new BaseDTOResponse<Object>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
-            log.info("Get followup details API response success | followup id=[{}]", followupId);
+//            log.info("Get followup details API response success | followup id=[{}]", followupId);
 
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -64,7 +64,6 @@ public class FollowupRestController {
             baseResponse = followUpService.getFollowupLoanWiseWithDuration(page, size, loanId, fromDate, toDate);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
-            log.info("Get followup details API response success | loan id=[{}]", loanId);
 
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -90,7 +89,7 @@ public class FollowupRestController {
             baseResponse = followUpService.getFollowupUserWiseWithDuration(page, size, userId, fromDate, toDate, type);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
-            log.info("Get followup details API response success | loan id=[{}]", userId);
+
 
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -113,7 +112,7 @@ public class FollowupRestController {
             baseResponse = followUpService.createFollowup(followUpDtoRequest, bearerToken);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
-            log.info("Get followup details API response success | followup with details[{}]", baseResponse.getData());
+
 
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

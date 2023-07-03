@@ -41,7 +41,6 @@ public class AdditionalContactDetailsServiceImpl implements AdditionalContactDet
                .deleted(additionalContact.getDeleted())
                .relationWithApplicant(additionalContact.getRelationWithApplicant())
                .build()));
-        log.info("additional Contact Data isEmpty {}", additionalContactDetailsDTO.isEmpty());
 
         return additionalContactDetailsDTO;
     }
@@ -50,7 +49,6 @@ public class AdditionalContactDetailsServiceImpl implements AdditionalContactDet
     public AdditionalContactDetailsDtoRequest getAdditionalContactDetailsById(Long additionalContactDetailId) throws Exception {
         try {
             AdditionalContactDetailsEntity additionalContactDetailsEntity = additionalContactDetailsRepository.findById(additionalContactDetailId).get();
-            log.info("additionalContactDetailsEntity Data {}", additionalContactDetailsEntity);
 
             AdditionalContactDetailsDtoRequest additionalContactDetailsDtoRequest = new AdditionalContactDetailsDtoRequest();
             additionalContactDetailsDtoRequest.setCreatedDate(additionalContactDetailsEntity.getCreatedDate());

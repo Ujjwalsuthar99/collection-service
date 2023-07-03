@@ -70,7 +70,7 @@ public class ReceiptTransferController {
             result = receiptTransferService.getReceiptTransferSummary(transferredByUserId);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-            log.info("Get receipt transfer summary details API response success | transferred_by=[{}]", transferredByUserId);
+//            log.info("Get receipt transfer summary details API response success | transferred_by=[{}]", transferredByUserId);
         } catch (Exception e) {
             baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
             response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
@@ -90,8 +90,8 @@ public class ReceiptTransferController {
             result = receiptTransferService.statusUpdate(receiptTransferStatusUpdateDtoRequest, bearerToken);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-            log.info("Status update {}", receiptTransferStatusUpdateDtoRequest.getStatus());
-            log.info("Receipt transfer id update {}", receiptTransferStatusUpdateDtoRequest.getReceiptTransferId());
+//            log.info("Status update {}", receiptTransferStatusUpdateDtoRequest.getStatus());
+//            log.info("Receipt transfer id update {}", receiptTransferStatusUpdateDtoRequest.getReceiptTransferId());
         } catch (Exception e) {
             if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
@@ -112,7 +112,7 @@ public class ReceiptTransferController {
         ResponseEntity<Object> response;
         ReceiptTransferResponseDTO result;
         try {
-            log.info("Receipt Transfer id {}", receiptTransferId);
+//            log.info("Receipt Transfer id {}", receiptTransferId);
             result = receiptTransferService.getReceiptTransferById(bearerToken, receiptTransferId, userId);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
@@ -141,7 +141,7 @@ public class ReceiptTransferController {
         ResponseEntity<Object> response;
         List<Map<String, Object>> result;
         try {
-            log.info("Receipt Transfer user id {}", transferredBy);
+//            log.info("Receipt Transfer user id {}", transferredBy);
             result = receiptTransferService.getReceiptTransferByUserId(transferredBy, fromDate, toDate, status, pageNo, pageSize);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
@@ -167,7 +167,7 @@ public class ReceiptTransferController {
         ResponseEntity<Object> response;
         Map<String, List<Map<String, Object>>> result;
         try {
-            log.info("Receipt Transfer user id {}", transferredBy);
+//            log.info("Receipt Transfer user id {}", transferredBy);
             result = receiptTransferService.getReceiptTransferByUserIdWithAllStatus(transferredBy, fromDate, toDate, pageNo, pageSize);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
@@ -189,7 +189,7 @@ public class ReceiptTransferController {
         ResponseEntity<Object> response;
         ReceiptTransferDataByReceiptIdResponseDTO result;
         try {
-            log.info("Receipt id {}", receiptId);
+//            log.info("Receipt id {}", receiptId);
             result = receiptTransferService.getReceiptTransferByReceiptId(bearerToken, receiptId);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
@@ -211,7 +211,7 @@ public class ReceiptTransferController {
         ResponseEntity<Object> response;
         Object result;
         try {
-            log.info("receiptTransferId {}", receiptTransferId);
+//            log.info("receiptTransferId {}", receiptTransferId);
             result = receiptTransferService.getReceiptsDataByReceiptTransferId(bearerToken, receiptTransferId);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
