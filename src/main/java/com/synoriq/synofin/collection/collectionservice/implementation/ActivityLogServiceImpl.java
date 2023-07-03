@@ -95,7 +95,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
             response = new BaseDTOResponse<>(activityLogResponsDTOS);
             return response;
         } else {
-            throw new Exception("1016025");
+            return new BaseDTOResponse<>(activityLogResponsDTOS);
         }
     }
     @Override
