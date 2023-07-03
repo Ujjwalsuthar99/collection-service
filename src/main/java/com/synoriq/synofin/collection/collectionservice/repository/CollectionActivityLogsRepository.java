@@ -57,6 +57,7 @@ public interface CollectionActivityLogsRepository extends PagingAndSortingReposi
     List<Map<String, Object>> getActivityLogsLoanWiseByDuration(@Param("loanId") Long loanId, @Param("fromDate")Date fromDate
             , @Param("toDate") Date toDate, Pageable pageable);
 
-
+    @Query(nativeQuery = true,value = "select * from collection.collection_activity_logs cal where cal.remarks like concat('%', :serviceRequestId, '%') and cal.activity_name in ('receipt_approved', 'receipt_rejected')")
+    CollectionActivityLogsEntity getActivityLogsKafkaByReceiptId(@Param("serviceRequestId") String serviceRequestId);
 
 }
