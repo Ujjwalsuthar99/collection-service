@@ -26,7 +26,7 @@ public interface RegisteredDeviceInfoRepository extends JpaRepository<Registered
             "\trdi.device_manufacturer_name as device_manufacturer_name,\n" +
             "\trdi.current_app_version as current_app_version,\n" +
             "\trdi.status,\n" +
-            "\trdi.device_unique_id as deviceUniqueId,\n" +
+            "\trdi.device_unique_id as deviceUniqueId\n" +
             "from\n" +
             "\tcollection.registered_device_info rdi\n" +
             "join master.users u on\n" +
