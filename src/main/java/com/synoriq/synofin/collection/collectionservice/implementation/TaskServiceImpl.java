@@ -258,7 +258,7 @@ public class TaskServiceImpl implements TaskService {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, modifiedErrorMessage, "failure", Long.parseLong(loanId));
-            throw new Exception("1017002");
+            throw new Exception("1016040");
         }
         return baseDTOResponse;
 
