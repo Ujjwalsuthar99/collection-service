@@ -189,7 +189,8 @@ public enum ErrorCode {
     TRANSFER_TO_USER_ID(1016036, "Transfer to user id is getting null against this entry"),
     LIMIT_CHECK_ON_APPROVAL(1016037, "Cannot process the request as your collection limit is exceeded"),
     RECEIPT_TIME_BOUND_LIMIT(1016038, "Receipt collection time bound on same loan, try after 10 min"),
-    TRANSACTION_NUMBER_VALIDATE(1016039, "UTR number already exists");
+    TRANSACTION_NUMBER_VALIDATE(1016039, "UTR number already exists"),
+    GETTING_ERROR_WHILE_FETCHING_LMS_DATA(1016040, "Data fetching error from LMS");
     private Integer codeValue;
     private String responseMessage;
 
