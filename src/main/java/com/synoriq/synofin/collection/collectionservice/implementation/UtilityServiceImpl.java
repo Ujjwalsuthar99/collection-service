@@ -420,7 +420,7 @@ public class UtilityServiceImpl implements UtilityService {
     public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId, String customerType, String customerName, String applicantMobileNumber, String collectedFromMobileNumber, String loanNumber) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
-
+        String postData = "----userRefNo: " + userRefNo + ",clientId: " + clientId + ",paymentMode: " + paymentMode + ",receiptAmount: " + receiptAmount + ",fileName: " + fileName + ",userId: " + userId + ",customerType: " + customerType + ",customerName: " + customerName + ",applicantMobileNumber: " + applicantMobileNumber + ",collectedFromMobileNumber: " + collectedFromMobileNumber + ",loanNumber: " + loanNumber;
         Base64.Encoder encoder = Base64.getEncoder();
         String base64 = encoder.encodeToString(imageData.getBytes());
 
@@ -565,7 +565,7 @@ public class UtilityServiceImpl implements UtilityService {
                 String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON(postField), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON((postField + postData)), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
             }
 
 //            if(clientId.equals("deccan")) {
