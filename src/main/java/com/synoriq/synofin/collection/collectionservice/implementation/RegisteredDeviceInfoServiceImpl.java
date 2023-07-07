@@ -29,12 +29,12 @@ public class RegisteredDeviceInfoServiceImpl implements RegisteredDeviceInfoServ
     }
     @Override
     public BaseDTOResponse<Object> createRegisteredDeviceInfo(RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, String userId) throws Exception {
-        List<RegisteredDeviceInfoEntity> registeredDeviceInfoEntityList = registeredDeviceInfoRepository.findDeviceInfoByUserId(Long.valueOf(userId));
+        List<RegisteredDeviceInfoEntity> registeredDeviceInfoEntityList = registeredDeviceInfoRepository.findDeviceInfoByUserIdAndByStatus(Long.valueOf(userId), "active");
         BaseDTOResponse<Object> response = null;
 
 
         if (registeredDeviceInfoEntityList.isEmpty()) {
-            // creating a row for the user whc haven't registered yet
+            // creating a row for the user who haven't registered yet
             log.info("No device registered on this user Id");
             RegisteredDeviceInfoEntity registeredDeviceInfoEntity = new RegisteredDeviceInfoEntity();
 
@@ -55,28 +55,28 @@ public class RegisteredDeviceInfoServiceImpl implements RegisteredDeviceInfoServ
         } else {
             //update logic for device
             log.info("Device Found");
+            response = new BaseDTOResponse<>("Active Device Found");
 
-
-            for (RegisteredDeviceInfoEntity registeredDeviceInfoEntity : registeredDeviceInfoEntityList) {
-                String status = registeredDeviceInfoEntity.getStatus();
-                String deviceId = registeredDeviceInfoEntity.getDeviceUniqueId();
-                if (status.equals("Active") && deviceId.equals(registeredDeviceInfoDtoRequest.getDeviceUniqueId())) {
-                    log.info("Logged In...");
-                    response = new BaseDTOResponse<>("Logged In...");
-                    break;
-                } else if (status.equals(registeredDeviceInfoDtoRequest.getStatus()) && !deviceId.equals(registeredDeviceInfoDtoRequest.getDeviceUniqueId())) {
-                    log.info("You are already active with one device!, Please contact IT support for new device registration");
-                    throw new Exception("1016027");
-//                    response = new BaseDTOResponse<>("You are already active with one device!, Please contact IT support for new device registration");
-                } else if (status.equals(registeredDeviceInfoDtoRequest.getStatus()) && deviceId.equals(registeredDeviceInfoDtoRequest.getDeviceUniqueId())) {
-                    log.info("No activity since long time!, Please contact IT support for your device activation");
-                    throw new Exception("1016026");
-//                    response = new BaseDTOResponse<>("No activity since long time!, Please contact IT support for your device activation");
-                } else {
-                    log.info("No Device Found");
-                    response = new BaseDTOResponse<>("No Device Found");
-                }
-            }
+//            for (RegisteredDeviceInfoEntity registeredDeviceInfoEntity : registeredDeviceInfoEntityList) {
+//                String status = registeredDeviceInfoEntity.getStatus();
+//                String deviceId = registeredDeviceInfoEntity.getDeviceUniqueId();
+//                if (status.equals("Active") && deviceId.equals(registeredDeviceInfoDtoRequest.getDeviceUniqueId())) {
+//                    log.info("Logged In...");
+//                    response = new BaseDTOResponse<>("Logged In...");
+//                    break;
+//                } else if (status.equals(registeredDeviceInfoDtoRequest.getStatus()) && !deviceId.equals(registeredDeviceInfoDtoRequest.getDeviceUniqueId())) {
+//                    log.info("You are already active with one device!, Please contact IT support for new device registration");
+//                    throw new Exception("1016027");
+////                    response = new BaseDTOResponse<>("You are already active with one device!, Please contact IT support for new device registration");
+//                } else if (status.equals(registeredDeviceInfoDtoRequest.getStatus()) && deviceId.equals(registeredDeviceInfoDtoRequest.getDeviceUniqueId())) {
+//                    log.info("No activity since long time!, Please contact IT support for your device activation");
+//                    throw new Exception("1016026");
+////                    response = new BaseDTOResponse<>("No activity since long time!, Please contact IT support for your device activation");
+//                } else {
+//                    log.info("No Device Found");
+//                    response = new BaseDTOResponse<>("No Device Found");
+//                }
+//            }
         }
         return response;
     }
