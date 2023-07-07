@@ -507,6 +507,7 @@ public class UtilityServiceImpl implements UtilityService {
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
                     FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
+                    saveSendSMSActivityData(loanId, res, userId);
 //                    log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
                     // creating api logs
                     consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]));
@@ -556,7 +557,11 @@ public class UtilityServiceImpl implements UtilityService {
                 message = message.replace("6778990000", shortenUrlResponseDTO.getData().getResult());
                 String receivedMobileNumber;
                 if(isProd) {
-                    receivedMobileNumber = applicantMobileNumber != null ? applicantMobileNumber : collectedFromMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
+                    if (Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null) {
+                        receivedMobileNumber = collectedFromMobileNumber;
+                    } else {
+                        receivedMobileNumber = applicantMobileNumber;
+                    }
                 } else {
                     receivedMobileNumber = "9649916989";
                 }

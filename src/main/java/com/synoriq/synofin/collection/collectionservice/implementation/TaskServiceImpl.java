@@ -203,12 +203,12 @@ public class TaskServiceImpl implements TaskService {
                                 case "Residential Address":
                                     addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
                                     if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
                                     }
                                     break;
                                 default:
                                     if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
                                     }
                                     addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
                                     break;
