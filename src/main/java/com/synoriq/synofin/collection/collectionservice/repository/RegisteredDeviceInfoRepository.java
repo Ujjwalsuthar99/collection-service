@@ -17,8 +17,6 @@ public interface RegisteredDeviceInfoRepository extends JpaRepository<Registered
 
     List<RegisteredDeviceInfoEntity> findDeviceInfoByUserId(Long userId);
 
-    List<RegisteredDeviceInfoEntity> findDeviceInfoByUserIdAndByStatus(Long userId, String status);
-
     @Query(nativeQuery = true, value = "select\n" +
             "\trdi.registered_device_info_id as id,\n" +
             "\trdi.created_date as created_date,\n" +
