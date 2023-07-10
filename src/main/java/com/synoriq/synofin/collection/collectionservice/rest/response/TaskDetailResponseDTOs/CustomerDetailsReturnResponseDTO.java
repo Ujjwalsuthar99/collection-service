@@ -17,7 +17,7 @@ public class CustomerDetailsReturnResponseDTO {
     public BasicInfoReturnResponseDTO basicInfo;
 
     @JsonProperty("address")
-    public AddressReturnResponseDTO address;
+    public Object address;
 
     @JsonProperty("numbers")
     public NumbersReturnResponseDTO numbers;

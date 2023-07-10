@@ -20,10 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -166,7 +163,7 @@ public class TaskServiceImpl implements TaskService {
                 for (CustomerDataResponseDTO customerData : customerRes.getData()) {
                     CustomerDetailsReturnResponseDTO customerDetails = new CustomerDetailsReturnResponseDTO();
                     BasicInfoReturnResponseDTO basicInfoApplicant = new BasicInfoReturnResponseDTO();
-                    AddressReturnResponseDTO addressReturnResponseDTO = new AddressReturnResponseDTO();
+                    Map<String, String> address = new HashMap<>();
                     NumbersReturnResponseDTO numbersReturnResponseDTO = new NumbersReturnResponseDTO();
                     customerDetails.setId(customerData.getId());
                     customerDetails.setCustomerType(customerData.getCustomerType());
@@ -185,47 +182,54 @@ public class TaskServiceImpl implements TaskService {
                     basicInfoApplicant.setLoanTenure(loanDetailRes.getData().getLoanTenure());
                     basicInfoApplicant.setAssetClassification(loanDetailRes.getData().getAssetClassification());
                     basicInfoApplicant.setEmiDate("Pending LMS");
-                    for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
-                        if (!(communicationData.getAddressType() == null)) {
-                            switch (communicationData.getAddressType()) {
-                                case "Permanent Address":
-                                    addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
-                                    if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-                                    }
-                                    break;
-                                case "Current Address":
-                                    addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
-                                    if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-                                    }
-                                    break;
-                                case "Residential Address":
-                                    addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
-                                    if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-                                    }
-                                    break;
-                                default:
-                                    if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-                                    }
-                                    addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
-                                    break;
-                            }
-                        } else {
-                            if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                    if (customerData.getCommunication() != null) {
+                        for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
+                            if (!(communicationData.getAddressType() == null)) {
+                                address.put(communicationData.getAddressType(), communicationData.getFullAddress());
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
+                                if ((!Objects.equals(numbersReturnResponseDTO.getMobNo(), "")) && !(Objects.equals(numbersReturnResponseDTO.getMobNo(), communicationData.getNumbers()))) {
+                                    numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
+//                                switch (communicationData.getAddressType()) {
+//                                    case "Permanent Address":
+//                                        addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
+//                                        if (!Objects.equals(communicationData.getNumbers(), "")) {
+//                                            numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+//                                        }
+//                                        break;
+//                                    case "Current Address":
+//                                        addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
+//                                        if (!Objects.equals(communicationData.getNumbers(), "")) {
+//                                            numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+//                                        }
+//                                        break;
+//                                    case "Residential Address":
+//                                        addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
+//                                        if (!Objects.equals(communicationData.getNumbers(), "")) {
+//                                            numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+//                                        }
+//                                        break;
+//                                    default:
+//                                        if (!Objects.equals(communicationData.getNumbers(), "")) {
+//                                            numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+//                                        }
+//                                        addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
+//                                        break;
+//                                }
+                            } else {
+                                if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                    numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                }
                             }
                         }
                     }
                     customerDetails.setBasicInfo(basicInfoApplicant);
-                    customerDetails.setAddress(addressReturnResponseDTO);
+                    customerDetails.setAddress(address);
                     customerDetails.setNumbers(numbersReturnResponseDTO);
                     customerList.add(customerDetails);
 
-
-//                    log.info("applicantDetails {}", customerDetails);
                 }
             }
             List<AdditionalContactDetailsEntity> additionalContactDetailsEntity = additionalContactDetailsRepository.findAllByLoanId(loanIdNumber);
