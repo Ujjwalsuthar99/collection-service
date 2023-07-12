@@ -5,10 +5,8 @@ import com.synoriq.synofin.collection.collectionservice.config.DatabaseContextHo
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
-import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
-import com.synoriq.synofin.collection.collectionservice.repository.CollectionLimitUserWiseRepository;
-import com.synoriq.synofin.collection.collectionservice.repository.CollectionReceiptRepository;
-import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
+import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferHistoryEntity;
+import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.events.template.MessageContainerTemplate;
 import com.synoriq.synofin.events.template.lms.CollectionRequestActionEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +52,14 @@ public class KafkaListnerService {
             log.info("messageObject.getUserId() {}", messageObject.getUserId());
             log.info("messageObject.getPaymentMode() {}", messageObject.getPaymentMode());
 //            CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserIdNew(messageObject.getUserId(), messageObject.getPaymentMode());
-            CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.findByUserIdAndCollectionLimitStrategiesKey(messageObject.getUserId(), messageObject.getPaymentMode());
+
+            Long userId = 0L;
+            CollectionReceiptEntity collectionReceiptEntity1 = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
+            if(collectionReceiptEntity1 != null) {
+                userId = collectionReceiptEntity1.getReceiptHolderUserId();
+            }
+
+            CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.findByUserIdAndCollectionLimitStrategiesKey(userId, messageObject.getPaymentMode());
             log.info("collection limit user wise surpassed {}", collectionLimitUser);
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
