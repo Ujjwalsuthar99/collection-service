@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
+import com.synoriq.synofin.collection.collectionservice.entity.RegisteredDeviceInfoEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.RegisteredDeviceInfoRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogBaseResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogCustomResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogDataDTO;
@@ -36,6 +38,8 @@ public class ActivityLogServiceImpl implements ActivityLogService {
     @Autowired
     private UtilityService utilityService;
 
+    @Autowired
+    private RegisteredDeviceInfoRepository registeredDeviceInfoRepository;
     @Override
     public BaseDTOResponse<Object> getActivityLogsById(Long activityLogsId) throws Exception {
 
@@ -184,6 +188,14 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         collectionActivityLogsEntity.setGeolocation(activityLogRequest.getGeolocationData());
 
         collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+
+        List<RegisteredDeviceInfoEntity> registeredDeviceInfoEntityList = registeredDeviceInfoRepository.findDeviceInfoByUserId(activityLogRequest.getUserId());
+        for (RegisteredDeviceInfoEntity registeredDeviceInfoEntity : registeredDeviceInfoEntityList) {
+            if (Objects.equals(registeredDeviceInfoEntity.getStatus(), "active")) {
+                registeredDeviceInfoEntity.setLastAppUsage(new Date());
+                registeredDeviceInfoRepository.save(registeredDeviceInfoEntity);
+            }
+        }
         return collectionActivityLogsEntity.getCollectionActivityLogsId();
     }
 
