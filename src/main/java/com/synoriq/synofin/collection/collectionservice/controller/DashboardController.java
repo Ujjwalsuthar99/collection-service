@@ -3,6 +3,7 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.AdditionalContactDetailsDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DashboardDTOs.DashboardResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.DashboardService;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptTransferService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ public class DashboardController {
                                                             throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
-        Map<String,Map> result;
+        DashboardResponseDTO result;
 
         try{
             result = dashboardService.getDashboardCountByUserId(userId, userName, fromDate, toDate);

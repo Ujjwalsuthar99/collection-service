@@ -115,6 +115,30 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
     @Query(nativeQuery = true, value = "select sr.service_request_id as serviceRequestId from lms.service_request sr join collection.collection_receipts cr on sr.service_request_id = cr.receipt_id where sr.form->>'transaction_reference' = :transactionReferenceNumber and sr.request_source = 'm_collect' and sr.form->>'payment_mode' = 'upi' and sr.status in ('approved', 'initiated') and sr.is_deleted = false")
     Map<String, Object> transactionNumberCheck(@Param("transactionReferenceNumber") String transactionReferenceNumber);
 
+//    @Query(nativeQuery = true, value = "select \n" +
+//            "\t sr.service_request_id\n" +
+//            "from\n" +
+//            "\tlms.service_request sr\n" +
+//            "join collection.collection_receipts cr on\n" +
+//            "\tcr.receipt_id = sr.service_request_id\n" +
+//            "where\n" +
+//            "\tcr.receipt_holder_user_id = :userId and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque')\n" +
+//            "\tand service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth)\n" +
+//            "\tand (DATE_PART('day', now()::timestamp - sr.created_date::timestamp) * 24 + DATE_PART('hour', now()::timestamp - sr.created_date::timestamp)) > CAST(:depositReminderHours as numeric)")
+//    List<Map<String, Object>> depositReminderData(@Param("userId") Long userId, @Param("depositReminderHours") String depositReminderHours);
+
+    @Query(nativeQuery = true, value = "select \n" +
+            "\t sr.service_request_id\n" +
+            "from\n" +
+            "\tlms.service_request sr\n" +
+            "join collection.collection_receipts cr on\n" +
+            "\tcr.receipt_id = sr.service_request_id\n" +
+            "where\n" +
+            "\tcr.receipt_holder_user_id = :userId and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque')\n" +
+            "\tand service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth)" +
+            "\tand EXTRACT('day' FROM age(now(), sr.created_date)) * 24 + EXTRACT('hour' FROM age(now(), sr.created_date)) > CAST(:depositReminderHours AS numeric)")
+    List<Map<String, Object>> depositReminderData(@Param("userId") Long userId, @Param("depositReminderHours") String depositReminderHours);
+
     @Query(nativeQuery = true, value = "select cast(cal.images as text) as images, cast(cal.geo_location_data as text) as geo_location_data, sr.form->>'created_by' as created_by from collection.collection_receipts cr\n" +
             " join collection.collection_activity_logs cal on cal.collection_activity_logs_id = cr.collection_activity_logs_id\n" +
             " join lms.service_request sr on sr.service_request_id = cr.receipt_id where cr.receipt_id = :receiptId")

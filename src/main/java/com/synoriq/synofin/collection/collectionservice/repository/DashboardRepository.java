@@ -19,20 +19,20 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
     Map<String,Object> getFollowupCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);
 
-    @Query(nativeQuery = true, value = "select count(*) AS total_count, sum(cast(coalesce(sr.form->>'receipt_amount', '0') as decimal)) as total_amount\n" +
+    @Query(nativeQuery = true, value = "select count(*) AS total_count, coalesce(sum(cast(coalesce(sr.form->>'receipt_amount', '0') as decimal)), '0') as total_amount\n" +
             "from lms.service_request sr join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id where sr.request_source = 'm_collect' and sr.form->>'created_by' = :userName " +
             "and date(sr.form->>'date_of_receipt') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
     Map<String,Object> getReceiptCountByUserIdByDuration(@Param("userName") String userName, @Param("fromDate") String fromDate
             , @Param("toDate") String toDate);
 
     @Query(nativeQuery = true, value = "select \n" +
-            "sum(amount) as total_amount, count(*) as total_count\n" +
+            "coalesce(sum(amount), '0') as total_amount, count(*) as total_count\n" +
             "from collection.receipt_transfer rt where rt.deleted = false and rt.transferred_by = :userId and rt.status = 'approved' and date(rt.created_date) between :fromDate and :toDate")
     Map<String,Object> getAmountTransferCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);
 
     @Query(nativeQuery = true, value = "select \n" +
-            "sum(amount) as total_amount, count(*) as total_count\n" +
+            "coalesce(sum(amount), '0') as total_amount, count(*) as total_count\n" +
             "from collection.receipt_transfer rt where rt.deleted = false and rt.transferred_by = :userId and rt.status = 'pending' and date(rt.created_date) between :fromDate and :toDate")
     Map<String,Object> getAmountTransferInProcessCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);
