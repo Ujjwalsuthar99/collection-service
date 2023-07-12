@@ -139,12 +139,6 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         BaseDTOResponse<Object> baseDTOResponse;
         try {
-            paymentMode = paymentMode == "" ? paymentMode = "cash" : paymentMode;
-            //            Pageable pageRequest;
-            //            if (pageNo > 0) {
-            //                pageNo = pageNo - 1;
-            //            }
-            //            pageRequest = PageRequest.of(pageNo, pageSize);
             List<Map<String, Object>> taskDetailPages = receiptRepository.getReceiptsByLoanIdWithDuration(loanId, fromDate, toDate);
 
             baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
