@@ -2,22 +2,23 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.DashboardRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DashboardDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.service.DashboardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
 @Service
 @Slf4j
 public class DashboardServiceImpl implements DashboardService {
+    @Autowired
+    private ReceiptRepository receiptRepository;
 
     @Autowired
     private DashboardRepository dashboardRepository;
@@ -25,8 +26,8 @@ public class DashboardServiceImpl implements DashboardService {
     @Autowired
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
     @Override
-    public Map<String, Map> getDashboardCountByUserId(Long userId, String userName, String startDate, String toDate) throws Exception {
-        Map<String, Map> responseLoans = new HashMap<>();
+    public DashboardResponseDTO getDashboardCountByUserId(Long userId, String userName, String startDate, String toDate) throws Exception {
+//        Map<String, Map> responseLoans = new HashMap<>();
         // adding 1 day in incoming toDate //
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         Calendar c = Calendar.getInstance();
@@ -36,7 +37,14 @@ public class DashboardServiceImpl implements DashboardService {
         Date endDate = formatter.parse(to);
         Date fromDate = formatter.parse(startDate);
 
+        DashboardResponseDTO dashboardResponseDTO = new DashboardResponseDTO();
         try {
+            CashInHandDashboardDTO cashInHandDashboardDTO = new CashInHandDashboardDTO();
+            ChequeAmountDashboardDTO chequeAmountDashboardDTO = new ChequeAmountDashboardDTO();
+            UpiAmountDashboardDTO upiAmountDashboardDTO = new UpiAmountDashboardDTO();
+            CommonCountDashboardDTO commonCountDashboardDTO = new CommonCountDashboardDTO();
+            FollowUpDashboardDTO followUpDashboardDTO = new FollowUpDashboardDTO();
+
             Map<String, Object> followupDataCounts = dashboardRepository.getFollowupCountByUserIdByDuration(userId, fromDate, endDate);
             Map<String, Object> amountTransferDataCounts = dashboardRepository.getAmountTransferCountByUserIdByDuration(userId, fromDate, endDate);
             Map<String, Object> amountTransferInProcessDataCounts = dashboardRepository.getAmountTransferInProcessCountByUserIdByDuration(userId, fromDate, endDate);
@@ -46,39 +54,67 @@ public class DashboardServiceImpl implements DashboardService {
             Map<String, Object> upiAmountData = dashboardRepository.getUpiByUserIdByDuration(userId);
             if (cashInHandDataCounts.isEmpty()) {
                 Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT));
-                Map<String, Object> newCashInHand = new HashMap<>();
-                newCashInHand.put("cash_in_hand", 0);
-                newCashInHand.put("cash_in_hand_limit", totalLimitValue);
-                cashInHandDataCounts = newCashInHand;
+                cashInHandDashboardDTO.setCashInHand(0D);
+                cashInHandDashboardDTO.setCashInHandLimit(totalLimitValue);
             }
             if (chequeAmountData.isEmpty()) {
                 Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT));
-                Map<String, Object> newChequeAmount = new HashMap<>();
-                newChequeAmount.put("cheque_amount", 0);
-                newChequeAmount.put("cheque_limit", totalLimitValue);
-                chequeAmountData = newChequeAmount;
+                chequeAmountDashboardDTO.setChequeAmount(0D);
+                chequeAmountDashboardDTO.setChequeLimit(totalLimitValue);
             }
             if (upiAmountData.isEmpty()) {
                 Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT));
-                Map<String, Object> newUpiAmount = new HashMap<>();
-                newUpiAmount.put("upi_amount", 0);
-                newUpiAmount.put("upi_limit", totalLimitValue);
-                upiAmountData = newUpiAmount;
+                upiAmountDashboardDTO.setUpiAmount(0D);
+                upiAmountDashboardDTO.setUpiLimit(totalLimitValue);
             }
-            responseLoans.put("followup", followupDataCounts);
-            responseLoans.put("receipt", receiptDataCounts);
-            responseLoans.put("amount_transfer", amountTransferDataCounts);
-            responseLoans.put("amount_transfer_inprocess", amountTransferInProcessDataCounts);
-            responseLoans.put("cash_in_hand", cashInHandDataCounts);
-            responseLoans.put("cheque_amount", chequeAmountData);
-            responseLoans.put("upi_amount", upiAmountData);
+            // cash in hand
+            cashInHandDashboardDTO.setCashInHand(Double.valueOf(String.valueOf(cashInHandDataCounts.get("cash_in_hand"))));
+            cashInHandDashboardDTO.setCashInHandLimit(Double.valueOf(String.valueOf(cashInHandDataCounts.get("cash_in_hand_limit"))));
 
+            // cheque in hand
+            chequeAmountDashboardDTO.setChequeAmount(Double.valueOf(String.valueOf(chequeAmountData.get("cheque_amount"))));
+            chequeAmountDashboardDTO.setChequeLimit(Double.valueOf(String.valueOf(chequeAmountData.get("cheque_limit"))));
+
+            // upi amount
+            upiAmountDashboardDTO.setUpiAmount(Double.valueOf(String.valueOf(upiAmountData.get("upi_amount"))));
+            upiAmountDashboardDTO.setUpiLimit(Double.valueOf(String.valueOf(upiAmountData.get("upi_limit"))));
+
+            // followUp
+            followUpDashboardDTO.setActionCount(0D);
+            followUpDashboardDTO.setTotalCount(Double.valueOf(String.valueOf(followupDataCounts.get("total_count"))));
+
+            // receipts data
+            commonCountDashboardDTO.setTotalCount(Double.valueOf(String.valueOf(receiptDataCounts.get("total_count"))));
+            commonCountDashboardDTO.setTotalAmount(Double.valueOf(String.valueOf(receiptDataCounts.get("total_amount"))));
+            dashboardResponseDTO.setReceipt(commonCountDashboardDTO);
+
+            // amount transfer
+            commonCountDashboardDTO.setTotalCount(Double.valueOf(String.valueOf(amountTransferDataCounts.get("total_count"))));
+            commonCountDashboardDTO.setTotalAmount(Double.valueOf(String.valueOf(amountTransferDataCounts.get("total_amount"))));
+            dashboardResponseDTO.setAmountTransfer(commonCountDashboardDTO);
+
+            // amount transfer in process
+            commonCountDashboardDTO.setTotalCount(Double.valueOf(String.valueOf(amountTransferInProcessDataCounts.get("total_count"))));
+            commonCountDashboardDTO.setTotalAmount(Double.valueOf(String.valueOf(amountTransferInProcessDataCounts.get("total_amount"))));
+            dashboardResponseDTO.setAmountTransferInProcess(commonCountDashboardDTO);
+
+
+            dashboardResponseDTO.setCashInHand(cashInHandDashboardDTO);
+            dashboardResponseDTO.setChequeAmount(chequeAmountDashboardDTO);
+            dashboardResponseDTO.setUpiAmount(upiAmountDashboardDTO);
+            dashboardResponseDTO.setFollowUp(followUpDashboardDTO);
+            dashboardResponseDTO.setDepositReminder(false);
+            String depositReminder = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER);
+            if (Objects.equals(depositReminder, "true")) {
+                String depositReminderHours = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER_HOURS);
+                List<Map<String, Object>> notDepositedReceipts = receiptRepository.depositReminderData(userId, depositReminderHours);
+                if (notDepositedReceipts.size() > 0) {
+                    dashboardResponseDTO.setDepositReminder(true);
+                }
+            }
         } catch (Exception e) {
             throw new Exception("1017000");
         }
-        return responseLoans;
-
-
+        return dashboardResponseDTO;
     }
-
 }
