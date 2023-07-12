@@ -236,10 +236,13 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                             for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
                                 Long collectionReceiptId = receiptTransferHistoryEntity.getCollectionReceiptsId();
                                 CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(collectionReceiptId);
+                                Map<String, Object> receiptDataByServiceId = receiptRepository.getLoanIdByServiceId(collectionReceiptId);
+                                if (Objects.equals(receiptDataByServiceId.get("status").toString(), "approved")) {
+                                    amount = amount - Double.parseDouble(receiptDataByServiceId.get("receiptAmount").toString());
+                                }
                                 if (collectionReceiptEntity != null) {
                                     collectionReceiptEntity.setLastReceiptTransferId(receiptTransferId);
                                     collectionReceiptEntity.setReceiptHolderUserId(requestActionBy);
-//                                    collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityLogsId);
                                     collectionReceiptRepository.save(collectionReceiptEntity);
                                 }
                             }
