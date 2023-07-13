@@ -104,15 +104,14 @@ public class DashboardServiceImpl implements DashboardService {
             dashboardResponseDTO.setUpiAmount(upiAmountDashboardDTO);
             dashboardResponseDTO.setFollowUp(followUpDashboardDTO);
             dashboardResponseDTO.setDepositReminder(false);
-//            String depositReminder = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER);
-//            if (Objects.equals(depositReminder, "true")) {
-//                String depositReminderHours = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER_HOURS);
-//                List<Map<String, Object>> notDepositedReceipts = receiptRepository.depositReminderData(userId, depositReminderHours);
-////                List<Map<String, Object>> notDepositedReceipts = receiptRepository.depositReminderData(userId);
-//                if (notDepositedReceipts.size() > 0) {
-//                    dashboardResponseDTO.setDepositReminder(true);
-//                }
-//            }
+            String depositReminder = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER);
+            if (Objects.equals(depositReminder, "true")) {
+                String depositReminderHours = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER_HOURS);
+                List<Map<String, Object>> notDepositedReceipts = receiptRepository.depositReminderData(userId, depositReminderHours);
+                if (notDepositedReceipts.size() > 0) {
+                    dashboardResponseDTO.setDepositReminder(true);
+                }
+            }
         } catch (Exception e) {
             throw new Exception("1017000");
         }
