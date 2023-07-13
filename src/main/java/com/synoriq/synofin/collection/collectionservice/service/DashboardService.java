@@ -6,6 +6,7 @@ import java.util.Map;
 
 public interface DashboardService {
 
-    public DashboardResponseDTO getDashboardCountByUserId(Long userId, String userName, String startDate, String toDate) throws Exception;
+    public Map<String, Map> getDashboardCountByUserId(Long userId, String userName, String startDate, String toDate) throws Exception;
+    public DashboardResponseDTO temp(Long userId, String userName, String startDate, String toDate) throws Exception;
 
 }
