@@ -1,0 +1,1 @@
+update collection.collection_configurations set configuration_value='false' where configuration_name='deposit_reminder';
