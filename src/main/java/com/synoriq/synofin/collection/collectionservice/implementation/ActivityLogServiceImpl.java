@@ -132,7 +132,11 @@ public class ActivityLogServiceImpl implements ActivityLogService {
                 activityLogCustomResponseDTO.setDistanceFromUserBranch(Double.parseDouble(String.valueOf(collectionActivityLog.get("distance_from_user_branch"))));
                 activityLogCustomResponseDTO.setRemarks(String.valueOf(collectionActivityLog.get("remarks")));
                 activityLogCustomResponseDTO.setLoanId(Long.parseLong(String.valueOf(collectionActivityLog.get("loan_id"))));
-                activityLogCustomResponseDTO.setBatteryPercentage(Long.parseLong(String.valueOf(collectionActivityLog.get("battery_percentage"))));
+                if (Objects.equals(String.valueOf(collectionActivityLog.get("battery_percentage")), "null")) {
+                    activityLogCustomResponseDTO.setBatteryPercentage(0L);
+                } else {
+                    activityLogCustomResponseDTO.setBatteryPercentage(Long.parseLong(String.valueOf(collectionActivityLog.get("battery_percentage"))));
+                }
                 activityLogCustomResponseDTO.setUserName(String.valueOf(collectionActivityLog.get("user_name")));
                 activityLogCustomResponseDTO.setIsReceipt(Boolean.valueOf(String.valueOf(collectionActivityLog.get("is_receipt"))));
                 activityLogCustomResponseDTO.setReceiptId((!Objects.equals(collectionActivityLog.get("receipt_id"), null) ? Long.parseLong(String.valueOf(collectionActivityLog.get("receipt_id"))) : null));
