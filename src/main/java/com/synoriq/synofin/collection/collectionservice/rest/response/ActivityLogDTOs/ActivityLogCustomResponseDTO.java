@@ -47,4 +47,10 @@ public class ActivityLogCustomResponseDTO {
     @JsonProperty("receipt_id")
     Long receiptId;
 
+    @JsonProperty("battery_percentage")
+    private Long batteryPercentage;
+
+    @JsonProperty("user_name")
+    private String userName;
+
 }
