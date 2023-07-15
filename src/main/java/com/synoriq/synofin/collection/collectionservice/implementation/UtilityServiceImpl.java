@@ -11,6 +11,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.ReceiptReposi
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.SpfcSmsRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
@@ -20,6 +21,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.FinovaMsgDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.SpfcMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrlDTOs.ShortenUrlResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
@@ -34,6 +36,7 @@ import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogSe
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.CslSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
+import com.synoriq.synofin.collection.collectionservice.service.msgservice.SpfcSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
@@ -83,6 +86,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Autowired
     CslSmsService cslSmsService;
+
+    @Autowired
+    private SpfcSmsService spfcSmsService;
 
     @Autowired
     HttpServletRequest httpServletRequest;
@@ -470,11 +476,14 @@ public class UtilityServiceImpl implements UtilityService {
             shortenUrlRequestDTO.setSystemId("collection");
             shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
             shortenUrlRequestDTO.setData(shortenUrlDataRequestDTO);
-
+            String shortenUrl = "";
+            if (!isProd) {
+                shortenUrl = SHORTEN_URL_UAT.replace("prod", "dev");
+            }
 
             shortenUrlResponseDTO = HTTPRequestService.<Object, ShortenUrlResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
-                    .url(SHORTEN_URL_UAT)
+                    .url(shortenUrl)
                     .body(shortenUrlRequestDTO)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(ShortenUrlResponseDTO.class)
@@ -572,6 +581,12 @@ public class UtilityServiceImpl implements UtilityService {
                 // creating api logs
                 consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON((postField + postData)), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
             }
+
+//            if (clientId.equals("spfc")) {
+//
+//                SpfcSmsRequestDTO spfcSmsRequestDTO = new SpfcSmsRequestDTO();
+//                SpfcMsgDTOResponse spfcMsgDTOResponse = spfcSmsService.sendSmsSpfc(spfcSmsRequestDTO, token, springProfile);
+//            }
 
 //            if(clientId.equals("deccan")) {
 //                String paymentMode1 = Objects.equals(paymentMode, "cash") ? "Cash" : (Objects.equals(paymentMode, "upi") ? "Online" : "Cheque") ;

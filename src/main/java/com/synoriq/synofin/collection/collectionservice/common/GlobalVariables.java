@@ -17,7 +17,9 @@ public class GlobalVariables {
     public static final String CASH_COLLECTION_DEFAULT_LIMIT = "cash_collection_default_limit";
     public static final String DEPOSIT_REMINDER = "deposit_reminder";
     public static final String DEPOSIT_REMINDER_HOURS = "deposit_reminder_hours";
-    public static final String SHORTEN_URL_UAT = "http://3.111.153.160:7011/integration/v1/url/shortan";
+    public static final String SHORTEN_URL_UAT = "https://api-prod.synofin.tech/common/integration/v1/url/shortan";
+
+    public static final String INTEGRATION_MSG_API_URL = "https://api-uat.synofin.tech/integration-connector/v1/send-sms";
     public static final String FINOVA_MSG_API_URL = "https://api.msg91.com/api/v5/flow/";
     public static final String CSL_MSG_API_URL = "http://foxxsms.net/sms//submitsms.jsp";
     public static final String USE_BUSINESS_DATE_AS_RECEIPT_DATE = "use_business_date_as_receipt_trx_date";
