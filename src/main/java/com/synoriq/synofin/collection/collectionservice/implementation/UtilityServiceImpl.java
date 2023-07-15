@@ -476,7 +476,7 @@ public class UtilityServiceImpl implements UtilityService {
             shortenUrlRequestDTO.setSystemId("collection");
             shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
             shortenUrlRequestDTO.setData(shortenUrlDataRequestDTO);
-            String shortenUrl = "";
+            String shortenUrl = SHORTEN_URL_UAT;
             if (!isProd) {
                 shortenUrl = SHORTEN_URL_UAT.replace("prod", "dev");
             }
