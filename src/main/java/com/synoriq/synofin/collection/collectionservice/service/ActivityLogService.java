@@ -2,7 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogBaseResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 
 import java.util.Date;
 

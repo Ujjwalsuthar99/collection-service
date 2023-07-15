@@ -17,7 +17,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
-import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.tomcat.util.json.JSONParser;
@@ -186,6 +186,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         collectionActivityLogsEntity.setAddress(activityLogRequest.getAddress());
         collectionActivityLogsEntity.setImages(activityLogRequest.getImages());
         collectionActivityLogsEntity.setGeolocation(activityLogRequest.getGeolocationData());
+        collectionActivityLogsEntity.setBatteryPercentage(activityLogRequest.getBatteryPercentage());
 
         collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 

@@ -1,7 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 import lombok.Data;
 
 @Data
