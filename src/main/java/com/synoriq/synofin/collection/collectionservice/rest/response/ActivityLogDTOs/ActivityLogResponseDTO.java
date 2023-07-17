@@ -1,12 +1,16 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
 
 @Setter
+@Getter
+@AllArgsConstructor
 @NoArgsConstructor
 public class ActivityLogResponseDTO {
 
@@ -40,5 +44,7 @@ public class ActivityLogResponseDTO {
     @JsonProperty("distance_from_user_branch")
     Double distanceFromUserBranch;
 
+    @JsonProperty("battery_percentage")
+    private Long batteryPercentage;
 
 }

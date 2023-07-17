@@ -92,6 +92,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
                 activityLogResponseDTO.setGeolocation(collectionActivityLogsEntity.getGeolocation());
                 activityLogResponseDTO.setImages(collectionActivityLogsEntity.getImages());
                 activityLogResponseDTO.setRemarks(collectionActivityLogsEntity.getRemarks());
+                activityLogResponseDTO.setBatteryPercentage(collectionActivityLogsEntity.getBatteryPercentage());
 
                 activityLogResponsDTOS.add(activityLogResponseDTO);
             }
