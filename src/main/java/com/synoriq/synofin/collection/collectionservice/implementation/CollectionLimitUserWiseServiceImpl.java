@@ -72,8 +72,12 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
             userName = userDetailByUserIdDTOResponse.getData().getEmployeeUserName();
         } else {
             profileDetailResponseDTO = profileService.getProfileDetails(token, collectionLimitUserWiseDtoRequest.getUsername());
-            userId = profileDetailResponseDTO.getData().getUserId();
-            userName = collectionLimitUserWiseDtoRequest.getUsername();
+            if (profileDetailResponseDTO.getData() != null) {
+                userId = profileDetailResponseDTO.getData().getUserId();
+                userName = collectionLimitUserWiseDtoRequest.getUsername();
+            } else {
+                throw new Exception("1016041");
+            }
         }
 
         CollectionLimitUserWiseEntity existingLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());

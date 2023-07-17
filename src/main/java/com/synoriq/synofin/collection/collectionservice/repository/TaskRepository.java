@@ -109,12 +109,15 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
             "join (select product_code, product_name from master.product) as p on p.product_code = la.product \n" +
             "left join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
+            "left join (select loan_id, vehicle_registration_no from lms.collateral_vehicle) as vehicle on vehicle.loan_id = la.loan_application_id \n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
             "    and la.deleted = false\n" +
             "    and la.loan_status in ( 'active', 'maturity_closure')\n" +
             "    and la2.allocated_to_user_id = :userId\n" +
-            "    and (LOWER(concat_ws(' ', c.first_name, c.last_name)) like LOWER(concat('%', :searchKey,'%')) or LOWER(la.product) like LOWER(concat('%', :searchKey, '%')) or LOWER(la.loan_application_number) like LOWER(concat('%', :searchKey, '%')) or LOWER(branch.branch_name) like LOWER(concat('%',:searchKey, '%')))\n" +
+            "    and (LOWER(concat_ws(' ', c.first_name, c.last_name)) like LOWER(concat('%', :searchKey,'%')) or LOWER(la.product) like LOWER(concat('%', :searchKey, '%')) or \n" +
+            "    LOWER(la.loan_application_number) like LOWER(concat('%', :searchKey, '%')) or LOWER(branch.branch_name) like LOWER(concat('%',:searchKey, '%')) or \n" +
+            "    LOWER(vehicle.vehicle_registration_no) like LOWER(concat('%',:searchKey, '%')))\n" +
             "order by\n" +
             "    la.loan_application_id asc")
     List<Map<String,Object>> getTaskDetailsBySearchKey(@Param("userId") Long userId, String searchKey, Pageable pageRequest);
