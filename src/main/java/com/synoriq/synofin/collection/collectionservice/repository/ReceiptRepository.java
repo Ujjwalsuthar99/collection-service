@@ -128,7 +128,8 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tand (EXTRACT('epoch' FROM (now() - sr.created_date))/3600) > CAST(:depositReminderHours AS numeric)")
     List<Map<String, Object>> depositReminderData(@Param("userId") Long userId, @Param("depositReminderHours") String depositReminderHours);
 
-    @Query(nativeQuery = true, value = "select cast(cal.images as text) as images, cast(cal.geo_location_data as text) as geo_location_data, sr.form->>'created_by' as created_by from collection.collection_receipts cr\n" +
+    @Query(nativeQuery = true, value = "select cast(cal.images as text) as images, cast(cal.geo_location_data as text) as geo_location_data, sr.form->>'created_by' as created_by,\n" +
+            " (select u.\"name\" from master.users u where u.username = sr.form->>'created_by') as full_name from collection.collection_receipts cr\n" +
             " join collection.collection_activity_logs cal on cal.collection_activity_logs_id = cr.collection_activity_logs_id\n" +
             " join lms.service_request sr on sr.service_request_id = cr.receipt_id where cr.receipt_id = :receiptId")
     Map<String, Object> getReceiptDataByReceiptId(@Param("receiptId") Long receiptId);

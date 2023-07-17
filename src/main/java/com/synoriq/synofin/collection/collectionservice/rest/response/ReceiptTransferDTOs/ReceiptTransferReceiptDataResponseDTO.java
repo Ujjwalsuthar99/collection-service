@@ -16,4 +16,10 @@ public class ReceiptTransferReceiptDataResponseDTO {
     @JsonProperty("images")
     private Object images;
 
+    @JsonProperty("user_name")
+    private String userName;
+
+    @JsonProperty("name")
+    private String name;
+
 }

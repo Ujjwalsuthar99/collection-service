@@ -480,6 +480,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             }
             receiptTransferReceiptDataResponseDTO.setImages(obj);
             receiptTransferReceiptDataResponseDTO.setLocation(new Gson().fromJson(String.valueOf(geoLocationDataNode1), Object.class));
+            receiptTransferReceiptDataResponseDTO.setName(String.valueOf(receiptData.get("full_name")));
+            receiptTransferReceiptDataResponseDTO.setUserName(String.valueOf(receiptData.get("created_by")));
 
             receiptTransferDataList = receiptTransferHistoryRepository.getReceiptTransferByReceiptId(receiptId);
             for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
