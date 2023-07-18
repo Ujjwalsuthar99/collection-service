@@ -17,7 +17,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
-import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.tomcat.util.json.JSONParser;
@@ -92,6 +92,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
                 activityLogResponseDTO.setGeolocation(collectionActivityLogsEntity.getGeolocation());
                 activityLogResponseDTO.setImages(collectionActivityLogsEntity.getImages());
                 activityLogResponseDTO.setRemarks(collectionActivityLogsEntity.getRemarks());
+                activityLogResponseDTO.setBatteryPercentage(collectionActivityLogsEntity.getBatteryPercentage());
 
                 activityLogResponsDTOS.add(activityLogResponseDTO);
             }
@@ -132,6 +133,12 @@ public class ActivityLogServiceImpl implements ActivityLogService {
                 activityLogCustomResponseDTO.setDistanceFromUserBranch(Double.parseDouble(String.valueOf(collectionActivityLog.get("distance_from_user_branch"))));
                 activityLogCustomResponseDTO.setRemarks(String.valueOf(collectionActivityLog.get("remarks")));
                 activityLogCustomResponseDTO.setLoanId(Long.parseLong(String.valueOf(collectionActivityLog.get("loan_id"))));
+                if (Objects.equals(String.valueOf(collectionActivityLog.get("battery_percentage")), "null")) {
+                    activityLogCustomResponseDTO.setBatteryPercentage(0L);
+                } else {
+                    activityLogCustomResponseDTO.setBatteryPercentage(Long.parseLong(String.valueOf(collectionActivityLog.get("battery_percentage"))));
+                }
+                activityLogCustomResponseDTO.setUserName(String.valueOf(collectionActivityLog.get("user_name")));
                 activityLogCustomResponseDTO.setIsReceipt(Boolean.valueOf(String.valueOf(collectionActivityLog.get("is_receipt"))));
                 activityLogCustomResponseDTO.setReceiptId((!Objects.equals(collectionActivityLog.get("receipt_id"), null) ? Long.parseLong(String.valueOf(collectionActivityLog.get("receipt_id"))) : null));
                 activityLogCustomResponseDTO.setAddress(new Gson().fromJson(String.valueOf(addressNode), Object.class));
@@ -186,6 +193,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         collectionActivityLogsEntity.setAddress(activityLogRequest.getAddress());
         collectionActivityLogsEntity.setImages(activityLogRequest.getImages());
         collectionActivityLogsEntity.setGeolocation(activityLogRequest.getGeolocationData());
+        collectionActivityLogsEntity.setBatteryPercentage(activityLogRequest.getBatteryPercentage());
 
         collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 

@@ -55,4 +55,7 @@ public class CollectionActivityLogsEntity {
     @Type(type = "json")
     private Object geolocation;
 
+    @Column(name = "battery_percentage")
+    private Long batteryPercentage;
+
 }

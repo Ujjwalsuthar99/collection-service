@@ -1,7 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
 import lombok.Data;
 
 import java.util.Date;
@@ -11,7 +10,6 @@ public class FollowUpDtoRequest {
 
 
     Long loanId;
-//    Boolean isDeleted;
     Long createdBy;
     String followUpReason;
 

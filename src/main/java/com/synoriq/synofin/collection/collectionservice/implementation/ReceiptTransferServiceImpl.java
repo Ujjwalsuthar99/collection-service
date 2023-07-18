@@ -480,6 +480,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             }
             receiptTransferReceiptDataResponseDTO.setImages(obj);
             receiptTransferReceiptDataResponseDTO.setLocation(new Gson().fromJson(String.valueOf(geoLocationDataNode1), Object.class));
+            receiptTransferReceiptDataResponseDTO.setName(String.valueOf(receiptData.get("full_name")));
+            receiptTransferReceiptDataResponseDTO.setUserName(String.valueOf(receiptData.get("created_by")));
 
             receiptTransferDataList = receiptTransferHistoryRepository.getReceiptTransferByReceiptId(receiptId);
             for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
@@ -539,6 +541,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 receiptsDataResponseDTO.setCreatedDate(String.valueOf(receipt.get("created_date")));
                 receiptsDataResponseDTO.setReceiptAmount(Double.parseDouble(String.valueOf(receipt.get("receipt_amount"))));
                 receiptsDataResponseDTO.setLoanApplicationNumber(String.valueOf(receipt.get("loan_application_number")));
+                receiptsDataResponseDTO.setLoanId(Long.parseLong(String.valueOf(receipt.get("loan_id"))));
                 receiptsDataResponseDTO.setCreatedBy(String.valueOf(receipt.get("created_by")));
                 receiptsDataResponseDTO.setStatus(utilityService.capitalizeName(String.valueOf(receipt.get("status"))));
 

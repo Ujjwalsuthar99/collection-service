@@ -22,6 +22,9 @@ public class ReceiptsDataResponseDTO {
     @JsonProperty("loan_application_number")
     private String loanApplicationNumber;
 
+    @JsonProperty("loan_id")
+    private Long loanId;
+
     @JsonProperty("created_by")
     private String createdBy;
 

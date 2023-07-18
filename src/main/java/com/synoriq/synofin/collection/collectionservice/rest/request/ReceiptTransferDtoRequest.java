@@ -1,6 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request;
 
-import com.synoriq.synofin.lms.commondto.dto.collection.CollectionActivityLogDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 import lombok.Data;
 
 import java.util.Date;

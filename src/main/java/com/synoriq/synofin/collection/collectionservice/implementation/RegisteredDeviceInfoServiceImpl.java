@@ -38,6 +38,10 @@ public class RegisteredDeviceInfoServiceImpl implements RegisteredDeviceInfoServ
                 if (Objects.equals(registeredDeviceInfoEntity.getStatus(), "active")) {
                     return new BaseDTOResponse<>("Active Device Found");
                 }
+                if (Objects.equals(registeredDeviceInfoEntity.getDeviceUniqueId(), registeredDeviceInfoDtoRequest.getDeviceUniqueId())) {
+                    registeredDeviceInfoEntity.setStatus("active");
+                    registeredDeviceInfoRepository.save(registeredDeviceInfoEntity);
+                }
             }
             RegisteredDeviceInfoEntity registeredDeviceInfoEntity = new RegisteredDeviceInfoEntity();
             registeredDeviceInfoEntity.setCreatedDate(new Date());
