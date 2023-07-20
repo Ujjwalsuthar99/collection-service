@@ -15,6 +15,9 @@ public class TaskListDTOReturnResponse {
     @JsonProperty("customer_name")
     String customerName;
 
+    @JsonProperty("mobile")
+    String mobile;
+
     @JsonProperty("loan_application_number")
     String loanApplicationNumber;
 

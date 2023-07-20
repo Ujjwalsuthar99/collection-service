@@ -85,6 +85,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
                     taskListDTOReturnResponse.setOverdueRepayment(loanDataDTO.getOverDueAmount());
                     taskListDTOReturnResponse.setBranch(loanDataDTO.getBranch());
                     taskListDTOReturnResponse.setDaysPastDue(loanDataDTO.getDpd());
+                    taskListDTOReturnResponse.setMobile(loanDataDTO.getCustomerDetails().getPhoneNumber());
 
                     int dpd = loanDataDTO.getDpd();
                     if (dpd >= 0 && dpd <= 30) {
