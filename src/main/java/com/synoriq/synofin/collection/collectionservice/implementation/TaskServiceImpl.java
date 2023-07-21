@@ -189,7 +189,7 @@ public class TaskServiceImpl implements TaskService {
                                 if (!Objects.equals(communicationData.getNumbers(), "")) {
                                     numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
                                 }
-                                if ((!Objects.equals(numbersReturnResponseDTO.getMobNo(), "")) && !(Objects.equals(numbersReturnResponseDTO.getMobNo(), communicationData.getNumbers()))) {
+                                if ((!Objects.equals(numbersReturnResponseDTO.getMobNo(), "") || numbersReturnResponseDTO.getMobNo() != null) && !(Objects.equals(numbersReturnResponseDTO.getMobNo(), communicationData.getNumbers()))) {
                                     numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
                                 }
 //                                switch (communicationData.getAddressType()) {
