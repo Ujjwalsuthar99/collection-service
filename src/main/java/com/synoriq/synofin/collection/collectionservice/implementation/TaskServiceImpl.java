@@ -192,32 +192,6 @@ public class TaskServiceImpl implements TaskService {
                                 if ((!Objects.equals(numbersReturnResponseDTO.getMobNo(), "")) && !(Objects.equals(numbersReturnResponseDTO.getMobNo(), communicationData.getNumbers()))) {
                                     numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
                                 }
-//                                switch (communicationData.getAddressType()) {
-//                                    case "Permanent Address":
-//                                        addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
-//                                        if (!Objects.equals(communicationData.getNumbers(), "")) {
-//                                            numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-//                                        }
-//                                        break;
-//                                    case "Current Address":
-//                                        addressReturnResponseDTO.setWorkAddress(communicationData.getFullAddress());
-//                                        if (!Objects.equals(communicationData.getNumbers(), "")) {
-//                                            numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-//                                        }
-//                                        break;
-//                                    case "Residential Address":
-//                                        addressReturnResponseDTO.setResidentialAddress(communicationData.getFullAddress());
-//                                        if (!Objects.equals(communicationData.getNumbers(), "")) {
-//                                            numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-//                                        }
-//                                        break;
-//                                    default:
-//                                        if (!Objects.equals(communicationData.getNumbers(), "")) {
-//                                            numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-//                                        }
-//                                        addressReturnResponseDTO.setHomeAddress(communicationData.getFullAddress());
-//                                        break;
-//                                }
                             } else {
                                 if (!Objects.equals(communicationData.getNumbers(), "")) {
                                     numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
