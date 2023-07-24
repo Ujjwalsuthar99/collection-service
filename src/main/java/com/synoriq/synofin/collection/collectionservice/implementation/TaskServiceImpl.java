@@ -228,6 +228,7 @@ public class TaskServiceImpl implements TaskService {
 //            log.info("customerList {}", customerList);
             loanRes.getData().setLoanBranch(loanDetailRes.getData().getSourcingBranch());
             loanRes.getData().setEmiCycle(utilityService.addSuffix(loanDetailRes.getData().getEmiCycle()));
+            loanRes.getData().setBalancePrincipal(loanDetailRes.getData().getBalancePrincipal());
             loanRes.getData().setLoanApplicationNumber(loanApplicationNumber);
             response.setCustomerDetails(customerList);
             response.setLoanDetails(loanRes.getData());
