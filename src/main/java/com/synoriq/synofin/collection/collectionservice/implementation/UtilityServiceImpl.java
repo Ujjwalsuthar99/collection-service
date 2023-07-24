@@ -732,7 +732,7 @@ public class UtilityServiceImpl implements UtilityService {
         OcrCheckResponseDTO res = new OcrCheckResponseDTO();
         try {
             OcrCheckRequestDTO ocrCheckBody = new ObjectMapper().convertValue(requestBody, OcrCheckRequestDTO.class);
-
+            log.info("base64 {}", requestBody.getData().getImgBaseUrl());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
