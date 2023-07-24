@@ -47,13 +47,22 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -127,6 +136,7 @@ public class UtilityServiceImpl implements UtilityService {
 
         return res;
     }
+
     @Override
     public Object getUserDetail(String token, Integer page, Integer size, String key) throws Exception {
 
@@ -157,7 +167,7 @@ public class UtilityServiceImpl implements UtilityService {
 
 //            List<UsersDataDTO> filteredList = userData.parallelStream().filter(user -> (user.getUsername().contains(key) || user.getName().contains(key))).collect(Collectors.toList());
             if (key.equals("")) {
-                for (int i = pageRequest; i < (pageRequest+10); i++) {
+                for (int i = pageRequest; i < (pageRequest + 10); i++) {
                     pageableArr.add(userData.get(i));
                 }
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);
@@ -168,7 +178,7 @@ public class UtilityServiceImpl implements UtilityService {
                         collect(Collectors.toList());
                 int length;
                 int filterSize = filteredList.size();
-                filterSize = filterSize - pageRequest ;
+                filterSize = filterSize - pageRequest;
                 if (filterSize > 10) {
                     length = (pageRequest + 10);
                 } else {
@@ -191,8 +201,9 @@ public class UtilityServiceImpl implements UtilityService {
 
         return baseDTOResponse;
     }
+
     @Override
-    public Object getContactSupport(String token,String keyword, String model) throws Exception {
+    public Object getContactSupport(String token, String keyword, String model) throws Exception {
 
         Object res = new Object();
         try {
@@ -202,7 +213,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             res = HTTPRequestService.<Object, ContactResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getContactSupport?keyword="+keyword+"&model="+model)
+                    .url("http://localhost:1102/v1/getContactSupport?keyword=" + keyword + "&model=" + model)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(ContactResponseDTO.class)
                     .build().call();
@@ -219,6 +230,7 @@ public class UtilityServiceImpl implements UtilityService {
 
         return res;
     }
+
     @Override
     public Date addOneDay(Date date) throws Exception {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -230,6 +242,7 @@ public class UtilityServiceImpl implements UtilityService {
         SimpleDateFormat simpleDateFormats = new SimpleDateFormat("dd-MM-yyyy");
         return simpleDateFormats.parse(to);
     }
+
     @Override
     public String mobileNumberMasking(String mobile) {
         String maskedNumberConfiguration = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MASKED_NUMBER_CONFIGURATION);
@@ -240,6 +253,7 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return mobile;
     }
+
     @Override
     public String addSuffix(Integer i) {
         if (i != null) {
@@ -258,6 +272,7 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return "--";
     }
+
     @Override
     public String capitalizeName(String name) {
         String[] strArr = name.split(" ");
@@ -268,7 +283,10 @@ public class UtilityServiceImpl implements UtilityService {
 //            newStr.append(strArr[i].substring(0, 1).toUpperCase()).append(strArr[i].substring(1, strArr[i].length)).append(" ");
         }
         return newStr.trim();
-    };
+    }
+
+    ;
+
     @Override
     public String getApiUrl() {
         String queryString = httpServletRequest.getQueryString();
@@ -279,6 +297,7 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI();
     }
+
     @Override
     public Object getBankNameByIFSC(String keyword) throws Exception {
 
@@ -305,6 +324,7 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return res;
     }
+
     @Override
     public UserDetailByTokenDTOResponse getUserDetailsByToken(String token) {
         UserDetailByTokenDTOResponse res = new UserDetailByTokenDTOResponse();
@@ -332,8 +352,9 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return res;
     }
+
     @Override
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String userRefNo, String fileName) throws IOException {
+    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String userRefNo, String fileName, String latitude, String longitude) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
 
@@ -345,7 +366,6 @@ public class UtilityServiceImpl implements UtilityService {
         uploadImageOnS3DataRequestDTO.setUserRefNo(userRefNo);
         uploadImageOnS3DataRequestDTO.setFileContentType("");
         uploadImageOnS3DataRequestDTO.setFileName(fileName);
-        uploadImageOnS3DataRequestDTO.setFile(base64);
         uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
         uploadImageOnS3RequestDTO.setSystemId("collection");
         uploadImageOnS3RequestDTO.setUserReferenceNumber("");
@@ -353,6 +373,48 @@ public class UtilityServiceImpl implements UtilityService {
 
 
         try {
+
+            String configurationEnabled = collectionConfigurationsRepository.findConfigurationValueByConfigurationName("geo_tagging_enabled_on_photos");
+
+            if (configurationEnabled.equals("true")) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime now = LocalDateTime.now();
+
+                if ((latitude != null) && (longitude != null)) {
+                    // Create a BufferedImage object from the byte array
+                    InputStream inputStream = new ByteArrayInputStream(imageData.getBytes());
+                    BufferedImage image = ImageIO.read(inputStream);
+
+// Create a Graphics2D object from the BufferedImage object
+                    Graphics2D graphics2D = image.createGraphics();
+
+// Set the font and color for the watermark
+                    Font font = new Font("Arial", Font.BOLD, 30);
+//            Color color = new Color(255, 255, 255, 150);
+                    String watermarkText = "Latitude: " + latitude + ", Longitude: " + longitude + ", Datetime:" + now;
+                    int stringWidth = graphics2D.getFontMetrics().stringWidth(watermarkText);
+
+//        // Calculate the position of the watermark on the bottom right corner of the image
+                    int x = (image.getWidth() / 2) - (stringWidth); // stringWidth is the width of the watermark text
+                    int y = image.getHeight() - 20; // 20 is the margin from the bottom
+//
+// Draw the watermark onto the image
+                    graphics2D.setFont(font);
+                    graphics2D.setColor(Color.RED);
+                    graphics2D.drawString(watermarkText, x, y);
+
+// Save the updated image as a byte array
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    ImageIO.write(image, "jpg", outputStream);
+                    byte[] updatedBytes = outputStream.toByteArray();
+
+                    base64 = encoder.encodeToString(updatedBytes);
+                }
+            }
+
+
+            uploadImageOnS3DataRequestDTO.setFile(base64);
+
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
@@ -378,6 +440,7 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return res;
     }
+
     @Override
     public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder) throws Exception {
         DownloadBase64FromS3ResponseDTO res = new DownloadBase64FromS3ResponseDTO();
@@ -422,6 +485,7 @@ public class UtilityServiceImpl implements UtilityService {
             return null;
         }
     }
+
     @Override
     public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId, String customerType, String customerName, String applicantMobileNumber, String collectedFromMobileNumber, String loanNumber) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
@@ -466,8 +530,6 @@ public class UtilityServiceImpl implements UtilityService {
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, Long.parseLong(userId), uploadImageOnS3RequestDTO, res, "success", Long.parseLong(loanId[0]));
 
 
-
-
             ShortenUrlResponseDTO shortenUrlResponseDTO;
             ShortenUrlRequestDTO shortenUrlRequestDTO = new ShortenUrlRequestDTO();
             ShortenUrlDataRequestDTO shortenUrlDataRequestDTO = new ShortenUrlDataRequestDTO();
@@ -493,20 +555,19 @@ public class UtilityServiceImpl implements UtilityService {
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.shorten_url, Long.parseLong(userId), shortenUrlRequestDTO, shortenUrlResponseDTO, "success", Long.parseLong(loanId[0]));
 
 
-
-            if(clientId.equals("finova")) {
+            if (clientId.equals("finova")) {
                 FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
-                if(paymentMode.equals("cash")) {
+                if (paymentMode.equals("cash")) {
                     finovaSmsRequest.setTemplateId(FINOVA_CASH_MSG_FLOW_ID);
                 } else if (paymentMode.equals("cheque")) {
                     finovaSmsRequest.setTemplateId(FINOVA_CHEQUE_MSG_FLOW_ID);
                 } else {
                     finovaSmsRequest.setTemplateId(FINOVA_UPI_MSG_FLOW_ID);
                 }
-                if(customerType.equals("applicant")) {
+                if (customerType.equals("applicant")) {
                     finovaSmsRequest.setSender("FINOVA");
                     finovaSmsRequest.setShortUrl("0");
-                    if(isProd) {
+                    if (isProd) {
                         finovaSmsRequest.setMobiles("91" + applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
                         finovaSmsRequest.setMobiles("917805951252");
@@ -524,7 +585,7 @@ public class UtilityServiceImpl implements UtilityService {
                 } else {
                     finovaSmsRequest.setSender("FINOVA");
                     finovaSmsRequest.setShortUrl("0");
-                    if(isProd) {
+                    if (isProd) {
                         finovaSmsRequest.setMobiles("91" + applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
                         finovaSmsRequest.setMobiles("917805951252");
@@ -539,7 +600,7 @@ public class UtilityServiceImpl implements UtilityService {
 
                     finovaSmsRequest.setSender("FINOVA");
                     finovaSmsRequest.setShortUrl("0");
-                    if(isProd) {
+                    if (isProd) {
                         finovaSmsRequest.setMobiles("91" + collectedFromMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
                         finovaSmsRequest.setMobiles("917805951252");
@@ -557,7 +618,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             }
 
-            if(clientId.equals("csl")) {
+            if (clientId.equals("csl")) {
                 String decodedString = URLDecoder.decode(CSL_TEMPLATE_ENCODED_MESSAGE, StandardCharsets.UTF_8);
                 String message = decodedString.replace("Vinay", customerName);
                 message = message.replace("500", receiptAmount);
@@ -565,7 +626,7 @@ public class UtilityServiceImpl implements UtilityService {
                 message = message.replace("1234567", loanNumber);
                 message = message.replace("6778990000", shortenUrlResponseDTO.getData().getResult());
                 String receivedMobileNumber;
-                if(isProd) {
+                if (isProd) {
                     if (Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null) {
                         receivedMobileNumber = collectedFromMobileNumber;
                     } else {
@@ -642,6 +703,7 @@ public class UtilityServiceImpl implements UtilityService {
 
         collectionActivityLogsRepository.save(collectionActivityLogsEntity);
     }
+
     @Override
     public UserDetailByUserIdDTOResponse getUserDetailsByUserId(String token, Long userId) {
         UserDetailByUserIdDTOResponse res = new UserDetailByUserIdDTOResponse();
@@ -653,7 +715,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             res = HTTPRequestService.<Object, UserDetailByUserIdDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getUserDetailsByUserId?userId="+ userId)
+                    .url("http://localhost:1102/v1/getUserDetailsByUserId?userId=" + userId)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UserDetailByUserIdDTOResponse.class)
                     .build().call();
@@ -669,6 +731,7 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return res;
     }
+
     @Override
     public Object getThermalPrintData(String receiptId) throws Exception {
 
@@ -688,14 +751,14 @@ public class UtilityServiceImpl implements UtilityService {
             SimpleDateFormat newDateFormat = new SimpleDateFormat("dd-MM-yyyy");
             String newFormatDate = newDateFormat.format(date);
 
-            String newDate =  newFormatDate + " " + splitDateTime[1];
+            String newDate = newFormatDate + " " + splitDateTime[1];
 
             String paymentMode = String.valueOf(serviceRequestData.get("payment_mode"));
             if (paymentMode.equals("upi")) {
                 paymentMode = "UPI/NEFT";
             } else if (paymentMode.equals("cash")) {
                 paymentMode = "Cash";
-            } else if (paymentMode.equals("cheque")){
+            } else if (paymentMode.equals("cheque")) {
                 paymentMode = "Cheque";
             }
 
@@ -727,6 +790,7 @@ public class UtilityServiceImpl implements UtilityService {
 
         return new BaseDTOResponse<>(base64);
     }
+
     @Override
     public OcrCheckResponseDTO ocrCheck(String token, OcrCheckRequestDTO requestBody) throws Exception {
         OcrCheckResponseDTO res = new OcrCheckResponseDTO();
