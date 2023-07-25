@@ -377,6 +377,7 @@ public class UtilityServiceImpl implements UtilityService {
             String configurationEnabled = collectionConfigurationsRepository.findConfigurationValueByConfigurationName("geo_tagging_enabled_on_photos");
 
             if (configurationEnabled.equals("true")) {
+                log.info("in iffff");
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 LocalDateTime now = LocalDateTime.now();
 
@@ -409,6 +410,7 @@ public class UtilityServiceImpl implements UtilityService {
                     byte[] updatedBytes = outputStream.toByteArray();
 
                     base64 = encoder.encodeToString(updatedBytes);
+                    log.info("geotagging lat long {}", base64);
                 }
             }
 
