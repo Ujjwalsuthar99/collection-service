@@ -376,40 +376,74 @@ public class UtilityServiceImpl implements UtilityService {
 
             String configurationEnabled = collectionConfigurationsRepository.findConfigurationValueByConfigurationName("geo_tagging_enabled_on_photos");
 
-            if (configurationEnabled.equals("true")) {
+            if ((latitude != null) && (longitude != null)) {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 LocalDateTime now = LocalDateTime.now();
+                // Create a BufferedImage object from the byte array
+                InputStream inputStream = new ByteArrayInputStream(imageData.getBytes());
+                BufferedImage image = ImageIO.read(inputStream);
 
-                if ((latitude != null) && (longitude != null)) {
-                    // Create a BufferedImage object from the byte array
-                    InputStream inputStream = new ByteArrayInputStream(imageData.getBytes());
-                    BufferedImage image = ImageIO.read(inputStream);
+                // Create a Graphics2D object from the BufferedImage object
+                Graphics2D graphics2D = image.createGraphics();
 
-                    // Create a Graphics2D object from the BufferedImage object
-                    Graphics2D graphics2D = image.createGraphics();
+                // Set the font and color for the watermark
+                Font font = new Font("Arial", Font.BOLD, 100);
+                String watermarkText = "Latitude: " + latitude + ", Longitude: " + longitude + ", Datetime:" + now;
 
-                    // Set the font and color for the watermark
-                    Font font = new Font("Arial", Font.BOLD, 60); // Increase font size to 40
-                    String watermarkText = "Latitude: " + latitude + ", Longitude: " + longitude + ", Datetime:" + now;
-                    int stringWidth = graphics2D.getFontMetrics(font).stringWidth(watermarkText); // Use the font for calculating width
+                // Define margins and padding
+                int leftMargin = 20;
+                int rightMargin = 20;
+                int topMargin = 20;
+                int bottomMargin = 20;
+                int padding = 10; // Padding between image borders and text
 
-                    // Calculate the position of the watermark on the bottom center of the image
-                    int x = (image.getWidth() / 2) - (stringWidth / 2); // Center align the text
-                    int y = image.getHeight() - 20; // 20 is the margin from the bottom
+                // Calculate the maximum text width based on the image width and margins
+                int maxTextWidth = image.getWidth() - leftMargin - rightMargin;
 
-                    // Draw the watermark onto the image
-                    graphics2D.setFont(font);
-                    graphics2D.setColor(Color.RED);
-                    graphics2D.drawString(watermarkText, x, y);
+                // Create a FontMetrics object to calculate text dimensions
+                FontMetrics fontMetrics = graphics2D.getFontMetrics(font);
 
-                    // Save the updated image as a byte array
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    ImageIO.write(image, "jpg", outputStream);
-                    byte[] updatedBytes = outputStream.toByteArray();
+                // Split the watermarkText into words
+                String[] words = watermarkText.split("\\s+");
+                StringBuilder currentLine = new StringBuilder();
+                ArrayList<String> lines = new ArrayList<>();
 
-                    base64 = encoder.encodeToString(updatedBytes);
+                for (String word : words) {
+                    // Check if adding the next word exceeds the max text width
+                    if (fontMetrics.stringWidth(currentLine.toString() + " " + word) > maxTextWidth - 2 * padding) {
+                        lines.add(currentLine.toString().trim());
+                        currentLine = new StringBuilder();
+                    }
+                    currentLine.append(word).append(" ");
                 }
+                // Add the last line
+                lines.add(currentLine.toString().trim());
+
+                // Calculate the total text height
+                int totalTextHeight = lines.size() * (fontMetrics.getHeight() + 2 * padding);
+
+                // Calculate the position of the watermark on the bottom center of the image
+                int x = (image.getWidth() - maxTextWidth) / 2;
+                int y = image.getHeight() - totalTextHeight - bottomMargin;
+
+                // Draw the watermark onto the image
+                graphics2D.setFont(font);
+                graphics2D.setColor(Color.RED);
+                for (String line : lines) {
+                    int textWidth = fontMetrics.stringWidth(line);
+                    int textX = x + (maxTextWidth - textWidth) / 2;
+                    graphics2D.drawString(line, textX, y + padding + fontMetrics.getAscent());
+                    y += fontMetrics.getHeight() + 2 * padding;
+                }
+
+                // Save the updated image as a byte array
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                ImageIO.write(image, "jpg", outputStream);
+                byte[] updatedBytes = outputStream.toByteArray();
+
+                base64 = encoder.encodeToString(updatedBytes);
             }
+
 
 
             uploadImageOnS3DataRequestDTO.setFile(base64);
