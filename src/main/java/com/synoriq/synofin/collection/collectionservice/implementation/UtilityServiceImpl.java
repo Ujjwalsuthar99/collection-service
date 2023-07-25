@@ -377,7 +377,6 @@ public class UtilityServiceImpl implements UtilityService {
             String configurationEnabled = collectionConfigurationsRepository.findConfigurationValueByConfigurationName("geo_tagging_enabled_on_photos");
 
             if (configurationEnabled.equals("true")) {
-                log.info("in iffff");
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 LocalDateTime now = LocalDateTime.now();
 
@@ -390,7 +389,7 @@ public class UtilityServiceImpl implements UtilityService {
                     Graphics2D graphics2D = image.createGraphics();
 
 // Set the font and color for the watermark
-                    Font font = new Font("Arial", Font.BOLD, 30);
+                    Font font = new Font("Arial", Font.BOLD, 60);
 //            Color color = new Color(255, 255, 255, 150);
                     String watermarkText = "Latitude: " + latitude + ", Longitude: " + longitude + ", Datetime:" + now;
                     int stringWidth = graphics2D.getFontMetrics().stringWidth(watermarkText);
@@ -410,7 +409,6 @@ public class UtilityServiceImpl implements UtilityService {
                     byte[] updatedBytes = outputStream.toByteArray();
 
                     base64 = encoder.encodeToString(updatedBytes);
-                    log.info("geotagging lat long {}", base64);
                 }
             }
 
