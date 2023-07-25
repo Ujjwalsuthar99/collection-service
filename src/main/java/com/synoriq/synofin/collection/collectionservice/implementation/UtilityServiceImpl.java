@@ -385,25 +385,24 @@ public class UtilityServiceImpl implements UtilityService {
                     InputStream inputStream = new ByteArrayInputStream(imageData.getBytes());
                     BufferedImage image = ImageIO.read(inputStream);
 
-// Create a Graphics2D object from the BufferedImage object
+                    // Create a Graphics2D object from the BufferedImage object
                     Graphics2D graphics2D = image.createGraphics();
 
-// Set the font and color for the watermark
-                    Font font = new Font("Arial", Font.BOLD, 60);
-//            Color color = new Color(255, 255, 255, 150);
+                    // Set the font and color for the watermark
+                    Font font = new Font("Arial", Font.BOLD, 60); // Increase font size to 40
                     String watermarkText = "Latitude: " + latitude + ", Longitude: " + longitude + ", Datetime:" + now;
-                    int stringWidth = graphics2D.getFontMetrics().stringWidth(watermarkText);
+                    int stringWidth = graphics2D.getFontMetrics(font).stringWidth(watermarkText); // Use the font for calculating width
 
-//        // Calculate the position of the watermark on the bottom right corner of the image
-                    int x = (image.getWidth() / 2) - (stringWidth); // stringWidth is the width of the watermark text
+                    // Calculate the position of the watermark on the bottom center of the image
+                    int x = (image.getWidth() / 2) - (stringWidth / 2); // Center align the text
                     int y = image.getHeight() - 20; // 20 is the margin from the bottom
-//
-// Draw the watermark onto the image
+
+                    // Draw the watermark onto the image
                     graphics2D.setFont(font);
                     graphics2D.setColor(Color.RED);
                     graphics2D.drawString(watermarkText, x, y);
 
-// Save the updated image as a byte array
+                    // Save the updated image as a byte array
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     ImageIO.write(image, "jpg", outputStream);
                     byte[] updatedBytes = outputStream.toByteArray();
