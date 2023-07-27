@@ -3,11 +3,17 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceWrapperResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDataReturnResponseDTO;
@@ -15,11 +21,15 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetail
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptTransferService;
+import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -531,8 +541,15 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         List<ReceiptTransferCustomDataResponseDTO> bankTransferArr = new ArrayList<>();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
+            Pageable pageable = PageRequest.of(pageNo, pageSize);
 
-            receiptTransferDataList = receiptTransferHistoryRepository.getAllBankTransfers();
+            List<String> statusList;
+            if (Objects.equals(status, "pending")) {
+                statusList = Collections.singletonList("pending");
+            } else {
+                statusList = Arrays.asList("approved", "cancelled", "rejected");
+            }
+            receiptTransferDataList = receiptTransferHistoryRepository.getAllBankTransfers(statusList, pageable);
             for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
                 JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("transfer_location_data")));
                 JsonNode imagesNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("receipt_image")));
@@ -542,6 +559,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 bankTransferDTO.setTransferByName(String.valueOf(receiptTransferData.get("transfer_by_name")));
                 bankTransferDTO.setTransferToName(String.valueOf(receiptTransferData.get("transfer_to_name")));
                 bankTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
+                bankTransferDTO.setStatus(String.valueOf(receiptTransferData.get("status")));
                 bankTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
                 bankTransferDTO.setBankName(String.valueOf(receiptTransferData.get("bank_name")));
                 bankTransferDTO.setAccountNumber(String.valueOf(receiptTransferData.get("account_number")));
@@ -591,6 +609,61 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             throw new Exception("1016028");
         }
         return receiptsDataList;
+    }
+
+    @Override
+    public Object depositInvoice(String bearerToken, DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception {
+        List<Map<String, Object>> receiptsData;
+        List<DepositInvoiceWrapperRequestDTO> depositInvoiceWrapperArr = new ArrayList<>();
+        DepositInvoiceWrapperResponseDTO res = new DepositInvoiceWrapperResponseDTO();
+        try {
+            receiptsData = receiptTransferRepository.getReceiptsDataByReceiptTransferId(depositInvoiceRequestDTO.getReceiptTransferId());
+            DepositInvoiceWrapperRequestDataDTO depositInvoiceWrapperRequestDataDTO = new DepositInvoiceWrapperRequestDataDTO();
+            depositInvoiceWrapperRequestDataDTO.setFundTransferNumber(depositInvoiceRequestDTO.getUtrNumber());
+            for (Map<String, Object> receiptData : receiptsData) {
+                DepositInvoiceWrapperRequestDTO depositInvoiceWrapperRequestDTO = new DepositInvoiceWrapperRequestDTO();
+                depositInvoiceWrapperRequestDTO.setAction(depositInvoiceRequestDTO.getAction());
+                depositInvoiceWrapperRequestDTO.setServiceRequestId(Long.parseLong(String.valueOf(receiptData.get("receipt_id"))));
+                depositInvoiceWrapperRequestDTO.setLoanId(Long.parseLong(String.valueOf(receiptData.get("loan_id"))));
+                depositInvoiceWrapperRequestDTO.setComment(depositInvoiceRequestDTO.getRemarks());
+                depositInvoiceWrapperRequestDTO.setReqData(depositInvoiceWrapperRequestDataDTO);
+                depositInvoiceWrapperArr.add(depositInvoiceWrapperRequestDTO);
+            }
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", bearerToken);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, DepositInvoiceWrapperResponseDTO>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/depositChallanBulkAction")
+                    .httpHeaders(httpHeaders)
+                    .body(depositInvoiceWrapperArr)
+                    .typeResponseType(DepositInvoiceWrapperResponseDTO.class)
+                    .build().call();
+
+//            if (res.getResponse()) {
+//                CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+//                collectionActivityLogsEntity.setActivityName("send_message_to_user");
+//                collectionActivityLogsEntity.setActivityDate(new Date());
+//                collectionActivityLogsEntity.setDeleted(false);
+//                collectionActivityLogsEntity.setActivityBy(Long.parseLong(userId));
+//                collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
+//                collectionActivityLogsEntity.setAddress("{}");
+//                collectionActivityLogsEntity.setRemarks(remarks);
+//                collectionActivityLogsEntity.setImages(res.getData());
+//                collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
+//                collectionActivityLogsEntity.setGeolocation("{}");
+//            }
+            CurrentUserInfo currentUserInfo = new CurrentUserInfo();
+
+
+
+
+        } catch (Exception e) {
+            throw new Exception("1016028");
+        }
+        return new Object();
     }
 
     private ReceiptTransferEntity saveReceiptTransferData(ReceiptTransferDtoRequest receiptTransferDtoRequest, Long collectionActivityId) {
