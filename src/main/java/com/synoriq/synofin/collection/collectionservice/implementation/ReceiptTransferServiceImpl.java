@@ -553,27 +553,33 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 statusList = Arrays.asList("approved", "cancelled", "rejected");
             }
             receiptTransferDataList = receiptTransferHistoryRepository.getAllBankTransfers(statusList, pageable);
-            for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
-                JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("transfer_location_data")));
-                JsonNode imagesNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("receipt_image")));
-                ReceiptTransferCustomDataResponseDTO bankTransferDTO = new ReceiptTransferCustomDataResponseDTO();
-                bankTransferDTO.setReceiptTransferId(Long.parseLong(String.valueOf(receiptTransferData.get("receipt_transfer_id"))));
-                bankTransferDTO.setCreatedDate(String.valueOf(receiptTransferData.get("created_date")));
-                bankTransferDTO.setTransferByName(String.valueOf(receiptTransferData.get("transfer_by_name")));
-                bankTransferDTO.setTransferToName(String.valueOf(receiptTransferData.get("transfer_to_name")));
-                bankTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
-                bankTransferDTO.setStatus(String.valueOf(receiptTransferData.get("status")));
-                bankTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
-                bankTransferDTO.setBankName(String.valueOf(receiptTransferData.get("bank_name")));
-                bankTransferDTO.setAccountNumber(String.valueOf(receiptTransferData.get("account_number")));
-                bankTransferDTO.setTransferLocationData(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
-                bankTransferDTO.setApprovalLocationData(new Gson().fromJson("{}", Object.class));
-                bankTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
-                bankTransferArr.add(bankTransferDTO);
-            }
+            if (receiptTransferDataList.size() > 0) {
+                for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
+                    JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("transfer_location_data")));
+                    JsonNode imagesNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("receipt_image")));
+                    ReceiptTransferCustomDataResponseDTO bankTransferDTO = new ReceiptTransferCustomDataResponseDTO();
+                    bankTransferDTO.setReceiptTransferId(Long.parseLong(String.valueOf(receiptTransferData.get("receipt_transfer_id"))));
+                    bankTransferDTO.setCreatedDate(String.valueOf(receiptTransferData.get("created_date")));
+                    bankTransferDTO.setTransferByName(String.valueOf(receiptTransferData.get("transfer_by_name")));
+                    bankTransferDTO.setTransferToName(String.valueOf(receiptTransferData.get("transfer_to_name")));
+                    bankTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
+                    bankTransferDTO.setStatus(String.valueOf(receiptTransferData.get("status")));
+                    bankTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
+                    bankTransferDTO.setBankName(String.valueOf(receiptTransferData.get("bank_name")));
+                    bankTransferDTO.setAccountNumber(String.valueOf(receiptTransferData.get("account_number")));
+                    bankTransferDTO.setTransferLocationData(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                    bankTransferDTO.setApprovalLocationData(new Gson().fromJson("{}", Object.class));
+                    bankTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
+                    bankTransferArr.add(bankTransferDTO);
+                }
 
-            allBankTransferResponseDTO.setData(bankTransferArr);
-            allBankTransferResponseDTO.setTotalCount(Long.parseLong(String.valueOf(receiptTransferDataList.get(0).get("total_rows"))));
+                allBankTransferResponseDTO.setData(bankTransferArr);
+                allBankTransferResponseDTO.setTotalCount(Long.parseLong(String.valueOf(receiptTransferDataList.get(0).get("total_rows"))));
+            } else {
+                allBankTransferResponseDTO.setTotalCount(0L);
+                allBankTransferResponseDTO.setData(new ArrayList<>());
+                return allBankTransferResponseDTO;
+            }
         } catch (Exception e) {
             throw new Exception("1016028");
         }
