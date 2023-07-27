@@ -6,6 +6,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTran
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.AllBankTransferResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferCustomDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferDataByReceiptIdResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
@@ -214,7 +216,7 @@ public class ReceiptTransferController {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
-        List<ReceiptTransferCustomDataResponseDTO> result;
+        AllBankTransferResponseDTO result;
         try {
             result = receiptTransferService.getAllBankTransfers(bearerToken, status, pageNo, pageSize);
             baseResponse = new BaseDTOResponse<>(result);
@@ -256,7 +258,7 @@ public class ReceiptTransferController {
     public ResponseEntity<Object> depositInvoice(@RequestHeader("Authorization") String bearerToken, @RequestBody DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
-        Object result;
+        DepositInvoiceResponseDataDTO result;
         try {
             result = receiptTransferService.depositInvoice(bearerToken, depositInvoiceRequestDTO);
             baseResponse = new BaseDTOResponse<>(result);

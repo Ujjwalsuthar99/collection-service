@@ -5,6 +5,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTran
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.AllBankTransferResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferCustomDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferDataByReceiptIdResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
@@ -29,8 +31,8 @@ public interface ReceiptTransferService {
     public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date endDate, String status, Integer pageNo, Integer pageSize) throws Exception;
     public Map<String, List<Map<String, Object>>> getReceiptTransferByUserIdWithAllStatus(Long transferredBy, Date fromDate, Date endDate, Integer pageNo, Integer pageSize) throws Exception;
     public ReceiptTransferDataByReceiptIdResponseDTO getReceiptTransferByReceiptId(String token , Long receiptId) throws Exception;
-    public List<ReceiptTransferCustomDataResponseDTO> getAllBankTransfers(String token, String status, Integer pageNo, Integer pageSize) throws Exception;
+    public AllBankTransferResponseDTO getAllBankTransfers(String token, String status, Integer pageNo, Integer pageSize) throws Exception;
     public Object getReceiptsDataByReceiptTransferId(String token , Long receiptTransferId) throws Exception;
-    public Object depositInvoice(String token , DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception;
+    public DepositInvoiceResponseDataDTO depositInvoice(String token , DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception;
 
 }

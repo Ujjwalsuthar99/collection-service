@@ -12,6 +12,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvo
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceWrapperResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.*;
@@ -536,9 +538,10 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     }
 
     @Override
-    public List<ReceiptTransferCustomDataResponseDTO> getAllBankTransfers(String token, String status, Integer pageNo, Integer pageSize) throws Exception {
+    public AllBankTransferResponseDTO getAllBankTransfers(String token, String status, Integer pageNo, Integer pageSize) throws Exception {
         List<Map<String, Object>> receiptTransferDataList;
         List<ReceiptTransferCustomDataResponseDTO> bankTransferArr = new ArrayList<>();
+        AllBankTransferResponseDTO allBankTransferResponseDTO = new AllBankTransferResponseDTO();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Pageable pageable = PageRequest.of(pageNo, pageSize);
@@ -568,10 +571,13 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 bankTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
                 bankTransferArr.add(bankTransferDTO);
             }
+
+            allBankTransferResponseDTO.setData(bankTransferArr);
+            allBankTransferResponseDTO.setTotalCount(Long.parseLong(String.valueOf(receiptTransferDataList.get(0).get("total_rows"))));
         } catch (Exception e) {
             throw new Exception("1016028");
         }
-        return bankTransferArr;
+        return allBankTransferResponseDTO;
     }
 
     @Override
@@ -612,10 +618,11 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     }
 
     @Override
-    public Object depositInvoice(String bearerToken, DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception {
+    public DepositInvoiceResponseDataDTO depositInvoice(String bearerToken, DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception {
         List<Map<String, Object>> receiptsData;
         List<DepositInvoiceWrapperRequestDTO> depositInvoiceWrapperArr = new ArrayList<>();
         DepositInvoiceWrapperResponseDTO res = new DepositInvoiceWrapperResponseDTO();
+        DepositInvoiceResponseDataDTO depositInvoiceResponseDataDTO = new DepositInvoiceResponseDataDTO();
         try {
             receiptsData = receiptTransferRepository.getReceiptsDataByReceiptTransferId(depositInvoiceRequestDTO.getReceiptTransferId());
             DepositInvoiceWrapperRequestDataDTO depositInvoiceWrapperRequestDataDTO = new DepositInvoiceWrapperRequestDataDTO();
@@ -634,36 +641,77 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             httpHeaders.add("Authorization", bearerToken);
             httpHeaders.add("Content-Type", "application/json");
 
-            res = HTTPRequestService.<Object, DepositInvoiceWrapperResponseDTO>builder()
-                    .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:1102/v1/depositChallanBulkAction")
-                    .httpHeaders(httpHeaders)
-                    .body(depositInvoiceWrapperArr)
-                    .typeResponseType(DepositInvoiceWrapperResponseDTO.class)
-                    .build().call();
+            if (Objects.equals(depositInvoiceRequestDTO.getAction(), "approved")) {
+                res = HTTPRequestService.<Object, DepositInvoiceWrapperResponseDTO>builder()
+                        .httpMethod(HttpMethod.POST)
+                        .url("http://localhost:1102/v1/depositChallanBulkAction")
+                        .httpHeaders(httpHeaders)
+                        .body(depositInvoiceWrapperArr)
+                        .typeResponseType(DepositInvoiceWrapperResponseDTO.class)
+                        .build().call();
+            }
 
-//            if (res.getResponse()) {
-//                CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
-//                collectionActivityLogsEntity.setActivityName("send_message_to_user");
-//                collectionActivityLogsEntity.setActivityDate(new Date());
-//                collectionActivityLogsEntity.setDeleted(false);
-//                collectionActivityLogsEntity.setActivityBy(Long.parseLong(userId));
-//                collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
-//                collectionActivityLogsEntity.setAddress("{}");
-//                collectionActivityLogsEntity.setRemarks(remarks);
-//                collectionActivityLogsEntity.setImages(res.getData());
-//                collectionActivityLogsEntity.setLoanId(Long.parseLong(loanId[0]));
-//                collectionActivityLogsEntity.setGeolocation("{}");
-//            }
             CurrentUserInfo currentUserInfo = new CurrentUserInfo();
+            CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+            ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findById(depositInvoiceRequestDTO.getReceiptTransferId()).get();
+            String updatedRemarks = TRANSFER_STATUS;
+            updatedRemarks = updatedRemarks.replace("{transfer_request}", depositInvoiceRequestDTO.getReceiptTransferId().toString());
+            updatedRemarks = updatedRemarks.replace("{transfer_action}", depositInvoiceRequestDTO.getAction());
+            updatedRemarks = (updatedRemarks + currentUserInfo.getCurrentUser().getUsername());
 
+            collectionActivityLogsEntity.setActivityName("receipt_transfer_" + depositInvoiceRequestDTO.getAction());
+            collectionActivityLogsEntity.setActivityDate(new Date());
+            collectionActivityLogsEntity.setDeleted(false);
+            collectionActivityLogsEntity.setActivityBy(currentUserInfo.getCurrentUser().getId());
+            collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
+            collectionActivityLogsEntity.setAddress("{}");
+            collectionActivityLogsEntity.setRemarks(updatedRemarks);
+            collectionActivityLogsEntity.setImages("{}");
+            collectionActivityLogsEntity.setGeolocation("{}");
+            collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+            List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList;
+            switch (depositInvoiceRequestDTO.getAction()) {
+                case RECEIPT_TRANSFER_APPROVE:
+                    receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(depositInvoiceRequestDTO.getReceiptTransferId());
+                    for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
+                        Long collectionReceiptId = receiptTransferHistoryEntity.getCollectionReceiptsId();
+                        CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(collectionReceiptId);
+                        if (collectionReceiptEntity != null) {
+                            collectionReceiptEntity.setLastReceiptTransferId(depositInvoiceRequestDTO.getReceiptTransferId());
+                            collectionReceiptRepository.save(collectionReceiptEntity);
+                        }
+                    }
+                    receiptTransferEntity.setStatus(depositInvoiceRequestDTO.getAction());
+                    receiptTransferEntity.setActionDatetime(new Date());
+                    receiptTransferEntity.setActionReason("");
+                    receiptTransferEntity.setActionRemarks(depositInvoiceRequestDTO.getRemarks());
+                    receiptTransferEntity.setActionBy(currentUserInfo.getCurrentUser().getId());
+                    receiptTransferEntity.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+                    receiptTransferRepository.save(receiptTransferEntity);
+                    break;
+                case RECEIPT_TRANSFER_REJECT:
+                    receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(depositInvoiceRequestDTO.getReceiptTransferId());
+                    for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
+                        receiptTransferHistoryEntity.setDeleted(true);
+                    }
+                    receiptTransferEntity.setStatus(depositInvoiceRequestDTO.getAction());
+                    receiptTransferEntity.setActionDatetime(new Date());
+                    receiptTransferEntity.setActionReason("");
+                    receiptTransferEntity.setActionRemarks(depositInvoiceRequestDTO.getRemarks());
+                    receiptTransferEntity.setActionBy(currentUserInfo.getCurrentUser().getId());
+                    receiptTransferEntity.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+                    receiptTransferRepository.save(receiptTransferEntity);
+                    break;
+                default:
+                    throw new Exception("1016032");
+            }
 
-
-
+            depositInvoiceResponseDataDTO.setSuccessfulRequestCount(res.getData().getSuccessfulRequestCount() != null ? res.getData().getSuccessfulRequestCount() : 0);
+            depositInvoiceResponseDataDTO.setFailedRequestCount(res.getData().getFailedRequestCount() != null ? res.getData().getFailedRequestCount() : 0);
         } catch (Exception e) {
             throw new Exception("1016028");
         }
-        return new Object();
+        return depositInvoiceResponseDataDTO;
     }
 
     private ReceiptTransferEntity saveReceiptTransferData(ReceiptTransferDtoRequest receiptTransferDtoRequest, Long collectionActivityId) {
