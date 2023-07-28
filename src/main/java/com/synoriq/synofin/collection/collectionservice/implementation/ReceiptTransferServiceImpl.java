@@ -668,7 +668,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                         .typeResponseType(DepositInvoiceWrapperResponseDTO.class)
                         .build().call();
             }
-
+            log.info("res {}", res);
             UserDetailByTokenDTOResponse resp = utilityService.getUserDetailsByToken(bearerToken);
             CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
             ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findById(depositInvoiceRequestDTO.getReceiptTransferId()).get();
