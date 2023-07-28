@@ -112,7 +112,9 @@ public class FollowUpServiceImpl implements FollowUpService {
             followUpDataResponseDTO.setTotalCount(Long.parseLong(String.valueOf(followUpEntityPages.get(0).get("total_rows"))));
         } else {
             log.error("Followup data not found for loan Id {}", loanId);
-            throw new Exception("1016025");
+            followUpDataResponseDTO.setData(followUpArr);
+            followUpDataResponseDTO.setTotalCount(0L);
+            return new BaseDTOResponse<>(followUpDataResponseDTO);
         }
         return new BaseDTOResponse<>(followUpDataResponseDTO);
     }

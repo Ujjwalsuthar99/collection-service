@@ -830,6 +830,8 @@ public class UtilityServiceImpl implements UtilityService {
     public OcrCheckResponseDTO ocrCheck(String token, OcrCheckRequestDTO requestBody) throws Exception {
         OcrCheckResponseDTO res = new OcrCheckResponseDTO();
         try {
+//            String base64 = requestBody.getData().getImgBaseUrl()
+
             OcrCheckRequestDTO ocrCheckBody = new ObjectMapper().convertValue(requestBody, OcrCheckRequestDTO.class);
 
             HttpHeaders httpHeaders = new HttpHeaders();
