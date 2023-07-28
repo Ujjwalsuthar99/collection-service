@@ -643,6 +643,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     depositInvoiceWrapperRequestDTO.setComment(depositInvoiceRequestDTO.getRemarks());
                     depositInvoiceWrapperRequestDTO.setReqData(depositInvoiceWrapperRequestDataDTO);
                     depositInvoiceWrapperArr.add(depositInvoiceWrapperRequestDTO);
+                    System.out.println("depositInvoiceDTOdepositInvoiceDTO" + depositInvoiceWrapperRequestDTO);
                 }
             }
             System.out.println("depositInvoiceWrapperArr" + List.of(depositInvoiceWrapperArr));
