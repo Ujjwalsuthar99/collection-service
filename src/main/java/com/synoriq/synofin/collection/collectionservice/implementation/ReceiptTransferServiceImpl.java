@@ -645,7 +645,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     depositInvoiceWrapperArr.add(depositInvoiceWrapperRequestDTO);
                 }
             }
-            log.info("depositInvoiceWrapperArr {}", depositInvoiceWrapperArr);
+            System.out.println("depositInvoiceWrapperArr" + List.of(depositInvoiceWrapperArr));
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", bearerToken);
