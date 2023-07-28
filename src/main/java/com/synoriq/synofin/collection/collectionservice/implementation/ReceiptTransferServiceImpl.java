@@ -634,15 +634,18 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             receiptsData = receiptTransferRepository.getReceiptsDataByReceiptTransferId(depositInvoiceRequestDTO.getReceiptTransferId());
             DepositInvoiceWrapperRequestDataDTO depositInvoiceWrapperRequestDataDTO = new DepositInvoiceWrapperRequestDataDTO();
             depositInvoiceWrapperRequestDataDTO.setFundTransferNumber(depositInvoiceRequestDTO.getUtrNumber());
-            for (Map<String, Object> receiptData : receiptsData) {
-                DepositInvoiceWrapperRequestDTO depositInvoiceWrapperRequestDTO = new DepositInvoiceWrapperRequestDTO();
-                depositInvoiceWrapperRequestDTO.setAction(depositInvoiceRequestDTO.getAction());
-                depositInvoiceWrapperRequestDTO.setServiceRequestId(Long.parseLong(String.valueOf(receiptData.get("receipt_id"))));
-                depositInvoiceWrapperRequestDTO.setLoanId(Long.parseLong(String.valueOf(receiptData.get("loan_id"))));
-                depositInvoiceWrapperRequestDTO.setComment(depositInvoiceRequestDTO.getRemarks());
-                depositInvoiceWrapperRequestDTO.setReqData(depositInvoiceWrapperRequestDataDTO);
-                depositInvoiceWrapperArr.add(depositInvoiceWrapperRequestDTO);
+            if (Objects.equals(depositInvoiceRequestDTO.getAction(), "approved")) {
+                for (Map<String, Object> receiptData : receiptsData) {
+                    DepositInvoiceWrapperRequestDTO depositInvoiceWrapperRequestDTO = new DepositInvoiceWrapperRequestDTO();
+                    depositInvoiceWrapperRequestDTO.setAction(depositInvoiceRequestDTO.getAction());
+                    depositInvoiceWrapperRequestDTO.setServiceRequestId(Long.parseLong(String.valueOf(receiptData.get("receipt_id"))));
+                    depositInvoiceWrapperRequestDTO.setLoanId(Long.parseLong(String.valueOf(receiptData.get("loan_id"))));
+                    depositInvoiceWrapperRequestDTO.setComment(depositInvoiceRequestDTO.getRemarks());
+                    depositInvoiceWrapperRequestDTO.setReqData(depositInvoiceWrapperRequestDataDTO);
+                    depositInvoiceWrapperArr.add(depositInvoiceWrapperRequestDTO);
+                }
             }
+            log.info("depositInvoiceWrapperArr {}", depositInvoiceWrapperArr);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", bearerToken);
