@@ -18,6 +18,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInv
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDataReturnResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
@@ -657,18 +658,18 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                         .build().call();
             }
 
-            CurrentUserInfo currentUserInfo = new CurrentUserInfo();
+            UserDetailByTokenDTOResponse resp = utilityService.getUserDetailsByToken(bearerToken);
             CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
             ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findById(depositInvoiceRequestDTO.getReceiptTransferId()).get();
             String updatedRemarks = TRANSFER_STATUS;
             updatedRemarks = updatedRemarks.replace("{transfer_request}", depositInvoiceRequestDTO.getReceiptTransferId().toString());
             updatedRemarks = updatedRemarks.replace("{transfer_action}", depositInvoiceRequestDTO.getAction());
-            updatedRemarks = (updatedRemarks + currentUserInfo.getCurrentUser().getUsername());
+            updatedRemarks = (updatedRemarks + resp.getData().getUserName());
 
             collectionActivityLogsEntity.setActivityName("receipt_transfer_" + depositInvoiceRequestDTO.getAction());
             collectionActivityLogsEntity.setActivityDate(new Date());
             collectionActivityLogsEntity.setDeleted(false);
-            collectionActivityLogsEntity.setActivityBy(currentUserInfo.getCurrentUser().getId());
+            collectionActivityLogsEntity.setActivityBy(resp.getData().getUserData().getUserId());
             collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
             collectionActivityLogsEntity.setAddress("{}");
             collectionActivityLogsEntity.setRemarks(updatedRemarks);
@@ -691,7 +692,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     receiptTransferEntity.setActionDatetime(new Date());
                     receiptTransferEntity.setActionReason("");
                     receiptTransferEntity.setActionRemarks(depositInvoiceRequestDTO.getRemarks());
-                    receiptTransferEntity.setActionBy(currentUserInfo.getCurrentUser().getId());
+                    receiptTransferEntity.setActionBy(resp.getData().getUserData().getUserId());
                     receiptTransferEntity.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
                     receiptTransferRepository.save(receiptTransferEntity);
                     break;
@@ -704,16 +705,25 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     receiptTransferEntity.setActionDatetime(new Date());
                     receiptTransferEntity.setActionReason("");
                     receiptTransferEntity.setActionRemarks(depositInvoiceRequestDTO.getRemarks());
-                    receiptTransferEntity.setActionBy(currentUserInfo.getCurrentUser().getId());
+                    receiptTransferEntity.setActionBy(resp.getData().getUserData().getUserId());
                     receiptTransferEntity.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
                     receiptTransferRepository.save(receiptTransferEntity);
                     break;
                 default:
                     throw new Exception("1016032");
             }
+            Long successCount, failedCount;
 
-            depositInvoiceResponseDataDTO.setSuccessfulRequestCount(res.getData().getSuccessfulRequestCount() != null ? res.getData().getSuccessfulRequestCount() : 0);
-            depositInvoiceResponseDataDTO.setFailedRequestCount(res.getData().getFailedRequestCount() != null ? res.getData().getFailedRequestCount() : 0);
+            if (res.getData() == null) {
+                successCount = 0L;
+                failedCount = 0L;
+            } else {
+                successCount = res.getData().getSuccessfulRequestCount();
+                failedCount = res.getData().getFailedRequestCount();
+            }
+
+            depositInvoiceResponseDataDTO.setSuccessfulRequestCount(successCount);
+            depositInvoiceResponseDataDTO.setFailedRequestCount(failedCount);
         } catch (Exception e) {
             throw new Exception("1016028");
         }
