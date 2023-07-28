@@ -17,7 +17,7 @@ public class FollowUpCustomDataResponseDTO {
     private String createdDate;
 
     @JsonProperty("created_by")
-    private Long createdBy;
+    private String createdBy;
 
     @JsonProperty("loan_number")
     private String loanNumber;
