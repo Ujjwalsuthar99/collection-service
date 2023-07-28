@@ -13,6 +13,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.SpfcSmsRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3DataRequestDTO;
@@ -830,7 +831,12 @@ public class UtilityServiceImpl implements UtilityService {
     public OcrCheckResponseDTO ocrCheck(String token, OcrCheckRequestDTO requestBody) throws Exception {
         OcrCheckResponseDTO res = new OcrCheckResponseDTO();
         try {
-//            String base64 = requestBody.getData().getImgBaseUrl()
+            String base64 = requestBody.getData().getImgBaseUrl();
+            base64 = base64.replace("\n", base64);
+            OcrCheckRequestDataDTO ocrCheckRequestDataDTO = new OcrCheckRequestDataDTO();
+            ocrCheckRequestDataDTO.setImgBaseUrl(base64);
+            ocrCheckRequestDataDTO.setImgType(requestBody.getData().getImgType());
+            requestBody.setData(ocrCheckRequestDataDTO);
 
             OcrCheckRequestDTO ocrCheckBody = new ObjectMapper().convertValue(requestBody, OcrCheckRequestDTO.class);
 
