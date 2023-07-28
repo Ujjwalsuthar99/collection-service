@@ -638,9 +638,11 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 for (Map<String, Object> receiptData : receiptsData) {
                     DepositInvoiceWrapperRequestDTO depositInvoiceWrapperRequestDTO = new DepositInvoiceWrapperRequestDTO();
                     depositInvoiceWrapperRequestDTO.setAction(depositInvoiceRequestDTO.getAction());
+                    depositInvoiceWrapperRequestDTO.setActionBy("checker");
                     depositInvoiceWrapperRequestDTO.setServiceRequestId(Long.parseLong(String.valueOf(receiptData.get("receipt_id"))));
                     depositInvoiceWrapperRequestDTO.setLoanId(Long.parseLong(String.valueOf(receiptData.get("loan_id"))));
                     depositInvoiceWrapperRequestDTO.setComment(depositInvoiceRequestDTO.getRemarks());
+                    depositInvoiceWrapperRequestDTO.setReqSource("m_collect");
                     depositInvoiceWrapperRequestDTO.setReqData(depositInvoiceWrapperRequestDataDTO);
                     depositInvoiceWrapperArr.add(depositInvoiceWrapperRequestDTO);
                     System.out.println("depositInvoiceDTOdepositInvoiceDTO" + depositInvoiceWrapperRequestDTO);
