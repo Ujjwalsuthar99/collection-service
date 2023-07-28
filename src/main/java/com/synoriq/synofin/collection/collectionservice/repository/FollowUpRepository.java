@@ -17,16 +17,15 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
 
     FollowUpEntity findByFollowupId(Long followupId);
 
-    @Query(nativeQuery = true,value = "\n" +
-            "select concat_ws(' ', c.first_name, c.last_name) as name,\n" +
+    @Query(nativeQuery = true,value = "select concat_ws(' ', c.first_name, c.last_name) as name,\n" +
             "c.address1_json->>'address' as address, \n" +
             "f.followups_id as followup_id,\n" +
             "f.loan_id as loanId,\n" +
             "la.loan_application_number as loan_number,\n" +
             "f.created_by as created_by, \n" +
-            "date(f.created_date) as created_date,\n" +
+            "f.created_date as created_date,\n" +
             "f.followup_reason as followup_reason,\n" +
-            "date(f.next_followup_datetime) as next_followup_date,\n" +
+            "f.next_followup_datetime as next_followup_date,\n" +
             "f.other_followup_reason as other_followup_reason,\n" +
             "f.remarks as remarks,\n" +
             "la.days_past_due as dpd,\n" +
@@ -57,13 +56,16 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
             "la.product as loan_type,\n" +
+            "cast(cal.images as text) as followup_images, cast(cal.geo_location_data as text) as geo_location_data,\n" +
+            "COUNT(f.followups_id) OVER () AS total_rows,\n" +
             "la.sanctioned_amount as loan_amount\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due,product,sanctioned_amount, loan_application_number from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "            join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
-            "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  " +
+            "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id\n" +
+            "           join collection.collection_activity_logs cal on cal.collection_activity_logs_id = f.collection_activity_logs_id\n" +
             " where f.loan_id = :loanId and clm.customer_type = 'applicant' \n" +
-            "            and f.next_followup_datetime between :fromDate and :toDate ")
+            "            and f.next_followup_datetime between :fromDate and :toDate")
     List<Map<String,Object>> getFollowupsLoanWiseByDuration(@Param("loanId") Long loanId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, Pageable pageable);
 

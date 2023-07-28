@@ -1,11 +1,17 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.FollowUpRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.FollowUpDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.FollowUpResponseDTO.FollowUpCustomDataResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.FollowUpResponseDTO.FollowUpDataResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferCustomDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.FollowupResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
 import com.synoriq.synofin.collection.collectionservice.service.FollowUpService;
@@ -17,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -80,26 +87,34 @@ public class FollowUpServiceImpl implements FollowUpService {
         if(fromDate.compareTo(toDate) == 0){
             toDate = checkToDate(toDate);
         }
-
-        BaseDTOResponse<Object> baseDTOResponse;
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<FollowUpCustomDataResponseDTO> followUpArr = new ArrayList<>();
         Pageable pageable = PageRequest.of(page,size);
+        FollowUpDataResponseDTO followUpDataResponseDTO = new FollowUpDataResponseDTO();
 
         List<Map<String,Object>> followUpEntityPages = followUpRepository.getFollowupsLoanWiseByDuration(loanId, fromDate,toDate, pageable);
-        if (page > 0) {
-            if (followUpEntityPages.size() == 0) {
-                return new BaseDTOResponse<>(followUpEntityPages);
+        if (followUpEntityPages.size() > 0) {
+            for (Map<String, Object> followUpEntity : followUpEntityPages) {
+                JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(followUpEntity.get("geo_location_data")));
+                JsonNode imagesNode = objectMapper.readTree(String.valueOf(followUpEntity.get("followup_images")));
+                FollowUpCustomDataResponseDTO followUpCustomDataResponseDTO = new FollowUpCustomDataResponseDTO();
+                followUpCustomDataResponseDTO.setFollowUpId(Long.parseLong(String.valueOf(followUpEntity.get("followup_id"))));
+                followUpCustomDataResponseDTO.setCreatedDate(String.valueOf(followUpEntity.get("created_date")));
+                followUpCustomDataResponseDTO.setCreatedBy(Long.parseLong(String.valueOf(followUpEntity.get("created_by"))));
+                followUpCustomDataResponseDTO.setFollowUpReason(String.valueOf(followUpEntity.get("followup_reason")));
+                followUpCustomDataResponseDTO.setNextFollowupDate(String.valueOf(followUpEntity.get("next_followup_date")));
+                followUpCustomDataResponseDTO.setRemarks(String.valueOf(followUpEntity.get("remarks")));
+                followUpCustomDataResponseDTO.setFollowUpImages(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
+                followUpCustomDataResponseDTO.setGeoLocationData(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                followUpArr.add(followUpCustomDataResponseDTO);
             }
-        }
-
-        if(!followUpEntityPages.isEmpty()){
-            baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
-        }else{
+            followUpDataResponseDTO.setData(followUpArr);
+            followUpDataResponseDTO.setTotalCount(Long.parseLong(String.valueOf(followUpEntityPages.get(0).get("total_rows"))));
+        } else {
             log.error("Followup data not found for loan Id {}", loanId);
             throw new Exception("1016025");
         }
-
-        return baseDTOResponse;
-
+        return new BaseDTOResponse<>(followUpDataResponseDTO);
     }
     @Override
     public BaseDTOResponse<Object> getFollowupUserWiseWithDuration(Integer page, Integer size, Long userId, Date fromDate, Date toDate, String type) throws Exception {
