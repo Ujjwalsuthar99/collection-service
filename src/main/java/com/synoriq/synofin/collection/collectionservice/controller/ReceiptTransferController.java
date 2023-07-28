@@ -4,7 +4,11 @@ import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCo
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.AllBankTransferResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferCustomDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferDataByReceiptIdResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptTransferService;
@@ -204,6 +208,30 @@ public class ReceiptTransferController {
         return response;
     }
 
+    @RequestMapping(value = "/receipt-transfer/all-bank-transfers", method = RequestMethod.GET)
+    public ResponseEntity<Object> getAllBankTransfers(@RequestHeader("Authorization") String bearerToken,
+                                                      @RequestParam(value = "status", defaultValue = "", required = false) String status,
+                                                      @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
+                                                      @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws Exception {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+        AllBankTransferResponseDTO result;
+        try {
+            result = receiptTransferService.getAllBankTransfers(bearerToken, status, pageNo, pageSize);
+            baseResponse = new BaseDTOResponse<>(result);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
     @RequestMapping(value = "/receipt-transfer/receipts-data/{receiptTransferId}", method = RequestMethod.GET)
     public ResponseEntity<Object> getReceiptsDataByReceiptTransferId(@RequestHeader("Authorization") String bearerToken, @PathVariable("receiptTransferId") Long receiptTransferId) throws Exception {
 
@@ -213,6 +241,26 @@ public class ReceiptTransferController {
         try {
 //            log.info("receiptTransferId {}", receiptTransferId);
             result = receiptTransferService.getReceiptsDataByReceiptTransferId(bearerToken, receiptTransferId);
+            baseResponse = new BaseDTOResponse<>(result);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "/receipt-transfer/deposit-invoice", method = RequestMethod.POST)
+    public ResponseEntity<Object> depositInvoice(@RequestHeader("Authorization") String bearerToken, @RequestBody DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+        DepositInvoiceResponseDataDTO result;
+        try {
+            result = receiptTransferService.depositInvoice(bearerToken, depositInvoiceRequestDTO);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {

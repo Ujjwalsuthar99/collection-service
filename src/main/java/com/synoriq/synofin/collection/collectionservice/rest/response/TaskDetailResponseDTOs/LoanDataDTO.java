@@ -27,5 +27,8 @@ public class LoanDataDTO {
     @JsonProperty("emi_cycle")
     String emiCycle;
 
+    @JsonProperty("balance_principal")
+    Double balancePrincipal;
+
 }
 
