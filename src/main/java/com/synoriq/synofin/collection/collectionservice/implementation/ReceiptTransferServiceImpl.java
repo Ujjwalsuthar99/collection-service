@@ -11,6 +11,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTran
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestListDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDataDTO;
@@ -645,21 +647,24 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     depositInvoiceWrapperRequestDTO.setReqSource("m_collect");
                     depositInvoiceWrapperRequestDTO.setReqData(depositInvoiceWrapperRequestDataDTO);
                     depositInvoiceWrapperArr.add(depositInvoiceWrapperRequestDTO);
-                    System.out.println("depositInvoiceDTOdepositInvoiceDTO" + depositInvoiceWrapperRequestDTO);
+                    log.info("depositInvoiceDTOdepositInvoiceDTO {}",depositInvoiceWrapperRequestDTO);
                 }
             }
-            System.out.println("depositInvoiceWrapperArr" + List.of(depositInvoiceWrapperArr));
+            DepositInvoiceWrapperRequestListDTO depositInvoiceWrapperRequestListDTO = new DepositInvoiceWrapperRequestListDTO();
+            depositInvoiceWrapperRequestListDTO.setReceiptObjectData(depositInvoiceWrapperArr);
+            System.out.println("depositInvoiceWrapperArr" + depositInvoiceWrapperArr);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", bearerToken);
             httpHeaders.add("Content-Type", "application/json");
 
             if (Objects.equals(depositInvoiceRequestDTO.getAction(), "approved")) {
+                DepositInvoiceWrapperRequestListDTO depositInvoiceWrapperBody = new ObjectMapper().convertValue(depositInvoiceWrapperRequestListDTO, DepositInvoiceWrapperRequestListDTO.class);
                 res = HTTPRequestService.<Object, DepositInvoiceWrapperResponseDTO>builder()
                         .httpMethod(HttpMethod.POST)
                         .url("http://localhost:1102/v1/depositChallanBulkAction")
                         .httpHeaders(httpHeaders)
-                        .body(depositInvoiceWrapperArr)
+                        .body(depositInvoiceWrapperBody)
                         .typeResponseType(DepositInvoiceWrapperResponseDTO.class)
                         .build().call();
             }

@@ -13,7 +13,7 @@ public class DepositInvoiceWrapperRequestDTO {
     @JsonProperty("action")
     private String action;
 
-    @JsonProperty(value = "action_by", defaultValue = "checker")
+    @JsonProperty("action_by")
     private String actionBy;
 
     @JsonProperty("comment")
@@ -25,7 +25,7 @@ public class DepositInvoiceWrapperRequestDTO {
     @JsonProperty("loan_id")
     private Long loanId;
 
-    @JsonProperty(value = "req_source", defaultValue = "m_collect")
+    @JsonProperty("req_source")
     private String reqSource;
 
     @JsonProperty("req_data")
