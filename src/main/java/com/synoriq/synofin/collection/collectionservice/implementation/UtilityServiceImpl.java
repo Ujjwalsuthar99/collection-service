@@ -832,7 +832,8 @@ public class UtilityServiceImpl implements UtilityService {
         OcrCheckResponseDTO res = new OcrCheckResponseDTO();
         try {
             String base64 = requestBody.getData().getImgBaseUrl();
-            base64 = base64.replace("\n", base64);
+            base64 = base64.replace("\n", "");
+
             OcrCheckRequestDataDTO ocrCheckRequestDataDTO = new OcrCheckRequestDataDTO();
             ocrCheckRequestDataDTO.setImgBaseUrl(base64);
             ocrCheckRequestDataDTO.setImgType(requestBody.getData().getImgType());

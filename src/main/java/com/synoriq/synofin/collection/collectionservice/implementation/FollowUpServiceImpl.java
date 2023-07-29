@@ -100,7 +100,7 @@ public class FollowUpServiceImpl implements FollowUpService {
                 FollowUpCustomDataResponseDTO followUpCustomDataResponseDTO = new FollowUpCustomDataResponseDTO();
                 followUpCustomDataResponseDTO.setFollowUpId(Long.parseLong(String.valueOf(followUpEntity.get("followup_id"))));
                 followUpCustomDataResponseDTO.setCreatedDate(String.valueOf(followUpEntity.get("created_date")));
-                followUpCustomDataResponseDTO.setCreatedBy(Long.parseLong(String.valueOf(followUpEntity.get("created_by"))));
+                followUpCustomDataResponseDTO.setCreatedBy(String.valueOf(followUpEntity.get("created_by")));
                 followUpCustomDataResponseDTO.setFollowUpReason(String.valueOf(followUpEntity.get("followup_reason")));
                 followUpCustomDataResponseDTO.setNextFollowupDate(String.valueOf(followUpEntity.get("next_followup_date")));
                 followUpCustomDataResponseDTO.setRemarks(String.valueOf(followUpEntity.get("remarks")));
