@@ -13,7 +13,7 @@ import java.util.List;
 public class OcrCheckNameResponseDTO {
 
     @JsonProperty("value")
-    private List<String> value;
+    private String value;
 
     @JsonProperty("conf")
     private String conf;
