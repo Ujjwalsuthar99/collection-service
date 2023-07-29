@@ -830,20 +830,18 @@ public class UtilityServiceImpl implements UtilityService {
     @Override
     public OcrCheckResponseDTO ocrCheck(String token, OcrCheckRequestDTO requestBody) throws Exception {
         OcrCheckResponseDTO res = new OcrCheckResponseDTO();
+        String base64 = requestBody.getData().getImgBaseUrl();
+        base64 = base64.replace("\n", "");
+        OcrCheckRequestDataDTO ocrCheckRequestDataDTO = new OcrCheckRequestDataDTO();
+        ocrCheckRequestDataDTO.setImgBaseUrl(base64);
+        ocrCheckRequestDataDTO.setImgType(requestBody.getData().getImgType());
+        requestBody.setData(ocrCheckRequestDataDTO);
         try {
-            String base64 = requestBody.getData().getImgBaseUrl();
-            base64 = base64.replace("\n", "");
-
-            OcrCheckRequestDataDTO ocrCheckRequestDataDTO = new OcrCheckRequestDataDTO();
-            ocrCheckRequestDataDTO.setImgBaseUrl(base64);
-            ocrCheckRequestDataDTO.setImgType(requestBody.getData().getImgType());
-            requestBody.setData(ocrCheckRequestDataDTO);
-
             OcrCheckRequestDTO ocrCheckBody = new ObjectMapper().convertValue(requestBody, OcrCheckRequestDTO.class);
-            log.info("base64 {}", requestBody.getData().getImgBaseUrl());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
+            log.info("ocrCheckBody {}", ocrCheckBody);
 
             res = HTTPRequestService.<Object, OcrCheckResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
@@ -853,12 +851,13 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(OcrCheckResponseDTO.class)
                     .build().call();
 
+            log.info("res {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
 
