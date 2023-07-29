@@ -20,18 +20,18 @@ public class OcrCheckDetailsResponseDTO {
     private OcrCheckPhoneResponseDTO phone;
 
     @JsonProperty("accNo")
-    private String accNo;
+    private Long accNo;
 
     @JsonProperty("bank")
     private String bank;
 
     @JsonProperty("chequeNo")
-    private String chequeNo;
+    private Long chequeNo;
 
     @JsonProperty("ifsc")
     private String ifsc;
 
     @JsonProperty("micr")
-    private String micr;
+    private Long micr;
 
 }

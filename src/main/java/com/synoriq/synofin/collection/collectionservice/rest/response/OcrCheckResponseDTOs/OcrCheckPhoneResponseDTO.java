@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class OcrCheckPhoneResponseDTO {
 
     @JsonProperty("value")
-    private String value;
+    private Long value;
 
     @JsonProperty("conf")
     private String conf;

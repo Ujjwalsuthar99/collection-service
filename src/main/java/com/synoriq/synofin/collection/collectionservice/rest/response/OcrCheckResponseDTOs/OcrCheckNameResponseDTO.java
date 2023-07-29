@@ -5,13 +5,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OcrCheckNameResponseDTO {
 
     @JsonProperty("value")
-    private String value;
+    private List<String> value;
 
     @JsonProperty("conf")
     private String conf;

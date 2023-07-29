@@ -16,7 +16,7 @@ public class OcrCheckResponseDTO {
     private Boolean response;
 
     @JsonProperty("data")
-    private List<OcrCheckDataResponseDTO> data;
+    private OcrCheckDataResponseDTO data;
 
     @JsonProperty("request_id")
     private String requestId;
