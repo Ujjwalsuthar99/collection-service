@@ -389,7 +389,7 @@ public class UtilityServiceImpl implements UtilityService {
                     Graphics2D graphics2D = image.createGraphics();
 
                     // Set the font and color for the watermark
-                    Font font = new Font("Arial", Font.BOLD, 100);
+                    Font font = new Font("Arial", Font.BOLD, 50);
                     String watermarkText = "Latitude: " + latitude + ", Longitude: " + longitude + ", Datetime:" + now;
 
                     // Define margins and padding
