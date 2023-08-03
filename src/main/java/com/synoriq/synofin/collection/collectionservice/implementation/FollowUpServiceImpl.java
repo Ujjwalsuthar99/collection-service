@@ -23,10 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_FOLLOWUP;
 
@@ -104,8 +101,14 @@ public class FollowUpServiceImpl implements FollowUpService {
                 followUpCustomDataResponseDTO.setFollowUpReason(String.valueOf(followUpEntity.get("followup_reason")));
                 followUpCustomDataResponseDTO.setNextFollowupDate(String.valueOf(followUpEntity.get("next_followup_date")));
                 followUpCustomDataResponseDTO.setRemarks(String.valueOf(followUpEntity.get("remarks")));
-                followUpCustomDataResponseDTO.setFollowUpImages(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
                 followUpCustomDataResponseDTO.setGeoLocationData(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                Map<String, String> imagesObj = new HashMap<>();
+                for (int i = 1; i <= imagesNode.size(); i++) {
+                    String imageVal = String.valueOf(imagesNode.get("url" + i));
+                    String updatedImageVal = "followUp/" + followUpCustomDataResponseDTO.getCreatedBy() + "/" + new Gson().fromJson(String.valueOf(imageVal), String.class);
+                    imagesObj.put("url" + i, updatedImageVal);
+                }
+                followUpCustomDataResponseDTO.setFollowUpImages(imagesObj);
                 followUpArr.add(followUpCustomDataResponseDTO);
             }
             followUpDataResponseDTO.setData(followUpArr);
