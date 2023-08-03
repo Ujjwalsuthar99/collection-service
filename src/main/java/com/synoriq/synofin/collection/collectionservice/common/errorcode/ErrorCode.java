@@ -191,7 +191,8 @@ public enum ErrorCode {
     RECEIPT_TIME_BOUND_LIMIT(1016038, "Receipt collection time bound on same loan, try after 10 min"),
     TRANSACTION_NUMBER_VALIDATE(1016039, "UTR number already exists"),
     GETTING_ERROR_WHILE_FETCHING_LMS_DATA(1016040, "Data fetching error from LMS"),
-    USER_IS_NOT_EXIST(1016041, "User is not exist");
+    USER_IS_NOT_EXIST(1016041, "User is not exist"),
+    DEPOSIT_CHALLAN_ERROR(1016042, "Deposit challan error");
     private Integer codeValue;
     private String responseMessage;
 

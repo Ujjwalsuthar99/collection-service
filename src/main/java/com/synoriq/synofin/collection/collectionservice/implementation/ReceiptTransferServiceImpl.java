@@ -3,6 +3,7 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
@@ -24,6 +25,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetail
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDataReturnResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
+import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptTransferService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
@@ -71,6 +73,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
     @Autowired
     private UtilityService utilityService;
+    @Autowired
+    ConsumedApiLogService consumedApiLogService;
 
     @Autowired
     private ActivityLogService activityLogService;
@@ -658,8 +662,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             httpHeaders.add("Authorization", bearerToken);
             httpHeaders.add("Content-Type", "application/json");
 
+            DepositInvoiceWrapperRequestListDTO depositInvoiceWrapperBody = new ObjectMapper().convertValue(depositInvoiceWrapperRequestListDTO, DepositInvoiceWrapperRequestListDTO.class);
             if (Objects.equals(depositInvoiceRequestDTO.getAction(), "approved")) {
-                DepositInvoiceWrapperRequestListDTO depositInvoiceWrapperBody = new ObjectMapper().convertValue(depositInvoiceWrapperRequestListDTO, DepositInvoiceWrapperRequestListDTO.class);
                 res = HTTPRequestService.<Object, DepositInvoiceWrapperResponseDTO>builder()
                         .httpMethod(HttpMethod.POST)
                         .url("http://localhost:1102/v1/depositChallanBulkAction")
@@ -735,8 +739,12 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
 
             depositInvoiceResponseDataDTO.setSuccessfulRequestCount(successCount);
             depositInvoiceResponseDataDTO.setFailedRequestCount(failedCount);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.deposit_challan, null, depositInvoiceWrapperBody, res, "success", null);
         } catch (Exception e) {
-            throw new Exception("1016028");
+            String errorMessage = e.getMessage();
+            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.deposit_challan, null, null, modifiedErrorMessage, "failure", null);
+            throw new Exception("1016042");
         }
         return depositInvoiceResponseDataDTO;
     }

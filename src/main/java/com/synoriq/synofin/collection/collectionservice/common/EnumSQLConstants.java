@@ -20,6 +20,7 @@ public class EnumSQLConstants {
         contact_support,
         get_pdf,
         razor_pay_ifsc,
+        deposit_challan,
         get_user_details_admin;
 
         private LogNames() {
