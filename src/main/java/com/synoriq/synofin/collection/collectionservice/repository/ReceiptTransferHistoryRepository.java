@@ -50,4 +50,20 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
             "where rt.transfer_type='bank' and rt.status in (:statusList)")
     List<Map<String, Object>> getAllBankTransfers(@Param("statusList") List<String> statusList, Pageable pageable);
 
+
+    @Query(nativeQuery = true, value = "select\n" +
+            "\tcast(count(rth.collection_receipts_id) as integer) as pending_receipt_count,\n" +
+            "\trth.receipt_transfer_id as receipt_transfer_id\n" +
+            "from\n" +
+            "\tcollection.receipt_transfer_history rth\n" +
+            "join collection.receipt_transfer rt on\n" +
+            "\trth.receipt_transfer_id = rt.receipt_transfer_id\n" +
+            "where\n" +
+            "\trt.transfer_type = 'bank'\n" +
+            "\tand rt.status = 'pending'\n" +
+            "\tand rth.receipt_transfer_id = (select rth.receipt_transfer_id from collection.receipt_transfer_history rth where rth.collection_receipts_id = :receiptId)\n" +
+            "group by\n" +
+            "\trth.receipt_transfer_id")
+    Map<String, Object> getDepositPendingReceipt(@Param("receiptId") Long receiptId);
+
 }

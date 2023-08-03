@@ -146,4 +146,6 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "         join collection.collection_activity_logs cal on cal.collection_activity_logs_id = cr.collection_activity_logs_id\n" +
             "         where rt.receipt_transfer_id = :receiptTransferId")
     List<Map<String, Object>> getReceiptsDataByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
+
+    ReceiptTransferEntity findByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
 }
