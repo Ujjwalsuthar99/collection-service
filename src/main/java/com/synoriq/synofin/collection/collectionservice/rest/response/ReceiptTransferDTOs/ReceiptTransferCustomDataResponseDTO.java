@@ -28,6 +28,12 @@ public class ReceiptTransferCustomDataResponseDTO {
     @JsonProperty("deposit_amount")
     private Double depositAmount;
 
+    @JsonProperty("approved_by")
+    private String approvedBy;
+
+    @JsonProperty("action_datetime")
+    private String actionDateTime;
+
     @JsonProperty("bank_name")
     private String bankName;
 
