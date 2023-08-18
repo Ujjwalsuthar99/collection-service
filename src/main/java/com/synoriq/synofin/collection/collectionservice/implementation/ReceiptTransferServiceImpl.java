@@ -570,6 +570,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     bankTransferDTO.setTransferByName(String.valueOf(receiptTransferData.get("transfer_by_name")));
                     bankTransferDTO.setTransferToName(String.valueOf(receiptTransferData.get("transfer_to_name")));
                     bankTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
+                    bankTransferDTO.setApprovedBy(String.valueOf(receiptTransferData.get("approved_by")));
+                    bankTransferDTO.setActionDateTime(String.valueOf(receiptTransferData.get("action_datetime")));
                     bankTransferDTO.setStatus(String.valueOf(receiptTransferData.get("status")));
                     bankTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
                     bankTransferDTO.setBankName(String.valueOf(receiptTransferData.get("bank_name")));

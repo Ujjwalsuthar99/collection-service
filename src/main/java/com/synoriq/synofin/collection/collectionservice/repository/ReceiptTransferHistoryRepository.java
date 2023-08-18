@@ -37,8 +37,8 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
 
     @Query(nativeQuery = true, value = "select\n" +
             "\trt.receipt_transfer_id, rt.created_date, concat(uu.name, ' ', uu.username) as transfer_by_name, (case when rt.transferred_to_user_id is null then (select ba.bank_name from master.bank_accounts ba where ba.bank_account_id = cast(rt.transfer_bank_code as bigint)) else concat(u.name, ' ', u.username) end) as transfer_to_name,\n" +
-            "\trt.transfer_type, rt.amount as deposit_amount, ba2.bank_name , ba2.account_number, CAST(cal.geo_location_data as TEXT) as transfer_location_data, CAST(cal2.geo_location_data as text) as approval_location_data,\n" +
-            "\tCAST(rt.receipt_image as TEXT) as receipt_image, rt.status as status, COUNT(rt.receipt_transfer_id) OVER () AS total_rows\n" +
+            "\trt.transfer_type, rt.amount as deposit_amount, ba2.bank_name , ba2.account_number, CAST(cal.geo_location_data as TEXT) as transfer_location_data, CAST(cal2.geo_location_data as text) as approval_location_data, rt.action_datetime,\n" +
+            "\tCAST(rt.receipt_image as TEXT) as receipt_image, rt.status as status, (case when rt.status != 'pending' then (select username from master.users where user_id = rt.\"action_by\") else '' end) as approved_by, COUNT(rt.receipt_transfer_id) OVER () AS total_rows\n" +
             "from\n" +
             "\tcollection.receipt_transfer rt\n" +
             "join collection.receipt_transfer_history rth on rt.receipt_transfer_id = rth.receipt_transfer_id\n" +
