@@ -237,10 +237,10 @@ public class TaskServiceImpl implements TaskService {
             loanRes.getData().setLoanBranch(loanDetailRes.getData().getSourcingBranch());
             loanRes.getData().setEmiCycle(utilityService.addSuffix(loanDetailRes.getData().getEmiCycle()));
             loanRes.getData().setBalancePrincipal(loanDetailRes.getData().getBalancePrincipal());
-            loanRes.getData().setBalanceEmi(loanSummaryResponse.getData().getInstallmentAmount().getPaid());
-            loanRes.getData().setBalanceEmiCount(loanSummaryResponse.getData().getNumberOfInstallments().getPaid());
-            loanRes.getData().setOverdueEmi(loanSummaryResponse.getData().getInstallmentAmount().getDuesAsOnDate());
-            loanRes.getData().setOverdueEmiCount(loanSummaryResponse.getData().getNumberOfInstallments().getDuesAsOnDate());
+            loanRes.getData().setEmiPaid(loanSummaryResponse.getData().getInstallmentAmount().getPaid());
+            loanRes.getData().setEmiPaidCount(loanSummaryResponse.getData().getNumberOfInstallments().getPaid());
+            loanRes.getData().setBalanceEmi(loanSummaryResponse.getData().getInstallmentAmount().getDuesAsOnDate());
+            loanRes.getData().setBalanceEmiCount(loanSummaryResponse.getData().getNumberOfInstallments().getDuesAsOnDate());
             loanRes.getData().setLoanApplicationNumber(loanApplicationNumber);
             response.setCustomerDetails(customerList);
             response.setLoanDetails(loanRes.getData());
