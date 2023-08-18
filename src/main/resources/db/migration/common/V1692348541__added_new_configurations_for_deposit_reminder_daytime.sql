@@ -1,0 +1,5 @@
+INSERT INTO collection.collection_configurations
+(created_date, created_by, deleted, configuration_name, configuration_value, configuration_description, modified_date, modified_by, active, stage)
+VALUES('2023-01-27 13:01:20.000', 1, false, 'deposit_reminder_after_daytime', '1/12', 'A deposit reminder will be triggered after a certain number of days and at a specific time based on the old initiated receipt. The time will be in a 24-hour format. For example, "2/13" indicates a reminder set for 2 days later at 1 pm.', '2023-04-26 12:21:28.543', NULL, true, NULL);
+
+update collection.collection_configurations set configuration_value='disable', configuration_description = 'The deposit reminder will be disabled if receipts are not deposited; in this case, an alert will be displayed. For instance, "disable, hours, daytime" represents the configuration values. "hours" refers to a specific number of hours, and "daytime" indicates a certain number of days and a specific time.' where configuration_name='deposit_reminder';

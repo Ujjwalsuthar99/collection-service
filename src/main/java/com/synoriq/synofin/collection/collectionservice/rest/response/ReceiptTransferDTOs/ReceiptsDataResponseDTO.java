@@ -19,6 +19,9 @@ public class ReceiptsDataResponseDTO {
     @JsonProperty("receipt_amount")
     private Double receiptAmount;
 
+    @JsonProperty("payment_mode")
+    private String paymentMode;
+
     @JsonProperty("loan_application_number")
     private String loanApplicationNumber;
 

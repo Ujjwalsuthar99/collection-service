@@ -608,6 +608,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 receiptsDataResponseDTO.setCreatedDate(String.valueOf(receipt.get("created_date")));
                 receiptsDataResponseDTO.setReceiptAmount(Double.parseDouble(String.valueOf(receipt.get("receipt_amount"))));
                 receiptsDataResponseDTO.setLoanApplicationNumber(String.valueOf(receipt.get("loan_application_number")));
+                receiptsDataResponseDTO.setPaymentMode(String.valueOf(receipt.get("payment_mode")));
                 receiptsDataResponseDTO.setLoanId(Long.parseLong(String.valueOf(receipt.get("loan_id"))));
                 receiptsDataResponseDTO.setCreatedBy(String.valueOf(receipt.get("created_by")));
                 receiptsDataResponseDTO.setStatus(utilityService.capitalizeName(String.valueOf(receipt.get("status"))));
