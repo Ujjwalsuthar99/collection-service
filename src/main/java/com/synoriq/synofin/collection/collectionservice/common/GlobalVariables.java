@@ -17,7 +17,7 @@ public class GlobalVariables {
     public static final String CASH_COLLECTION_DEFAULT_LIMIT = "cash_collection_default_limit";
     public static final String DEPOSIT_REMINDER = "deposit_reminder";
     public static final String DEPOSIT_REMINDER_HOURS = "deposit_reminder_hours";
-    public static final String DEPOSIT_REMINDER_DAYTIME = "deposit_reminder_daytime";
+    public static final String DEPOSIT_REMINDER_DAYTIME = "deposit_reminder_after_daytime";
     public static final String SHORTEN_URL_UAT = "https://api-prod.synofin.tech/common/integration/v1/url/shortan";
 
     public static final String INTEGRATION_MSG_API_URL = "https://api-uat.synofin.tech/integration-connector/v1/send-sms";
