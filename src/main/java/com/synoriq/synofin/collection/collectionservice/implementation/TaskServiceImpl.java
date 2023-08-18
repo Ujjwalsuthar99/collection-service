@@ -8,6 +8,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.TaskRepositor
 import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.*;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanSummaryForLoanDTOs.LoanSummaryResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
@@ -119,6 +120,13 @@ public class TaskServiceImpl implements TaskService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", Long.parseLong(loanId));
 
+            LoanSummaryResponseDTO loanSummaryResponse = HTTPRequestService.<Object, LoanSummaryResponseDTO>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getLoanSummaryForLoan/" + loanIdNumber)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(LoanSummaryResponseDTO.class)
+                    .build().call();
+
             int dpd = loanDetailRes.getData().getDpd();
             String dpdTextColor;
             String dpdBgColor;
@@ -229,6 +237,10 @@ public class TaskServiceImpl implements TaskService {
             loanRes.getData().setLoanBranch(loanDetailRes.getData().getSourcingBranch());
             loanRes.getData().setEmiCycle(utilityService.addSuffix(loanDetailRes.getData().getEmiCycle()));
             loanRes.getData().setBalancePrincipal(loanDetailRes.getData().getBalancePrincipal());
+            loanRes.getData().setBalanceEmi(loanSummaryResponse.getData().getInstallmentAmount().getPaid());
+            loanRes.getData().setBalanceEmiCount(loanSummaryResponse.getData().getNumberOfInstallments().getPaid());
+            loanRes.getData().setOverdueEmi(loanSummaryResponse.getData().getInstallmentAmount().getDuesAsOnDate());
+            loanRes.getData().setOverdueEmiCount(loanSummaryResponse.getData().getNumberOfInstallments().getDuesAsOnDate());
             loanRes.getData().setLoanApplicationNumber(loanApplicationNumber);
             response.setCustomerDetails(customerList);
             response.setLoanDetails(loanRes.getData());

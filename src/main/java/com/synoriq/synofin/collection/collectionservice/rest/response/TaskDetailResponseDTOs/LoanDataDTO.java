@@ -30,5 +30,18 @@ public class LoanDataDTO {
     @JsonProperty("balance_principal")
     Double balancePrincipal;
 
+    @JsonProperty("balance_emi")
+    private Double balanceEmi;
+
+    @JsonProperty("balance_emi_count")
+    private Integer balanceEmiCount;
+
+    @JsonProperty("overdue_emi")
+    private Double overdueEmi;
+
+    @JsonProperty("overdue_emi_count")
+    private Integer overdueEmiCount;
+
+
 }
 
