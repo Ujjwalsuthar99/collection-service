@@ -58,12 +58,33 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
             "\tcollection.receipt_transfer_history rth\n" +
             "join collection.receipt_transfer rt on\n" +
             "\trth.receipt_transfer_id = rt.receipt_transfer_id\n" +
+            "join lms.service_request sr on\n" +
+            "\trth.collection_receipts_id = sr.service_request_id\n" +
             "where\n" +
             "\trt.transfer_type = 'bank'\n" +
             "\tand rt.status = 'pending'\n" +
-            "\tand rth.receipt_transfer_id = (select rth.receipt_transfer_id from collection.receipt_transfer_history rth where rth.collection_receipts_id = :receiptId)\n" +
+            "\tand rth.receipt_transfer_id = (\n" +
+            "\tselect\n" +
+            "\t\trth.receipt_transfer_id\n" +
+            "\tfrom\n" +
+            "\t\tcollection.receipt_transfer_history rth\n" +
+            "\tjoin collection.receipt_transfer rt on\n" +
+            "\t\trth.receipt_transfer_id = rt.receipt_transfer_id\n" +
+            "\twhere\n" +
+            "\t\trth.collection_receipts_id = :receiptId\n" +
+            "\t\tand rt.transfer_type = 'bank'\n" +
+            "\t\tand rt.transfer_type = 'bank')\n" +
+            "\tand sr.\"status\" = 'initiated'\n" +
             "group by\n" +
             "\trth.receipt_transfer_id")
     Map<String, Object> getDepositPendingReceipt(@Param("receiptId") Long receiptId);
+
+    @Query(nativeQuery = true, value = "select\n" +
+            "\tcast(count(rth.collection_receipts_id) as integer)\n" +
+            "from\n" +
+            "\tcollection.receipt_transfer_history rth\n" +
+            "where\n" +
+            "\trth.receipt_transfer_id = :receiptTransferId")
+    Long getReceiptCountFromReceiptTransfer(@Param("receiptTransferId") Long receiptTransferId);
 
 }

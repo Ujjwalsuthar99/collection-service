@@ -59,7 +59,7 @@ public class KafkaListnerService {
 
             Long userId = 0L;
             CollectionReceiptEntity collectionReceiptEntity1 = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
-            if(collectionReceiptEntity1 != null) {
+            if (collectionReceiptEntity1 != null) {
                 userId = collectionReceiptEntity1.getReceiptHolderUserId();
             }
 
@@ -76,7 +76,7 @@ public class KafkaListnerService {
 
             CollectionActivityLogsEntity checkCollectionActivityLogsEntity = collectionActivityLogsRepository.getActivityLogsKafkaByReceiptId(String.valueOf(messageObject.getServiceRequestId()));
 
-            if(collectionLimitUser != null && collectionReceiptEntity != null && checkCollectionActivityLogsEntity == null) {
+            if (collectionLimitUser != null && collectionReceiptEntity != null && checkCollectionActivityLogsEntity == null) {
                 log.info("in iffff");
                 collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
                 collectionLimitUserWiseEntity.setCreatedDate(new Date());
@@ -106,7 +106,9 @@ public class KafkaListnerService {
 
                 Map<String, Object> receiptHistoryCount = receiptTransferHistoryRepository.getDepositPendingReceipt(messageObject.getServiceRequestId());
 
-                if(Long.parseLong(String.valueOf(receiptHistoryCount.get("pending_receipt_count"))) == 1) {
+                Long totalReceiptCountFromReceiptTransfer = receiptTransferHistoryRepository.getReceiptCountFromReceiptTransfer(Long.valueOf(String.valueOf(receiptHistoryCount.get("receipt_transfer_id"))));
+
+                if (Long.valueOf(String.valueOf(receiptHistoryCount.get("pending_receipt_count"))).equals(totalReceiptCountFromReceiptTransfer)) {
                     ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(Long.parseLong(String.valueOf(receiptHistoryCount.get("receipt_transfer_id"))));
                     receiptTransferEntity.setStatus("approved");
                     receiptTransferRepository.save(receiptTransferEntity);
