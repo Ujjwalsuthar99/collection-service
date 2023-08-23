@@ -159,4 +159,6 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "\tand rt.transfer_type = 'bank'\n" +
             "\tand rth.deleted = false")
     Long getDepositionOfReceipt(@Param("receiptId") Long receiptId);
+    
+    ReceiptTransferEntity findByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
 }
