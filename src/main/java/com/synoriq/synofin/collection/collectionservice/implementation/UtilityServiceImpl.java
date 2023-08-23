@@ -11,6 +11,8 @@ import com.synoriq.synofin.collection.collectionservice.repository.ReceiptReposi
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.RequestDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.SmsListDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.SpfcSmsRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDataDTO;
@@ -679,11 +681,49 @@ public class UtilityServiceImpl implements UtilityService {
                 consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON((postField + postData)), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
             }
 
-//            if (clientId.equals("spfc")) {
-//
-//                SpfcSmsRequestDTO spfcSmsRequestDTO = new SpfcSmsRequestDTO();
-//                SpfcMsgDTOResponse spfcMsgDTOResponse = spfcSmsService.sendSmsSpfc(spfcSmsRequestDTO, token, springProfile);
-//            }
+            if (clientId.equals("spfc")) {
+                RequestDataDTO requestDataDTO = new RequestDataDTO();
+                if (paymentMode.equals("cash")) {
+                    requestDataDTO.setTemplateName("template3");
+                } else if (paymentMode.equals("cheque")) {
+                    requestDataDTO.setTemplateName("template2");
+                } else {
+                    requestDataDTO.setTemplateName("template1");
+                }
+
+                requestDataDTO.setMessageType("text");
+                List<SmsListDTO> smsListDTOS = new ArrayList<>();
+                List<String> strings = new ArrayList<>();
+                strings.add(receiptAmount);
+                strings.add(loanNumber);
+                strings.add(shortenUrlResponseDTO.getData().getResult());
+                SmsListDTO smsListDTO = new SmsListDTO();
+                smsListDTO.setMessageType("english");
+                String receivedMobileNumber;
+                if (isProd) {
+                    if (Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null) {
+                        receivedMobileNumber = collectedFromMobileNumber;
+                    } else {
+                        receivedMobileNumber = applicantMobileNumber;
+                    }
+                    smsListDTO.setMobiles("91" + receivedMobileNumber);
+                } else {
+                    smsListDTO.setMobiles("919887432524");
+                }
+                smsListDTOS.add(smsListDTO);
+                requestDataDTO.setTemplateVariable(strings);
+                requestDataDTO.setSmsList(smsListDTOS);
+                SpfcSmsRequestDTO spfcSmsRequestDTO = new SpfcSmsRequestDTO();
+                spfcSmsRequestDTO.setSystemId("collection");
+                spfcSmsRequestDTO.setUserReferenceNumber("");
+                spfcSmsRequestDTO.setSpecificPartnerName("");
+                spfcSmsRequestDTO.setData(requestDataDTO);
+
+                SpfcMsgDTOResponse spfcMsgDTOResponse = spfcSmsService.sendSmsSpfc(spfcSmsRequestDTO, token, springProfile);
+                saveSendSMSActivityData(loanId, res, userId);
+                // creating api logs
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), spfcSmsRequestDTO, spfcMsgDTOResponse, "success", Long.parseLong(loanId[0]));
+            }
 
 //            if(clientId.equals("deccan")) {
 //                String paymentMode1 = Objects.equals(paymentMode, "cash") ? "Cash" : (Objects.equals(paymentMode, "upi") ? "Online" : "Cheque") ;

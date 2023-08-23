@@ -275,4 +275,24 @@ public class ReceiptTransferController {
     }
 
 
+    @RequestMapping(value = "/receipt-transfer/disable-approve/{receiptId}", method = RequestMethod.GET)
+    public ResponseEntity<Object> disableApproveButtonInLms(@RequestHeader("Authorization") String bearerToken, @PathVariable("receiptId") Long receiptId) throws Exception {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+        try {
+            baseResponse = receiptTransferService.disableApproveButtonInLms(bearerToken, receiptId);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+
 }
