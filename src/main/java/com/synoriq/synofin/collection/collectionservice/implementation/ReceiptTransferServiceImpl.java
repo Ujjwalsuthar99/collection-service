@@ -785,12 +785,16 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             log.info("receipt transfer id {}", receiptTransferId);
 
             DisableApproveButtonResponseDTO disableApproveButtonResponseDTO = new DisableApproveButtonResponseDTO();
-            if(receiptTransferId != null) {
-                disableApproveButtonResponseDTO.setDisableApproveButton(false);
-//                return false;
+
+            String disableApproveButtonConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DISABLE_APPROVE_BUTTON_IN_LMS);
+            if(disableApproveButtonConf.equals("true")) {
+                if(receiptTransferId != null) {
+                    disableApproveButtonResponseDTO.setDisableApproveButton(false);
+                } else {
+                    disableApproveButtonResponseDTO.setDisableApproveButton(true);
+                }
             } else {
-                disableApproveButtonResponseDTO.setDisableApproveButton(true);
-//                return true;
+                disableApproveButtonResponseDTO.setDisableApproveButton(false);
             }
             return new BaseDTOResponse<>(disableApproveButtonResponseDTO);
         } catch (Exception e) {
