@@ -146,4 +146,17 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "         join collection.collection_activity_logs cal on cal.collection_activity_logs_id = cr.collection_activity_logs_id\n" +
             "         where rt.receipt_transfer_id = :receiptTransferId")
     List<Map<String, Object>> getReceiptsDataByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
+
+    @Query(nativeQuery = true, value = "select\n" +
+            "\trth.receipt_transfer_id\n" +
+            "from\n" +
+            "\tcollection.receipt_transfer_history rth\n" +
+            "join collection.receipt_transfer rt on\n" +
+            "\trth.receipt_transfer_id = rt.receipt_transfer_id\n" +
+            "where\n" +
+            "\trth.collection_receipts_id = :receiptId\n" +
+            "\tand rt.status = 'pending'\n" +
+            "\tand rt.transfer_type = 'bank'\n" +
+            "\tand rth.deleted = false")
+    Long getDepositionOfReceipt(@Param("receiptId") Long receiptId);
 }

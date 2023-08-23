@@ -775,4 +775,26 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         receiptTransferRepository.save(receiptTransferEntity);
         return receiptTransferEntity;
     }
+
+
+    @Override
+    public BaseDTOResponse<Object> disableApproveButtonInLms(String Token, Long receiptId) throws Exception {
+
+        try {
+            Long receiptTransferId = receiptTransferRepository.getDepositionOfReceipt(receiptId);
+            log.info("receipt transfer id {}", receiptTransferId);
+
+            DisableApproveButtonResponseDTO disableApproveButtonResponseDTO = new DisableApproveButtonResponseDTO();
+            if(receiptTransferId != null) {
+                disableApproveButtonResponseDTO.setDisableApproveButton(false);
+//                return false;
+            } else {
+                disableApproveButtonResponseDTO.setDisableApproveButton(true);
+//                return true;
+            }
+            return new BaseDTOResponse<>(disableApproveButtonResponseDTO);
+        } catch (Exception e) {
+            throw new Exception("1016028");
+        }
+    }
 }

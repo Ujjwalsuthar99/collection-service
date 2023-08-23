@@ -33,6 +33,7 @@ public interface ReceiptTransferService {
     public ReceiptTransferDataByReceiptIdResponseDTO getReceiptTransferByReceiptId(String token , Long receiptId) throws Exception;
     public AllBankTransferResponseDTO getAllBankTransfers(String token, String status, Integer pageNo, Integer pageSize) throws Exception;
     public Object getReceiptsDataByReceiptTransferId(String token , Long receiptTransferId) throws Exception;
+    public BaseDTOResponse<Object> disableApproveButtonInLms(String token , Long receiptId) throws Exception;
     public DepositInvoiceResponseDataDTO depositInvoice(String token , DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception;
 
 }
