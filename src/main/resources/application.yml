@@ -1,13 +1,13 @@
 spring:
   profiles:
-    active: preprod
+    active: pre-prod
   application:
     name: collection-service
   config:
     import: "optional:configserver:"
   cloud:
     config:
-      label: preprod
+      label: pre-prod
   #      uri: http://13.232.9.69:8888
   flyway:
     enabled: false
