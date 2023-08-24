@@ -9,8 +9,11 @@ public class ShortenUrlRequestDTO {
     @JsonProperty("data")
     public ShortenUrlDataRequestDTO data;
 
-    @JsonProperty("client_id")
-    public String clientId;
+    @JsonProperty("specific_partner_name")
+    public String specificPartnerName;
+
+    @JsonProperty("user_reference_number")
+    public String userReferenceNumber;
 
     @JsonProperty("system_id")
     public String systemId;
