@@ -2,10 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.config.DatabaseContextHolder;
-import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferHistoryEntity;
+import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.events.template.MessageContainerTemplate;
 import com.synoriq.synofin.events.template.lms.CollectionRequestActionEvent;
@@ -20,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.KAFKA_RECEIPT_STATUS;
@@ -40,6 +38,12 @@ public class KafkaListnerService {
     @Autowired
     private CollectionActivityLogsRepository collectionActivityLogsRepository;
 
+    @Autowired
+    private ReceiptTransferHistoryRepository receiptTransferHistoryRepository;
+
+    @Autowired
+    private ReceiptTransferRepository receiptTransferRepository;
+
     @KafkaListener(topics = "${spring.kafka.events.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "${spring.kafka.groupId}")
     public void consumerTest(@Payload MessageContainerTemplate message, @Headers MessageHeaders headers, Acknowledgment acknowledgment) {
         try {
@@ -55,7 +59,7 @@ public class KafkaListnerService {
 
             Long userId = 0L;
             CollectionReceiptEntity collectionReceiptEntity1 = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
-            if(collectionReceiptEntity1 != null) {
+            if (collectionReceiptEntity1 != null) {
                 userId = collectionReceiptEntity1.getReceiptHolderUserId();
             }
 
@@ -72,7 +76,7 @@ public class KafkaListnerService {
 
             CollectionActivityLogsEntity checkCollectionActivityLogsEntity = collectionActivityLogsRepository.getActivityLogsKafkaByReceiptId(String.valueOf(messageObject.getServiceRequestId()));
 
-            if(collectionLimitUser != null && collectionReceiptEntity != null && checkCollectionActivityLogsEntity == null) {
+            if (collectionLimitUser != null && collectionReceiptEntity != null && checkCollectionActivityLogsEntity == null) {
                 log.info("in iffff");
                 collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
                 collectionLimitUserWiseEntity.setCreatedDate(new Date());
@@ -99,9 +103,20 @@ public class KafkaListnerService {
                 collectionActivityLogsEntity.setImages(null);
                 collectionActivityLogsEntity.setGeolocation("{}");
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
-                acknowledgment.acknowledge();
+
+                Map<String, Object> receiptHistoryCount = receiptTransferHistoryRepository.getDepositPendingReceipt(messageObject.getServiceRequestId());
+
+                Long totalReceiptCountFromReceiptTransfer = receiptTransferHistoryRepository.getReceiptCountFromReceiptTransfer(Long.valueOf(String.valueOf(receiptHistoryCount.get("receipt_transfer_id"))));
+
+                if (Long.valueOf(String.valueOf(receiptHistoryCount.get("pending_receipt_count"))).equals(totalReceiptCountFromReceiptTransfer)) {
+                    ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(Long.parseLong(String.valueOf(receiptHistoryCount.get("receipt_transfer_id"))));
+                    receiptTransferEntity.setStatus("approved");
+                    receiptTransferRepository.save(receiptTransferEntity);
+                }
+
                 log.info(" ---------- Things acknowledged -------------");
             }
+            acknowledgment.acknowledge();
         } catch (Exception ee) {
             ee.printStackTrace();
         }
