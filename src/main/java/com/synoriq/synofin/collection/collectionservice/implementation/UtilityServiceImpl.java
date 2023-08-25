@@ -292,6 +292,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Override
     public String getApiUrl() {
+        if (Objects.equals(springProfile, "pre-prod")) {
+            springProfile = "preprod";
+        }
         String queryString = httpServletRequest.getQueryString();
 //        httpServletRequest.getRequestURI() = "/collection-service/v1/getMasterType";
         log.info("queryString {}", queryString);
@@ -526,6 +529,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Override
     public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId, String customerType, String customerName, String applicantMobileNumber, String collectedFromMobileNumber, String loanNumber) throws IOException {
+        if (Objects.equals(springProfile, "pre-prod")) {
+            springProfile = "preprod";
+        }
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
         String postData = "----userRefNo: " + userRefNo + ",clientId: " + clientId + ",paymentMode: " + paymentMode + ",receiptAmount: " + receiptAmount + ",fileName: " + fileName + ",userId: " + userId + ",customerType: " + customerType + ",customerName: " + customerName + ",applicantMobileNumber: " + applicantMobileNumber + ",collectedFromMobileNumber: " + collectedFromMobileNumber + ",loanNumber: " + loanNumber;
@@ -572,13 +578,16 @@ public class UtilityServiceImpl implements UtilityService {
             ShortenUrlRequestDTO shortenUrlRequestDTO = new ShortenUrlRequestDTO();
             ShortenUrlDataRequestDTO shortenUrlDataRequestDTO = new ShortenUrlDataRequestDTO();
 
-            shortenUrlRequestDTO.setClientId(clientId);
+            shortenUrlRequestDTO.setUserReferenceNumber("");
+            shortenUrlRequestDTO.setSpecificPartnerName("");
             shortenUrlRequestDTO.setSystemId("collection");
             shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
             shortenUrlRequestDTO.setData(shortenUrlDataRequestDTO);
-            String shortenUrl = SHORTEN_URL_UAT;
-            if (!isProd) {
-                shortenUrl = SHORTEN_URL_UAT.replace("prod", "dev");
+            String shortenUrl = "";
+            if (springProfile.equals("pre-prod")) {
+                shortenUrl = SHORTEN_URL_PREPROD;
+            } else {
+                shortenUrl = SHORTEN_URL_PREPROD.replace("preprod", springProfile);
             }
 
             shortenUrlResponseDTO = HTTPRequestService.<Object, ShortenUrlResponseDTO>builder()
