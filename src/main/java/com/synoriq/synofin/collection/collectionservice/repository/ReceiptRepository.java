@@ -238,4 +238,12 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tor LOWER(cast(sr.service_request_id as text)) like LOWER(concat('%', :searchKey, '%'))\n" +
             ")")
     List<Map<String, Object>> getReceiptsBySearchKey(@Param("userName") String userName, @Param("searchKey") String searchKey, Pageable pageRequest);
+
+    @Query(nativeQuery = true, value = "select\n" +
+            "\tcast(sr.form->>'payment_mode' as text) as payment_mode\n" +
+            "from\n" +
+            "\tlms.service_request sr\n" +
+            "where\n" +
+            "\tsr.service_request_id=:receiptId")
+    String getPaymentModeByReceiptId(@Param("receiptId") Long receiptId);
 }

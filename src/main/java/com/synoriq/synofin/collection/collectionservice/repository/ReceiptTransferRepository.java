@@ -158,7 +158,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "\tand rt.status = 'pending'\n" +
             "\tand rt.transfer_type = 'bank'\n" +
             "\tand rth.deleted = false")
-    Long getDepositionOfReceipt(@Param("receiptId") Long receiptId);
+    String getDepositionOfReceipt(@Param("receiptId") Long receiptId);
     
     ReceiptTransferEntity findByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
 }
