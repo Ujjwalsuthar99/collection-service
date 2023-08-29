@@ -85,6 +85,7 @@ public class KafkaListnerService {
                 collectionLimitUserWiseEntity.setUserId(collectionLimitUser.getUserId());
                 collectionLimitUserWiseEntity.setTotalLimitValue(collectionLimitUser.getTotalLimitValue());
                 collectionLimitUserWiseEntity.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                collectionLimitUserWiseEntity.setUserName(messageObject.getUserName());
                 log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
                 collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
 
