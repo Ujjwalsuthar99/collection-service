@@ -77,14 +77,19 @@ public class KafkaListnerService {
             CollectionActivityLogsEntity checkCollectionActivityLogsEntity = collectionActivityLogsRepository.getActivityLogsKafkaByReceiptId(String.valueOf(messageObject.getServiceRequestId()));
 
             if (collectionLimitUser != null && collectionReceiptEntity != null && checkCollectionActivityLogsEntity == null) {
-                log.info("in iffff");
                 collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
                 collectionLimitUserWiseEntity.setCreatedDate(new Date());
                 collectionLimitUserWiseEntity.setDeleted(collectionLimitUser.getDeleted());
                 collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUser.getCollectionLimitStrategiesKey());
                 collectionLimitUserWiseEntity.setUserId(collectionLimitUser.getUserId());
                 collectionLimitUserWiseEntity.setTotalLimitValue(collectionLimitUser.getTotalLimitValue());
-                collectionLimitUserWiseEntity.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                if(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())) < 0 ) {
+                    log.info("in iff for limit minus check {}", collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                    collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
+                } else {
+                    log.info("in else for limit minus check {}", collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                    collectionLimitUserWiseEntity.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                }
                 collectionLimitUserWiseEntity.setUserName(messageObject.getUserName());
                 log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
                 collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
