@@ -142,7 +142,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tcr.receipt_id = sr.service_request_id\n" +
             "where\n" +
             "\t(cr.receipt_holder_user_id = :userId and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque') and sr.status = 'initiated')\n" +
-            "    or (cr.receipt_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending'))\n" +
+            "    or (cr.receipt_id in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending'))\n" +
             "\tand (EXTRACT('epoch' FROM (now() - sr.created_date))/3600) > CAST(:depositReminderHours AS numeric)")
     List<Map<String, Object>> depositReminderData(@Param("userId") Long userId, @Param("depositReminderHours") String depositReminderHours);
 
@@ -154,7 +154,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tcr.receipt_id = sr.service_request_id\n" +
             "where\n" +
             "\t(cr.receipt_holder_user_id = :userId and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque') and sr.status = 'initiated')\n" +
-            "    or (cr.receipt_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending'))\n" +
+            "    or (cr.receipt_id in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending'))\n" +
             "    order by sr.created_date asc limit 1")
     Map<String, Object> depositReminderDataByDayTime(@Param("userId") Long userId);
 
