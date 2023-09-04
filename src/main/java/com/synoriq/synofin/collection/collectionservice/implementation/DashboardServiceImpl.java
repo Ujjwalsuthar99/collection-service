@@ -119,7 +119,7 @@ public class DashboardServiceImpl implements DashboardService {
                 String[] dayTime = depositReminderDayTime.split("/");
                 Map<String, Object> getReceiptDataNotDeposited = receiptRepository.depositReminderDataByDayTime(userId);
                 log.info("dash serv {}", getReceiptDataNotDeposited);
-                if(getReceiptDataNotDeposited != null) {
+                if(getReceiptDataNotDeposited.size() != 0) {
                     log.info("value is not null");
                     String strDate = String.valueOf(getReceiptDataNotDeposited.get("created_date"));
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
