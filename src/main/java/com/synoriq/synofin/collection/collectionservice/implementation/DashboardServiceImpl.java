@@ -118,9 +118,7 @@ public class DashboardServiceImpl implements DashboardService {
                 String depositReminderDayTime = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER_DAYTIME);
                 String[] dayTime = depositReminderDayTime.split("/");
                 Map<String, Object> getReceiptDataNotDeposited = receiptRepository.depositReminderDataByDayTime(userId);
-                log.info("dash serv {}", getReceiptDataNotDeposited);
                 if(getReceiptDataNotDeposited.size() != 0) {
-                    log.info("value is not null");
                     String strDate = String.valueOf(getReceiptDataNotDeposited.get("created_date"));
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                     Date date = dateFormat.parse(strDate);
