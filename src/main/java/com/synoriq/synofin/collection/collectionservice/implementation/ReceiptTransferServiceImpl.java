@@ -95,7 +95,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             Double transferredAmount = receiptTransferDtoRequest.getAmount();
             Long transferredToID = receiptTransferDtoRequest.getTransferredToUserId();
             String transferMode = receiptTransferDtoRequest.getTransferMode();
-            if(transferMode.equals("cash")) {
+            if (transferMode.equals("cash")) {
                 limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
             } else {
                 limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
@@ -211,6 +211,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         }
         return receiptTransferDTOList;
     }
+
     @Transactional
     public ReceiptTransferEntity statusUpdate(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, String token) throws Exception {
         BaseDTOResponse<Object> baseResponse = null;
@@ -297,7 +298,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                             } else {
                                 CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
                                 String limitConf = "";
-                                if(receiptTransferEntityTransferMode.equals("cash")) {
+                                if (receiptTransferEntityTransferMode.equals("cash")) {
                                     limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
                                 } else {
                                     limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
@@ -356,11 +357,12 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         receiptTransferEntity.setReceiptImage(receiptTransferStatusUpdateDtoRequest.getImages());
         receiptTransferRepository.save(receiptTransferEntity);
     }
+
     @Override
     public void setRemarks(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, Long collectionActivityId) {
         CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
         String remarks = receiptTransferStatusUpdateDtoRequest.getActivityLog().getRemarks();
-        String lastWord = remarks.substring(remarks.lastIndexOf(" ")+1);
+        String lastWord = remarks.substring(remarks.lastIndexOf(" ") + 1);
         String updatedRemarks = TRANSFER_STATUS;
         updatedRemarks = updatedRemarks.replace("{transfer_request}", receiptTransferStatusUpdateDtoRequest.getReceiptTransferId().toString());
         updatedRemarks = updatedRemarks.replace("{transfer_action}", receiptTransferStatusUpdateDtoRequest.getStatus());
@@ -368,8 +370,9 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         collectionActivityLogsEntity1.setRemarks(updatedRemarks);
         collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
     }
+
     @Override
-    public ReceiptTransferResponseDTO getReceiptTransferById(String token ,Long receiptTransferId, Long userId) throws Exception {
+    public ReceiptTransferResponseDTO getReceiptTransferById(String token, Long receiptTransferId, Long userId) throws Exception {
         log.info("receipt tranfer idddd {}", receiptTransferId);
         ReceiptTransferEntity receiptTransferEntity;
         boolean buttonRestriction = false;
@@ -386,7 +389,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, receiptTransferEntity.getTransferMode());
 
             List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferId);
-            Long receiptId =  receiptTransferHistoryEntityList.get(0).getCollectionReceiptsId();
+            Long receiptId = receiptTransferHistoryEntityList.get(0).getCollectionReceiptsId();
             List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntity = receiptTransferHistoryRepository.buttonRestriction(receiptTransferId, receiptId);
 
             if (!receiptTransferHistoryEntity.isEmpty()) {
@@ -431,6 +434,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         }
         return receiptTransferResponseDTO;
     }
+
     @Override
     public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date endDate, String status, Integer pageNo, Integer pageSize) throws Exception {
         List<Map<String, Object>> receiptTransferEntity;
@@ -447,6 +451,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         }
         return receiptTransferEntity;
     }
+
     @Override
     public Map<String, List<Map<String, Object>>> getReceiptTransferByUserIdWithAllStatus(Long transferredBy, Date fromDate, Date endDate, Integer pageNo, Integer pageSize) throws Exception {
         List<Map<String, Object>> transfer;
@@ -654,7 +659,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     depositInvoiceWrapperRequestDTO.setReqSource("m_collect");
                     depositInvoiceWrapperRequestDTO.setReqData(depositInvoiceWrapperRequestDataDTO);
                     depositInvoiceWrapperArr.add(depositInvoiceWrapperRequestDTO);
-                    log.info("depositInvoiceDTOdepositInvoiceDTO {}",depositInvoiceWrapperRequestDTO);
+                    log.info("depositInvoiceDTOdepositInvoiceDTO {}", depositInvoiceWrapperRequestDTO);
                 }
             }
             DepositInvoiceWrapperRequestListDTO depositInvoiceWrapperRequestListDTO = new DepositInvoiceWrapperRequestListDTO();
@@ -781,17 +786,21 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     public BaseDTOResponse<Object> disableApproveButtonInLms(String Token, Long receiptId) throws Exception {
 
         try {
-            Long receiptTransferId = receiptTransferRepository.getDepositionOfReceipt(receiptId);
-            log.info("receipt transfer id {}", receiptTransferId);
+            String receiptTransferId = receiptTransferRepository.getDepositionOfReceipt(receiptId);
+            String paymentMode = receiptRepository.getPaymentModeByReceiptId(receiptId);
 
             DisableApproveButtonResponseDTO disableApproveButtonResponseDTO = new DisableApproveButtonResponseDTO();
 
             String disableApproveButtonConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DISABLE_APPROVE_BUTTON_IN_LMS);
-            if(disableApproveButtonConf.equals("true")) {
-                if(receiptTransferId != null) {
-                    disableApproveButtonResponseDTO.setDisableApproveButton(false);
+            if (disableApproveButtonConf.equals("true")) {
+                if (!paymentMode.equals("upi")) {
+                    if (receiptTransferId != null) {
+                        disableApproveButtonResponseDTO.setDisableApproveButton(false);
+                    } else {
+                        disableApproveButtonResponseDTO.setDisableApproveButton(true);
+                    }
                 } else {
-                    disableApproveButtonResponseDTO.setDisableApproveButton(true);
+                    disableApproveButtonResponseDTO.setDisableApproveButton(false);
                 }
             } else {
                 disableApproveButtonResponseDTO.setDisableApproveButton(false);
