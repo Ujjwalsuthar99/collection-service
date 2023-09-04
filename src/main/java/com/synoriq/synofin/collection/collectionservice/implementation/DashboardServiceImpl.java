@@ -118,22 +118,26 @@ public class DashboardServiceImpl implements DashboardService {
                 String depositReminderDayTime = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER_DAYTIME);
                 String[] dayTime = depositReminderDayTime.split("/");
                 Map<String, Object> getReceiptDataNotDeposited = receiptRepository.depositReminderDataByDayTime(userId);
-                String strDate = String.valueOf(getReceiptDataNotDeposited.get("created_date"));
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = dateFormat.parse(strDate);
+                if(getReceiptDataNotDeposited != null) {
+                    String strDate = String.valueOf(getReceiptDataNotDeposited.get("created_date"));
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    Date date = dateFormat.parse(strDate);
 
-                int daysToAdd = Integer.parseInt(dayTime[0]);
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(date);
-                calendar.add(Calendar.DAY_OF_YEAR, daysToAdd);
-                calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(dayTime[1]));
-                calendar.set(Calendar.MINUTE, 0);
-                calendar.set(Calendar.SECOND, 0);
+                    int daysToAdd = Integer.parseInt(dayTime[0]);
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(date);
+                    calendar.add(Calendar.DAY_OF_YEAR, daysToAdd);
+                    calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(dayTime[1]));
+                    calendar.set(Calendar.MINUTE, 0);
+                    calendar.set(Calendar.SECOND, 0);
 
-                Date finalDate = calendar.getTime();
-                Date currentDate = new Date();
-                if (finalDate.compareTo(currentDate) < 0) {
-                    dashboardResponseDTO.setDepositReminder(true);
+                    Date finalDate = calendar.getTime();
+                    Date currentDate = new Date();
+                    if (finalDate.compareTo(currentDate) < 0) {
+                        dashboardResponseDTO.setDepositReminder(true);
+                    } else {
+                        dashboardResponseDTO.setDepositReminder(false);
+                    }
                 } else {
                     dashboardResponseDTO.setDepositReminder(false);
                 }
