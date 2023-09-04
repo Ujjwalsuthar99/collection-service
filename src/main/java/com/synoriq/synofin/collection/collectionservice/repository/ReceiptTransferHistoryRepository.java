@@ -72,9 +72,8 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
             "\t\trth.receipt_transfer_id = rt.receipt_transfer_id\n" +
             "\twhere\n" +
             "\t\trth.collection_receipts_id = :receiptId\n" +
-            "\t\tand rt.transfer_type = 'bank'\n" +
             "\t\tand rt.transfer_type = 'bank')\n" +
-            "\tand sr.\"status\" = 'initiated'\n" +
+            "\tand sr.\"status\" = 'approved'\n" +
             "group by\n" +
             "\trth.receipt_transfer_id")
     Map<String, Object> getDepositPendingReceipt(@Param("receiptId") Long receiptId);
