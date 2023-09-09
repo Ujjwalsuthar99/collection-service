@@ -1,7 +1,5 @@
 package com.synoriq.synofin.collection.collectionservice.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.synoriq.synofin.utilityservice.utility.DateTime;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.AllArgsConstructor;
 import lombok.Data;

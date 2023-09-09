@@ -61,7 +61,7 @@
 
 		<dependency>
 			<groupId>com.synoriq.synofin</groupId>
-			<artifactId>utility-service</artifactId>
+			<artifactId>master-service</artifactId>
 			<version>preprod-SNAPSHOT</version>
 		</dependency>
 
