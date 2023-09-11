@@ -134,28 +134,55 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
     Map<String, Object> transactionNumberCheck(@Param("transactionReferenceNumber") String transactionReferenceNumber);
 
 
-    @Query(nativeQuery = true, value = "select \n" +
-            "\t sr.service_request_id\n" +
+    @Query(nativeQuery = true, value = "select\n" +
+            "\tsr.service_request_id\n" +
             "from\n" +
             "\tlms.service_request sr\n" +
             "join collection.collection_receipts cr on\n" +
             "\tcr.receipt_id = sr.service_request_id\n" +
             "where\n" +
-            "\t(cr.receipt_holder_user_id = :userId and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque') and sr.status = 'initiated')\n" +
-            "    or (cr.receipt_id in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending'))\n" +
-            "\tand (EXTRACT('epoch' FROM (now() - sr.created_date))/3600) > CAST(:depositReminderHours AS numeric)")
+            "\t(cr.receipt_holder_user_id = :userId\n" +
+            "\t\tand (sr.form->>'payment_mode' = 'cash'\n" +
+            "\t\t\tor sr.form->>'payment_mode' = 'cheque')\n" +
+            "\t\tand sr.status = 'initiated')\n" +
+            "\tand (cr.receipt_id in (\n" +
+            "\tselect\n" +
+            "\t\trth.collection_receipts_id\n" +
+            "\tfrom\n" +
+            "\t\tcollection.receipt_transfer_history rth\n" +
+            "\tjoin collection.receipt_transfer rt on\n" +
+            "\t\trth.receipt_transfer_id = rt.receipt_transfer_id\n" +
+            "\twhere\n" +
+            "\t\trt.status = 'pending'))\n" +
+            "\tand (extract('epoch'\n" +
+            "from\n" +
+            "\t(now() - sr.created_date))/ 3600) > cast(:depositReminderHours as numeric)")
     List<Map<String, Object>> depositReminderData(@Param("userId") Long userId, @Param("depositReminderHours") String depositReminderHours);
 
-    @Query(nativeQuery = true, value = "select \n" +
-            "\t sr.service_request_id, sr.created_date \n" +
+    @Query(nativeQuery = true, value = "select\n" +
+            "\tsr.service_request_id,\n" +
+            "\tsr.created_date\n" +
             "from\n" +
             "\tlms.service_request sr\n" +
             "join collection.collection_receipts cr on\n" +
             "\tcr.receipt_id = sr.service_request_id\n" +
             "where\n" +
-            "\t(cr.receipt_holder_user_id = :userId and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque') and sr.status = 'initiated')\n" +
-            "    or (cr.receipt_id in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending'))\n" +
-            "    order by sr.created_date asc limit 1")
+            "\t(sr.form->>'payment_mode' = 'cash'\n" +
+            "\t\tor sr.form->>'payment_mode' = 'cheque')\n" +
+            "\tand sr.status = 'initiated'\n" +
+            "\tand cr.receipt_holder_user_id = :userId \n" +
+            "\tand cr.receipt_id in (\n" +
+            "\tselect\n" +
+            "\t\trth.collection_receipts_id\n" +
+            "\tfrom\n" +
+            "\t\tcollection.receipt_transfer_history rth\n" +
+            "\tjoin collection.receipt_transfer rt on\n" +
+            "\t\trth.receipt_transfer_id = rt.receipt_transfer_id\n" +
+            "\twhere\n" +
+            "\t\trt.status = 'pending')\n" +
+            "order by\n" +
+            "\tsr.created_date asc\n" +
+            "limit 1")
     Map<String, Object> depositReminderDataByDayTime(@Param("userId") Long userId);
 
     @Query(nativeQuery = true, value = "select cast(cal.images as text) as images, cast(cal.geo_location_data as text) as geo_location_data, sr.form->>'created_by' as created_by,\n" +
