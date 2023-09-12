@@ -144,7 +144,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\t(cr.receipt_holder_user_id = :userId\n" +
             "\t\tand sr.form->>'payment_mode' = 'cash'\n" +
             "\t\tand sr.status = 'initiated')\n" +
-            "\tand (cr.receipt_id in (\n" +
+            "\tor (cr.receipt_id in (\n" +
             "\tselect\n" +
             "\t\trth.collection_receipts_id\n" +
             "\tfrom\n" +
@@ -169,7 +169,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tsr.form->>'payment_mode' = 'cash'\n" +
             "\tand sr.status = 'initiated'\n" +
             "\tand cr.receipt_holder_user_id = :userId \n" +
-            "\tand cr.receipt_id in (\n" +
+            "\tor cr.receipt_id in (\n" +
             "\tselect\n" +
             "\t\trth.collection_receipts_id\n" +
             "\tfrom\n" +
