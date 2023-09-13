@@ -152,7 +152,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tjoin collection.receipt_transfer rt on\n" +
             "\t\trth.receipt_transfer_id = rt.receipt_transfer_id\n" +
             "\twhere\n" +
-            "\t\trt.status = 'pending') and cr.receipt_holder_user_id = :userId)\n" +
+            "\t\trt.status = 'pending') and cr.receipt_holder_user_id = :userId and sr.form->>'payment_mode' = 'cash')\n" +
             "\tand (extract('epoch'\n" +
             "from\n" +
             "\t(now() - sr.created_date))/ 3600) > cast(:depositReminderHours as numeric)")
@@ -167,8 +167,8 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tcr.receipt_id = sr.service_request_id\n" +
             "where\n" +
             "\t(sr.form->>'payment_mode' = 'cash'\n" +
-            "\tand sr.status = 'initiated'\n" +
-            "\tand cr.receipt_holder_user_id = :userId)\n" +
+            "\t\tand sr.status = 'initiated'\n" +
+            "\t\tand cr.receipt_holder_user_id = :userId)\n" +
             "\tor (cr.receipt_id in (\n" +
             "\tselect\n" +
             "\t\trth.collection_receipts_id\n" +
@@ -177,7 +177,9 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tjoin collection.receipt_transfer rt on\n" +
             "\t\trth.receipt_transfer_id = rt.receipt_transfer_id\n" +
             "\twhere\n" +
-            "\t\trt.status = 'pending') and cr.receipt_holder_user_id = :userId)\n" +
+            "\t\trt.status = 'pending')\n" +
+            "\tand cr.receipt_holder_user_id = :userId\n" +
+            "\tand sr.form->>'payment_mode' = 'cash')\n" +
             "order by\n" +
             "\tsr.created_date asc\n" +
             "limit 1")
