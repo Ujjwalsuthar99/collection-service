@@ -41,7 +41,6 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
             "\tCAST(rt.receipt_image as TEXT) as receipt_image, rt.status as status, (case when rt.status != 'pending' then (select username from master.users where user_id = rt.\"action_by\") else '' end) as approved_by, COUNT(rt.receipt_transfer_id) OVER () AS total_rows\n" +
             "from\n" +
             "\tcollection.receipt_transfer rt\n" +
-            "join collection.receipt_transfer_history rth on rt.receipt_transfer_id = rth.receipt_transfer_id\n" +
             "left join (select user_id, name, username from master.users) as u on u.user_id = rt.transferred_to_user_id\n" +
             "left join (select user_id, name, username from master.users) as uu on uu.user_id = rt.transferred_by \n" +
             "left join (select bank_account_id, bank_name, account_number from master.bank_accounts) as ba2 on cast(ba2.bank_account_id as text) = rt.transfer_bank_code\n" +
@@ -72,9 +71,8 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
             "\t\trth.receipt_transfer_id = rt.receipt_transfer_id\n" +
             "\twhere\n" +
             "\t\trth.collection_receipts_id = :receiptId\n" +
-            "\t\tand rt.transfer_type = 'bank'\n" +
             "\t\tand rt.transfer_type = 'bank')\n" +
-            "\tand sr.\"status\" = 'initiated'\n" +
+            "\tand sr.\"status\" = 'approved'\n" +
             "group by\n" +
             "\trth.receipt_transfer_id")
     Map<String, Object> getDepositPendingReceipt(@Param("receiptId") Long receiptId);

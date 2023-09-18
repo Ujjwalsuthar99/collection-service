@@ -117,6 +117,8 @@ public class KafkaListnerService {
                 if (Long.valueOf(String.valueOf(receiptHistoryCount.get("pending_receipt_count"))).equals(totalReceiptCountFromReceiptTransfer)) {
                     ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(Long.parseLong(String.valueOf(receiptHistoryCount.get("receipt_transfer_id"))));
                     receiptTransferEntity.setStatus("approved");
+                    receiptTransferEntity.setActionBy(messageObject.getUserId());
+                    receiptTransferEntity.setActionDatetime(new Date());
                     receiptTransferRepository.save(receiptTransferEntity);
                 }
 
