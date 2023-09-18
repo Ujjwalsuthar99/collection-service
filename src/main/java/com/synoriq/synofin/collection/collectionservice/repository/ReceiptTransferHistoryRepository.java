@@ -52,7 +52,8 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
 
     @Query(nativeQuery = true, value = "select\n" +
             "\tcast(count(rth.collection_receipts_id) as integer) as pending_receipt_count,\n" +
-            "\trth.receipt_transfer_id as receipt_transfer_id\n" +
+            "\trth.receipt_transfer_id as receipt_transfer_id,\n" +
+            "\trt.created_date\n" +
             "from\n" +
             "\tcollection.receipt_transfer_history rth\n" +
             "join collection.receipt_transfer rt on\n" +
@@ -74,7 +75,11 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
             "\t\tand rt.transfer_type = 'bank')\n" +
             "\tand sr.\"status\" = 'approved'\n" +
             "group by\n" +
-            "\trth.receipt_transfer_id")
+            "\trth.receipt_transfer_id,\n" +
+            "\trt.created_date\n" +
+            "order by\n" +
+            "\trt.created_date asc\n" +
+            "limit 1")
     Map<String, Object> getDepositPendingReceipt(@Param("receiptId") Long receiptId);
 
     @Query(nativeQuery = true, value = "select\n" +
