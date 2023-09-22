@@ -32,5 +32,6 @@ public interface UtilityService {
     public Object getThermalPrintData(String receiptId) throws Exception;
     public OcrCheckResponseDTO ocrCheck(String token, OcrCheckRequestDTO requestBody) throws Exception;
     public String convertToJSON(String input);
+    public String splitCodeName(String input);
 
 }
