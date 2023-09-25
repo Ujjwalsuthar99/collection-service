@@ -75,7 +75,7 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
             profileDetailResponseDTO = profileService.getProfileDetails(token, collectionLimitUserWiseDtoRequest.getUsername());
             if (profileDetailResponseDTO.getData() != null) {
                 userId = profileDetailResponseDTO.getData().getUserId();
-                userName = collectionLimitUserWiseDtoRequest.getUsername();
+                userName = utilityService.splitCodeName(collectionLimitUserWiseDtoRequest.getUsername());
                 log.info(" else user name {}", userName);
             } else {
                 throw new Exception("1016041");

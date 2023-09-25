@@ -66,6 +66,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -911,5 +912,17 @@ public class UtilityServiceImpl implements UtilityService {
         }
 
         return res;
+    }
+
+    public String splitCodeName(String codeName) {
+        String patternString = "\\((.*?)\\)";
+        Pattern pattern = Pattern.compile(patternString);
+        Matcher matcher = pattern.matcher(codeName);
+        while (matcher.find()) {
+            String matchedSubstring = matcher.group(1);
+            System.out.println("Matched: " + matchedSubstring);
+            return matchedSubstring;
+        }
+        return codeName;
     }
 }
