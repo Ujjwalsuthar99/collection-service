@@ -135,7 +135,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
     @Query(nativeQuery = true, value = "select ba.bank_branch as bank_branch, ba.account_number as account_number, ba.bank_name from master.bank_accounts ba where ba.bank_account_id = :bankCode")
     Map<String, Object> getBankData(@Param("bankCode") Long bankCode);
 
-    @Query(nativeQuery = true,value = "select cast(sr.form->>'receipt_amount' as decimal) as receipt_amount, sr.created_date as created_date, sr.form->>'payment_mode' as payment_mode,\n" +
+    @Query(nativeQuery = true,value = "select cast(sr.form->>'receipt_amount' as decimal) as receipt_amount, sr.created_date as created_date, initcap(sr.form->>'payment_mode') as payment_mode,\n" +
             "\t\tsr.service_request_id as receipt_id, la.loan_application_number, sr.form->>'created_by' as created_by, sr.loan_id,\n" +
             "\t\tsr.status as status, cast(cal.images as text) as receipt_images, cast(cal.geo_location_data as text) as geo_location_data\n" +
             "         from collection.receipt_transfer rt \n" +
