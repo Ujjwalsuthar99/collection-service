@@ -950,21 +950,22 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             log.info("res {}", res);
-            Map<String, Object> documentsData = new HashMap<>();
+//            Map<String, Object> documentsData = new HashMap<>();
 
             if (res.getData().size() > 0) {
                 for (GetDocumentsDataResponseDTO getDocumentsDataResponseDTO : res.getData()) {
-                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "applicant")) {
+                    Map<String, Object> documentsData = new HashMap<>();
+                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "applicant") && Objects.equals(getDocumentsDataResponseDTO.getDocumentType(), "profile_photo")) {
                         documentsData.put("type", "applicant");
                         documentsData.put("document", getDocumentsDataResponseDTO.getDocumentUrl());
                         documentsDataArr.add(documentsData);
                     }
-                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "coapplicant")) {
+                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "coapplicant") && Objects.equals(getDocumentsDataResponseDTO.getDocumentType(), "profile_photo")) {
                         documentsData.put("type", "coapplicant");
                         documentsData.put("document", getDocumentsDataResponseDTO.getDocumentUrl());
                         documentsDataArr.add(documentsData);
                     }
-                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "guarantor")) {
+                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "guarantor") && Objects.equals(getDocumentsDataResponseDTO.getDocumentType(), "profile_photo")) {
                         documentsData.put("type", "guarantor");
                         documentsData.put("document", getDocumentsDataResponseDTO.getDocumentUrl());
                         documentsDataArr.add(documentsData);
