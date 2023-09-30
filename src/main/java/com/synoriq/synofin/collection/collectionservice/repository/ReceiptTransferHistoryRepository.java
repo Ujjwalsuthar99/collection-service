@@ -46,7 +46,8 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
             "left join (select bank_account_id, bank_name, account_number from master.bank_accounts) as ba2 on cast(ba2.bank_account_id as text) = rt.transfer_bank_code\n" +
             "join collection.collection_activity_logs cal on cal.collection_activity_logs_id = rt.collection_activity_logs_id \n" +
             "left join (select collection_activity_logs_id, geo_location_data from collection.collection_activity_logs) as cal2 on cal2.collection_activity_logs_id = rt.action_activity_logs_id\n" +
-            "where rt.transfer_type='bank' and rt.status in (:statusList)")
+            "where rt.transfer_type='bank' and rt.status in (:statusList)" +
+            "order by rt.created_date desc")
     List<Map<String, Object>> getAllBankTransfers(@Param("statusList") List<String> statusList, Pageable pageable);
 
 

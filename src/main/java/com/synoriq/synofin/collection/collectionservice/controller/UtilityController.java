@@ -5,6 +5,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
@@ -48,6 +51,7 @@ public class UtilityController {
         }
         return response;
     }
+
     @RequestMapping(value = "getAllUserData", method = RequestMethod.GET)
     public ResponseEntity<Object> getAllUserDetail(@RequestHeader("Authorization") String bearerToken, @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
                                                    @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
@@ -70,6 +74,7 @@ public class UtilityController {
         }
         return response;
     }
+
     @RequestMapping(value = "getContactSupport", method = RequestMethod.GET)
     public ResponseEntity<Object> getContactSupport(@RequestHeader("Authorization") String bearerToken, @RequestParam(value = "keyword") String keyword, @RequestParam(value = "model") String model) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
@@ -139,17 +144,17 @@ public class UtilityController {
 
     @RequestMapping(value = "sendPdfToCustomerUsingS3", method = RequestMethod.POST)
     public ResponseEntity<Object> sendPdfToCustomerUsingS3(@RequestHeader("Authorization") String token, @RequestParam("image") MultipartFile imageData,
-                                                  @RequestParam("user_ref_no") String userRefNo,
-                                                  @RequestParam("client_id") String clientId,
-                                                  @RequestParam("payment_mode") String paymentMode,
-                                                  @RequestParam("receipt_amount") String receiptAmount,
-                                                  @RequestParam("file_name") String fileName,
-                                                  @RequestParam("user_id") String userId,
-                                                  @RequestParam("customer_type") String customerType,
-                                                  @RequestParam("customer_name") String customerName,
-                                                  @RequestParam("applicant_mobile_number") String applicantMobileNumber,
-                                                  @RequestParam("collected_from_number") String collectedFromMobileNumber,
-                                                  @RequestParam("loan_number") String loanNumber) throws SQLException {
+                                                           @RequestParam("user_ref_no") String userRefNo,
+                                                           @RequestParam("client_id") String clientId,
+                                                           @RequestParam("payment_mode") String paymentMode,
+                                                           @RequestParam("receipt_amount") String receiptAmount,
+                                                           @RequestParam("file_name") String fileName,
+                                                           @RequestParam("user_id") String userId,
+                                                           @RequestParam("customer_type") String customerType,
+                                                           @RequestParam("customer_name") String customerName,
+                                                           @RequestParam("applicant_mobile_number") String applicantMobileNumber,
+                                                           @RequestParam("collected_from_number") String collectedFromMobileNumber,
+                                                           @RequestParam("loan_number") String loanNumber) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         UploadImageOnS3ResponseDTO result;
@@ -170,15 +175,16 @@ public class UtilityController {
 
     @RequestMapping(value = "downloadBase64FromS3", method = RequestMethod.GET)
     public ResponseEntity<Object> downloadBase64FromS3(@RequestHeader("Authorization") String token,
-                                                  @RequestParam("file_name") String fileName,
-                                                  @RequestParam("user_ref_no") String userRefNo,
-                                                  @RequestParam(value = "isNativeFolder", defaultValue = "true", required = false) boolean isNativeFolder) throws SQLException {
+                                                       @RequestParam("file_name") String fileName,
+                                                       @RequestParam("user_ref_no") String userRefNo,
+                                                       @RequestParam(value = "isNativeFolder", defaultValue = "true", required = false) boolean isNativeFolder,
+                                                       @RequestParam(value = "isCustomerPhotos", defaultValue = "false", required = false) boolean isCustomerPhotos) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         DownloadBase64FromS3ResponseDTO result;
 
         try {
-            result = utilityService.downloadBase64FromS3(token, userRefNo, fileName, isNativeFolder);
+            result = utilityService.downloadBase64FromS3(token, userRefNo, fileName, isNativeFolder, isCustomerPhotos);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -224,6 +230,29 @@ public class UtilityController {
                 response = new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
             } else {
                 response = new ResponseEntity<>(result, HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "getDocuments", method = RequestMethod.POST)
+    public ResponseEntity<Object> getDocuments(@RequestHeader("Authorization") String token, @RequestParam("loanId") String loanId) {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+
+        try {
+            baseResponse = utilityService.getDocuments(token, loanId);
+            if (baseResponse.getData() == null && baseResponse.getError() != null) {
+                response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+            } else {
+                response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
             }
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

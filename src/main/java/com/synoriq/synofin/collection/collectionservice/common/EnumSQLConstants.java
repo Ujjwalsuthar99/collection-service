@@ -21,7 +21,9 @@ public class EnumSQLConstants {
         get_pdf,
         razor_pay_ifsc,
         deposit_challan,
+        get_documents,
         get_user_details_admin;
+
 
         private LogNames() {
         }

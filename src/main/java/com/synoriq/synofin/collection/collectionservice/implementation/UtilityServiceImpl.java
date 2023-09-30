@@ -22,6 +22,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImage
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsDataResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.FinovaMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.SpfcMsgDTOResponse;
@@ -484,7 +486,7 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder) throws Exception {
+    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder, boolean isCustomerPhotos) throws Exception {
         DownloadBase64FromS3ResponseDTO res = new DownloadBase64FromS3ResponseDTO();
 
         try {
@@ -492,9 +494,14 @@ public class UtilityServiceImpl implements UtilityService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
+            String systemId = "collection";
+            if (isCustomerPhotos) {
+                systemId = "collection_lms";
+            }
+
             res = HTTPRequestService.<Object, DownloadBase64FromS3ResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getBase64ByFileName?fileName=" + fileName + "&userRefNo=" + userRefNo + "&isNativeFolder=" + isNativeFolder)
+                    .url("http://localhost:1102/v1/getBase64ByFileName?fileName=" + fileName + "&userRefNo=" + userRefNo + "&isNativeFolder=" + isNativeFolder + "&systemId=" + systemId)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(DownloadBase64FromS3ResponseDTO.class)
                     .build().call();
@@ -924,5 +931,56 @@ public class UtilityServiceImpl implements UtilityService {
             return matchedSubstring;
         }
         return codeName;
+    }
+
+    @Override
+    public BaseDTOResponse<Object> getDocuments(String token, String loanId) throws Exception {
+        GetDocumentsResponseDTO res;
+        List<Map<String, Object>> documentsDataArr = new ArrayList<>();
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, GetDocumentsResponseDTO>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getDocuments?loanId=" + loanId)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(GetDocumentsResponseDTO.class)
+                    .build().call();
+
+            log.info("res {}", res);
+            Map<String, Object> documentsData = new HashMap<>();
+
+            if (res.getData().size() > 0) {
+                for (GetDocumentsDataResponseDTO getDocumentsDataResponseDTO : res.getData()) {
+                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "applicant")) {
+                        documentsData.put("type", "applicant");
+                        documentsData.put("document", getDocumentsDataResponseDTO.getDocumentUrl());
+                        documentsDataArr.add(documentsData);
+                    }
+                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "coapplicant")) {
+                        documentsData.put("type", "coapplicant");
+                        documentsData.put("document", getDocumentsDataResponseDTO.getDocumentUrl());
+                        documentsDataArr.add(documentsData);
+                    }
+                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "guarantor")) {
+                        documentsData.put("type", "guarantor");
+                        documentsData.put("document", getDocumentsDataResponseDTO.getDocumentUrl());
+                        documentsDataArr.add(documentsData);
+                    }
+                }
+            }
+
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_documents, null, null, res, "success", null);
+        } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_documents, null, null, modifiedErrorMessage, "failure", null);
+            log.error("{}", ee.getMessage());
+        }
+
+        return new BaseDTOResponse<>(documentsDataArr);
     }
 }
