@@ -9,55 +9,55 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetDocumentsDataResponseDTO {
 
-    @JsonProperty("documentType")
+    @JsonProperty("document_type")
     private String documentType;
 
-    @JsonProperty("documentState")
+    @JsonProperty("document_state")
     private Object documentState;
 
-    @JsonProperty("receivingDate")
+    @JsonProperty("receiving_date")
     private Object receivingDate;
 
-    @JsonProperty("isVerified")
+    @JsonProperty("is_verified")
     private Boolean isVerified;
 
-    @JsonProperty("documentUrl")
+    @JsonProperty("document_url")
     private String documentUrl;
 
-    @JsonProperty("documentStatus")
+    @JsonProperty("document_status")
     private Object documentStatus;
 
     @JsonProperty("description")
     private Object description;
 
-    @JsonProperty("documentValue")
+    @JsonProperty("document_value")
     private String documentValue;
 
-    @JsonProperty("applicantType")
+    @JsonProperty("applicant_type")
     private String applicantType;
 
-    @JsonProperty("customerName")
+    @JsonProperty("customer_name")
     private String customerName;
 
-    @JsonProperty("otherDocumentName")
+    @JsonProperty("other_document_name")
     private Object otherDocumentName;
 
-    @JsonProperty("customerId")
+    @JsonProperty("customer_id")
     private Integer customerId;
 
-    @JsonProperty("documentId")
+    @JsonProperty("document_id")
     private Integer documentId;
 
-    @JsonProperty("documentOwner")
+    @JsonProperty("document_owner")
     private String documentOwner;
 
-    @JsonProperty("documentStage")
+    @JsonProperty("document_stage")
     private Object documentStage;
 
-    @JsonProperty("documentDepartment")
+    @JsonProperty("document_department")
     private Object documentDepartment;
 
-    @JsonProperty("disbursalStage")
+    @JsonProperty("disbursal_stage")
     private Object disbursalStage;
 
 }
