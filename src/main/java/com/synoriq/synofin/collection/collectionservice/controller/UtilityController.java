@@ -242,7 +242,7 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "getDocuments", method = RequestMethod.POST)
+    @RequestMapping(value = "getDocuments", method = RequestMethod.GET)
     public ResponseEntity<Object> getDocuments(@RequestHeader("Authorization") String token, @RequestParam("loanId") String loanId) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
