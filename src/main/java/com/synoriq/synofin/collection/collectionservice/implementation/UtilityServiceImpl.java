@@ -472,6 +472,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(UploadImageOnS3ResponseDTO.class)
                     .build().call();
 
+            log.info("upload result {}", res);
             // creating api logs
             uploadImageOnS3DataRequestDTO.setFile("base64 string");
             uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);

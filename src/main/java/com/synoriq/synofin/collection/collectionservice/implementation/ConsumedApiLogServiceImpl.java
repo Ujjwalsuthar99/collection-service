@@ -33,6 +33,8 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
         String apiType = httpServletRequest.getMethod();
         String endPoint = utilityService.getApiUrl();
 
+        log.info("create cionsumed log here");
+
         if (userId == null) {
             userId = 0L;
         }
@@ -59,5 +61,7 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
         consumedApiLogsEntity.setEndPoint(consumedApiLogRequestDTO.getEndPoint());
 
         consumedApiLogRepository.save(consumedApiLogsEntity);
+
+        log.info("log created successfully {}", consumedApiLogsEntity);
     }
 }
