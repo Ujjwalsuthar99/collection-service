@@ -20,9 +20,9 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
             , @Param("toDate") Date toDate);
 
     @Query(nativeQuery = true, value = "select count(*) AS total_count, coalesce(sum(cast(coalesce(sr.form->>'receipt_amount', '0') as decimal)), '0') as total_amount\n" +
-            "from lms.service_request sr join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id where sr.request_source = 'm_collect' and sr.form->>'created_by' = :userName " +
+            "from lms.service_request sr join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id where sr.request_source = 'm_collect' and sr.created_by = :userId " +
             "and date(sr.form->>'date_of_receipt') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
-    Map<String,Object> getReceiptCountByUserIdByDuration(@Param("userName") String userName, @Param("fromDate") String fromDate
+    Map<String,Object> getReceiptCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") String fromDate
             , @Param("toDate") String toDate);
 
     @Query(nativeQuery = true, value = "select \n" +
