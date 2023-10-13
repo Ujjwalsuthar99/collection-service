@@ -257,7 +257,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "join lms.customer_loan_mapping clm on clm.loan_id = sr.loan_id \n" +
             "join lms.customer c on clm.customer_id = c.customer_id \n" +
             "where clm.customer_type = 'applicant' and sr.request_source = 'm_collect' \n" +
-            "and sr.form->>'created_by' = :userName\n" +
+            "and sr.created_by = (select user_id from master.users where username = :userName)\n" +
             "and (\n" +
             "\tLOWER(la.loan_application_number) like LOWER(concat('%', :searchKey, '%'))\n" +
             "\tor LOWER(cast(sr.status as text)) like LOWER(concat('%', :searchKey, '%'))\n" +
