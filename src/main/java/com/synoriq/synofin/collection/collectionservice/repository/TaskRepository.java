@@ -21,7 +21,8 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
     String getLoanApplicationNumber(@Param("loanId") Long loanId);
     @Query(nativeQuery = true, value = "select la.loan_application_id,\n" +
             "    branch.branch_name as branch,\n" +
-            "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+//            "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+            "    concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as customer_name,\n" +
             "    c.phone1_json->>'mobile' as mobile,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    p.product_name as product,\n" +
@@ -67,7 +68,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    and la2.allocated_to_user_id = :userId\n" +
             "order by\n" +
             "    la.loan_application_id asc")
-    List<Map<String,Object>> getTaskDetailsByPages(@Param("userId") Long userId, Pageable pageRequest);
+    List<Map<String,Object>> getTaskDetailsByPages(@Param("userId") Long userId, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageRequest);
 
 
     @Query(nativeQuery = true, value = "select la.loan_application_id,\n" +

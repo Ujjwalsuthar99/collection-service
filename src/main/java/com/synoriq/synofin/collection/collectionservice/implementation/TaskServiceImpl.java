@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.AdditionalContactDetailsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.AdditionalContactDetailsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
@@ -13,6 +14,7 @@ import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogSe
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.collection.collectionservice.service.TaskService;
+import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +30,8 @@ import java.util.*;
 public class TaskServiceImpl implements TaskService {
 
     @Autowired
+    private RSAUtils rsaUtils;
+    @Autowired
     private TaskRepository taskRepository;
 
     @Autowired
@@ -38,6 +42,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private AdditionalContactDetailsRepository additionalContactDetailsRepository;
+    @Autowired
+    private CurrentUserInfo currentUserInfo;
 
     @Override
     public BaseDTOResponse<Object> getTaskDetails(Long userId, Integer pageNo, Integer pageSize) throws Exception {
@@ -50,7 +56,11 @@ public class TaskServiceImpl implements TaskService {
                 pageNo = pageNo - 1;
             }
             pageRequest = PageRequest.of(pageNo, pageSize);
-            List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsByPages(userId, pageRequest);
+            String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+            String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+            Boolean piiPermission = rsaUtils.getPiiPermission();
+            List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsByPages(userId, encryptionKey, password, piiPermission, pageRequest);
+
             if (pageNo > 0) {
                 if (taskDetailPages.size() == 0) {
                     return new BaseDTOResponse<>(taskDetailPages);
