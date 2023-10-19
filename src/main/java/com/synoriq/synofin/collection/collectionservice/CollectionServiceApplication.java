@@ -16,6 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan("com.synoriq.synofin.collection.collectionservice.repository")
 @ComponentScan("com.synoriq.synofin.collection.collectionservice.service")
 @ComponentScan("com.synoriq.synofin.events.*")
+@ComponentScan("com.synoriq.synofin.dataencryptionservice")
 public class CollectionServiceApplication {
 
 	public static void main(String[] args) {
