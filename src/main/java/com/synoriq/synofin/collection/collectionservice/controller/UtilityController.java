@@ -1,11 +1,14 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
@@ -18,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
@@ -253,6 +254,54 @@ public class UtilityController {
                 response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
             } else {
                 response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "send-qr-code", method = RequestMethod.POST)
+    public ResponseEntity<Object> sendQrCode(@RequestHeader("Authorization") String token, @RequestBody DynamicQrCodeRequestDTO reqBody) {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        DynamicQrCodeResponseDTO result;
+
+        try {
+            result = utilityService.sendQrCode(token, reqBody);
+            if (result.getData() == null && result.getError() != null) {
+                response = new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+            } else {
+                response = new ResponseEntity<>(result, HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "get-qr-code-transaction-status", method = RequestMethod.POST)
+    public ResponseEntity<Object> getQrCodeTransactionStatus(@RequestHeader("Authorization") String token, @RequestBody DynamicQrCodeStatusCheckRequestDTO reqBody) {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        DynamicQrCodeCheckStatusResponseDTO result;
+
+        try {
+            result = utilityService.getQrCodeTransactionStatus(token, reqBody);
+            if (result.getData() == null && result.getError() != null) {
+                response = new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+            } else {
+                response = new ResponseEntity<>(result, HttpStatus.OK);
             }
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

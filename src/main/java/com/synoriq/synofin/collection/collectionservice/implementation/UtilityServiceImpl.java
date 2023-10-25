@@ -9,6 +9,8 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionAct
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.RequestDataDTO;
@@ -22,6 +24,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImage
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
@@ -984,5 +988,67 @@ public class UtilityServiceImpl implements UtilityService {
         }
 
         return new BaseDTOResponse<>(documentsDataArr);
+    }
+
+    @Override
+    public DynamicQrCodeResponseDTO sendQrCode(String token, DynamicQrCodeRequestDTO requestBody) throws Exception {
+        DynamicQrCodeResponseDTO res = new DynamicQrCodeResponseDTO();
+        try {
+            DynamicQrCodeRequestDTO dynamicQrCodeRequestDTO = new ObjectMapper().convertValue(requestBody, DynamicQrCodeRequestDTO.class);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+            log.info("ocrCheckBody {}", dynamicQrCodeRequestDTO);
+
+            res = HTTPRequestService.<Object, DynamicQrCodeResponseDTO>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/sendQrCode")
+                    .httpHeaders(httpHeaders)
+                    .body(dynamicQrCodeRequestDTO)
+                    .typeResponseType(DynamicQrCodeResponseDTO.class)
+                    .build().call();
+
+            log.info("res {}", res);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
+        } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, modifiedErrorMessage, "failure", null);
+            log.error("{}", ee.getMessage());
+        }
+
+        return res;
+    }
+
+    @Override
+    public DynamicQrCodeCheckStatusResponseDTO getQrCodeTransactionStatus(String token, DynamicQrCodeStatusCheckRequestDTO requestBody) throws Exception {
+        DynamicQrCodeCheckStatusResponseDTO res = new DynamicQrCodeCheckStatusResponseDTO();
+        try {
+            DynamicQrCodeRequestDTO dynamicQrCodeRequestDTO = new ObjectMapper().convertValue(requestBody, DynamicQrCodeRequestDTO.class);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+            log.info("ocrCheckBody {}", dynamicQrCodeRequestDTO);
+
+            res = HTTPRequestService.<Object, DynamicQrCodeCheckStatusResponseDTO>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/getQrCodeTransactionStatus")
+                    .httpHeaders(httpHeaders)
+                    .body(dynamicQrCodeRequestDTO)
+                    .typeResponseType(DynamicQrCodeCheckStatusResponseDTO.class)
+                    .build().call();
+
+            log.info("res {}", res);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
+        } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, modifiedErrorMessage, "failure", null);
+            log.error("{}", ee.getMessage());
+        }
+
+        return res;
     }
 }
