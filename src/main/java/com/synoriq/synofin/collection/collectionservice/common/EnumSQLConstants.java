@@ -22,7 +22,11 @@ public class EnumSQLConstants {
         razor_pay_ifsc,
         deposit_challan,
         get_documents,
-        get_user_details_admin;
+        get_user_details_admin,
+
+        send_qr_code,
+
+        check_qr_payment_status;
 
 
         private LogNames() {

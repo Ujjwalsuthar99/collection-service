@@ -5,12 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
-import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
-import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
-import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
-import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeStatusCheckRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
+import com.synoriq.synofin.collection.collectionservice.repository.*;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.RequestDataDTO;
@@ -55,6 +52,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.ion.Decimal;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -114,6 +112,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Autowired
     ConsumedApiLogService consumedApiLogService;
+
+    @Autowired
+    DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository;
 
     @Override
     public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception {
@@ -993,6 +994,24 @@ public class UtilityServiceImpl implements UtilityService {
     @Override
     public DynamicQrCodeResponseDTO sendQrCode(String token, DynamicQrCodeRequestDTO requestBody) throws Exception {
         DynamicQrCodeResponseDTO res = new DynamicQrCodeResponseDTO();
+        DynamicQrCodeDataRequestDTO integrationDataRequestBody = new DynamicQrCodeDataRequestDTO();
+        DynamicQrCodeIntegrationDataRequestDTO integrationRequestBody = new DynamicQrCodeIntegrationDataRequestDTO();
+
+        integrationDataRequestBody.setAmount(String.valueOf(requestBody.getAmount()));
+        integrationDataRequestBody.setPayerAccount(requestBody.getPayerAccount());
+        integrationDataRequestBody.setPayerIFSC(requestBody.getPayerIFSC());
+        integrationDataRequestBody.setFirstName(requestBody.getFirstName());
+        integrationDataRequestBody.setLastName(requestBody.getLastName());
+        integrationDataRequestBody.setBillNumber(requestBody.getLoanId() + "_" + System.currentTimeMillis());
+        integrationDataRequestBody.setMerchantTranId(requestBody.getLoanId() + "_" + System.currentTimeMillis());
+
+        integrationRequestBody.setDynamicQrCodeDataRequestDTO(integrationDataRequestBody);
+        integrationRequestBody.setSystemId("collection");
+        integrationRequestBody.setUserReferenceNumber(String.valueOf(requestBody.getUserId()));
+        integrationRequestBody.setSpecificPartnerName(requestBody.getVendor());
+
+
+
         try {
             DynamicQrCodeRequestDTO dynamicQrCodeRequestDTO = new ObjectMapper().convertValue(requestBody, DynamicQrCodeRequestDTO.class);
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -1000,21 +1019,61 @@ public class UtilityServiceImpl implements UtilityService {
             httpHeaders.add("Content-Type", "application/json");
             log.info("ocrCheckBody {}", dynamicQrCodeRequestDTO);
 
+
+
             res = HTTPRequestService.<Object, DynamicQrCodeResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/sendQrCode")
                     .httpHeaders(httpHeaders)
-                    .body(dynamicQrCodeRequestDTO)
+                    .body(integrationRequestBody)
                     .typeResponseType(DynamicQrCodeResponseDTO.class)
                     .build().call();
 
+            if(res.getResponse().equals(true)) {
+
+                CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+                collectionActivityLogsEntity.setActivityName("generated_dynamic_qr_code");
+                collectionActivityLogsEntity.setActivityDate(new Date());
+                collectionActivityLogsEntity.setDeleted(false);
+                collectionActivityLogsEntity.setActivityBy(requestBody.getUserId());
+                collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
+                collectionActivityLogsEntity.setAddress("{}");
+                collectionActivityLogsEntity.setRemarks("Generated a QR code against loan id " + requestBody.getLoanId() + " of payment Rs. " + requestBody.getAmount());
+                collectionActivityLogsEntity.setImages("{}");
+                collectionActivityLogsEntity.setLoanId(requestBody.getLoanId());
+                collectionActivityLogsEntity.setGeolocation(requestBody.getGeolocation());
+
+                collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+
+                DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
+                digitalPaymentTransactionsEntity.setCreatedDate(new Date());
+                digitalPaymentTransactionsEntity.setCreatedBy(requestBody.getUserId());
+                digitalPaymentTransactionsEntity.setModifiedDate(null);
+                digitalPaymentTransactionsEntity.setModifiedBy(null);
+                digitalPaymentTransactionsEntity.setLoanId(requestBody.getLoanId());
+                digitalPaymentTransactionsEntity.setPaymentServiceName("dynamic_qr_code");
+                digitalPaymentTransactionsEntity.setStatus("pending");
+                digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(requestBody.getAmount()));
+                digitalPaymentTransactionsEntity.setUtrNumber(null);
+                digitalPaymentTransactionsEntity.setReceiptRequestBody("{}");
+                digitalPaymentTransactionsEntity.setPaymentLink(null);
+                digitalPaymentTransactionsEntity.setMobileNo(null);
+                digitalPaymentTransactionsEntity.setVendor(requestBody.getVendor());
+                digitalPaymentTransactionsEntity.setReceiptGenerated(false);
+                digitalPaymentTransactionsEntity.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+                digitalPaymentTransactionsEntity.setActionActivityLogsId(null);
+                digitalPaymentTransactionsEntity.setOtherResponseData(res);
+
+                digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+            }
+
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, res, "success", null);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
 
@@ -1024,6 +1083,15 @@ public class UtilityServiceImpl implements UtilityService {
     @Override
     public DynamicQrCodeCheckStatusResponseDTO getQrCodeTransactionStatus(String token, DynamicQrCodeStatusCheckRequestDTO requestBody) throws Exception {
         DynamicQrCodeCheckStatusResponseDTO res = new DynamicQrCodeCheckStatusResponseDTO();
+        DynamicQrCodeStatusCheckIntegrationRequestDTO dynamicQrCodeStatusCheckIntegrationRequestDTO = new DynamicQrCodeStatusCheckIntegrationRequestDTO();
+        DynamicQrCodeStatusCheckDataRequestDTO dynamicQrCodeStatusCheckDataRequestDTO = new DynamicQrCodeStatusCheckDataRequestDTO();
+
+        dynamicQrCodeStatusCheckDataRequestDTO.setMerchantTranId(requestBody.getMerchantTranId());
+
+        dynamicQrCodeStatusCheckIntegrationRequestDTO.setDynamicQrCodeStatusCheckDataRequestDTO(dynamicQrCodeStatusCheckDataRequestDTO);
+        dynamicQrCodeStatusCheckIntegrationRequestDTO.setUserReferenceNumber(String.valueOf(requestBody.getUserId()));
+        dynamicQrCodeStatusCheckIntegrationRequestDTO.setSystemId("collection");
+        dynamicQrCodeStatusCheckIntegrationRequestDTO.setSpecificPartnerName(requestBody.getVendor());
         try {
             DynamicQrCodeRequestDTO dynamicQrCodeRequestDTO = new ObjectMapper().convertValue(requestBody, DynamicQrCodeRequestDTO.class);
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -1035,9 +1103,33 @@ public class UtilityServiceImpl implements UtilityService {
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/getQrCodeTransactionStatus")
                     .httpHeaders(httpHeaders)
-                    .body(dynamicQrCodeRequestDTO)
+                    .body(dynamicQrCodeStatusCheckIntegrationRequestDTO)
                     .typeResponseType(DynamicQrCodeCheckStatusResponseDTO.class)
                     .build().call();
+
+            if(res.getResponse().equals(true)) {
+
+                CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+                collectionActivityLogsEntity.setActivityName("dynamic_qr_code_payment_approved");
+                collectionActivityLogsEntity.setActivityDate(new Date());
+                collectionActivityLogsEntity.setDeleted(false);
+                collectionActivityLogsEntity.setActivityBy(requestBody.getUserId());
+                collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
+                collectionActivityLogsEntity.setAddress("{}");
+                collectionActivityLogsEntity.setRemarks("The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + requestBody.getLoanId() + " has been updated as " + res.getData().getStatus());
+                collectionActivityLogsEntity.setImages("{}");
+                collectionActivityLogsEntity.setLoanId(requestBody.getLoanId());
+                collectionActivityLogsEntity.setGeolocation(requestBody.getGeolocation());
+
+                collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+
+                DigitalPaymentTransactionsEntity transactionData = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
+
+                transactionData.setStatus("success");
+                transactionData.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+                // here we should have a one more column to store the check payment status API response data
+                digitalPaymentTransactionsRepository.save(transactionData);
+            }
 
             log.info("res {}", res);
             // creating api logs
