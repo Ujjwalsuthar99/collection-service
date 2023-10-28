@@ -1,7 +1,9 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
@@ -1010,8 +1012,6 @@ public class UtilityServiceImpl implements UtilityService {
         integrationRequestBody.setUserReferenceNumber(String.valueOf(requestBody.getUserId()));
         integrationRequestBody.setSpecificPartnerName(requestBody.getVendor());
 
-
-
         try {
             DynamicQrCodeRequestDTO dynamicQrCodeRequestDTO = new ObjectMapper().convertValue(requestBody, DynamicQrCodeRequestDTO.class);
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -1045,6 +1045,14 @@ public class UtilityServiceImpl implements UtilityService {
 
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
+                ObjectMapper objectMapper = new ObjectMapper();
+                ObjectNode resultNode = objectMapper.createObjectNode();
+
+                ObjectNode requestNode = objectMapper.valueToTree(integrationDataRequestBody);
+                ObjectNode responseNode = objectMapper.valueToTree(res);
+                resultNode.set("request", requestNode);
+                resultNode.set("response", responseNode);
+
                 DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
                 digitalPaymentTransactionsEntity.setCreatedDate(new Date());
                 digitalPaymentTransactionsEntity.setCreatedBy(requestBody.getUserId());
@@ -1062,7 +1070,7 @@ public class UtilityServiceImpl implements UtilityService {
                 digitalPaymentTransactionsEntity.setReceiptGenerated(false);
                 digitalPaymentTransactionsEntity.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
                 digitalPaymentTransactionsEntity.setActionActivityLogsId(null);
-                digitalPaymentTransactionsEntity.setOtherResponseData(res);
+                digitalPaymentTransactionsEntity.setOtherResponseData(resultNode);
 
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
             }
