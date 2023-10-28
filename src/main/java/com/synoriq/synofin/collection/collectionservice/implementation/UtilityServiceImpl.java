@@ -24,6 +24,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImage
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
@@ -1004,12 +1005,18 @@ public class UtilityServiceImpl implements UtilityService {
         integrationDataRequestBody.setPayerIFSC(requestBody.getPayerIFSC());
         integrationDataRequestBody.setFirstName(requestBody.getFirstName());
         integrationDataRequestBody.setLastName(requestBody.getLastName());
+        String billNumber = null;
+        String merchantTransId = null;
         if(requestBody.getVendor().equals("kotak")) {
-            integrationDataRequestBody.setBillNumber("." + requestBody.getLoanId() + "." + System.currentTimeMillis());
-            integrationDataRequestBody.setMerchantTranId("." + requestBody.getLoanId() + "." + System.currentTimeMillis());
+            billNumber = "." + requestBody.getLoanId() + "." + System.currentTimeMillis();
+            merchantTransId = "." + requestBody.getLoanId() + "." + System.currentTimeMillis();
+            integrationDataRequestBody.setBillNumber(billNumber);
+            integrationDataRequestBody.setMerchantTranId(merchantTransId);
         } else {
-            integrationDataRequestBody.setBillNumber(requestBody.getLoanId() + "_" + System.currentTimeMillis());
-            integrationDataRequestBody.setMerchantTranId(requestBody.getLoanId() + "_" + System.currentTimeMillis());
+            billNumber = requestBody.getLoanId() + "_" + System.currentTimeMillis();
+            merchantTransId = requestBody.getLoanId() + "_" + System.currentTimeMillis();
+            integrationDataRequestBody.setBillNumber(billNumber);
+            integrationDataRequestBody.setMerchantTranId(merchantTransId);
         }
 
         integrationRequestBody.setDynamicQrCodeDataRequestDTO(integrationDataRequestBody);
@@ -1033,6 +1040,18 @@ public class UtilityServiceImpl implements UtilityService {
                     .body(integrationRequestBody)
                     .typeResponseType(DynamicQrCodeResponseDTO.class)
                     .build().call();
+
+            DynamicQrCodeDataResponseDTO dynamicQrCodeDataResponseDTO = new DynamicQrCodeDataResponseDTO();
+            dynamicQrCodeDataResponseDTO.setMerchantTranId(merchantTransId);
+            dynamicQrCodeDataResponseDTO.setLink(res.getData().getLink());
+            dynamicQrCodeDataResponseDTO.setStatus(res.getData().getStatus());
+
+            DynamicQrCodeResponseDTO dynamicQrCodeResponseDto = new DynamicQrCodeResponseDTO();
+            dynamicQrCodeResponseDto.setRequestId(res.getRequestId());
+            dynamicQrCodeResponseDto.setData(dynamicQrCodeDataResponseDTO);
+            if(requestBody.getVendor().equals("kotak")) {
+                res = dynamicQrCodeResponseDto;
+            }
 
             if(res.getResponse().equals(true)) {
 
