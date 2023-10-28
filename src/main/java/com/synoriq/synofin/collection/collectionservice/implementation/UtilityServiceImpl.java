@@ -1004,8 +1004,13 @@ public class UtilityServiceImpl implements UtilityService {
         integrationDataRequestBody.setPayerIFSC(requestBody.getPayerIFSC());
         integrationDataRequestBody.setFirstName(requestBody.getFirstName());
         integrationDataRequestBody.setLastName(requestBody.getLastName());
-        integrationDataRequestBody.setBillNumber(requestBody.getLoanId() + "_" + System.currentTimeMillis());
-        integrationDataRequestBody.setMerchantTranId(requestBody.getLoanId() + "_" + System.currentTimeMillis());
+        if(requestBody.getVendor().equals("kotak")) {
+            integrationDataRequestBody.setBillNumber("." + requestBody.getLoanId() + "." + System.currentTimeMillis());
+            integrationDataRequestBody.setMerchantTranId("." + requestBody.getLoanId() + "." + System.currentTimeMillis());
+        } else {
+            integrationDataRequestBody.setBillNumber(requestBody.getLoanId() + "_" + System.currentTimeMillis());
+            integrationDataRequestBody.setMerchantTranId(requestBody.getLoanId() + "_" + System.currentTimeMillis());
+        }
 
         integrationRequestBody.setDynamicQrCodeDataRequestDTO(integrationDataRequestBody);
         integrationRequestBody.setSystemId("collection");
