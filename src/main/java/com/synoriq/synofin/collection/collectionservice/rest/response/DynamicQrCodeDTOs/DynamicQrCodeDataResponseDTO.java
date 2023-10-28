@@ -22,4 +22,7 @@ public class DynamicQrCodeDataResponseDTO {
     @JsonProperty("link")
     private String link;
 
+    @JsonProperty("digitalPaymentTransactionsId")
+    private Long digitalPaymentTransactionsId;
+
 }

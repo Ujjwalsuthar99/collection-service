@@ -1097,6 +1097,7 @@ public class UtilityServiceImpl implements UtilityService {
                 digitalPaymentTransactionsEntity.setOtherResponseData(resultNode);
 
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+                dynamicQrCodeDataResponseDTO.setDigitalPaymentTransactionsId(digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId());
             }
 
             log.info("res {}", res);
