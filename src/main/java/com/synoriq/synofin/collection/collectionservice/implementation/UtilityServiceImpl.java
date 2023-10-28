@@ -1047,6 +1047,7 @@ public class UtilityServiceImpl implements UtilityService {
             dynamicQrCodeDataResponseDTO.setStatus(res.getData().getStatus());
 
             DynamicQrCodeResponseDTO dynamicQrCodeResponseDto = new DynamicQrCodeResponseDTO();
+            dynamicQrCodeResponseDto.setResponse(res.getResponse());
             dynamicQrCodeResponseDto.setRequestId(res.getRequestId());
             dynamicQrCodeResponseDto.setData(dynamicQrCodeDataResponseDTO);
             if(requestBody.getVendor().equals("kotak")) {
