@@ -275,7 +275,10 @@ public class TaskServiceImpl implements TaskService {
                 pageNo = pageNo - 1;
             }
             pageRequest = PageRequest.of(pageNo, pageSize);
-            List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsBySearchKey(userId, searchKey, pageRequest);
+            String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+            String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+            Boolean piiPermission = rsaUtils.getPiiPermission();
+            List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsBySearchKey(userId, searchKey, encryptionKey, password, piiPermission, pageRequest);
             if (pageNo > 0) {
                 if (taskDetailPages.size() == 0) {
                     return new BaseDTOResponse<>(taskDetailPages);

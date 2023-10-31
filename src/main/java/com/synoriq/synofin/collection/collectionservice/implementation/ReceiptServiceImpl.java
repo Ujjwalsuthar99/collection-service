@@ -17,6 +17,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.SystemProp
 import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
+import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,8 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @Slf4j
 public class ReceiptServiceImpl implements ReceiptService {
 
+    @Autowired
+    private RSAUtils rsaUtils;
     @Autowired
     ReceiptRepository receiptRepository;
 
@@ -96,6 +99,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         BaseDTOResponse<Object> baseDTOResponse;
         try {
+            String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+            String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+            Boolean piiPermission = rsaUtils.getPiiPermission();
             List<Map<String, Object>> taskDetailPages;
             Pageable pageRequest;
             if (page > 0) {
@@ -103,9 +109,9 @@ public class ReceiptServiceImpl implements ReceiptService {
             }
             pageRequest = PageRequest.of(page, size);
             if (!Objects.equals(searchKey, "")) {
-                taskDetailPages = receiptRepository.getReceiptsBySearchKey(userName, searchKey, pageRequest);
+                taskDetailPages = receiptRepository.getReceiptsBySearchKey(userName, searchKey, encryptionKey, password, piiPermission, pageRequest);
             } else {
-                taskDetailPages = receiptRepository.getReceiptsByUserIdWithDuration(userName, fromDate, toDate, pageRequest);
+                taskDetailPages = receiptRepository.getReceiptsByUserIdWithDuration(userName, fromDate, toDate, encryptionKey, password, piiPermission, pageRequest);
             }
 
             baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
@@ -123,7 +129,10 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         BaseDTOResponse<Object> baseDTOResponse;
         try {
-            List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferred(userName);
+            String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+            String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+            Boolean piiPermission = rsaUtils.getPiiPermission();
+            List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferred(userName, encryptionKey, password, piiPermission);
             baseDTOResponse = new BaseDTOResponse<>(receiptsData);
         } catch (Exception e) {
             throw new Exception("1017002");

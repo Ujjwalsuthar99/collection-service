@@ -20,7 +20,8 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tsr.created_date as created_date,\n" +
             "\tclm.loan_id,\n" +
             "\tla.loan_application_number,\n" +
-            "\tconcat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+//            "\tconcat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+            " concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as customer_name,\n" +
             "\tc.address1_json->>'address' as address,\n" +
             "\tcast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
             "\tsr.status as status,\n" +
@@ -64,7 +65,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\t\tusername = :userName)\n" +
             "\tand date(sr.form->>'date_of_receipt') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
     List<Map<String, Object>> getReceiptsByUserIdWithDuration(@Param("userName") String userName, @Param("fromDate") String fromDate
-            , @Param("toDate") String toDate, Pageable pageRequest);
+            , @Param("toDate") String toDate, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageRequest);
 
 
     @Query(nativeQuery = true, value = "select \n" +
@@ -104,7 +105,8 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
 
     @Query(nativeQuery = true, value = "select \n" +
             "    sr.service_request_id as id ,\n" +
-            "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+//            "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+            "    concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as customer_name,\n" +
             "    (case when cast(sr.form->>'receipt_amount' as decimal) is null then 0 else cast(sr.form->>'receipt_amount' as decimal) end) as receipt_amount,\n" +
             "    sr.form->>'payment_mode' as payment_mode\n" +
             "    from lms.service_request sr \n" +
@@ -115,7 +117,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    where sr.request_source = 'm_collect' and sr.status = 'initiated' and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque') \n" +
             "    and (cr.receipt_holder_user_id = (select user_id from master.users where username = :userName)\n" +
             "    and cr.receipt_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending'))")
-    List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferred(@Param("userName") String userName);
+    List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferred(@Param("userName") String userName, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission);
 
 
     @Query(nativeQuery = true, value = "SELECT case when sum(cast(sr.form->>'receipt_amount' as decimal)) is null then 0.0 else sum(cast(sr.form->>'receipt_amount' as decimal)) end\n" +
@@ -234,7 +236,8 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "sr.created_date as created_date,\n" +
             "clm.loan_id,\n" +
             "la.loan_application_number,\n" +
-            "concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+//            "concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
+            " concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as customer_name,\n" +
             "c.address1_json->>'address' as address,\n" +
             "cast(sr.form->>'receipt_amount' as decimal) as receipt_amount,\n" +
             "sr.status as status,\n" +
@@ -264,7 +267,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tor LOWER(sr.form->>'payment_mode') like LOWER(concat('%',:searchKey, '%'))\n" +
             "\tor LOWER(cast(sr.service_request_id as text)) like LOWER(concat('%', :searchKey, '%'))\n" +
             ")")
-    List<Map<String, Object>> getReceiptsBySearchKey(@Param("userName") String userName, @Param("searchKey") String searchKey, Pageable pageRequest);
+    List<Map<String, Object>> getReceiptsBySearchKey(@Param("userName") String userName, @Param("searchKey") String searchKey, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageRequest);
 
     @Query(nativeQuery = true, value = "select\n" +
             "\tcast(sr.form->>'payment_mode' as text) as payment_mode\n" +

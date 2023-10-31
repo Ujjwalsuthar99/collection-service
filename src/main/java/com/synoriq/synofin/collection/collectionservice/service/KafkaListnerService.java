@@ -55,17 +55,17 @@ public class KafkaListnerService {
             log.info("message object, {}", messageObject);
             log.info("messageObject.getUserId() {}", messageObject.getUserId());
             log.info("messageObject.getPaymentMode() {}", messageObject.getPaymentMode());
-//            CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserIdNew(messageObject.getUserId(), messageObject.getPaymentMode());
 
             Long userId = 0L;
             CollectionReceiptEntity collectionReceiptEntity1 = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
+            log.info("collectionReceiptEntity1 {}", collectionReceiptEntity1);
             if (collectionReceiptEntity1 != null) {
                 userId = collectionReceiptEntity1.getReceiptHolderUserId();
             }
 
             CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.findByUserIdAndCollectionLimitStrategiesKey(userId, messageObject.getPaymentMode());
             log.info("collection limit user wise surpassed {}", collectionLimitUser);
-            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
+//            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
             log.info("service request id {}", messageObject.getServiceRequestId());
             CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
@@ -75,24 +75,18 @@ public class KafkaListnerService {
             log.info("check service request, {}", collectionReceiptEntity);
 
             CollectionActivityLogsEntity checkCollectionActivityLogsEntity = collectionActivityLogsRepository.getActivityLogsKafkaByReceiptId(String.valueOf(messageObject.getServiceRequestId()));
-
+            log.info("checkCollectionActivityLogsEntity {}", checkCollectionActivityLogsEntity);
             if (collectionLimitUser != null && collectionReceiptEntity != null && checkCollectionActivityLogsEntity == null) {
-                collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
-                collectionLimitUserWiseEntity.setCreatedDate(new Date());
-                collectionLimitUserWiseEntity.setDeleted(collectionLimitUser.getDeleted());
-                collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUser.getCollectionLimitStrategiesKey());
-                collectionLimitUserWiseEntity.setUserId(collectionLimitUser.getUserId());
-                collectionLimitUserWiseEntity.setTotalLimitValue(collectionLimitUser.getTotalLimitValue());
                 if(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())) < 0 ) {
                     log.info("in iff for limit minus check {}", collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
-                    collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
+                    collectionLimitUser.setUtilizedLimitValue(0D);
                 } else {
                     log.info("in else for limit minus check {}", collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
-                    collectionLimitUserWiseEntity.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                    collectionLimitUser.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
                 }
-                collectionLimitUserWiseEntity.setUserName(messageObject.getUserName());
-                log.info("collection limit user wise entity {}", collectionLimitUserWiseEntity);
-                collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+                collectionLimitUser.setUserName(messageObject.getUserName());
+                log.info("collection limit user wise entity {}", collectionLimitUser);
+                collectionLimitUserWiseRepository.save(collectionLimitUser);
 
                 CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
                 collectionActivityLogsEntity.setActivityBy(messageObject.getUserId());
@@ -111,10 +105,11 @@ public class KafkaListnerService {
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
                 Map<String, Object> receiptHistoryCount = receiptTransferHistoryRepository.getDepositPendingReceipt(messageObject.getServiceRequestId());
-
+                log.info("receiptHistoryCount {}", receiptHistoryCount);
                 Long totalReceiptCountFromReceiptTransfer = receiptTransferHistoryRepository.getReceiptCountFromReceiptTransfer(Long.valueOf(String.valueOf(receiptHistoryCount.get("receipt_transfer_id"))));
-
+                log.info("totalReceiptCountFromReceiptTransfer {}", totalReceiptCountFromReceiptTransfer);
                 if (Long.valueOf(String.valueOf(receiptHistoryCount.get("pending_receipt_count"))).equals(totalReceiptCountFromReceiptTransfer)) {
+                    log.info("in ifffff");
                     ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(Long.parseLong(String.valueOf(receiptHistoryCount.get("receipt_transfer_id"))));
                     receiptTransferEntity.setStatus("approved");
                     receiptTransferEntity.setActionBy(messageObject.getUserId());
