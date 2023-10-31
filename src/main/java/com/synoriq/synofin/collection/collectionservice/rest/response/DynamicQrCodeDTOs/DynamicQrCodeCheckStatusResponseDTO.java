@@ -8,7 +8,7 @@ import lombok.Data;
 public class DynamicQrCodeCheckStatusResponseDTO {
 
     @JsonProperty("response")
-    private boolean response;
+    private Boolean response;
 
     @JsonProperty("data")
     private DynamicQrCodeDataResponseDTO data;

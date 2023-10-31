@@ -2,20 +2,39 @@ package com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrC
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.hibernate.annotations.Type;
+import software.amazon.ion.Decimal;
+
+import javax.persistence.Column;
 
 @Data
 public class DynamicQrCodeRequestDTO {
 
-    @JsonProperty("data")
-    private DynamicQrCodeDataRequestDTO dynamicQrCodeDataRequestDTO;
+    @JsonProperty("amount")
+    private String amount;
 
-    @JsonProperty("user_reference_number")
-    private String userReferenceNumber;
+    @JsonProperty("payerAccount")
+    private String payerAccount;
 
-    @JsonProperty("system_id")
-    private String systemId;
+    @JsonProperty("payerIFSC")
+    private String payerIFSC;
 
-    @JsonProperty("specific_partner_name")
-    private String specificPartnerName;
+    @JsonProperty("firstName")
+    private String firstName;
+
+    @JsonProperty("lastName")
+    private String lastName;
+
+    @JsonProperty("loanId")
+    private Long loanId;
+
+    @JsonProperty("userId")
+    private Long userId;
+
+    @JsonProperty("vendor")
+    private String vendor;
+
+    @JsonProperty("geo_location_data")
+    private Object geolocation;
 
 }

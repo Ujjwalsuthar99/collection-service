@@ -1,7 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.IntegrationServiceErrorResponseDTO;
 import lombok.Data;
 
@@ -9,7 +8,7 @@ import lombok.Data;
 public class DynamicQrCodeResponseDTO {
 
     @JsonProperty("response")
-    private boolean response;
+    private Boolean response;
 
     @JsonProperty("data")
     private DynamicQrCodeDataResponseDTO data;
