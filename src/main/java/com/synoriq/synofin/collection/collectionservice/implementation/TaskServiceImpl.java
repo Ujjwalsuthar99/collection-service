@@ -179,49 +179,51 @@ public class TaskServiceImpl implements TaskService {
 
             if (!(customerRes.getData() == null)) {
                 for (CustomerDataResponseDTO customerData : customerRes.getData()) {
-                    CustomerDetailsReturnResponseDTO customerDetails = new CustomerDetailsReturnResponseDTO();
-                    BasicInfoReturnResponseDTO basicInfoApplicant = new BasicInfoReturnResponseDTO();
-                    Map<String, String> address = new HashMap<>();
-                    NumbersReturnResponseDTO numbersReturnResponseDTO = new NumbersReturnResponseDTO();
-                    customerDetails.setId(customerData.getId());
-                    customerDetails.setCustomerType(customerData.getCustomerType());
-                    basicInfoApplicant.setId(customerData.getBasicInfo().getId());
-                    basicInfoApplicant.setFirstName(customerData.getBasicInfo().getFirstName());
-                    basicInfoApplicant.setMiddleName(customerData.getBasicInfo().getMiddleName());
-                    basicInfoApplicant.setLastName(customerData.getBasicInfo().getLastName());
-                    basicInfoApplicant.setDob(customerData.getBasicInfo().getDob());
-                    basicInfoApplicant.setDpd(dpd);
-                    basicInfoApplicant.setDpdBucket(dpdBucket);
-                    basicInfoApplicant.setDpdBgColor(dpdBgColor);
-                    basicInfoApplicant.setDpdTextColor(dpdTextColor);
-                    basicInfoApplicant.setPos(loanDetailRes.getData().getPrincipalOutstanding());
-                    basicInfoApplicant.setLoanAmount(loanDetailRes.getData().getLoanAmount());
-                    basicInfoApplicant.setEmiAmount(loanDetailRes.getData().getEmiAmount());
-                    basicInfoApplicant.setLoanTenure(loanDetailRes.getData().getLoanTenure());
-                    basicInfoApplicant.setAssetClassification(loanDetailRes.getData().getAssetClassification());
-                    basicInfoApplicant.setEmiDate("Pending LMS");
-                    if (customerData.getCommunication() != null) {
-                        for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
-                            if (!(communicationData.getAddressType() == null)) {
-                                address.put(communicationData.getAddressType(), communicationData.getFullAddress());
-                                if (!Objects.equals(communicationData.getNumbers(), "") && communicationData.getNumbers() != null) {
-                                    numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-                                }
-                                if ((!Objects.equals(numbersReturnResponseDTO.getMobNo(), "")) && !(Objects.equals(numbersReturnResponseDTO.getMobNo(), communicationData.getNumbers()))) {
-                                    numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
-                                }
-                            } else {
-                                if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                    numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                    if (customerData.getBasicInfo() != null) {
+                        CustomerDetailsReturnResponseDTO customerDetails = new CustomerDetailsReturnResponseDTO();
+                        BasicInfoReturnResponseDTO basicInfoApplicant = new BasicInfoReturnResponseDTO();
+                        Map<String, String> address = new HashMap<>();
+                        NumbersReturnResponseDTO numbersReturnResponseDTO = new NumbersReturnResponseDTO();
+                        customerDetails.setId(customerData.getId());
+                        customerDetails.setCustomerType(customerData.getCustomerType());
+                        basicInfoApplicant.setId(customerData.getBasicInfo().getId());
+                        basicInfoApplicant.setFirstName(customerData.getBasicInfo().getFirstName());
+                        basicInfoApplicant.setMiddleName(customerData.getBasicInfo().getMiddleName());
+                        basicInfoApplicant.setLastName(customerData.getBasicInfo().getLastName());
+                        basicInfoApplicant.setDob(customerData.getBasicInfo().getDob());
+                        basicInfoApplicant.setDpd(dpd);
+                        basicInfoApplicant.setDpdBucket(dpdBucket);
+                        basicInfoApplicant.setDpdBgColor(dpdBgColor);
+                        basicInfoApplicant.setDpdTextColor(dpdTextColor);
+                        basicInfoApplicant.setPos(loanDetailRes.getData().getPrincipalOutstanding());
+                        basicInfoApplicant.setLoanAmount(loanDetailRes.getData().getLoanAmount());
+                        basicInfoApplicant.setEmiAmount(loanDetailRes.getData().getEmiAmount());
+                        basicInfoApplicant.setLoanTenure(loanDetailRes.getData().getLoanTenure());
+                        basicInfoApplicant.setAssetClassification(loanDetailRes.getData().getAssetClassification());
+                        basicInfoApplicant.setEmiDate("Pending LMS");
+                        if (customerData.getCommunication() != null) {
+                            for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
+                                if (!(communicationData.getAddressType() == null)) {
+                                    address.put(communicationData.getAddressType(), communicationData.getFullAddress());
+                                    if (!Objects.equals(communicationData.getNumbers(), "") && communicationData.getNumbers() != null) {
+                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                    }
+                                    if ((!Objects.equals(numbersReturnResponseDTO.getMobNo(), "")) && !(Objects.equals(numbersReturnResponseDTO.getMobNo(), communicationData.getNumbers()))) {
+                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                    }
+                                } else {
+                                    if (!Objects.equals(communicationData.getNumbers(), "")) {
+                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                    }
                                 }
                             }
                         }
-                    }
-                    customerDetails.setBasicInfo(basicInfoApplicant);
-                    customerDetails.setAddress(address);
-                    customerDetails.setNumbers(numbersReturnResponseDTO);
-                    customerList.add(customerDetails);
+                        customerDetails.setBasicInfo(basicInfoApplicant);
+                        customerDetails.setAddress(address);
+                        customerDetails.setNumbers(numbersReturnResponseDTO);
+                        customerList.add(customerDetails);
 
+                    }
                 }
             }
             List<AdditionalContactDetailsEntity> additionalContactDetailsEntity = additionalContactDetailsRepository.findAllByLoanId(loanIdNumber);
