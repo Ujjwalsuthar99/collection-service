@@ -1084,7 +1084,7 @@ public class UtilityServiceImpl implements UtilityService {
                 digitalPaymentTransactionsEntity.setStatus("pending");
                 digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(requestBody.getAmount()));
                 digitalPaymentTransactionsEntity.setUtrNumber(null);
-                digitalPaymentTransactionsEntity.setReceiptRequestBody("{}");
+                digitalPaymentTransactionsEntity.setReceiptRequestBody(requestBody.getReceiptRequestBody());
                 digitalPaymentTransactionsEntity.setPaymentLink(null);
                 digitalPaymentTransactionsEntity.setMobileNo(null);
                 digitalPaymentTransactionsEntity.setVendor(requestBody.getVendor());
