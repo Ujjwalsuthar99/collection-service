@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public interface DigitalPaymentTransactionsRepository extends JpaRepository<Digi
             "from\n" +
             "\tcollection.digital_payment_transactions dpt\n" +
             "where\n" +
-            "\tdpt.created_by = :createdBy")
-    List<Map<String, Object>> getDigitalPaymentTransactionsByCreatedBy(Long createdBy, Pageable pageable);
+            "\tdpt.created_by = :createdBy and dpt.created_date between :fromDate and :toDate")
+    List<Map<String, Object>> getDigitalPaymentTransactionsByCreatedBy(Long createdBy, Pageable pageable, Date fromDate, Date toDate);
 
 }

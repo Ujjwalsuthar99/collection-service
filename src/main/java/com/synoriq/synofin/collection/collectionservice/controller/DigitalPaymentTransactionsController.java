@@ -5,10 +5,13 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.service.DigitalPaymentTransactionsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_NUMBER;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_SIZE;
@@ -25,16 +28,19 @@ public class DigitalPaymentTransactionsController {
     DigitalPaymentTransactionsService digitalPaymentTransactionsService;
 
     @RequestMapping(value = "digital-payment-transactions/transactions/{userId}", method = RequestMethod.GET)
-    public ResponseEntity<Object> getDigitalPaymentTransactionsUserWise(@RequestHeader("Authorization") String bearerToken, @PathVariable("userId") String userId,
+    public ResponseEntity<Object> getDigitalPaymentTransactionsUserWise(@RequestHeader("Authorization") String bearerToken, @PathVariable("userId") Long userId,
                                                                         @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
-                                                                        @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size) {
+                                                                        @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
+                                                                        @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date fromDate,
+                                                                        @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date toDate,
+                                                                        @RequestParam("searchKey") String searchKey) {
 
         BaseDTOResponse<Object> baseResponse;
         Object digitalPaymentTransactionsResponse;
         ResponseEntity<Object> response;
 
         try {
-            digitalPaymentTransactionsResponse = digitalPaymentTransactionsService.getDigitalPaymentTransactionsUserWise(bearerToken, userId, page, size);
+            digitalPaymentTransactionsResponse = digitalPaymentTransactionsService.getDigitalPaymentTransactionsUserWise(userId, page, size, fromDate, toDate, searchKey);
             response = new ResponseEntity<>(digitalPaymentTransactionsResponse, HttpStatus.OK);
 
 

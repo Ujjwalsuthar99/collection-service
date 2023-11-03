@@ -13,6 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -25,22 +27,17 @@ public class DigitalPaymentTransactionsServiceImpl implements DigitalPaymentTran
     @Autowired
     private UtilityService utilityService;
     @Override
-    public Object getDigitalPaymentTransactionsUserWise(String token, String userId, Integer page, Integer size) throws Exception {
-        BaseDTOResponse<Object> baseDTOResponse;
-        Pageable pageable = PageRequest.of(page,size);
+    public Object getDigitalPaymentTransactionsUserWise(Long userId, Integer page, Integer size, Date fromDate, Date toDate, String searchKey) throws Exception {
+        List<Map<String, Object>> digitalPaymentTransactionsEntityList;
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            digitalPaymentTransactionsEntityList = digitalPaymentTransactionsRepository.getDigitalPaymentTransactionsByCreatedBy(userId, pageable, fromDate, toDate);
 
-        List<Map<String, Object>> digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.getDigitalPaymentTransactionsByCreatedBy(Long.valueOf(userId), pageable);
-
-        if (digitalPaymentTransactionsEntity != null) {
-            baseDTOResponse = new BaseDTOResponse<>(digitalPaymentTransactionsEntity);
-        } else {
-            log.error("Digital payment transactions data not found for user this id {}", userId);
-            throw new Exception("1016025");
+        } catch (Exception e) {
+            throw new Exception("1017000");
         }
 
-        return baseDTOResponse;
-
-
-
+        return new BaseDTOResponse<Object>(digitalPaymentTransactionsEntityList);
     }
+
 }
