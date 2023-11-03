@@ -19,6 +19,8 @@ public interface DigitalPaymentTransactionsRepository extends JpaRepository<Digi
             "\tdpt.created_date,\n" +
             "\tdpt.modified_date,\n" +
             "\tdpt.loan_id,\n" +
+            "\t(select la.loan_application_number from lms.loan_application la where la.loan_application_id=dpt.loan_id) as loan_number,\n" +
+            "\t(select concat(c.first_name, ' ', c.last_name) from lms.customer_loan_mapping clm join lms.customer c on clm.customer_id = c.customer_id  where clm.loan_id = dpt.loan_id and clm.customer_type ='applicant') as customer_name,\n" +
             "\tdpt.payment_service_name,\n" +
             "\tdpt.status,\n" +
             "\tdpt.amount,\n" +
