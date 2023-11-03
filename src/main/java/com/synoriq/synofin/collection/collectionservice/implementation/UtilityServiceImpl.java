@@ -918,6 +918,8 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             log.info("res {}", res);
+            ocrCheckRequestDataDTO.setImgBaseUrl("base64 string");
+            requestBody.setData(ocrCheckRequestDataDTO);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
         } catch (Exception ee) {
@@ -1167,11 +1169,11 @@ public class UtilityServiceImpl implements UtilityService {
 
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, requestBody, res, "success", null);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, requestBody, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
 
