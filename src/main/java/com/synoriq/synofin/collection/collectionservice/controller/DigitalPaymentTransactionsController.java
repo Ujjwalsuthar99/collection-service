@@ -33,7 +33,7 @@ public class DigitalPaymentTransactionsController {
                                                                         @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
                                                                         @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date fromDate,
                                                                         @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date toDate,
-                                                                        @RequestParam("searchKey") String searchKey) {
+                                                                        @RequestParam(value = "searchKey", defaultValue = "") String searchKey) {
 
         BaseDTOResponse<Object> baseResponse;
         Object digitalPaymentTransactionsResponse;
