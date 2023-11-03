@@ -29,6 +29,7 @@ import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogSe
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptTransferService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
+import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     @Autowired
     private ReceiptRepository receiptRepository;
     @Autowired
+    private CurrentUserInfo currentUserInfo;
+    @Autowired
     private CollectionReceiptRepository collectionReceiptRepository;
 
     @Autowired
@@ -73,6 +76,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
     @Autowired
     private UtilityService utilityService;
+    @Autowired
+    private RSAUtils rsaUtils;
     @Autowired
     ConsumedApiLogService consumedApiLogService;
 
@@ -379,13 +384,16 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         Map<String, Object> bankData = null;
         ReceiptTransferResponseDTO receiptTransferResponseDTO = new ReceiptTransferResponseDTO();
         try {
+            String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+            String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+            Boolean piiPermission = rsaUtils.getPiiPermission();
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
             Long receiptTransferToUserId = receiptTransferEntity.getTransferredToUserId();
             Long receiptTransferByUserId = receiptTransferEntity.getTransferredBy();
             if (receiptTransferEntity.getTransferBankCode() != null && !Objects.equals(receiptTransferEntity.getTransferBankCode(), "")) {
                 bankData = receiptTransferRepository.getBankData(Long.parseLong(receiptTransferEntity.getTransferBankCode()));
             }
-            List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId);
+            List<Map<String, Object>> receiptsData = receiptTransferRepository.getDataByReceiptTransferId(receiptTransferId, encryptionKey, password, piiPermission);
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, receiptTransferEntity.getTransferMode());
 
             List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferId);

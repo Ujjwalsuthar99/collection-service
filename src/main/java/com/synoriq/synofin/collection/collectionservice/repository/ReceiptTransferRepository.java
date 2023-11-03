@@ -122,7 +122,10 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             , @Param("toDate") Date toDate, Pageable pageRequest);
 
 
-    @Query(nativeQuery = true,value = "select concat_ws(' ', c.first_name, c.last_name) as name, cast(sr.form->>'receipt_amount' as decimal) as receipt_amount, sr.service_request_id as receipt_id, sr.form->>'payment_mode' as payment_mode\n" +
+    @Query(nativeQuery = true,value = "select " +
+//            "         concat_ws(' ', c.first_name, c.last_name) as name, " +
+            "         concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as name,\n" +
+            "         cast(sr.form->>'receipt_amount' as decimal) as receipt_amount, sr.service_request_id as receipt_id, sr.form->>'payment_mode' as payment_mode\n" +
             "         from collection.receipt_transfer rt \n" +
             "         join (select collection_receipts_id, receipt_transfer_id from collection.receipt_transfer_history) as rth on rt.receipt_transfer_id  = rth.receipt_transfer_id \n" +
             "         join (select service_request_id, loan_id, form from lms.service_request) as sr on sr.service_request_id = rth.collection_receipts_id \n" +
@@ -130,7 +133,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "         join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "         join (select customer_id, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id \n" +
             "         where rt.receipt_transfer_id = :receiptTransferId and clm.customer_type = 'applicant'")
-    List<Map<String, Object>> getDataByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
+    List<Map<String, Object>> getDataByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission);
 
     @Query(nativeQuery = true, value = "select ba.bank_branch as bank_branch, ba.account_number as account_number, ba.bank_name from master.bank_accounts ba where ba.bank_account_id = :bankCode")
     Map<String, Object> getBankData(@Param("bankCode") Long bankCode);
