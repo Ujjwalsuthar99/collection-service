@@ -1027,11 +1027,9 @@ public class UtilityServiceImpl implements UtilityService {
         integrationRequestBody.setSpecificPartnerName(requestBody.getVendor());
 
         try {
-            DynamicQrCodeRequestDTO dynamicQrCodeRequestDTO = new ObjectMapper().convertValue(requestBody, DynamicQrCodeRequestDTO.class);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
-            log.info("ocrCheckBody {}", dynamicQrCodeRequestDTO);
 
 
 
@@ -1052,9 +1050,7 @@ public class UtilityServiceImpl implements UtilityService {
             dynamicQrCodeResponseDto.setResponse(res.getResponse());
             dynamicQrCodeResponseDto.setRequestId(res.getRequestId());
             dynamicQrCodeResponseDto.setData(dynamicQrCodeDataResponseDTO);
-            if(requestBody.getVendor().equals("kotak")) {
-                res = dynamicQrCodeResponseDto;
-            }
+			res = dynamicQrCodeResponseDto;
 
             if(res.getResponse().equals(true)) {
 
@@ -1090,7 +1086,7 @@ public class UtilityServiceImpl implements UtilityService {
                 digitalPaymentTransactionsEntity.setStatus("pending");
                 digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(requestBody.getAmount()));
                 digitalPaymentTransactionsEntity.setUtrNumber(null);
-                digitalPaymentTransactionsEntity.setReceiptRequestBody("{}");
+                digitalPaymentTransactionsEntity.setReceiptRequestBody(requestBody.getReceiptRequestBody());
                 digitalPaymentTransactionsEntity.setPaymentLink(null);
                 digitalPaymentTransactionsEntity.setMobileNo(null);
                 digitalPaymentTransactionsEntity.setVendor(requestBody.getVendor());
@@ -1129,11 +1125,9 @@ public class UtilityServiceImpl implements UtilityService {
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setSystemId("collection");
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setSpecificPartnerName(requestBody.getVendor());
         try {
-            DynamicQrCodeRequestDTO dynamicQrCodeRequestDTO = new ObjectMapper().convertValue(requestBody, DynamicQrCodeRequestDTO.class);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
-            log.info("ocrCheckBody {}", dynamicQrCodeRequestDTO);
 
             res = HTTPRequestService.<Object, DynamicQrCodeCheckStatusResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)

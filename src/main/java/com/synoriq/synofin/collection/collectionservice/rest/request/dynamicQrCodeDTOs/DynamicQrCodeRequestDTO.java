@@ -37,4 +37,7 @@ public class DynamicQrCodeRequestDTO {
     @JsonProperty("geo_location_data")
     private Object geolocation;
 
+    @JsonProperty("receipt_request_body")
+    private Object receiptRequestBody;
+
 }

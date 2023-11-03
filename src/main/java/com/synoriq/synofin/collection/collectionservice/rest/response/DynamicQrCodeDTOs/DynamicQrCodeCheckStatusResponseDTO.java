@@ -11,7 +11,7 @@ public class DynamicQrCodeCheckStatusResponseDTO {
     private Boolean response;
 
     @JsonProperty("data")
-    private DynamicQrCodeDataResponseDTO data;
+    private DynamicQrCodeCheckStatusDataResponseDTO data;
 
     @JsonProperty("request_id")
     private String requestId;
