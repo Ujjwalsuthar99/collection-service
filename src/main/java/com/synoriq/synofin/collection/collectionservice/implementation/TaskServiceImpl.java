@@ -9,6 +9,8 @@ import com.synoriq.synofin.collection.collectionservice.repository.TaskRepositor
 import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.*;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsReturnResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanSummaryForLoanDTOs.LoanSummaryResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
@@ -75,6 +77,7 @@ public class TaskServiceImpl implements TaskService {
         return baseDTOResponse;
 
     }
+
     @Override
     public Object getTaskDetailByLoanId(String token, TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
 
@@ -84,6 +87,7 @@ public class TaskServiceImpl implements TaskService {
 
         TaskDetailRequestDTO loanDataBody = new ObjectMapper().convertValue(taskDetailRequestDTO, TaskDetailRequestDTO.class);
         TaskDetailDTOResponse resp = new TaskDetailDTOResponse();
+        TaskDetailReturnResponseDTO response = new TaskDetailReturnResponseDTO();
         BaseDTOResponse<Object> baseDTOResponse = null;
         String loanId = taskDetailRequestDTO.getRequestData().getLoanId();
         Long loanIdNumber = Long.parseLong(loanId);
@@ -137,7 +141,39 @@ public class TaskServiceImpl implements TaskService {
                     .typeResponseType(LoanSummaryResponseDTO.class)
                     .build().call();
 
-            int dpd = loanDetailRes.getData().getDpd();
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, customerRes, "success", Long.parseLong(loanId));
+
+            if (Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", "vehicle")) {
+                CollateralDetailsResponseDTO collateralResponse = HTTPRequestService.<Object, CollateralDetailsResponseDTO>builder()
+                        .httpMethod(HttpMethod.GET)
+                        .url("http://localhost:1102/v1/getCollaterals?loanId=" + loanIdNumber)
+                        .httpHeaders(httpHeaders)
+                        .typeResponseType(CollateralDetailsResponseDTO.class)
+                        .build().call();
+
+                // creating api logs
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, "success", Long.parseLong(loanId));
+
+                if (collateralResponse.getData() != null) {
+                    CollateralDetailsReturnResponseDTO collateralDetailsReturnResponseDTO = new CollateralDetailsReturnResponseDTO();
+                    collateralResponse.getData().forEach((key, value) -> {
+                        collateralDetailsReturnResponseDTO.setChasisNumber(String.valueOf(value.get("chasis_no")));
+                        collateralDetailsReturnResponseDTO.setVehicleNumber(String.valueOf(value.get("vehicle_registration_no")));
+                        collateralDetailsReturnResponseDTO.setVehicleType(String.valueOf(value.get("vehicle_type")));
+                        collateralDetailsReturnResponseDTO.setModel(String.valueOf(value.get("model")));
+                        collateralDetailsReturnResponseDTO.setManufacturer(String.valueOf(value.get("manufacturer")));
+                        collateralDetailsReturnResponseDTO.setEngineNumber(String.valueOf(value.get("engine_no")));
+                        collateralDetailsReturnResponseDTO.setCostOfAsset(Double.parseDouble(String.valueOf(value.get("cost_of_asset"))));
+
+                    });
+                    response.setCollateralDetails(collateralDetailsReturnResponseDTO);
+                } else {
+                    response.setCollateralDetails(null);
+                }
+
+            }
+            int dpd = loanDetailRes.getData() != null ? loanDetailRes.getData().getDpd() : 0;
             String dpdTextColor;
             String dpdBgColor;
             String dpdBucket;
@@ -173,7 +209,7 @@ public class TaskServiceImpl implements TaskService {
             }
 
             String loanApplicationNumber = taskRepository.getLoanApplicationNumber(loanIdNumber);
-            TaskDetailReturnResponseDTO response = new TaskDetailReturnResponseDTO();
+
             List<CustomerDetailsReturnResponseDTO> customerList = new ArrayList<>();
 
 
@@ -266,6 +302,7 @@ public class TaskServiceImpl implements TaskService {
         return baseDTOResponse;
 
     }
+
     @Override
     public BaseDTOResponse<Object> getTaskDetailsBySearchKey(Long userId, String searchKey, Integer pageNo, Integer pageSize) throws Exception {
 
@@ -294,6 +331,7 @@ public class TaskServiceImpl implements TaskService {
         return baseDTOResponse;
 
     }
+
     @Override
     public BaseDTOResponse<Object> getLoanIdsByLoanId(Long loanId) throws Exception {
 
