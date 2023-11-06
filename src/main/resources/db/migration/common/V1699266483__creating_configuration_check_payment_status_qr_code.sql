@@ -1,0 +1,2 @@
+INSERT INTO collection.collection_configurations (created_date,created_by,deleted,configuration_name,configuration_value,configuration_description,modified_date,modified_by,active,stage) VALUES
+	 ('2023-10-28 17:07:13.466',1,false,'is_check_qr_payment_status_available','false','If available then the client API will fetch the status from vendor or if not then the status will be fetched from our database',NULL,NULL,true,NULL);
