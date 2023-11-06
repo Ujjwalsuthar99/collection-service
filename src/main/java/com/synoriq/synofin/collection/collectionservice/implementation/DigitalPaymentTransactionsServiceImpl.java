@@ -30,9 +30,12 @@ public class DigitalPaymentTransactionsServiceImpl implements DigitalPaymentTran
         try {
             Pageable pageable = PageRequest.of(page, size);
             digitalPaymentTransactionsEntityList = digitalPaymentTransactionsRepository.getDigitalPaymentTransactionsByCreatedBy(userId, pageable, fromDate, toDate);
-
-            response.put("transactions", digitalPaymentTransactionsEntityList);
-            response.put("total_rows", digitalPaymentTransactionsEntityList.get(0).get("total_rows"));
+            if (digitalPaymentTransactionsEntityList != null) {
+                response.put("transactions", digitalPaymentTransactionsEntityList);
+                response.put("total_rows", digitalPaymentTransactionsEntityList.get(0).get("total_rows"));
+            } else {
+                throw new Exception("1017002");
+            }
 
         } catch (Exception e) {
             throw new Exception("1017000");
