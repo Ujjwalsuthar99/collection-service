@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,16 @@ import java.util.Map;
 public interface DigitalPaymentTransactionsRepository extends JpaRepository<DigitalPaymentTransactionsEntity, Long> {
 
     DigitalPaymentTransactionsEntity findByDigitalPaymentTransactionsId(Long digitalPaymentTransactionsId);
+    @Query(nativeQuery = true, value="select\n" +
+            "\tcast(dpt.other_response_data->'request'->>'merchantTranId' as text) as merchantTransId,\n" +
+            "\tdpt.status,\n" +
+            "\tdpt.amount,\n" +
+            "\tdpt.vendor\n" +
+            "from\n" +
+            "\tcollection.digital_payment_transactions dpt\n" +
+            "where\n" +
+            "\tdpt.digital_payment_trans_id = :digitalPaymentTransactionsId and dpt.other_response_data->'request'->>'merchantTranId'=:merchantTransId")
+    Map<String, Object> findByDigitalPaymentTransactionsIdForCheckStatusResponse(Long digitalPaymentTransactionsId, String merchantTransId);
     @Query(nativeQuery = true, value="select\n" +
             "\tdpt.digital_payment_trans_id,\n" +
             "\tdpt.created_date,\n" +
@@ -32,7 +43,7 @@ public interface DigitalPaymentTransactionsRepository extends JpaRepository<Digi
             "from\n" +
             "\tcollection.digital_payment_transactions dpt\n" +
             "where\n" +
-            "\tdpt.created_by = :createdBy and dpt.created_date between :fromDate and :toDate")
-    List<Map<String, Object>> getDigitalPaymentTransactionsByCreatedBy(Long createdBy, Pageable pageable, Date fromDate, Date toDate);
+            "\tdpt.created_by = :createdBy and dpt.created_date between :fromDate and :toDate order by dpt.created_by desc")
+    List<Map<String, Object>> getDigitalPaymentTransactionsByCreatedBy(@Param("createdBy") Long createdBy, Pageable pageable, @Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
 
 }

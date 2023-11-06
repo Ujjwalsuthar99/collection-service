@@ -23,6 +23,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImage
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
@@ -1124,42 +1125,57 @@ public class UtilityServiceImpl implements UtilityService {
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setUserReferenceNumber(String.valueOf(requestBody.getUserId()));
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setSystemId("collection");
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setSpecificPartnerName(requestBody.getVendor());
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
+            String isCheckQrPaymentStatusAvailableConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(IS_QR_CODE_CHECK_PAYMENT_STATUS_AVAILABLE);
 
-            res = HTTPRequestService.<Object, DynamicQrCodeCheckStatusResponseDTO>builder()
-                    .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:1102/v1/getQrCodeTransactionStatus")
-                    .httpHeaders(httpHeaders)
-                    .body(dynamicQrCodeStatusCheckIntegrationRequestDTO)
-                    .typeResponseType(DynamicQrCodeCheckStatusResponseDTO.class)
-                    .build().call();
+            String[] isCheckQrPaymentStatusAvailable  = isCheckQrPaymentStatusAvailableConf.split("/");
 
-            if(res.getResponse().equals(true)) {
+            if(Arrays.asList(isCheckQrPaymentStatusAvailable).contains(requestBody.getVendor())) {
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.add("Authorization", token);
+                httpHeaders.add("Content-Type", "application/json");
 
-                CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
-                collectionActivityLogsEntity.setActivityName("dynamic_qr_code_payment_approved");
-                collectionActivityLogsEntity.setActivityDate(new Date());
-                collectionActivityLogsEntity.setDeleted(false);
-                collectionActivityLogsEntity.setActivityBy(requestBody.getUserId());
-                collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
-                collectionActivityLogsEntity.setAddress("{}");
-                collectionActivityLogsEntity.setRemarks("The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + requestBody.getLoanId() + " has been updated as " + res.getData().getStatus());
-                collectionActivityLogsEntity.setImages("{}");
-                collectionActivityLogsEntity.setLoanId(requestBody.getLoanId());
-                collectionActivityLogsEntity.setGeolocation(requestBody.getGeolocation());
-
-                collectionActivityLogsRepository.save(collectionActivityLogsEntity);
-
-                DigitalPaymentTransactionsEntity transactionData = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
-
-                transactionData.setStatus("success");
-                transactionData.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
-                // here we should have a one more column to store the check payment status API response data
-                digitalPaymentTransactionsRepository.save(transactionData);
+                res = HTTPRequestService.<Object, DynamicQrCodeCheckStatusResponseDTO>builder()
+                        .httpMethod(HttpMethod.POST)
+                        .url("http://localhost:1102/v1/getQrCodeTransactionStatus")
+                        .httpHeaders(httpHeaders)
+                        .body(dynamicQrCodeStatusCheckIntegrationRequestDTO)
+                        .typeResponseType(DynamicQrCodeCheckStatusResponseDTO.class)
+                        .build().call();
+            } else {
+                res.setResponse(true);
+                Map<String, Object> digitalPaymentTransaction = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsIdForCheckStatusResponse(requestBody.getDigitalPaymentTransactionId(), requestBody.getMerchantTranId());
+                DynamicQrCodeCheckStatusDataResponseDTO dynamicQrCodeCheckStatusDataResponseDTO = new DynamicQrCodeCheckStatusDataResponseDTO();
+                dynamicQrCodeCheckStatusDataResponseDTO.setMerchantTranId(String.valueOf(digitalPaymentTransaction.get("merchantTransId")));
+                dynamicQrCodeCheckStatusDataResponseDTO.setStatus(String.valueOf(digitalPaymentTransaction.get("status")));
+                dynamicQrCodeCheckStatusDataResponseDTO.setAmount(String.valueOf(digitalPaymentTransaction.get("amount")));
+                res.setData(dynamicQrCodeCheckStatusDataResponseDTO);
             }
+
+//            if(res.getData().getStatus().equalsIgnoreCase("success")) {
+//
+//                CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+//                collectionActivityLogsEntity.setActivityName("dynamic_qr_code_payment_approved");
+//                collectionActivityLogsEntity.setActivityDate(new Date());
+//                collectionActivityLogsEntity.setDeleted(false);
+//                collectionActivityLogsEntity.setActivityBy(requestBody.getUserId());
+//                collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
+//                collectionActivityLogsEntity.setAddress("{}");
+//                collectionActivityLogsEntity.setRemarks("The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + requestBody.getLoanId() + " has been updated as " + res.getData().getStatus());
+//                collectionActivityLogsEntity.setImages("{}");
+//                collectionActivityLogsEntity.setLoanId(requestBody.getLoanId());
+//                collectionActivityLogsEntity.setGeolocation(requestBody.getGeolocation());
+//
+//                collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+//
+//                DigitalPaymentTransactionsEntity transactionData = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
+//
+//                transactionData.setStatus("success");
+//                transactionData.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+//                // here we should have a one more column to store the check payment status API response data
+//                digitalPaymentTransactionsRepository.save(transactionData);
+//            }
 
             log.info("res {}", res);
             // creating api logs
