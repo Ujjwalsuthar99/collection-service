@@ -22,6 +22,8 @@ public class EnumSQLConstants {
         razor_pay_ifsc,
         deposit_challan,
         get_documents,
+        get_loan_summary,
+        get_collaterals,
         get_user_details_admin,
 
         send_qr_code,

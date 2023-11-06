@@ -1,0 +1,2 @@
+ALTER TYPE collection.consumed_api_logs_log_name ADD VALUE 'get_loan_summary' AFTER 'send_qr_code';
+ALTER TYPE collection.consumed_api_logs_log_name ADD VALUE 'get_collaterals' AFTER 'get_loan_summary';
