@@ -13,10 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -28,16 +25,23 @@ public class DigitalPaymentTransactionsServiceImpl implements DigitalPaymentTran
     private UtilityService utilityService;
     @Override
     public Object getDigitalPaymentTransactionsUserWise(Long userId, Integer page, Integer size, Date fromDate, Date toDate, String searchKey) throws Exception {
-        List<Map<String, Object>> digitalPaymentTransactionsEntityList;
+        List<Map<String, Object>> digitalPaymentTransactionsEntityList = new ArrayList<>();
+        Map<String, Object> response = new HashMap<>();
         try {
             Pageable pageable = PageRequest.of(page, size);
             digitalPaymentTransactionsEntityList = digitalPaymentTransactionsRepository.getDigitalPaymentTransactionsByCreatedBy(userId, pageable, fromDate, toDate);
+            if (digitalPaymentTransactionsEntityList != null) {
+                response.put("transactions", digitalPaymentTransactionsEntityList);
+                response.put("total_rows", digitalPaymentTransactionsEntityList.get(0).get("total_rows"));
+            } else {
+                throw new Exception("1017002");
+            }
 
         } catch (Exception e) {
             throw new Exception("1017000");
         }
 
-        return new BaseDTOResponse<Object>(digitalPaymentTransactionsEntityList);
+        return new BaseDTOResponse<Object>(response);
     }
 
 }
