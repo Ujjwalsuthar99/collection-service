@@ -8,6 +8,7 @@ import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogSe
 import com.synoriq.synofin.collection.collectionservice.service.DigitalPaymentTransactionsService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ public class DigitalPaymentTransactionsServiceImpl implements DigitalPaymentTran
     private UtilityService utilityService;
     @Override
     public Object getDigitalPaymentTransactionsUserWise(Long userId, Integer page, Integer size, Date fromDate, Date toDate, String searchKey) throws Exception {
+        toDate = DateUtils.addDays(toDate,1);
         List<Map<String, Object>> digitalPaymentTransactionsEntityList = new ArrayList<>();
         Map<String, Object> response = new HashMap<>();
         try {
