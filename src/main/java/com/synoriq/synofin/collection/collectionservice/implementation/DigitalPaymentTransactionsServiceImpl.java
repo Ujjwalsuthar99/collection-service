@@ -34,7 +34,7 @@ public class DigitalPaymentTransactionsServiceImpl implements DigitalPaymentTran
                 response.put("transactions", digitalPaymentTransactionsEntityList);
                 response.put("total_rows", digitalPaymentTransactionsEntityList.get(0).get("total_rows"));
             } else {
-                response.put("transactions", null);
+                response.put("transactions", digitalPaymentTransactionsEntityList);
                 response.put("total_rows", 0);
             }
 
