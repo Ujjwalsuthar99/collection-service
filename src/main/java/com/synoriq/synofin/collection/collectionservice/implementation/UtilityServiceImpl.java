@@ -1189,4 +1189,12 @@ public class UtilityServiceImpl implements UtilityService {
 
         return res;
     }
+
+    @Override
+    public Object qrCodeCallBack(String token, DynamicQrCodeCallBackRequestDTO requestBody) throws Exception {
+
+
+
+        return new Object();
+    }
 }

@@ -84,17 +84,6 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
 
         CollectionLimitUserWiseEntity existingLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
 
-        String defaultLimit = collectionLimitUserWiseDtoRequest.getTotalLimitValue().toString();
-        if (collectionLimitUserWiseDtoRequest.getTotalLimitValue() == null) {
-            if (collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cash")) {
-                defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
-            } else if (collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cheque")) {
-                defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT);
-            } else {
-                defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT);
-            }
-        }
-
         if (existingLimit != null) {
             if (collectionLimitUserWiseDtoRequest.getTotalLimitValue() < existingLimit.getUtilizedLimitValue()) {
                 throw new Exception("1017009");
@@ -102,6 +91,16 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
             existingLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getTotalLimitValue());
             collectionLimitUserWiseRepository.save(existingLimit);
         } else {
+            String defaultLimit = collectionLimitUserWiseDtoRequest.getTotalLimitValue().toString();
+            if (collectionLimitUserWiseDtoRequest.getTotalLimitValue() == null) {
+                if (collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cash")) {
+                    defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
+                } else if (collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cheque")) {
+                    defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT);
+                } else {
+                    defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT);
+                }
+            }
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
             collectionLimitUserWiseEntity.setCreatedDate(new Date());
             collectionLimitUserWiseEntity.setDeleted(false);

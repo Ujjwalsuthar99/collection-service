@@ -18,8 +18,7 @@ public class DynamicQrCodeStatusCheckRequestDTO {
     @JsonProperty("userId")
     private Long userId;
 
-    @Column(name = "geo_location_data")
-    @Type(type = "json")
+    @JsonProperty("geo_location_data")
     private Object geolocation;
 
     @JsonProperty("digital_payment_transaction_id")
