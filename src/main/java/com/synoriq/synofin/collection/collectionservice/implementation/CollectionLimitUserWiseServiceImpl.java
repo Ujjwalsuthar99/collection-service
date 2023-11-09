@@ -63,8 +63,8 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
     public String createCollectionLimitUserWise(String token, CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws Exception {
 
         Long userId;
-        String userName;
         UserDetailByUserIdDTOResponse userDetailByUserIdDTOResponse;
+        String userName = utilityService.splitCodeName(collectionLimitUserWiseDtoRequest.getUsername());
         ProfileDetailResponseDTO profileDetailResponseDTO;
         if (collectionLimitUserWiseDtoRequest.getUserId() != null) { // update
             userDetailByUserIdDTOResponse = utilityService.getUserDetailsByUserId(token, collectionLimitUserWiseDtoRequest.getUserId());
@@ -72,10 +72,10 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
             userName = userDetailByUserIdDTOResponse.getData().getEmployeeUserName();
             log.info(" ifff user name {}", userName);
         } else {
-            profileDetailResponseDTO = profileService.getProfileDetails(token, collectionLimitUserWiseDtoRequest.getUsername());
+            profileDetailResponseDTO = profileService.getProfileDetails(token, userName);
             if (profileDetailResponseDTO.getData() != null) {
                 userId = profileDetailResponseDTO.getData().getUserId();
-                userName = utilityService.splitCodeName(collectionLimitUserWiseDtoRequest.getUsername());
+//                userName = utilityService.splitCodeName(collectionLimitUserWiseDtoRequest.getUsername());
                 log.info(" else user name {}", userName);
             } else {
                 throw new Exception("1016041");
