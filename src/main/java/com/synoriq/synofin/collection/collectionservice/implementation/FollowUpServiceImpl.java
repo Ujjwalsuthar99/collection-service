@@ -144,7 +144,7 @@ public class FollowUpServiceImpl implements FollowUpService {
             baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
         } else {
             log.error("Followup data not found for loan Id {}", userId);
-            throw new Exception("1016025");
+            baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
         }
 
         return baseDTOResponse;
