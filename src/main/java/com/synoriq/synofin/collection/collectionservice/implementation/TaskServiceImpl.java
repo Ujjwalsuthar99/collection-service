@@ -60,7 +60,8 @@ public class TaskServiceImpl implements TaskService {
             pageRequest = PageRequest.of(pageNo, pageSize);
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
-            Boolean piiPermission = rsaUtils.getPiiPermission();
+//            Boolean piiPermission = rsaUtils.getPiiPermission();
+            Boolean piiPermission = true;
             List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsByPages(userId, encryptionKey, password, piiPermission, pageRequest);
 
             if (pageNo > 0) {
@@ -316,7 +317,8 @@ public class TaskServiceImpl implements TaskService {
             pageRequest = PageRequest.of(pageNo, pageSize);
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
-            Boolean piiPermission = rsaUtils.getPiiPermission();
+//            Boolean piiPermission = rsaUtils.getPiiPermission();
+            Boolean piiPermission = true;
             List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsBySearchKey(userId, searchKey, encryptionKey, password, piiPermission, pageRequest);
             if (pageNo > 0) {
                 if (taskDetailPages.size() == 0) {

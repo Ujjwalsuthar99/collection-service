@@ -101,7 +101,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         try {
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
-            Boolean piiPermission = rsaUtils.getPiiPermission();
+//            Boolean piiPermission = rsaUtils.getPiiPermission();
+            Boolean piiPermission = true;
             List<Map<String, Object>> taskDetailPages;
             Pageable pageRequest;
             if (page > 0) {
@@ -131,7 +132,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         try {
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
-            Boolean piiPermission = rsaUtils.getPiiPermission();
+//            Boolean piiPermission = rsaUtils.getPiiPermission();
+            Boolean piiPermission = true;
             List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferred(userName, encryptionKey, password, piiPermission);
             baseDTOResponse = new BaseDTOResponse<>(receiptsData);
         } catch (Exception e) {

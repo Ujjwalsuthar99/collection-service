@@ -386,7 +386,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         try {
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
-            Boolean piiPermission = rsaUtils.getPiiPermission();
+//            Boolean piiPermission = rsaUtils.getPiiPermission();
+            Boolean piiPermission = true;
             receiptTransferEntity = receiptTransferRepository.findById(receiptTransferId).get();
             Long receiptTransferToUserId = receiptTransferEntity.getTransferredToUserId();
             Long receiptTransferByUserId = receiptTransferEntity.getTransferredBy();
