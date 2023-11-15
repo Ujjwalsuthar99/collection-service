@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS collection.digital_payment_transactions (
     collection_activity_logs_id int8 NULL,
     action_activity_logs_id int8 NULL,
     other_response_data json NULL,
-    call_back_request_body NULL,
+    call_back_request_body json NULL,
     CONSTRAINT digital_payment_trans_id_pk PRIMARY KEY (digital_payment_trans_id)
 );
 
