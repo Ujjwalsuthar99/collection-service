@@ -12,7 +12,6 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.createRecei
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.GetReceiptDateResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.ReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.ReceiptServiceSystemPropertiesResponse;
 import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
@@ -165,7 +164,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional
     public ServiceRequestSaveResponse createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception {
         ServiceRequestSaveResponse res;
-        Long collectionActivityId = null;
+        Long collectionActivityId;
         ReceiptServiceDtoRequest createReceiptBody = new ObjectMapper().convertValue(receiptServiceDtoRequest, ReceiptServiceDtoRequest.class);
 
         ReceiptServiceRequestDataDTO receiptServiceRequestDataDTO = new ReceiptServiceRequestDataDTO();
@@ -194,17 +193,21 @@ public class ReceiptServiceImpl implements ReceiptService {
             }
 
             String limitConf = null;
-            if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash")) {
-                limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
-            } else if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque")) {
-                limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
-            } else if(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi"))  {
-                limitConf = ONLINE_COLLECTION_DEFAULT_LIMIT;
+            switch (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode()) {
+                case "cash":
+                    limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
+                    break;
+                case "cheque":
+                    limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
+                    break;
+                case "upi":
+                    limitConf = ONLINE_COLLECTION_DEFAULT_LIMIT;
+                    break;
             }
 
 
-            Double totalLimitValue = 0.00;
-            Double currentReceiptAmountAllowed = 0.00;
+            Double totalLimitValue;
+            double currentReceiptAmountAllowed;
             double receiptAmount = Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
             CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode);
 
@@ -213,7 +216,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                 currentReceiptAmountAllowed = totalLimitValue - collectionLimitUser.getUtilizedLimitValue();
                 log.info("Utilized limit {}", collectionLimitUser.getUtilizedLimitValue());
             } else {
-                currentReceiptAmountAllowed = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
+                currentReceiptAmountAllowed = Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
             }
 
             // per day cash limit check
@@ -268,6 +271,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, res, "success", createReceiptBody.getActivityData().getLoanId());
             if (res.getData() != null) {
                 if (res.getData().getServiceRequestId() == null) {
+                    res.getError().getText();
                     throw new Exception("1016035");
                 }
                 collectionActivityId = activityLogService.createActivityLogs(receiptServiceDtoRequest.getActivityData(), bearerToken);
@@ -340,9 +344,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         ReceiptServiceSystemPropertiesResponse lmsBusinessDate;
 
         GetReceiptDateResponse getReceiptDateResponse = new GetReceiptDateResponse();
-        ReceiptDateResponse receiptDateResponse = new ReceiptDateResponse();
 //        log.info("get receipt date {}", receiptDateResponse);
-        BaseDTOResponse<Object> baseResponse = null;
+        BaseDTOResponse<Object> baseResponse;
         try {
 
             String businessDateConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(USE_BUSINESS_DATE_AS_RECEIPT_DATE);
@@ -374,7 +377,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                 String cDate = dateObj.format(formatter);
                 getReceiptDateResponse.setBusinessDate(cDate);
             }
-            baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
 
             if (transactionDateConf.equals("true")) {
                 String bDate = lmsBusinessDate.data.businessDate;
@@ -389,7 +391,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                 String cDate = dateObj.format(formatter);
                 getReceiptDateResponse.setTransactionDate(cDate);
             }
-            baseResponse = new BaseDTOResponse<Object>(getReceiptDateResponse);
+            baseResponse = new BaseDTOResponse<>(getReceiptDateResponse);
 //            log.info("Receipt Date {}", baseResponse);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();

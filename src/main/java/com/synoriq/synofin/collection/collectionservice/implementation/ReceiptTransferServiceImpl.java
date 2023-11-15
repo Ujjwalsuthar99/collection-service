@@ -13,12 +13,9 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvo
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestListDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceWrapperResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
@@ -33,7 +30,6 @@ import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -89,7 +85,6 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     public BaseDTOResponse<Object> createReceiptTransfer(@RequestBody ReceiptTransferDtoRequest receiptTransferDtoRequest, String token) throws Exception {
 
         BaseDTOResponse<Object> baseResponse;
-        ResponseEntity<Object> response = null;
         try {
             Long receiptTransferTableId = receiptTransferDtoRequest.getReceiptTransferId();
             String limitConf;
@@ -153,7 +148,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                             receiptTransferHistoryRepository.save(receiptTransferHistoryEntityToBeSaved);
                         }
                     }
-                    baseResponse = new BaseDTOResponse<Object>(receiptTransferEntity);
+                    baseResponse = new BaseDTOResponse<>(receiptTransferEntity);
 
                 } else {
                     throw new Exception("1016031");
@@ -181,10 +176,10 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     receiptTransferHistoryEntity.setDeleted(false);
                     receiptTransferHistoryRepository.save(receiptTransferHistoryEntity);
                 }
-                baseResponse = new BaseDTOResponse<Object>(receiptTransferEntity);
+                baseResponse = new BaseDTOResponse<>(receiptTransferEntity);
             }
         } catch (Exception ee) {
-            log.error("RestControllers error occurred for vanWebHookDetails: {} ->  {}", ee.getMessage());
+            log.error("RestControllers error occurred for vanWebHookDetails {}", ee.getMessage());
             throw new Exception(ee.getMessage());
         }
         return baseResponse;
@@ -219,8 +214,6 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
 
     @Transactional
     public ReceiptTransferEntity statusUpdate(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, String token) throws Exception {
-        BaseDTOResponse<Object> baseResponse = null;
-        ResponseEntity<Object> response = null;
         ReceiptTransferEntity receiptTransferEntity;
         try {
             String requestStatus = receiptTransferStatusUpdateDtoRequest.getStatus();
@@ -302,7 +295,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                                 }
                             } else {
                                 CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
-                                String limitConf = "";
+                                String limitConf;
                                 if (receiptTransferEntityTransferMode.equals("cash")) {
                                     limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
                                 } else {
@@ -437,7 +430,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             }
 
         } catch (Exception e) {
-            log.info("error {}", e);
+            log.info("error", e);
             e.printStackTrace();
             throw new Exception("1016028");
         }
@@ -494,11 +487,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String receiptTransferReadOnlyMode = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(RECEIPT_TRANSFER_MODE_READ_ONLY);
-            if (receiptTransferReadOnlyMode.equals("true")) {
-                receiptTransferDataByReceiptIdResponseDTO.setTransferHistoryButton(false);
-            } else {
-                receiptTransferDataByReceiptIdResponseDTO.setTransferHistoryButton(true);
-            }
+            receiptTransferDataByReceiptIdResponseDTO.setTransferHistoryButton(!receiptTransferReadOnlyMode.equals("true"));
             receiptData = receiptRepository.getReceiptDataByReceiptId(receiptId);
             JsonNode geoLocationDataNode1 = objectMapper.readTree(String.valueOf(receiptData.get("geo_location_data")));
             JsonNode imagesNode1 = objectMapper.readTree(String.valueOf(receiptData.get("images")));
@@ -803,11 +792,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             String disableApproveButtonConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DISABLE_APPROVE_BUTTON_IN_LMS);
             if (disableApproveButtonConf.equals("true")) {
                 if (!paymentMode.equals("upi")) {
-                    if (receiptTransferId != null) {
-                        disableApproveButtonResponseDTO.setDisableApproveButton(false);
-                    } else {
-                        disableApproveButtonResponseDTO.setDisableApproveButton(true);
-                    }
+                    disableApproveButtonResponseDTO.setDisableApproveButton(receiptTransferId == null);
                 } else {
                     disableApproveButtonResponseDTO.setDisableApproveButton(false);
                 }

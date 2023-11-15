@@ -9,4 +9,7 @@ public class DynamicQrCodeStatusCheckDataRequestDTO {
     @JsonProperty("merchantTranId")
     private String merchantTranId;
 
+    @JsonProperty("customerId")
+    private String customerId;
+
 }

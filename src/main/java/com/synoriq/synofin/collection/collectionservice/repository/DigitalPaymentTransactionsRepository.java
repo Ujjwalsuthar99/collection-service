@@ -15,15 +15,18 @@ import java.util.Map;
 public interface DigitalPaymentTransactionsRepository extends JpaRepository<DigitalPaymentTransactionsEntity, Long> {
 
     DigitalPaymentTransactionsEntity findByDigitalPaymentTransactionsId(Long digitalPaymentTransactionsId);
+
+    DigitalPaymentTransactionsEntity findByMerchantTranId(String merchantTranId);
+
     @Query(nativeQuery = true, value="select\n" +
-            "\tcast(dpt.other_response_data->'request'->>'merchantTranId' as text) as merchantTransId,\n" +
+            "\tdpt.merchant_tran_id as merchantTransId,\n" +
             "\tdpt.status,\n" +
             "\tdpt.amount,\n" +
             "\tdpt.vendor\n" +
             "from\n" +
             "\tcollection.digital_payment_transactions dpt\n" +
             "where\n" +
-            "\tdpt.digital_payment_trans_id = :digitalPaymentTransactionsId and dpt.other_response_data->'request'->>'merchantTranId'=:merchantTransId")
+            "\tdpt.digital_payment_trans_id = :digitalPaymentTransactionsId and dpt.merchant_tran_id = :merchantTransId")
     Map<String, Object> findByDigitalPaymentTransactionsIdForCheckStatusResponse(Long digitalPaymentTransactionsId, String merchantTransId);
     @Query(nativeQuery = true, value="select\n" +
             "\tdpt.digital_payment_trans_id,\n" +

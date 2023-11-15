@@ -2,21 +2,21 @@ package com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrC
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.hibernate.annotations.Type;
-
-import javax.persistence.Column;
 
 @Data
 public class DynamicQrCodeStatusCheckRequestDTO {
 
-    @JsonProperty("merchantTranId")
+    @JsonProperty("merchant_tran_id")
     private String merchantTranId;
 
-    @JsonProperty("loanId")
+    @JsonProperty("loan_id")
     private Long loanId;
 
-    @JsonProperty("userId")
+    @JsonProperty("user_id")
     private Long userId;
+
+    @JsonProperty("mobile_number")
+    private String mobileNumber;
 
     @JsonProperty("geo_location_data")
     private Object geolocation;

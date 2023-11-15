@@ -9,38 +9,29 @@ public class DynamicQrCodeCallBackRequestDTO {
     @JsonProperty("merchantId")
     private String merchantId;
 
-    @JsonProperty("subMerchantId")
-    private String subMerchantId;
-
-    @JsonProperty("terminalId")
-    private String terminalId;
-
-    @JsonProperty("BankRRN")
-    private String BankRRN;
+    @JsonProperty("OriginalBankRRN")
+    private String originalBankRRN;
 
     @JsonProperty("merchantTranId")
     private String merchantTranId;
 
-    @JsonProperty("PayerName")
-    private String PayerName;
+    @JsonProperty("Amount")
+    private String amount;
 
-    @JsonProperty("PayerMobile")
-    private String PayerMobile;
+    @JsonProperty("success")
+    private String success;
 
-    @JsonProperty("PayerVA")
-    private String PayerVA;
+    @JsonProperty("message")
+    private String message;
 
-    @JsonProperty("PayerAmount")
-    private String PayerAmount;
-
-    @JsonProperty("TxnStatus")
-    private String TxnStatus;
+    @JsonProperty("status")
+    private String status;
 
     @JsonProperty("TxnInitDate")
-    private String TxnInitDate;
+    private String txnInitDate;
 
-    @JsonProperty("TxnCompletionDate")
-    private String TxnCompletionDate;
+    @JsonProperty("vendor")
+    private String vendor;
 
 }
 

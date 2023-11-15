@@ -1085,6 +1085,7 @@ public class UtilityServiceImpl implements UtilityService {
                 digitalPaymentTransactionsEntity.setLoanId(requestBody.getLoanId());
                 digitalPaymentTransactionsEntity.setPaymentServiceName("dynamic_qr_code");
                 digitalPaymentTransactionsEntity.setStatus("pending");
+                digitalPaymentTransactionsEntity.setMerchantTranId(merchantTransId);
                 digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(requestBody.getAmount()));
                 digitalPaymentTransactionsEntity.setUtrNumber(null);
                 digitalPaymentTransactionsEntity.setReceiptRequestBody(requestBody.getReceiptRequestBody());
@@ -1120,12 +1121,12 @@ public class UtilityServiceImpl implements UtilityService {
         DynamicQrCodeStatusCheckDataRequestDTO dynamicQrCodeStatusCheckDataRequestDTO = new DynamicQrCodeStatusCheckDataRequestDTO();
 
         dynamicQrCodeStatusCheckDataRequestDTO.setMerchantTranId(requestBody.getMerchantTranId());
+        dynamicQrCodeStatusCheckDataRequestDTO.setCustomerId("91" + requestBody.getMobileNumber());
 
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setDynamicQrCodeStatusCheckDataRequestDTO(dynamicQrCodeStatusCheckDataRequestDTO);
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setUserReferenceNumber(String.valueOf(requestBody.getUserId()));
-        dynamicQrCodeStatusCheckIntegrationRequestDTO.setSystemId("collection");
+        dynamicQrCodeStatusCheckIntegrationRequestDTO.setSystemId("collections");
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setSpecificPartnerName(requestBody.getVendor());
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
             String isCheckQrPaymentStatusAvailableConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(IS_QR_CODE_CHECK_PAYMENT_STATUS_AVAILABLE);
 
@@ -1192,9 +1193,25 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Override
     public Object qrCodeCallBack(String token, DynamicQrCodeCallBackRequestDTO requestBody) throws Exception {
-
-
-
-        return new Object();
+        String merchantTransId = requestBody.getMerchantTranId();
+        Map<String, Object> response = new HashMap<>();
+        try {
+            DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByMerchantTranId(merchantTransId);
+            if (digitalPaymentTransactionsEntity != null) {
+                if (Objects.equals(requestBody.getStatus(), "SUCCESS")) {
+                    digitalPaymentTransactionsEntity.setStatus("success");
+                }
+                digitalPaymentTransactionsEntity.setCallBackRequestBody(requestBody);
+                digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+                response.put("status", true);
+            } else {
+                response.put("status", false);
+            }
+        } catch (Exception e) {
+            String errorMessage = e.getMessage();
+            log.error("errorMessage {}", errorMessage);
+            throw new Exception();
+        }
+        return response;
     }
 }

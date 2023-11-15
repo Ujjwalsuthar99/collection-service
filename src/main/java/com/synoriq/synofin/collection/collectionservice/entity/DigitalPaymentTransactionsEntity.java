@@ -45,6 +45,9 @@ public class DigitalPaymentTransactionsEntity {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "merchant_tran_id")
+    private String merchantTranId;
+
     @Column(name = "amount")
     private Float amount;
 
@@ -76,5 +79,10 @@ public class DigitalPaymentTransactionsEntity {
     @Column(name = "other_response_data")
     @Type(type = "json")
     private Object otherResponseData;
+
+    @Column(name = "call_back_request_body")
+    @Type(type = "json")
+    private Object callBackRequestBody;
+
 
 }
