@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferAirtelDepositStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
@@ -35,5 +36,6 @@ public interface ReceiptTransferService {
     public Object getReceiptsDataByReceiptTransferId(String token , Long receiptTransferId) throws Exception;
     public BaseDTOResponse<Object> disableApproveButtonInLms(String token , Long receiptId) throws Exception;
     public DepositInvoiceResponseDataDTO depositInvoice(String token , DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception;
+    public BaseDTOResponse<Object> airtelDepositStatusUpdate(String token , ReceiptTransferAirtelDepositStatusRequestDTO requestBody) throws Exception;
 
 }

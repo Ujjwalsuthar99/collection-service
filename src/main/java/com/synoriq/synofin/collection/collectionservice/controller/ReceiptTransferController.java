@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferAirtelDepositStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
@@ -282,6 +283,25 @@ public class ReceiptTransferController {
         ResponseEntity<Object> response;
         try {
             baseResponse = receiptTransferService.disableApproveButtonInLms(bearerToken, receiptId);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "/receipt-transfer/airtel-deposition/status-update", method = RequestMethod.PUT)
+    public ResponseEntity<Object> airtelDepositStatusUpdate(@RequestHeader("Authorization") String bearerToken, @RequestBody ReceiptTransferAirtelDepositStatusRequestDTO requestBody) throws Exception {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+        try {
+            baseResponse = receiptTransferService.airtelDepositStatusUpdate(bearerToken, requestBody);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
