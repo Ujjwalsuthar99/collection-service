@@ -115,11 +115,9 @@ public class ReceiptTransferController {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
-        ReceiptTransferResponseDTO result;
         try {
 //            log.info("Receipt Transfer id {}", receiptTransferId);
-            result = receiptTransferService.getReceiptTransferById(bearerToken, receiptTransferId, userId);
-            baseResponse = new BaseDTOResponse<>(result);
+            baseResponse = receiptTransferService.getReceiptTransferById(bearerToken, receiptTransferId, userId);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

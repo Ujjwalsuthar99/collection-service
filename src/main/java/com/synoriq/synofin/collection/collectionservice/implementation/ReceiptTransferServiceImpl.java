@@ -374,13 +374,17 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     }
 
     @Override
-    public ReceiptTransferResponseDTO getReceiptTransferById(String token, Long receiptTransferId, Long userId) throws Exception {
+    public BaseDTOResponse<Object> getReceiptTransferById(String token, Long receiptTransferId, Long userId) throws Exception {
         log.info("receipt tranfer idddd {}", receiptTransferId);
         ReceiptTransferEntity receiptTransferEntity;
         boolean buttonRestriction = false;
         Map<String, Object> bankData = null;
         ReceiptTransferResponseDTO receiptTransferResponseDTO = new ReceiptTransferResponseDTO();
         try {
+            if(userId == 00000L) {
+                ReceiptTransferEntity receiptTransferEntity1 = receiptTransferRepository.findByReceiptTransferId(receiptTransferId);
+                return new BaseDTOResponse<>(receiptTransferEntity1);
+            }
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
 //            Boolean piiPermission = rsaUtils.getPiiPermission();
@@ -438,7 +442,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             e.printStackTrace();
             throw new Exception("1016028");
         }
-        return receiptTransferResponseDTO;
+        return new BaseDTOResponse<>(receiptTransferResponseDTO);
     }
 
     @Override
@@ -813,12 +817,19 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         Long receiptTransferId = requestBody.getReceiptTransferId();
         try {
             ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(receiptTransferId);
+            if(receiptTransferEntity == null) {
+                throw new Exception("1017002");
+            }
 
 // we are updating the receipt transfer id in merchant tran id column in digital payment transaction table
-            receiptTransferEntity.setStatus(requestBody.getStatus());
-            receiptTransferEntity.setActionBy(receiptTransferEntity.getTransferredBy());
-            receiptTransferEntity.setActionDatetime(new Date());
-            receiptTransferEntity.setActionReason("Airtel Deposition");
+            if (requestBody.getStatus().equals("success")) {
+                receiptTransferEntity.setStatus("payment_received");
+                receiptTransferEntity.setActionBy(receiptTransferEntity.getTransferredBy());
+                receiptTransferEntity.setActionDatetime(new Date());
+                receiptTransferEntity.setActionReason("Airtel Deposition");
+            } else {
+                receiptTransferEntity.setStatus("pending");
+            }
 // here we have to update the activity log id for approval action that we will think accordingly
             receiptTransferRepository.save(receiptTransferEntity);
 
