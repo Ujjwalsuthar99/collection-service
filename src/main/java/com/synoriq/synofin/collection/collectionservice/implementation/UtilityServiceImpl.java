@@ -11,10 +11,7 @@ import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTra
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.FinovaSmsRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.RequestDataDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.SmsListDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.SpfcSmsRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
@@ -31,6 +28,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumen
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.FinovaMsgDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.PaisabuddyMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.SpfcMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrlDTOs.ShortenUrlResponseDTO;
@@ -46,6 +44,7 @@ import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogSe
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.CslSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
+import com.synoriq.synofin.collection.collectionservice.service.msgservice.PaisabuddySmsService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.SpfcSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
@@ -110,6 +109,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Autowired
     private SpfcSmsService spfcSmsService;
+
+    @Autowired
+    private PaisabuddySmsService paisabuddySmsService;
 
     @Autowired
     HttpServletRequest httpServletRequest;
@@ -546,7 +548,7 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId, String customerType, String customerName, String applicantMobileNumber, String collectedFromMobileNumber, String loanNumber) throws IOException {
+    public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId, String customerType, String customerName, String applicantMobileNumber, String collectedFromMobileNumber, String loanNumber, Long receiptId) throws IOException {
         if (Objects.equals(springProfile, "pre-prod")) {
             springProfile = "preprod";
         }
@@ -750,6 +752,28 @@ public class UtilityServiceImpl implements UtilityService {
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
                 consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), spfcSmsRequestDTO, spfcMsgDTOResponse, "success", Long.parseLong(loanId[0]));
+            }
+
+            if (clientId.equals("paisabuddy")) {
+                PaisabuddySmsRequest paisabuddySmsRequest = new PaisabuddySmsRequest();
+                paisabuddySmsRequest.setTemplateId(PAISABUDDY_SMS_TEMPLATE_ID);
+                paisabuddySmsRequest.setSender("PaisBd");
+                paisabuddySmsRequest.setCustomerName(customerName);
+                paisabuddySmsRequest.setAmount(receiptAmount);
+                paisabuddySmsRequest.setReceiptId(String.valueOf(receiptId));
+                paisabuddySmsRequest.setLoanNumber(loanNumber);
+                paisabuddySmsRequest.setShortenUrl(shortenUrlResponseDTO.getData().getResult());
+                if (isProd) {
+                    paisabuddySmsRequest.setMobiles("91" + collectedFromMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
+                } else {
+                    paisabuddySmsRequest.setMobiles("919773354037");
+                }
+
+                PaisabuddyMsgDTOResponse paisabuddyMsgDTOResponse = paisabuddySmsService.sendSmsPaisabuddy(paisabuddySmsRequest);
+                saveSendSMSActivityData(loanId, res, userId);
+//                    log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
+                // creating api logs
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), paisabuddySmsRequest, paisabuddyMsgDTOResponse, "success", Long.parseLong(loanId[0]));
             }
 
 //            if(clientId.equals("deccan")) {

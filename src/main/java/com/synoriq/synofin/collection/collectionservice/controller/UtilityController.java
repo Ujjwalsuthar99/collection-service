@@ -156,13 +156,14 @@ public class UtilityController {
                                                            @RequestParam("customer_name") String customerName,
                                                            @RequestParam("applicant_mobile_number") String applicantMobileNumber,
                                                            @RequestParam("collected_from_number") String collectedFromMobileNumber,
-                                                           @RequestParam("loan_number") String loanNumber) throws SQLException {
+                                                           @RequestParam("loan_number") String loanNumber,
+                                                           @RequestParam("receipt_id") Long receiptId) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         UploadImageOnS3ResponseDTO result;
 
         try {
-            result = utilityService.sendPdfToCustomerUsingS3(token, imageData, userRefNo, clientId, paymentMode, receiptAmount, fileName, userId, customerType, customerName, applicantMobileNumber, collectedFromMobileNumber, loanNumber);
+            result = utilityService.sendPdfToCustomerUsingS3(token, imageData, userRefNo, clientId, paymentMode, receiptAmount, fileName, userId, customerType, customerName, applicantMobileNumber, collectedFromMobileNumber, loanNumber, receiptId);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
