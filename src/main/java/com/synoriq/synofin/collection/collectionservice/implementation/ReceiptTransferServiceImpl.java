@@ -7,6 +7,7 @@ import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferAirtelDepositStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
@@ -72,6 +73,9 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
     @Autowired
     private UtilityService utilityService;
+
+    @Autowired
+    DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository;
     @Autowired
     private RSAUtils rsaUtils;
     @Autowired
@@ -803,5 +807,50 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         } catch (Exception e) {
             throw new Exception("1016028");
         }
+    }
+
+    public BaseDTOResponse<Object> airtelDepositStatusUpdate(String bearerToken, ReceiptTransferAirtelDepositStatusRequestDTO requestBody) throws Exception {
+        Long receiptTransferId = requestBody.getReceiptTransferId();
+        try {
+            ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(receiptTransferId);
+
+// we are updating the receipt transfer id in merchant tran id column in digital payment transaction table
+            receiptTransferEntity.setStatus(requestBody.getStatus());
+            receiptTransferEntity.setActionBy(receiptTransferEntity.getTransferredBy());
+            receiptTransferEntity.setActionDatetime(new Date());
+            receiptTransferEntity.setActionReason("Airtel Deposition");
+// here we have to update the activity log id for approval action that we will think accordingly
+            receiptTransferRepository.save(receiptTransferEntity);
+
+
+            // Here we are storing the logs of digital payment transaction table
+            // adding vendor static as csl
+            DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
+            digitalPaymentTransactionsEntity.setCreatedDate(new Date());
+            digitalPaymentTransactionsEntity.setCreatedBy(receiptTransferEntity.getTransferredBy());
+            digitalPaymentTransactionsEntity.setModifiedDate(null);
+            digitalPaymentTransactionsEntity.setModifiedBy(null);
+            digitalPaymentTransactionsEntity.setLoanId(5044565L);
+            digitalPaymentTransactionsEntity.setPaymentServiceName("airtel_deposition");
+            digitalPaymentTransactionsEntity.setStatus(requestBody.getStatus());
+            digitalPaymentTransactionsEntity.setMerchantTranId(requestBody.getUtrNumber());
+            digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(String.valueOf(receiptTransferEntity.getAmount())));
+            digitalPaymentTransactionsEntity.setUtrNumber(null);
+            digitalPaymentTransactionsEntity.setReceiptRequestBody(requestBody);
+            digitalPaymentTransactionsEntity.setPaymentLink(null);
+            digitalPaymentTransactionsEntity.setMobileNo(null);
+            digitalPaymentTransactionsEntity.setVendor("csl");
+            digitalPaymentTransactionsEntity.setReceiptGenerated(false);
+            digitalPaymentTransactionsEntity.setCollectionActivityLogsId(null);
+            digitalPaymentTransactionsEntity.setActionActivityLogsId(null);
+            digitalPaymentTransactionsEntity.setOtherResponseData(null);
+            digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+
+            return new BaseDTOResponse<>("data saved successfully");
+
+        } catch (Exception ee) {
+            return new BaseDTOResponse<>("failure");
+        }
+
     }
 }
