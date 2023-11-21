@@ -844,9 +844,9 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             digitalPaymentTransactionsEntity.setLoanId(5044565L);
             digitalPaymentTransactionsEntity.setPaymentServiceName("airtel_deposition");
             digitalPaymentTransactionsEntity.setStatus(requestBody.getStatus());
-            digitalPaymentTransactionsEntity.setMerchantTranId(requestBody.getUtrNumber());
+            digitalPaymentTransactionsEntity.setMerchantTranId(String.valueOf(receiptTransferId));
             digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(String.valueOf(receiptTransferEntity.getAmount())));
-            digitalPaymentTransactionsEntity.setUtrNumber(null);
+            digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getUtrNumber());
             digitalPaymentTransactionsEntity.setReceiptRequestBody(requestBody);
             digitalPaymentTransactionsEntity.setPaymentLink(null);
             digitalPaymentTransactionsEntity.setMobileNo(null);
