@@ -3,6 +3,7 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
@@ -15,6 +16,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTra
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.FollowupResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
 import com.synoriq.synofin.collection.collectionservice.service.FollowUpService;
+import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,12 @@ import static com.synoriq.synofin.collection.collectionservice.common.ActivityRe
 @Service
 @Slf4j
 public class FollowUpServiceImpl implements FollowUpService {
+
+    @Autowired
+    private RSAUtils rsaUtils;
+
+    @Autowired
+    private CurrentUserInfo currentUserInfo;
 
     @Autowired
     FollowUpRepository followUpRepository;
@@ -58,7 +66,7 @@ public class FollowUpServiceImpl implements FollowUpService {
             followupResponseDTO.setNextFollowUpDateTime(formatter.format(followUpEntity.getNextFollowUpDateTime()));
             followupResponseDTO.setIsDeleted(followUpEntity.getIsDeleted());
 
-            response = new BaseDTOResponse<Object>(followupResponseDTO);
+            response = new BaseDTOResponse<>(followupResponseDTO);
             return response;
 
         }else{
@@ -72,7 +80,11 @@ public class FollowUpServiceImpl implements FollowUpService {
 
         Map<String, Object> followupData;
         try {
-            followupData = followUpRepository.getFollowupDetailsById(followupId);
+            String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+            String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+//            Boolean piiPermission = rsaUtils.getPiiPermission();
+            Boolean piiPermission = true;
+            followupData = followUpRepository.getFollowupDetailsById(followupId, encryptionKey, password, piiPermission);
         } catch (Exception e) {
             throw new Exception("1017002");
         }
@@ -88,8 +100,12 @@ public class FollowUpServiceImpl implements FollowUpService {
         List<FollowUpCustomDataResponseDTO> followUpArr = new ArrayList<>();
         Pageable pageable = PageRequest.of(page,size);
         FollowUpDataResponseDTO followUpDataResponseDTO = new FollowUpDataResponseDTO();
+        String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+        String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+//            Boolean piiPermission = rsaUtils.getPiiPermission();
+        Boolean piiPermission = true;
 
-        List<Map<String,Object>> followUpEntityPages = followUpRepository.getFollowupsLoanWiseByDuration(loanId, fromDate,toDate, pageable);
+        List<Map<String,Object>> followUpEntityPages = followUpRepository.getFollowupsLoanWiseByDuration(loanId, fromDate, toDate, encryptionKey, password, piiPermission, pageable);
         if (followUpEntityPages.size() > 0) {
             for (Map<String, Object> followUpEntity : followUpEntityPages) {
                 JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(followUpEntity.get("geo_location_data")));
@@ -129,11 +145,15 @@ public class FollowUpServiceImpl implements FollowUpService {
 
         BaseDTOResponse<Object> baseDTOResponse;
         Pageable pageable = PageRequest.of(page,size);
+        String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+        String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+//            Boolean piiPermission = rsaUtils.getPiiPermission();
+        Boolean piiPermission = true;
 
         if (type.equals("pending")) {
-            followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForPending(userId, fromDate, toDate, pageable);
+            followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForPending(userId, fromDate, toDate, encryptionKey, password, piiPermission, pageable);
         } else {
-            followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForCreated(userId, fromDate, toDate, pageable);
+            followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForCreated(userId, fromDate, toDate, encryptionKey, password, piiPermission, pageable);
         }
         if (page > 0) {
             if (followUpEntityPages.size() == 0) {

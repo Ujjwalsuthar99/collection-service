@@ -192,7 +192,8 @@ public enum ErrorCode {
     TRANSACTION_NUMBER_VALIDATE(1016039, "UTR number already exists"),
     GETTING_ERROR_WHILE_FETCHING_LMS_DATA(1016040, "Data fetching error from LMS"),
     USER_IS_NOT_EXIST(1016041, "User is not exist"),
-    DEPOSIT_CHALLAN_ERROR(1016042, "Deposit challan error");
+    DEPOSIT_CHALLAN_ERROR(1016042, "Deposit challan error"),
+    PER_MONTH_CASH_COLLECTION_ERROR(1016043, "Per month cash collection limit exceeded");
     private Integer codeValue;
     private String responseMessage;
 

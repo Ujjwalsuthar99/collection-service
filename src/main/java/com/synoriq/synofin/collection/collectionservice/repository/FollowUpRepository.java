@@ -2,7 +2,6 @@ package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
 import io.lettuce.core.dynamic.annotation.Param;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +16,9 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
 
     FollowUpEntity findByFollowupId(Long followupId);
 
-    @Query(nativeQuery = true,value = "select concat_ws(' ', c.first_name, c.last_name) as name,\n" +
+    @Query(nativeQuery = true,value = "select " +
+//            "concat_ws(' ', c.first_name, c.last_name) as name,\n" +
+            "concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as name,\n" +
             "c.address1_json->>'address' as address, \n" +
             "f.followups_id as followup_id,\n" +
             "f.loan_id as loanId,\n" +
@@ -67,10 +68,11 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             " where f.loan_id = :loanId and clm.customer_type = 'applicant' \n" +
             "            and f.next_followup_datetime between :fromDate and :toDate")
     List<Map<String,Object>> getFollowupsLoanWiseByDuration(@Param("loanId") Long loanId, @Param("fromDate") Date fromDate
-            , @Param("toDate") Date toDate, Pageable pageable);
+            , @Param("toDate") Date toDate, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageable);
 
     @Query(nativeQuery = true,value = "\n" +
-            "select concat_ws(' ', c.first_name, c.last_name) as name,\n" +
+//            "select concat_ws(' ', c.first_name, c.last_name) as name,\n" +
+            "concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as name,\n" +
             "c.address1_json->>'address' as address, \n" +
             "f.followups_id as followup_id,\n" +
             "f.loan_id as loanId,\n" +
@@ -117,10 +119,11 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             " where f.created_by = :userId and clm.customer_type = 'applicant' \n" +
             "            and f.next_followup_datetime between :fromDate and :toDate ")
     List<Map<String,Object>> getFollowupsUserWiseByDurationForPending(@Param("userId") Long userId, @Param("fromDate") Date fromDate
-            , @Param("toDate") Date toDate, Pageable pageable);
+            , @Param("toDate") Date toDate, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageable);
 
     @Query(nativeQuery = true,value = "\n" +
-            "select concat_ws(' ', c.first_name, c.last_name) as name,\n" +
+//            "select concat_ws(' ', c.first_name, c.last_name) as name,\n" +
+            "concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as name,\n" +
             "c.address1_json->>'address' as address, \n" +
             "f.followups_id as followup_id,\n" +
             "f.loan_id as loanId,\n" +
@@ -167,10 +170,12 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             " where f.created_by = :userId and clm.customer_type = 'applicant' \n" +
             "            and f.created_date between :fromDate and :toDate ")
     List<Map<String,Object>> getFollowupsUserWiseByDurationForCreated(@Param("userId") Long userId, @Param("fromDate") Date fromDate
-            , @Param("toDate") Date toDate, Pageable pageable);
+            , @Param("toDate") Date toDate, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageable);
 
 
-    @Query(nativeQuery = true,value = "select concat_ws(' ', c.first_name, c.last_name) as name,\n" +
+    @Query(nativeQuery = true,value = "select " +
+//            "concat_ws(' ', c.first_name, c.last_name) as name,\n" +
+            "concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as name,\n" +
             "c.address1_json->>'address' as address, \n" +
             "f.followups_id as followup_id,\n" +
             "f.loan_id as loan_id,\n" +
@@ -216,6 +221,6 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id\n" +
             "           join (select collection_activity_logs_id, geo_location_data, images from collection.collection_activity_logs) as cal on cal.collection_activity_logs_id  = f.collection_activity_logs_id\n" +
             "           where f.followups_id = :followupId")
-    Map<String, Object> getFollowupDetailsById(@Param("followupId") Long followupId);
+    Map<String, Object> getFollowupDetailsById(@Param("followupId") Long followupId, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission);
 
 }

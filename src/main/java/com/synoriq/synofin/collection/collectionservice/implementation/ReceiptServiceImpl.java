@@ -38,10 +38,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_RECEIPT;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
@@ -229,6 +226,40 @@ public class ReceiptServiceImpl implements ReceiptService {
 //                log.info("receiptAmount {}", receiptAmount);
                 if (receiptCollectedAmountTillToday + receiptAmount > perDayCashLimitLoan) {
                     throw new Exception("1017005");
+                }
+            }
+
+            // per month cash limit check
+            String monthLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MONTH_CASH_VALIDATION);
+            if (receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode.equals("cash") && !monthLimit.equals("false")) {
+                Date beginning, end;
+
+                {
+                    Calendar calendar = getCalendarForNow();
+                    calendar.set(Calendar.DAY_OF_MONTH,
+                            calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+                    setTimeToBeginningOfDay(calendar);
+                    beginning = calendar.getTime();
+                }
+
+                {
+                    Calendar calendar = getCalendarForNow();
+                    calendar.set(Calendar.DAY_OF_MONTH,
+                            calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+                    setTimeToEndofDay(calendar);
+                    end = calendar.getTime();
+                }
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                log.info("begining {}", beginning);
+                log.info(" end {}", end);
+                String fromDate = dateFormat.format(beginning);
+                String toDate = dateFormat.format(end);
+
+                double perMonthCashLimitLoan = Double.parseDouble(monthLimit);
+                double receiptCollectedAmountWithinMonth = receiptRepository.getCollectedAmountWithinMonth(Long.valueOf(receiptServiceDtoRequest.getRequestData().getLoanId()), fromDate, toDate);
+
+                if (receiptCollectedAmountWithinMonth + receiptAmount > perMonthCashLimitLoan) {
+                    throw new Exception("1016043");
                 }
             }
 //            log.info("Total Limit Value {}", totalLimitValue);
@@ -436,5 +467,23 @@ public class ReceiptServiceImpl implements ReceiptService {
         outputStream.write(Objects.requireNonNull(response.getBody()));
         outputStream.close();
 
+    }
+
+    private static Calendar getCalendarForNow() {
+        Calendar calendar = GregorianCalendar.getInstance();
+        calendar.setTime(new Date());
+        return calendar;
+    }
+    private static void setTimeToBeginningOfDay(Calendar calendar) {
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+    }
+    private static void setTimeToEndofDay(Calendar calendar) {
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
     }
 }
