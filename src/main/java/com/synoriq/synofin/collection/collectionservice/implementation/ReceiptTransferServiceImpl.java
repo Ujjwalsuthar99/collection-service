@@ -820,6 +820,13 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     public BaseDTOResponse<Object> airtelDepositStatusUpdate(String bearerToken, ReceiptTransferAirtelDepositStatusRequestDTO requestBody) throws Exception {
         Long receiptTransferId = requestBody.getReceiptTransferId();
         try {
+            DigitalPaymentTransactionsEntity utrNumberData = digitalPaymentTransactionsRepository.checkUtrNumberValidation(requestBody.getUtrNumber());
+            if(requestBody.getUtrNumber() != null) {
+                if(utrNumberData != null) {
+                    throw new Exception("1016044");
+                }
+            }
+
             ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(receiptTransferId);
             if(receiptTransferEntity == null) {
                 throw new Exception("1017002");
@@ -838,33 +845,40 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             receiptTransferRepository.save(receiptTransferEntity);
 
 
-            // Here we are storing the logs of digital payment transaction table
-            // adding vendor static as csl
-            DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
-            digitalPaymentTransactionsEntity.setCreatedDate(new Date());
-            digitalPaymentTransactionsEntity.setCreatedBy(receiptTransferEntity.getTransferredBy());
-            digitalPaymentTransactionsEntity.setModifiedDate(null);
-            digitalPaymentTransactionsEntity.setModifiedBy(null);
-            digitalPaymentTransactionsEntity.setLoanId(5044565L);
-            digitalPaymentTransactionsEntity.setPaymentServiceName("airtel_deposition");
-            digitalPaymentTransactionsEntity.setStatus(requestBody.getStatus());
-            digitalPaymentTransactionsEntity.setMerchantTranId(String.valueOf(receiptTransferId));
-            digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(String.valueOf(receiptTransferEntity.getAmount())));
-            digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getUtrNumber());
-            digitalPaymentTransactionsEntity.setReceiptRequestBody(requestBody);
-            digitalPaymentTransactionsEntity.setPaymentLink(null);
-            digitalPaymentTransactionsEntity.setMobileNo(null);
-            digitalPaymentTransactionsEntity.setVendor("csl");
-            digitalPaymentTransactionsEntity.setReceiptGenerated(false);
-            digitalPaymentTransactionsEntity.setCollectionActivityLogsId(null);
-            digitalPaymentTransactionsEntity.setActionActivityLogsId(null);
-            digitalPaymentTransactionsEntity.setOtherResponseData(null);
-            digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+
+            if(utrNumberData != null) {
+                utrNumberData.setUtrNumber(requestBody.getUtrNumber());
+                digitalPaymentTransactionsRepository.save(utrNumberData);
+            } else {
+                // Here we are storing the logs of digital payment transaction table
+                // adding vendor static as csl
+                DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
+                digitalPaymentTransactionsEntity.setCreatedDate(new Date());
+                digitalPaymentTransactionsEntity.setCreatedBy(receiptTransferEntity.getTransferredBy());
+                digitalPaymentTransactionsEntity.setModifiedDate(null);
+                digitalPaymentTransactionsEntity.setModifiedBy(null);
+                digitalPaymentTransactionsEntity.setLoanId(5044565L);
+                digitalPaymentTransactionsEntity.setPaymentServiceName("airtel_deposition");
+                digitalPaymentTransactionsEntity.setStatus(requestBody.getStatus());
+                digitalPaymentTransactionsEntity.setMerchantTranId(String.valueOf(receiptTransferId));
+                digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(String.valueOf(receiptTransferEntity.getAmount())));
+                digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getUtrNumber());
+                digitalPaymentTransactionsEntity.setReceiptRequestBody(requestBody);
+                digitalPaymentTransactionsEntity.setPaymentLink(null);
+                digitalPaymentTransactionsEntity.setMobileNo(null);
+                digitalPaymentTransactionsEntity.setVendor("airtel");
+                digitalPaymentTransactionsEntity.setReceiptGenerated(false);
+                digitalPaymentTransactionsEntity.setCollectionActivityLogsId(null);
+                digitalPaymentTransactionsEntity.setActionActivityLogsId(null);
+                digitalPaymentTransactionsEntity.setOtherResponseData(requestBody);
+                digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+            }
 
             return new BaseDTOResponse<>("data saved successfully");
 
         } catch (Exception ee) {
-            return new BaseDTOResponse<>("failure");
+//            return new BaseDTOResponse<>("failure");
+            throw new Exception(ee.getMessage());
         }
 
     }

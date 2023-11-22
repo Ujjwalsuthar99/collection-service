@@ -104,13 +104,27 @@ public class KafkaListnerService {
                 collectionActivityLogsEntity.setGeolocation("{}");
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
-                Map<String, Object> receiptHistoryCount = receiptTransferHistoryRepository.getDepositPendingReceipt(messageObject.getServiceRequestId());
-                log.info("receiptHistoryCount {}", receiptHistoryCount);
-                Long totalReceiptCountFromReceiptTransfer = receiptTransferHistoryRepository.getReceiptCountFromReceiptTransfer(Long.valueOf(String.valueOf(receiptHistoryCount.get("receipt_transfer_id"))));
+                Long currentTotalReceiptsCount = 1L;
+                // find the receipt transfer id in which this current receipt lies
+                Long receiptTransferId = receiptTransferHistoryRepository.getReceiptTransferIdUsingReceiptId(messageObject.getServiceRequestId());
+                log.info("receiptTransferId {}", receiptTransferId);
+                // find the total number of receipts lies within the receipt transfer id
+                Long totalReceiptCountFromReceiptTransfer = receiptTransferHistoryRepository.getReceiptCountFromReceiptTransfer(receiptTransferId);
                 log.info("totalReceiptCountFromReceiptTransfer {}", totalReceiptCountFromReceiptTransfer);
-                if (Long.valueOf(String.valueOf(receiptHistoryCount.get("pending_receipt_count"))).equals(totalReceiptCountFromReceiptTransfer)) {
+                // find the number of approved receipts within the receipt transfer and add the current receipt id count to it
+
+                List<Map<String, Object>> receiptHistoryCount = receiptTransferHistoryRepository.getDepositPendingReceipt(receiptTransferId);
+                log.info("receiptHistoryCount {}", receiptHistoryCount);
+
+                // add the condition where will compare the approved count with total number of receipts
+
+                currentTotalReceiptsCount += receiptHistoryCount.size();
+
+                // if the total number of receipts are equal to the approved counts then only will approve the receipt transfer
+
+                if (currentTotalReceiptsCount.equals(totalReceiptCountFromReceiptTransfer)) {
                     log.info("in ifffff");
-                    ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(Long.parseLong(String.valueOf(receiptHistoryCount.get("receipt_transfer_id"))));
+                    ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(receiptTransferId);
                     receiptTransferEntity.setStatus("approved");
                     receiptTransferEntity.setActionBy(messageObject.getUserId());
                     receiptTransferEntity.setActionDatetime(new Date());
