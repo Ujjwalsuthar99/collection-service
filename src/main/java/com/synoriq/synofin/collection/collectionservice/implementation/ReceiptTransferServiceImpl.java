@@ -556,7 +556,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     }
 
     @Override
-    public AllBankTransferResponseDTO getAllBankTransfers(String token, String status, Integer pageNo, Integer pageSize) throws Exception {
+    public AllBankTransferResponseDTO getAllBankTransfers(String token, String searchKey, String status, Integer pageNo, Integer pageSize) throws Exception {
         List<Map<String, Object>> receiptTransferDataList;
         List<ReceiptTransferCustomDataResponseDTO> bankTransferArr = new ArrayList<>();
         AllBankTransferResponseDTO allBankTransferResponseDTO = new AllBankTransferResponseDTO();
@@ -570,7 +570,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             } else {
                 statusList = Arrays.asList("approved", "cancelled", "rejected");
             }
-            receiptTransferDataList = receiptTransferHistoryRepository.getAllBankTransfers(statusList, pageable);
+            receiptTransferDataList = receiptTransferHistoryRepository.getAllBankTransfers(statusList, searchKey, pageable);
             if (receiptTransferDataList.size() > 0) {
                 for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
                     JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("transfer_location_data")));
