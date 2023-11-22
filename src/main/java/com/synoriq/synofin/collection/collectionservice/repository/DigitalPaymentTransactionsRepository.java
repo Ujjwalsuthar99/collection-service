@@ -48,5 +48,7 @@ public interface DigitalPaymentTransactionsRepository extends JpaRepository<Digi
             "where\n" +
             "\tdpt.created_by = :createdBy and dpt.created_date between :fromDate and :toDate order by dpt.created_by desc")
     List<Map<String, Object>> getDigitalPaymentTransactionsByCreatedBy(@Param("createdBy") Long createdBy, Pageable pageable, @Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
+    @Query(nativeQuery = true, value = "select * from collection.digital_payment_transactions dpt where dpt.utr_number = :utrNumber limit 1")
+    DigitalPaymentTransactionsEntity checkUtrNumberValidation(@Param("utrNumber") String utrNumber);
 
 }
