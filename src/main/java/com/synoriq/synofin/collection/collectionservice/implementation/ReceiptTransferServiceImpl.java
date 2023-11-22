@@ -383,7 +383,11 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         try {
             if(userId == 00000L) {
                 ReceiptTransferEntity receiptTransferEntity1 = receiptTransferRepository.findByReceiptTransferId(receiptTransferId);
-                return new BaseDTOResponse<>(receiptTransferEntity1);
+                if (receiptTransferEntity1 != null) {
+                    return new BaseDTOResponse<>(receiptTransferEntity1);
+                } else {
+                    return new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(1016025));
+                }
             }
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
