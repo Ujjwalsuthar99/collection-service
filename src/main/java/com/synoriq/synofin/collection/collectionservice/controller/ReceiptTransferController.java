@@ -84,7 +84,6 @@ public class ReceiptTransferController {
     }
 
 
-
     @RequestMapping(value = "/receipt-transfer/status-update", method = RequestMethod.PUT)
     public ResponseEntity<Object> getReceiptTransferSummary(@RequestBody ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, @RequestHeader("Authorization") String bearerToken) throws SQLException {
 
@@ -109,7 +108,6 @@ public class ReceiptTransferController {
     }
 
 
-
     @RequestMapping(value = "/receipt-transfer/{receiptTransferId}", method = RequestMethod.GET)
     public ResponseEntity<Object> getReceiptTransferById(@RequestHeader("Authorization") String bearerToken, @PathVariable("receiptTransferId") Long receiptTransferId, @RequestParam("userId") Long userId) throws SQLException {
 
@@ -129,7 +127,6 @@ public class ReceiptTransferController {
         }
         return response;
     }
-
 
 
     @RequestMapping(value = "/users/{transferredBy}/receipt-transfer", method = RequestMethod.GET)
@@ -161,10 +158,10 @@ public class ReceiptTransferController {
 
     @RequestMapping(value = "/users/{transferredBy}/all-receipt-transfer", method = RequestMethod.GET)
     public ResponseEntity<Object> getReceiptTransferByUserIdWithAllStatus(@PathVariable("transferredBy") Long transferredBy,
-                                                             @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date fromDate,
-                                                             @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date toDate,
-                                                             @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
-                                                             @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws SQLException {
+                                                                          @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date fromDate,
+                                                                          @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date toDate,
+                                                                          @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
+                                                                          @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws SQLException {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
@@ -209,6 +206,7 @@ public class ReceiptTransferController {
 
     @RequestMapping(value = "/receipt-transfer/all-bank-transfers", method = RequestMethod.GET)
     public ResponseEntity<Object> getAllBankTransfers(@RequestHeader("Authorization") String bearerToken,
+                                                      @RequestParam(value = "searchKey", defaultValue = "", required = false) String searchKey,
                                                       @RequestParam(value = "status", defaultValue = "", required = false) String status,
                                                       @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
                                                       @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws Exception {
@@ -217,7 +215,7 @@ public class ReceiptTransferController {
         ResponseEntity<Object> response;
         AllBankTransferResponseDTO result;
         try {
-            result = receiptTransferService.getAllBankTransfers(bearerToken, status, pageNo, pageSize);
+            result = receiptTransferService.getAllBankTransfers(bearerToken, searchKey, status, pageNo, pageSize);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {
