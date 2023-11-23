@@ -302,8 +302,9 @@ public class ReceiptServiceImpl implements ReceiptService {
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, res, "success", createReceiptBody.getActivityData().getLoanId());
             if (res.getData() != null) {
                 if (res.getData().getServiceRequestId() == null) {
-                    res.getError().getText();
-                    throw new Exception("1016035");
+                    return res;
+//                    res.getError().getText();
+//                    throw new Exception("1016035");
                 }
                 collectionActivityId = activityLogService.createActivityLogs(receiptServiceDtoRequest.getActivityData(), bearerToken);
 

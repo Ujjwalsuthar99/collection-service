@@ -108,7 +108,9 @@ public class ReceiptController {
             createReceiptResponse = receiptService.createReceipt(receiptServiceDtoRequest, bearerToken);
             if (createReceiptResponse.getData() == null && createReceiptResponse.getError() != null) {
                 response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
-            } else {
+            } else if (createReceiptResponse.getData().getServiceRequestId() == null && createReceiptResponse.getError() != null) {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
+            } else  {
                 response = new ResponseEntity<>(createReceiptResponse, HttpStatus.OK);
             }
 
