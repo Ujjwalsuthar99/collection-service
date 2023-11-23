@@ -159,13 +159,15 @@ public class TaskServiceImpl implements TaskService {
                 if (collateralResponse.getData() != null) {
                     CollateralDetailsReturnResponseDTO collateralDetailsReturnResponseDTO = new CollateralDetailsReturnResponseDTO();
                     collateralResponse.getData().forEach((key, value) -> {
-                        collateralDetailsReturnResponseDTO.setChasisNumber(String.valueOf(value.get("chasis_no")));
-                        collateralDetailsReturnResponseDTO.setVehicleNumber(String.valueOf(value.get("vehicle_registration_no")));
-                        collateralDetailsReturnResponseDTO.setVehicleType(String.valueOf(value.get("vehicle_type")));
-                        collateralDetailsReturnResponseDTO.setModel(String.valueOf(value.get("model")));
-                        collateralDetailsReturnResponseDTO.setManufacturer(String.valueOf(value.get("manufacturer")));
-                        collateralDetailsReturnResponseDTO.setEngineNumber(String.valueOf(value.get("engine_no")));
-                        collateralDetailsReturnResponseDTO.setCostOfAsset(Double.parseDouble(String.valueOf(value.get("cost_of_asset"))));
+                        if (Objects.equals(value.get("collateral_product").toString(), "vehicle")) {
+                            collateralDetailsReturnResponseDTO.setChasisNumber(String.valueOf(value.get("chasis_no")));
+                            collateralDetailsReturnResponseDTO.setVehicleNumber(String.valueOf(value.get("vehicle_registration_no")));
+                            collateralDetailsReturnResponseDTO.setVehicleType(String.valueOf(value.get("vehicle_type")));
+                            collateralDetailsReturnResponseDTO.setModel(String.valueOf(value.get("model")));
+                            collateralDetailsReturnResponseDTO.setManufacturer(String.valueOf(value.get("manufacturer")));
+                            collateralDetailsReturnResponseDTO.setEngineNumber(String.valueOf(value.get("engine_no")));
+                            collateralDetailsReturnResponseDTO.setCostOfAsset(Double.parseDouble(String.valueOf(value.get("cost_of_asset"))));
+                        }
 
                     });
                     response.setCollateralDetails(collateralDetailsReturnResponseDTO);
