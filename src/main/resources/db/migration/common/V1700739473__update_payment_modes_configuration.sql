@@ -1,0 +1,1 @@
+UPDATE collection.collection_configurations SET configuration_value = 'coll_cash/coll_cheque/coll_digital' WHERE configuration_name = 'payment_modes_to_use_at_create_receipt';
