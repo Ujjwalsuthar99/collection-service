@@ -4,6 +4,7 @@ import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCo
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferAirtelDepositStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferForAirtelRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
@@ -310,5 +311,25 @@ public class ReceiptTransferController {
         return response;
     }
 
+
+    @RequestMapping(value = "/receipt-transfer/get-receipt-transfer-for-airtel", method = RequestMethod.GET)
+    public ResponseEntity<Object> getReceiptTransferForAirtel(@RequestHeader("Authorization") String bearerToken, @RequestBody ReceiptTransferForAirtelRequestDTO receiptTransferForAirtelRequestDTO) throws SQLException {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+        try {
+//            log.info("Receipt Transfer id {}", receiptTransferId);
+            baseResponse = receiptTransferService.getReceiptTransferForAirtel(bearerToken, receiptTransferForAirtelRequestDTO);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
 
 }
