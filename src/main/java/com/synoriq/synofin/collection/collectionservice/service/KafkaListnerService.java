@@ -16,9 +16,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.KAFKA_RECEIPT_STATUS;
 
@@ -104,7 +102,7 @@ public class KafkaListnerService {
                 collectionActivityLogsEntity.setGeolocation("{}");
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
-                Long currentTotalReceiptsCount = 1L;
+                Long currentTotalReceiptsCount = 0L;
                 // find the receipt transfer id in which this current receipt lies
                 Long receiptTransferId = receiptTransferHistoryRepository.getReceiptTransferIdUsingReceiptId(messageObject.getServiceRequestId());
                 log.info("receiptTransferId {}", receiptTransferId);
@@ -114,11 +112,16 @@ public class KafkaListnerService {
                 // find the number of approved receipts within the receipt transfer and add the current receipt id count to it
 
                 List<Map<String, Object>> receiptHistoryCount = receiptTransferHistoryRepository.getDepositPendingReceipt(receiptTransferId);
+                log.info("receiptHistoryCount {}", Collections.singletonList(receiptHistoryCount));
+                log.info("receiptHistoryCount {}", Arrays.asList(receiptHistoryCount));
                 log.info("receiptHistoryCount {}", receiptHistoryCount);
 
+                log.info("receiptHistoryCount.size() {}", receiptHistoryCount.size());
                 // add the condition where will compare the approved count with total number of receipts
 
                 currentTotalReceiptsCount += receiptHistoryCount.size();
+
+                log.info("currentTotalReceiptsCount {}", currentTotalReceiptsCount);
 
                 // if the total number of receipts are equal to the approved counts then only will approve the receipt transfer
 
