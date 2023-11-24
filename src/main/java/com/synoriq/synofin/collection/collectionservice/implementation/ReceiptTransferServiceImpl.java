@@ -9,6 +9,7 @@ import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferAirtelDepositStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferForAirtelRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDTO;
@@ -881,5 +882,23 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             throw new Exception(ee.getMessage());
         }
 
+    }
+
+
+    @Override
+    public BaseDTOResponse<Object> getReceiptTransferForAirtel(String token, ReceiptTransferForAirtelRequestDTO receiptTransferForAirtelRequestDTO) throws Exception {
+        ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(receiptTransferForAirtelRequestDTO.getReceiptTransferId());
+        try {
+            if (receiptTransferEntity != null) {
+                return new BaseDTOResponse<>(receiptTransferEntity);
+            } else {
+                return new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(1016025));
+            }
+
+        } catch (Exception e) {
+            log.info("error", e);
+            e.printStackTrace();
+            throw new Exception("1016028");
+        }
     }
 }
