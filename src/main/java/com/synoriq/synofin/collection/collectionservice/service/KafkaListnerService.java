@@ -102,7 +102,7 @@ public class KafkaListnerService {
                 collectionActivityLogsEntity.setGeolocation("{}");
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
-                Long currentTotalReceiptsCount = 1L;
+                Long currentTotalReceiptsCount = 0L;
                 // find the receipt transfer id in which this current receipt lies
                 Long receiptTransferId = receiptTransferHistoryRepository.getReceiptTransferIdUsingReceiptId(messageObject.getServiceRequestId());
                 log.info("receiptTransferId {}", receiptTransferId);
