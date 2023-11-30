@@ -1168,6 +1168,27 @@ public class UtilityServiceImpl implements UtilityService {
                     .body(dynamicQrCodeStatusCheckIntegrationRequestDTO)
                     .typeResponseType(DynamicQrCodeCheckStatusResponseDTO.class)
                     .build().call();
+
+            CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+            collectionActivityLogsEntity.setActivityName("dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase());
+            collectionActivityLogsEntity.setActivityDate(new Date());
+            collectionActivityLogsEntity.setDeleted(false);
+            collectionActivityLogsEntity.setActivityBy(requestBody.getUserId());
+            collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
+            collectionActivityLogsEntity.setAddress("{}");
+            collectionActivityLogsEntity.setRemarks("The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + requestBody.getLoanId() + " has been updated as success by checking the status manually");
+            collectionActivityLogsEntity.setImages("{}");
+            collectionActivityLogsEntity.setLoanId(requestBody.getLoanId());
+            collectionActivityLogsEntity.setGeolocation("{}");
+
+            collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+
+            DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
+            digitalPaymentTransactionsEntity.setUtrNumber(res.getData().getOriginalBankRRN());
+            digitalPaymentTransactionsEntity.setStatus(res.getData().getStatus().toLowerCase());
+            digitalPaymentTransactionsEntity.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+
+            digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
 //            } else {
 //                res.setResponse(true);
 //                Map<String, Object> digitalPaymentTransaction = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsIdForCheckStatusResponse(requestBody.getDigitalPaymentTransactionId(), requestBody.getMerchantTranId());
@@ -1177,6 +1198,8 @@ public class UtilityServiceImpl implements UtilityService {
 //                dynamicQrCodeCheckStatusDataResponseDTO.setAmount(String.valueOf(digitalPaymentTransaction.get("amount")));
 //                res.setData(dynamicQrCodeCheckStatusDataResponseDTO);
 //            }
+
+
 
             log.info("res {}", res);
             // creating api logs
