@@ -194,7 +194,8 @@ public enum ErrorCode {
     USER_IS_NOT_EXIST(1016041, "User is not exist"),
     DEPOSIT_CHALLAN_ERROR(1016042, "Deposit challan error"),
     PER_MONTH_CASH_COLLECTION_ERROR(1016043, "Per month cash collection limit exceeded"),
-    UTR_NUMBER_ALREADY_EXIST_IN_DIGITAL_PAYMENT_TRANSACTION(1016044, "UTR number already exist");
+    UTR_NUMBER_ALREADY_EXIST_IN_DIGITAL_PAYMENT_TRANSACTION(1016044, "UTR number already exist"),
+    TRANSACTION_IS_ALREADY_GOT_SUCCESSFUL(1016045, "The transaction has been already successfully updated");
     private Integer codeValue;
     private String responseMessage;
 

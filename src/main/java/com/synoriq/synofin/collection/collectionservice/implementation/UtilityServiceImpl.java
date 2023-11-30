@@ -1161,6 +1161,12 @@ public class UtilityServiceImpl implements UtilityService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
+            DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
+
+            if(digitalPaymentTransactionsEntity.getStatus().equals("success")) {
+                throw new Exception("1016045");
+            }
+
             res = HTTPRequestService.<Object, DynamicQrCodeCheckStatusResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/getQrCodeTransactionStatus")
@@ -1168,6 +1174,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .body(dynamicQrCodeStatusCheckIntegrationRequestDTO)
                     .typeResponseType(DynamicQrCodeCheckStatusResponseDTO.class)
                     .build().call();
+
 
             CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
             collectionActivityLogsEntity.setActivityName("dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase());
@@ -1183,7 +1190,6 @@ public class UtilityServiceImpl implements UtilityService {
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
-            DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
             digitalPaymentTransactionsEntity.setUtrNumber(res.getData().getOriginalBankRRN());
             digitalPaymentTransactionsEntity.setStatus(res.getData().getStatus().toLowerCase());
             digitalPaymentTransactionsEntity.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
