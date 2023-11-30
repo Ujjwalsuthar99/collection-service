@@ -1163,9 +1163,9 @@ public class UtilityServiceImpl implements UtilityService {
 
             DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
 
-            if(digitalPaymentTransactionsEntity.getStatus().equals("success")) {
-                throw new Exception("1016045");
-            }
+//            if(digitalPaymentTransactionsEntity.getStatus().equals("success")) {
+//                throw new Exception("1016045");
+//            }
 
             res = HTTPRequestService.<Object, DynamicQrCodeCheckStatusResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
