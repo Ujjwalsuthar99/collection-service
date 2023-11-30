@@ -312,7 +312,7 @@ public class ReceiptTransferController {
     }
 
 
-    @RequestMapping(value = "/receipt-transfer/get-receipt-transfer-for-airtel", method = RequestMethod.GET)
+    @RequestMapping(value = "/receipt-transfer/get-receipt-transfer-for-airtel", method = RequestMethod.POST)
     public ResponseEntity<Object> getReceiptTransferForAirtel(@RequestHeader("Authorization") String bearerToken, @RequestBody ReceiptTransferForAirtelRequestDTO receiptTransferForAirtelRequestDTO) throws SQLException {
 
         BaseDTOResponse<Object> baseResponse;
