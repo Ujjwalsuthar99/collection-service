@@ -1149,7 +1149,7 @@ public class UtilityServiceImpl implements UtilityService {
 
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setDynamicQrCodeStatusCheckDataRequestDTO(dynamicQrCodeStatusCheckDataRequestDTO);
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setUserReferenceNumber(String.valueOf(requestBody.getUserId()));
-        dynamicQrCodeStatusCheckIntegrationRequestDTO.setSystemId("collections");
+        dynamicQrCodeStatusCheckIntegrationRequestDTO.setSystemId("collection");
         dynamicQrCodeStatusCheckIntegrationRequestDTO.setSpecificPartnerName(requestBody.getVendor());
         try {
 //            String isCheckQrPaymentStatusAvailableConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(IS_QR_CODE_CHECK_PAYMENT_STATUS_AVAILABLE);
