@@ -18,13 +18,13 @@ public class PaisabuddySmsRequest {
     @JsonProperty("var2")
     String amount;
 
-    @JsonProperty("var4")
+    @JsonProperty("var3")
     String receiptId;
 
-    @JsonProperty("var5")
+    @JsonProperty("var4")
     String loanNumber;
 
-    @JsonProperty("var6")
+    @JsonProperty("var5")
     String shortenUrl;
 
     @JsonProperty("mobiles")
