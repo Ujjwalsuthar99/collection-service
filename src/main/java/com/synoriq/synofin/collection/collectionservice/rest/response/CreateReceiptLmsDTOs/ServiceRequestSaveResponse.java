@@ -17,4 +17,7 @@ public class ServiceRequestSaveResponse {
     @JsonProperty("error")
     public ServiceRequestErrorResponse error;
 
+    @JsonProperty("validation_error")
+    public Object validationError;
+
 }
