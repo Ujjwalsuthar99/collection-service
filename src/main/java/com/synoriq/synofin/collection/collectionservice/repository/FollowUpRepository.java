@@ -72,7 +72,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
 
     @Query(nativeQuery = true,value = "\n" +
 //            "select concat_ws(' ', c.first_name, c.last_name) as name,\n" +
-            "concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as name,\n" +
+            "select concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as name,\n" +
             "c.address1_json->>'address' as address, \n" +
             "f.followups_id as followup_id,\n" +
             "f.loan_id as loanId,\n" +
@@ -123,7 +123,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
 
     @Query(nativeQuery = true,value = "\n" +
 //            "select concat_ws(' ', c.first_name, c.last_name) as name,\n" +
-            "concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as name,\n" +
+            "select concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as name,\n" +
             "c.address1_json->>'address' as address, \n" +
             "f.followups_id as followup_id,\n" +
             "f.loan_id as loanId,\n" +
