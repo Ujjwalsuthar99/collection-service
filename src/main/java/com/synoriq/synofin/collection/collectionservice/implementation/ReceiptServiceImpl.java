@@ -249,7 +249,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                     setTimeToEndofDay(calendar);
                     end = calendar.getTime();
                 }
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
                 log.info("begining {}", beginning);
                 log.info(" end {}", end);
                 String fromDate = dateFormat.format(beginning);
