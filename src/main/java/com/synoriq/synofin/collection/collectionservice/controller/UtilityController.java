@@ -336,4 +336,24 @@ public class UtilityController {
         return response;
     }
 
+    @RequestMapping(value = "qr-status-check", method = RequestMethod.POST)
+    public ResponseEntity<Object> qrStatusCheck(@RequestHeader("Authorization") String token, @RequestParam("merchant_id") String merchantId) {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        Object result;
+
+        try {
+            result = utilityService.qrStatusCheck(token, merchantId);
+            response = new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
 }

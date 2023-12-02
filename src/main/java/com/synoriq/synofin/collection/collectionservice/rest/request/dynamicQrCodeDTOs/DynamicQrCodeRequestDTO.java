@@ -31,6 +31,9 @@ public class DynamicQrCodeRequestDTO {
     @JsonProperty("userId")
     private Long userId;
 
+    @JsonProperty("mobileNumber")
+    private String mobileNumber;
+
     @JsonProperty("vendor")
     private String vendor;
 

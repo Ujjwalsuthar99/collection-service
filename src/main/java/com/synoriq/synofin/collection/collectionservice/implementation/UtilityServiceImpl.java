@@ -1114,7 +1114,7 @@ public class UtilityServiceImpl implements UtilityService {
                 digitalPaymentTransactionsEntity.setUtrNumber(null);
                 digitalPaymentTransactionsEntity.setReceiptRequestBody(requestBody.getReceiptRequestBody());
                 digitalPaymentTransactionsEntity.setPaymentLink(null);
-                digitalPaymentTransactionsEntity.setMobileNo(null);
+                digitalPaymentTransactionsEntity.setMobileNo(Long.parseLong(requestBody.getMobileNumber()));
                 digitalPaymentTransactionsEntity.setVendor(requestBody.getVendor());
                 digitalPaymentTransactionsEntity.setReceiptGenerated(false);
                 digitalPaymentTransactionsEntity.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
@@ -1143,15 +1143,15 @@ public class UtilityServiceImpl implements UtilityService {
         DynamicQrCodeCheckStatusResponseDTO res = new DynamicQrCodeCheckStatusResponseDTO();
         DynamicQrCodeStatusCheckIntegrationRequestDTO dynamicQrCodeStatusCheckIntegrationRequestDTO = new DynamicQrCodeStatusCheckIntegrationRequestDTO();
         DynamicQrCodeStatusCheckDataRequestDTO dynamicQrCodeStatusCheckDataRequestDTO = new DynamicQrCodeStatusCheckDataRequestDTO();
-
-        dynamicQrCodeStatusCheckDataRequestDTO.setMerchantTranId(requestBody.getMerchantTranId());
-        dynamicQrCodeStatusCheckDataRequestDTO.setCustomerId("91" + requestBody.getMobileNumber());
-
-        dynamicQrCodeStatusCheckIntegrationRequestDTO.setDynamicQrCodeStatusCheckDataRequestDTO(dynamicQrCodeStatusCheckDataRequestDTO);
-        dynamicQrCodeStatusCheckIntegrationRequestDTO.setUserReferenceNumber(String.valueOf(requestBody.getUserId()));
-        dynamicQrCodeStatusCheckIntegrationRequestDTO.setSystemId("collection");
-        dynamicQrCodeStatusCheckIntegrationRequestDTO.setSpecificPartnerName(requestBody.getVendor());
         try {
+            DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntityData = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
+            dynamicQrCodeStatusCheckDataRequestDTO.setMerchantTranId(requestBody.getMerchantTranId());
+            dynamicQrCodeStatusCheckDataRequestDTO.setCustomerId("91" + digitalPaymentTransactionsEntityData.getMobileNo().toString());
+
+            dynamicQrCodeStatusCheckIntegrationRequestDTO.setDynamicQrCodeStatusCheckDataRequestDTO(dynamicQrCodeStatusCheckDataRequestDTO);
+            dynamicQrCodeStatusCheckIntegrationRequestDTO.setUserReferenceNumber(String.valueOf(digitalPaymentTransactionsEntityData.getCreatedBy()));
+            dynamicQrCodeStatusCheckIntegrationRequestDTO.setSystemId("collection");
+            dynamicQrCodeStatusCheckIntegrationRequestDTO.setSpecificPartnerName(digitalPaymentTransactionsEntityData.getVendor());
 //            String isCheckQrPaymentStatusAvailableConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(IS_QR_CODE_CHECK_PAYMENT_STATUS_AVAILABLE);
 //
 //            String[] isCheckQrPaymentStatusAvailable  = isCheckQrPaymentStatusAvailableConf.split("/");
@@ -1161,7 +1161,7 @@ public class UtilityServiceImpl implements UtilityService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
-            DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
+//            DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
 
 //            if(digitalPaymentTransactionsEntity.getStatus().equals("success")) {
 //                throw new Exception("1016045");
@@ -1180,21 +1180,21 @@ public class UtilityServiceImpl implements UtilityService {
             collectionActivityLogsEntity.setActivityName("dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase());
             collectionActivityLogsEntity.setActivityDate(new Date());
             collectionActivityLogsEntity.setDeleted(false);
-            collectionActivityLogsEntity.setActivityBy(requestBody.getUserId());
+            collectionActivityLogsEntity.setActivityBy(digitalPaymentTransactionsEntityData.getCreatedBy());
             collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
             collectionActivityLogsEntity.setAddress("{}");
-            collectionActivityLogsEntity.setRemarks("The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + requestBody.getLoanId() + " has been updated as success by checking the status manually");
+            collectionActivityLogsEntity.setRemarks("The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + digitalPaymentTransactionsEntityData.getLoanId() + " has been updated as success by checking the status manually");
             collectionActivityLogsEntity.setImages("{}");
-            collectionActivityLogsEntity.setLoanId(requestBody.getLoanId());
-            collectionActivityLogsEntity.setGeolocation("{}");
+            collectionActivityLogsEntity.setLoanId(digitalPaymentTransactionsEntityData.getLoanId());
+            collectionActivityLogsEntity.setGeolocation(requestBody.getGeolocation());
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
-            digitalPaymentTransactionsEntity.setUtrNumber(res.getData().getOriginalBankRRN());
-            digitalPaymentTransactionsEntity.setStatus(res.getData().getStatus().toLowerCase());
-            digitalPaymentTransactionsEntity.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+            digitalPaymentTransactionsEntityData.setUtrNumber(res.getData().getOriginalBankRRN());
+            digitalPaymentTransactionsEntityData.setStatus(res.getData().getStatus().toLowerCase());
+            digitalPaymentTransactionsEntityData.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
 
-            digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+            digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
 //            } else {
 //                res.setResponse(true);
 //                Map<String, Object> digitalPaymentTransaction = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsIdForCheckStatusResponse(requestBody.getDigitalPaymentTransactionId(), requestBody.getMerchantTranId());
@@ -1256,5 +1256,26 @@ public class UtilityServiceImpl implements UtilityService {
             throw new Exception();
         }
         return response;
+    }
+
+    @Override
+    public Object qrStatusCheck(String token, String merchantId) throws Exception{
+
+        try {
+            DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByMerchantTranId(merchantId);
+            if (digitalPaymentTransactionsEntity != null) {
+
+            } else {
+
+            }
+
+        } catch (Exception e) {
+
+        }
+
+
+
+
+        return new BaseDTOResponse<>(new Object());
     }
 }
