@@ -1260,22 +1260,18 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Override
     public Object qrStatusCheck(String token, String merchantId) throws Exception{
-
+        Map<String, Object> resp = new HashMap<>();
         try {
             DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByMerchantTranId(merchantId);
             if (digitalPaymentTransactionsEntity != null) {
-
+                resp.put("status", digitalPaymentTransactionsEntity.getStatus());
             } else {
-
+                throw new Exception("");
             }
 
         } catch (Exception e) {
-
+            throw new Exception(e.getMessage());
         }
-
-
-
-
-        return new BaseDTOResponse<>(new Object());
+        return new BaseDTOResponse<>(resp);
     }
 }
