@@ -106,9 +106,11 @@ public class ReceiptController {
 
         try {
             createReceiptResponse = receiptService.createReceipt(receiptServiceDtoRequest, bearerToken);
-            if (createReceiptResponse.getData() == null && createReceiptResponse.getError() != null) {
+            if (createReceiptResponse.getData() == null && createReceiptResponse.getError() == null) {
                 response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
-            } else if (createReceiptResponse.getData().getServiceRequestId() == null && createReceiptResponse.getError() != null) {
+            } else if (createReceiptResponse.getData() == null && createReceiptResponse.getError() != null) {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
+            } else if (createReceiptResponse.getData() != null && createReceiptResponse.getData().getServiceRequestId() == null && createReceiptResponse.getError() != null) {
                 response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
             } else  {
                 response = new ResponseEntity<>(createReceiptResponse, HttpStatus.OK);
