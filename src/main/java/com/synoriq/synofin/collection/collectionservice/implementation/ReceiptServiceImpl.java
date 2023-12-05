@@ -298,7 +298,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .typeResponseType(ServiceRequestSaveResponse.class)
                     .build().call();
 
-            log.info("response create receipt {}", res);
+                log.info("response create receipt {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, res, "success", createReceiptBody.getActivityData().getLoanId());
             if (res.getData() != null) {

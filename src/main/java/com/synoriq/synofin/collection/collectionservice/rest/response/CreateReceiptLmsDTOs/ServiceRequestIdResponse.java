@@ -9,9 +9,15 @@ import lombok.NoArgsConstructor;
 public class ServiceRequestIdResponse {
 
     @JsonProperty("result")
-    public String data;
+    public Object result;
+
+    @JsonProperty("status")
+    public String status;
 
     @JsonProperty("service_request_id")
     public Long serviceRequestId;
+
+    @JsonProperty("unique_transaction_number")
+    public Object uniqueTransactionNumber;
 
 }
