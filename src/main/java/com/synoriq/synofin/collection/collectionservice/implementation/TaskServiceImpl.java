@@ -277,6 +277,7 @@ public class TaskServiceImpl implements TaskService {
                     }
                     basicInfoOther.setRelation(additionalContactDetailsEntity1.getRelationWithApplicant());
                     basicInfoOther.setFirstName(additionalContactDetailsEntity1.getContactName());
+                    basicInfoOther.setAddress(additionalContactDetailsEntity1.getAddress());
                     CustomerDetailsReturnResponseDTO customerDetailsOther = new CustomerDetailsReturnResponseDTO();
                     customerDetailsOther.setBasicInfo(basicInfoOther);
                     customerDetailsOther.setNumbers(numbersReturnResponseDTO1);
