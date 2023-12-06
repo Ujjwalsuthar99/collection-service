@@ -134,7 +134,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
                 activityLogCustomResponseDTO.setRemarks(String.valueOf(collectionActivityLog.get("remarks")));
                 if (Objects.equals(String.valueOf(collectionActivityLog.get("activity_name")), "create_followup")) {
                     followUpReason = collectionActivityLogsRepository.getFollowUpReason(Long.parseLong(String.valueOf(collectionActivityLog.get("collection_activity_logs_id"))));
-                    activityLogCustomResponseDTO.setRemarks(collectionActivityLog.get("remarks") + ".FollowUp Reason: " + followUpReason);
+                    activityLogCustomResponseDTO.setRemarks("FollowUp Id "+ collectionActivityLog.get("collection_activity_logs_id") + ", FollowUp Reason: " + followUpReason);
                 }
                 activityLogCustomResponseDTO.setDistanceFromUserBranch(Double.parseDouble(String.valueOf(collectionActivityLog.get("distance_from_user_branch"))));
                 activityLogCustomResponseDTO.setLoanId(Long.parseLong(String.valueOf(collectionActivityLog.get("loan_id"))));
