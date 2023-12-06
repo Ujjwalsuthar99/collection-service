@@ -40,6 +40,7 @@ public class AdditionalContactDetailsServiceImpl implements AdditionalContactDet
                .mobileNumber(additionalContact.getMobileNumber())
                .deleted(additionalContact.getDeleted())
                .relationWithApplicant(additionalContact.getRelationWithApplicant())
+               .address(additionalContact.getAddress())
                .build()));
 
         return additionalContactDetailsDTO;
