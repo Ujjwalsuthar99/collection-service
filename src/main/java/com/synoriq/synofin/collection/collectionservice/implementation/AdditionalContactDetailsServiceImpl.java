@@ -84,6 +84,7 @@ public class AdditionalContactDetailsServiceImpl implements AdditionalContactDet
                 additionalContactDetailsEntity.setAltMobileNumber(additionalContactDetailsDtoRequest.getAltMobileNumber());
                 additionalContactDetailsEntity.setEmail(additionalContactDetailsDtoRequest.getEmail());
                 additionalContactDetailsEntity.setRelationWithApplicant(additionalContactDetailsDtoRequest.getRelationWithApplicant());
+                additionalContactDetailsEntity.setAddress(additionalContactDetailsDtoRequest.getAddress());
 
                 additionalContactDetailsRepository.save(additionalContactDetailsEntity);
             }

@@ -47,6 +47,7 @@ public class AdditionalContactDetailsEntity {
     @Column(name = "relation_with_applicant")
     private String relationWithApplicant;
 
-
+    @Column(name = "address")
+    private String address;
 
 }

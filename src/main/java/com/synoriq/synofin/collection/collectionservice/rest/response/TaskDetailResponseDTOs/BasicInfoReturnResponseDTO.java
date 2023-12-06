@@ -60,4 +60,7 @@ public class BasicInfoReturnResponseDTO {
 
     @JsonProperty("emi_amount")
     public Double emiAmount;
+
+    @JsonProperty("address")
+    public String address;
 }

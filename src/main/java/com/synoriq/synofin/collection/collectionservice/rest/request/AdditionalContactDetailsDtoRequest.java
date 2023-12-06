@@ -34,4 +34,6 @@ public class AdditionalContactDetailsDtoRequest {
 
     String relationWithApplicant;
 
+    String address;
+
 }
