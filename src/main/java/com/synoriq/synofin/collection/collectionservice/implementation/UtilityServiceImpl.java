@@ -1278,7 +1278,7 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public Object sendOtp(String token, SendOtpRequestDTO sendOtpRequestDTO) throws Exception{
+    public MasterDTOResponse sendOtp(String token, SendOtpRequestDTO sendOtpRequestDTO) throws Exception{
         MasterDTOResponse res = new MasterDTOResponse();
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -1305,7 +1305,7 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public Object verifyOtp(String token, VerifyOtpRequestDTO reqBody) throws Exception{
+    public MasterDTOResponse verifyOtp(String token, VerifyOtpRequestDTO reqBody) throws Exception{
         MasterDTOResponse res = new MasterDTOResponse();
         try {
             HttpHeaders httpHeaders = new HttpHeaders();

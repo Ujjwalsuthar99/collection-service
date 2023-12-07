@@ -11,6 +11,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
@@ -46,7 +47,7 @@ public interface UtilityService {
     public DynamicQrCodeCheckStatusResponseDTO getQrCodeTransactionStatus(String token, DynamicQrCodeStatusCheckRequestDTO requestBody) throws Exception;
     public Object qrCodeCallBack(String token, DynamicQrCodeCallBackRequestDTO requestBody) throws Exception;
     public Object qrStatusCheck(String token, String merchantId) throws Exception;
-    public Object sendOtp(String token, SendOtpRequestDTO sendOtpRequestDTO) throws Exception;
-    public Object verifyOtp(String token, VerifyOtpRequestDTO reqBody) throws Exception;
+    public MasterDTOResponse sendOtp(String token, SendOtpRequestDTO sendOtpRequestDTO) throws Exception;
+    public MasterDTOResponse verifyOtp(String token, VerifyOtpRequestDTO reqBody) throws Exception;
 
 }

@@ -12,6 +12,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
@@ -363,7 +364,7 @@ public class UtilityController {
     public ResponseEntity<Object> sendOtp(@RequestHeader("Authorization") String token, @RequestBody SendOtpRequestDTO sendOtpRequestDTO) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
-        Object result;
+        MasterDTOResponse result;
 
         try {
             result = utilityService.sendOtp(token, sendOtpRequestDTO);
@@ -383,7 +384,7 @@ public class UtilityController {
     public ResponseEntity<Object> verifyOtp(@RequestHeader("Authorization") String token, @RequestBody VerifyOtpRequestDTO reqBody) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
-        Object result;
+        MasterDTOResponse result;
 
         try {
             result = utilityService.verifyOtp(token, reqBody);
