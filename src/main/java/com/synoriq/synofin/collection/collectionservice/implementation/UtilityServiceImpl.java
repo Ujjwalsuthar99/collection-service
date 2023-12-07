@@ -1288,6 +1288,7 @@ public class UtilityServiceImpl implements UtilityService {
             res = HTTPRequestService.<Object, MasterDTOResponse>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/send-otp")
+                    .body(sendOtpRequestDTO)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(MasterDTOResponse.class)
                     .build().call();
@@ -1314,6 +1315,7 @@ public class UtilityServiceImpl implements UtilityService {
             res = HTTPRequestService.<Object, MasterDTOResponse>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/verify-otp")
+                    .body(reqBody)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(MasterDTOResponse.class)
                     .build().call();
