@@ -63,4 +63,10 @@ public interface CollectionActivityLogsRepository extends PagingAndSortingReposi
     @Query(nativeQuery = true,value = "select * from collection.collection_activity_logs cal where cal.remarks like concat('%', :serviceRequestId, '%') and cal.activity_name in ('receipt_approved', 'receipt_rejected')")
     CollectionActivityLogsEntity getActivityLogsKafkaByReceiptId(@Param("serviceRequestId") String serviceRequestId);
 
+
+    @Query(nativeQuery = true, value = "select (select l.\"label\" from master.lists l where l.list_name = 'followup_reason' and l.key = f.followup_reason) as reason \n" +
+            "from collection.followups f \n" +
+            "where f.collection_activity_logs_id = :activityLogId")
+    String getFollowUpReason(@Param("activityLogId") Long activityLogId);
+
 }

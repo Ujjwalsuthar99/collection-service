@@ -14,10 +14,12 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.sendOtpDTOs.SendOtpRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3DataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDTOs.VerifyOtpRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusDataResponseDTO;
@@ -1275,4 +1277,59 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return new BaseDTOResponse<>(resp);
     }
+
+    @Override
+    public MasterDTOResponse sendOtp(String token, SendOtpRequestDTO sendOtpRequestDTO) throws Exception{
+        MasterDTOResponse res = new MasterDTOResponse();
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, MasterDTOResponse>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/send-otp")
+                    .body(sendOtpRequestDTO)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(MasterDTOResponse.class)
+                    .build().call();
+
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_otp, null, sendOtpRequestDTO, res, "success", null);
+        } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_otp, null, sendOtpRequestDTO, modifiedErrorMessage, "failure", null);
+            log.error("{}", ee.getMessage());
+        }
+        return res;
+    }
+
+    @Override
+    public MasterDTOResponse verifyOtp(String token, VerifyOtpRequestDTO reqBody) throws Exception{
+        MasterDTOResponse res = new MasterDTOResponse();
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, MasterDTOResponse>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/verify-otp")
+                    .body(reqBody)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(MasterDTOResponse.class)
+                    .build().call();
+
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.verify_otp, null, reqBody, res, "success", null);
+        } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.verify_otp, null, reqBody, modifiedErrorMessage, "failure", null);
+            log.error("{}", ee.getMessage());
+        }
+        return res;
+    }
+
 }
