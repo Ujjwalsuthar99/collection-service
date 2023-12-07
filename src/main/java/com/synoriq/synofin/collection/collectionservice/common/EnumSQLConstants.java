@@ -28,7 +28,9 @@ public class EnumSQLConstants {
 
         send_qr_code,
 
-        check_qr_payment_status;
+        check_qr_payment_status,
+        send_otp,
+        verify_otp;
 
 
         private LogNames() {
