@@ -1233,6 +1233,7 @@ public class UtilityServiceImpl implements UtilityService {
             if (digitalPaymentTransactionsEntity != null) {
                 if (Objects.equals(requestBody.getStatus(), "SUCCESS")) {
                     digitalPaymentTransactionsEntity.setStatus("success");
+                    digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getOriginalBankRRN());
                 }
                 digitalPaymentTransactionsEntity.setCallBackRequestBody(requestBody);
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
