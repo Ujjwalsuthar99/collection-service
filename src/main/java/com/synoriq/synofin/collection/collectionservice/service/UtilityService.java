@@ -47,7 +47,7 @@ public interface UtilityService {
     public DynamicQrCodeCheckStatusResponseDTO getQrCodeTransactionStatus(String token, DynamicQrCodeStatusCheckRequestDTO requestBody) throws Exception;
     public Object qrCodeCallBack(String token, DynamicQrCodeCallBackRequestDTO requestBody) throws Exception;
     public Object qrStatusCheck(String token, String merchantId) throws Exception;
-    public MasterDTOResponse sendOtp(String token, SendOtpRequestDTO sendOtpRequestDTO) throws Exception;
-    public MasterDTOResponse verifyOtp(String token, VerifyOtpRequestDTO reqBody) throws Exception;
+    public MasterDTOResponse sendOtp(String token, String mobileNumber) throws Exception;
+    public MasterDTOResponse verifyOtp(String token, String mobileNumber, String otp) throws Exception;
 
 }

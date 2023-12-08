@@ -360,14 +360,14 @@ public class UtilityController {
     }
 
 
-    @RequestMapping(value = "send-otp", method = RequestMethod.POST)
-    public ResponseEntity<Object> sendOtp(@RequestHeader("Authorization") String token, @RequestBody SendOtpRequestDTO sendOtpRequestDTO) {
+    @RequestMapping(value = "send-otp", method = RequestMethod.GET)
+    public ResponseEntity<Object> sendOtp(@RequestHeader("Authorization") String token, @RequestParam("mobileNumber") String mobileNumber) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         MasterDTOResponse result;
 
         try {
-            result = utilityService.sendOtp(token, sendOtpRequestDTO);
+            result = utilityService.sendOtp(token, mobileNumber);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -380,14 +380,14 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "verify-otp", method = RequestMethod.POST)
-    public ResponseEntity<Object> verifyOtp(@RequestHeader("Authorization") String token, @RequestBody VerifyOtpRequestDTO reqBody) {
+    @RequestMapping(value = "verify-otp", method = RequestMethod.GET)
+    public ResponseEntity<Object> verifyOtp(@RequestHeader("Authorization") String token, @RequestParam("mobileNumber") String mobileNumber, @RequestParam("otp") String otp) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         MasterDTOResponse result;
 
         try {
-            result = utilityService.verifyOtp(token, reqBody);
+            result = utilityService.verifyOtp(token, mobileNumber, otp);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
