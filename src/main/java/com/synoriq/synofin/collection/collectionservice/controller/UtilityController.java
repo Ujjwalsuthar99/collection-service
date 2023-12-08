@@ -400,4 +400,24 @@ public class UtilityController {
         return response;
     }
 
+    @RequestMapping(value = "resend-otp", method = RequestMethod.GET)
+    public ResponseEntity<Object> resendOtp(@RequestHeader("Authorization") String token, @RequestParam("mobileNumber") String mobileNumber) {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        MasterDTOResponse result;
+
+        try {
+            result = utilityService.resendOtp(token, mobileNumber);
+            response = new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
 }

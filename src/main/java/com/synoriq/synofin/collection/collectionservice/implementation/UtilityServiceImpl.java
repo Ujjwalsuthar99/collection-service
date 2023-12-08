@@ -14,6 +14,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.sendOtpDTOs.ResendOtpDataRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.sendOtpDTOs.ResendOtpRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.sendOtpDTOs.SendOtpDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.sendOtpDTOs.SendOtpRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
@@ -1348,6 +1350,40 @@ public class UtilityServiceImpl implements UtilityService {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.verify_otp, null, verifyOtpRequestDTO, modifiedErrorMessage, "failure", null);
+            log.error("{}", ee.getMessage());
+        }
+        return res;
+    }
+
+    @Override
+    public MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception{
+        MasterDTOResponse res = new MasterDTOResponse();
+
+        ResendOtpRequestDTO resendOtpRequestDTO = new ResendOtpRequestDTO();
+        ResendOtpDataRequestDTO resendOtpDataRequestDTO = new ResendOtpDataRequestDTO();
+        resendOtpDataRequestDTO.setRetryType("text");
+        resendOtpDataRequestDTO.setPhoneNumber("91" + mobileNumber);
+        resendOtpRequestDTO.setSystemId("collection");
+        resendOtpRequestDTO.setData(resendOtpDataRequestDTO);
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, MasterDTOResponse>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/resend-otp")
+                    .body(resendOtpRequestDTO)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(MasterDTOResponse.class)
+                    .build().call();
+
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.resend_otp, null, resendOtpRequestDTO, res, "success", null);
+        } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.resend_otp, null, resendOtpRequestDTO, modifiedErrorMessage, "failure", null);
             log.error("{}", ee.getMessage());
         }
         return res;

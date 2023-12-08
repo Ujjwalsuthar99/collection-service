@@ -30,7 +30,8 @@ public class EnumSQLConstants {
 
         check_qr_payment_status,
         send_otp,
-        verify_otp;
+        verify_otp,
+        resend_otp;
 
 
         private LogNames() {

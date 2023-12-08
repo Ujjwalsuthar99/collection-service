@@ -49,5 +49,6 @@ public interface UtilityService {
     public Object qrStatusCheck(String token, String merchantId) throws Exception;
     public MasterDTOResponse sendOtp(String token, String mobileNumber) throws Exception;
     public MasterDTOResponse verifyOtp(String token, String mobileNumber, String otp) throws Exception;
+    public MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception;
 
 }
