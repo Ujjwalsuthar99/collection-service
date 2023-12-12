@@ -1,0 +1,1 @@
+ALTER TABLE collection.collection_activity_logs ADD column if not exists reference_id int8 NULL;
