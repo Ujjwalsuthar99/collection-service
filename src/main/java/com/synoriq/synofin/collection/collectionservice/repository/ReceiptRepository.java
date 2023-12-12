@@ -281,4 +281,17 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "where\n" +
             "\tsr.service_request_id=:receiptId")
     String getPaymentModeByReceiptId(@Param("receiptId") Long receiptId);
+
+    @Query(nativeQuery = true, value = "select \n" +
+            "    sr.service_request_id,\n" +
+            "    concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as customer_name,\n" +
+            "    (case when cast(sr.form->>'receipt_amount' as decimal) is null then 0 else cast(sr.form->>'receipt_amount' as decimal) end) as receipt_amount,\n" +
+            "    sr.form->>'payment_mode' as payment_mode\n" +
+            "from lms.service_request sr \n" +
+            "join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id\n" +
+            "join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id = sr.loan_id and clm.customer_type = 'applicant' \n" +
+            "join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
+            "where sr.status = 'initiated'  and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque')\n" +
+            "and sr.service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending')")
+    List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferredForPortal(@Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission);
 }

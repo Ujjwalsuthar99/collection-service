@@ -488,4 +488,24 @@ public class ReceiptServiceImpl implements ReceiptService {
         calendar.set(Calendar.SECOND, 59);
         calendar.set(Calendar.MILLISECOND, 999);
     }
+
+    @Override
+    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferredForPortal() throws Exception {
+
+
+        BaseDTOResponse<Object> baseDTOResponse;
+        try {
+            String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+            String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+//            Boolean piiPermission = rsaUtils.getPiiPermission();
+            Boolean piiPermission = true;
+            List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferredForPortal(encryptionKey, password, piiPermission);
+            baseDTOResponse = new BaseDTOResponse<>(receiptsData);
+        } catch (Exception e) {
+            throw new Exception("1017002");
+        }
+
+        return baseDTOResponse;
+
+    }
 }

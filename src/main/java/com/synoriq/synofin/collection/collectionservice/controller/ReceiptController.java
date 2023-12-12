@@ -180,4 +180,24 @@ public class ReceiptController {
         return responseEntity;
 
     }
+
+
+    @RequestMapping(value = "/receipts/receipts-not-transferred-portal", method = RequestMethod.GET)
+    public ResponseEntity<Object> getReceiptsByUserIdWhichNotTransferredForPortal() throws SQLException {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+
+        try {
+            baseResponse = receiptService.getReceiptsByUserIdWhichNotTransferredForPortal();
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
 }
