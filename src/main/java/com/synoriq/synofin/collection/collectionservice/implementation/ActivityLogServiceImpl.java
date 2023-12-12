@@ -1,26 +1,23 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.RegisteredDeviceInfoEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.RegisteredDeviceInfoRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogBaseResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogCustomResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
-import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
+import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +60,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         }
 
     }
+
     @Override
     public BaseDTOResponse<Object> getActivityLogsByUserIdWithDuration(Integer page, Integer size, Long userId, Date fromDate, Date endDate) throws Exception {
 
@@ -80,7 +78,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
 
         List<ActivityLogResponseDTO> activityLogResponsDTOS = new LinkedList<>();
         if (!collectionActivityLogs.isEmpty()) {
-            for(CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogs){
+            for (CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogs) {
 
                 ActivityLogResponseDTO activityLogResponseDTO = new ActivityLogResponseDTO();
                 activityLogResponseDTO.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
@@ -103,11 +101,12 @@ public class ActivityLogServiceImpl implements ActivityLogService {
             return new BaseDTOResponse<>(activityLogResponsDTOS);
         }
     }
+
     @Override
-    public ActivityLogBaseResponseDTO getActivityLogsByLoanIdWithDuration(Integer page, Integer size,Long loanId, Date fromDate, Date endDate, String filterBy) throws Exception {
+    public ActivityLogBaseResponseDTO getActivityLogsByLoanIdWithDuration(Integer page, Integer size, Long loanId, Date fromDate, Date endDate, String filterBy) throws Exception {
 
         Date toDate = checkToDate(endDate);
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = PageRequest.of(page, size);
         List<Map<String, Object>> collectionActivityLogs;
         ActivityLogBaseResponseDTO activityLogBaseResponseDTO = new ActivityLogBaseResponseDTO();
         ActivityLogDataDTO activityLogDataDTO = new ActivityLogDataDTO();
@@ -134,7 +133,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
                 activityLogCustomResponseDTO.setRemarks(String.valueOf(collectionActivityLog.get("remarks")));
                 if (Objects.equals(String.valueOf(collectionActivityLog.get("activity_name")), "create_followup")) {
                     followUpReason = collectionActivityLogsRepository.getFollowUpReason(Long.parseLong(String.valueOf(collectionActivityLog.get("collection_activity_logs_id"))));
-                    activityLogCustomResponseDTO.setRemarks("FollowUp Id "+ collectionActivityLog.get("collection_activity_logs_id") + ", FollowUp Reason: " + followUpReason);
+                    activityLogCustomResponseDTO.setRemarks("FollowUp Id " + collectionActivityLog.get("collection_activity_logs_id") + ", FollowUp Reason: " + followUpReason);
                 }
                 activityLogCustomResponseDTO.setDistanceFromUserBranch(Double.parseDouble(String.valueOf(collectionActivityLog.get("distance_from_user_branch"))));
                 activityLogCustomResponseDTO.setLoanId(Long.parseLong(String.valueOf(collectionActivityLog.get("loan_id"))));
@@ -162,6 +161,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         }
         return activityLogBaseResponseDTO;
     }
+
     @Override
     public Long createActivityLogs(CollectionActivityLogDTO activityLogRequest, String token) throws Exception {
 
@@ -212,7 +212,14 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         return collectionActivityLogsEntity.getCollectionActivityLogsId();
     }
 
-    private Date checkToDate(Date toDate){
-        return DateUtils.addDays(toDate,1);
+    private Date checkToDate(Date toDate){return DateUtils.addDays(toDate, 1);}
+
+    @Override
+    public List<CollectionActivityLogsEntity> getActivityLogsByReferenceId(Long referenceId) throws Exception {
+        try {
+            return collectionActivityLogsRepository.findActivityLogByReferenceId(referenceId);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
     }
 }

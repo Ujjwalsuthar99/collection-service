@@ -58,4 +58,6 @@ public class CollectionActivityLogsEntity {
     @Column(name = "battery_percentage")
     private Long batteryPercentage;
 
+    @Column(name = "reference_id")
+    private Long referenceId;
 }
