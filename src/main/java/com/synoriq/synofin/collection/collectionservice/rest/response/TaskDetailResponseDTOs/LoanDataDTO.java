@@ -44,5 +44,8 @@ public class LoanDataDTO {
 
     @JsonProperty("repo_status")
     private String repoStatus;
+
+    @JsonProperty("repo_card_show")
+    private Boolean repoCardShow;
 }
 

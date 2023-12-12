@@ -6,6 +6,7 @@ import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUser
 import com.synoriq.synofin.collection.collectionservice.entity.AdditionalContactDetailsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.RepossessionEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.AdditionalContactDetailsRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.RepossessionRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
@@ -28,6 +29,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
 @Service
 @Slf4j
@@ -39,6 +41,8 @@ public class TaskServiceImpl implements TaskService {
     private TaskRepository taskRepository;
     @Autowired
     private RepossessionRepository repossessionRepository;
+    @Autowired
+    private CollectionConfigurationsRepository collectionConfigurationsRepository;
     @Autowired
     private UtilityService utilityService;
 
@@ -177,12 +181,6 @@ public class TaskServiceImpl implements TaskService {
                 } else {
                     response.setCollateralDetails(null);
                 }
-
-            }
-            String repoStatus = null;
-            RepossessionEntity repossessionEntity = repossessionRepository.findTop1ByLoanIdOrderByCreatedDateDesc(loanIdNumber);
-            if (repossessionEntity != null) {
-                repoStatus = repossessionEntity.getStatus();
             }
 
             int dpd = loanDetailRes.getData() != null ? loanDetailRes.getData().getDpd() : 0;
@@ -218,6 +216,23 @@ public class TaskServiceImpl implements TaskService {
                 dpdTextColor = "#ffffff";
                 dpdBgColor = "#722F37";
                 dpdBucket = "180+ DPD";
+            }
+
+            String repoStatus = "new";
+            boolean repoCardShow = false;
+            RepossessionEntity repossessionEntity = null;
+            String isRepossessionEnabled = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(IS_REPOSSESSION_ENABLED);
+            String showRepossessionAfterXDpd = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(SHOW_REPOSSESSION_AFTER_X_DPD);
+            String[] confDpd = showRepossessionAfterXDpd.split("-");
+            String[] dpdBucketList = dpdBucket.substring(0, dpdBucket.length() - 4).split("-");
+            int endPointerConfDpd = Integer.parseInt(confDpd[1]);
+            int endPointerDpdBucket = Integer.parseInt(dpdBucketList[1]);
+            if (Objects.equals(isRepossessionEnabled, "true") && (endPointerConfDpd == endPointerDpdBucket) && Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", "vehicle")) {
+                repossessionEntity = repossessionRepository.findTop1ByLoanIdOrderByCreatedDateDesc(loanIdNumber);
+                if (repossessionEntity != null) {
+                    repoStatus = repossessionEntity.getStatus();
+                }
+                repoCardShow = true;
             }
 
             String loanApplicationNumber = taskRepository.getLoanApplicationNumber(loanIdNumber);
@@ -304,6 +319,7 @@ public class TaskServiceImpl implements TaskService {
             loanRes.getData().setBalanceEmiCount(loanSummaryResponse.getData().getNumberOfInstallments().getDuesAsOnDate());
             loanRes.getData().setLoanApplicationNumber(loanApplicationNumber);
             loanRes.getData().setRepoStatus(repoStatus);
+            loanRes.getData().setRepoCardShow(repoCardShow);
             response.setCustomerDetails(customerList);
             response.setLoanDetails(loanRes.getData());
             baseDTOResponse = new BaseDTOResponse<>(response);
