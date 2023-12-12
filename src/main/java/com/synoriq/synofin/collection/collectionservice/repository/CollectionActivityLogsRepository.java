@@ -69,4 +69,9 @@ public interface CollectionActivityLogsRepository extends PagingAndSortingReposi
             "where f.collection_activity_logs_id = :activityLogId")
     String getFollowUpReason(@Param("activityLogId") Long activityLogId);
 
+    public List<CollectionActivityLogsEntity> findActivityLogByReferenceId(Long referenceId);
+
+    @Query(nativeQuery = true, value = "select * from collection.collection_activity_logs cal where cal.loan_id = :loanId and cal.activity_name like 'repossession_%' order by cal.activity_date desc")
+    public List<CollectionActivityLogsEntity> getActivityLogsDataByLoanIdWithRepossession(@Param("loanId") Long loanId);
+
 }

@@ -42,5 +42,7 @@ public class LoanDataDTO {
     @JsonProperty("emi_paid_count")
     private Integer emiPaidCount;
 
+    @JsonProperty("repo_status")
+    private String repoStatus;
 }
 

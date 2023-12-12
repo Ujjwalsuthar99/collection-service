@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.AdditionalContactDetailsEntity;
+import com.synoriq.synofin.collection.collectionservice.entity.RepossessionEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.AdditionalContactDetailsRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.RepossessionRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
@@ -35,7 +37,8 @@ public class TaskServiceImpl implements TaskService {
     private RSAUtils rsaUtils;
     @Autowired
     private TaskRepository taskRepository;
-
+    @Autowired
+    private RepossessionRepository repossessionRepository;
     @Autowired
     private UtilityService utilityService;
 
@@ -176,6 +179,12 @@ public class TaskServiceImpl implements TaskService {
                 }
 
             }
+            String repoStatus = null;
+            RepossessionEntity repossessionEntity = repossessionRepository.findTop1ByLoanIdOrderByCreatedDateDesc(loanIdNumber);
+            if (repossessionEntity != null) {
+                repoStatus = repossessionEntity.getStatus();
+            }
+
             int dpd = loanDetailRes.getData() != null ? loanDetailRes.getData().getDpd() : 0;
             String dpdTextColor;
             String dpdBgColor;
@@ -294,6 +303,7 @@ public class TaskServiceImpl implements TaskService {
             loanRes.getData().setBalanceEmi(loanSummaryResponse.getData().getInstallmentAmount().getDuesAsOnDate());
             loanRes.getData().setBalanceEmiCount(loanSummaryResponse.getData().getNumberOfInstallments().getDuesAsOnDate());
             loanRes.getData().setLoanApplicationNumber(loanApplicationNumber);
+            loanRes.getData().setRepoStatus(repoStatus);
             response.setCustomerDetails(customerList);
             response.setLoanDetails(loanRes.getData());
             baseDTOResponse = new BaseDTOResponse<>(response);
