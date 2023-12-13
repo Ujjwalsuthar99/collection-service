@@ -74,7 +74,7 @@ public class RepossessionController {
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = repossessionService.initiateRepossession(bearerToken, requestBody);
+            baseResponse = repossessionService.yardRepossession(bearerToken, requestBody);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
 
