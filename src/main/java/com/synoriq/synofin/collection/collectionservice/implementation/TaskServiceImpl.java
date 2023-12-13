@@ -220,16 +220,15 @@ public class TaskServiceImpl implements TaskService {
 
             String repoStatus = "new";
             boolean repoCardShow = false;
-            RepossessionEntity repossessionEntity = null;
+            Long repoId = null;
+            RepossessionEntity repossessionEntity;
             String isRepossessionEnabled = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(IS_REPOSSESSION_ENABLED);
             String showRepossessionAfterXDpd = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(SHOW_REPOSSESSION_AFTER_X_DPD);
-            String[] confDpd = showRepossessionAfterXDpd.split("-");
-            String[] dpdBucketList = dpdBucket.substring(0, dpdBucket.length() - 4).split("-");
-            int endPointerConfDpd = Integer.parseInt(confDpd[1]);
-            int endPointerDpdBucket = Integer.parseInt(dpdBucketList[1]);
-            if (Objects.equals(isRepossessionEnabled, "true") && (endPointerConfDpd == endPointerDpdBucket) && Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", "vehicle")) {
+            int repoDpd = Integer.parseInt(showRepossessionAfterXDpd);
+            if (Objects.equals(isRepossessionEnabled, "true") && repoDpd < dpd && Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", "vehicle")) {
                 repossessionEntity = repossessionRepository.findTop1ByLoanIdOrderByCreatedDateDesc(loanIdNumber);
                 if (repossessionEntity != null) {
+                    repoId = repossessionEntity.getRepossessionId();
                     repoStatus = repossessionEntity.getStatus();
                 }
                 repoCardShow = true;
@@ -319,6 +318,7 @@ public class TaskServiceImpl implements TaskService {
             loanRes.getData().setBalanceEmiCount(loanSummaryResponse.getData().getNumberOfInstallments().getDuesAsOnDate());
             loanRes.getData().setLoanApplicationNumber(loanApplicationNumber);
             loanRes.getData().setRepoStatus(repoStatus);
+            loanRes.getData().setRepoId(repoId);
             loanRes.getData().setRepoCardShow(repoCardShow);
             response.setCustomerDetails(customerList);
             response.setLoanDetails(loanRes.getData());

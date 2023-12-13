@@ -66,5 +66,27 @@ public class RepossessionController {
         }
         return response;
     }
+
+    @RequestMapping(value = "repossession/yard-repossession", method = RequestMethod.POST)
+    public ResponseEntity<Object> yardRepossession(@RequestHeader("Authorization") String bearerToken, @RequestBody RepossessionRequestDTO requestBody) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+
+        try {
+            baseResponse = repossessionService.initiateRepossession(bearerToken, requestBody);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
 }
 
