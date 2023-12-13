@@ -6,15 +6,20 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.loanAllocat
 import com.synoriq.synofin.collection.collectionservice.rest.request.loanAllocationDTOs.LoanAllocationMultiUsersDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.LoanAllocationService;
+import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.*;
 
 @Service
 @Slf4j
 public class LoanAllocationServiceImpl implements LoanAllocationService {
+
+    @Autowired
+    private UtilityService utilityService;
 
     @Autowired
     private LoanAllocationRepository loanAllocationRepository;
@@ -129,6 +134,19 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
             }
         }
         return new BaseDTOResponse<>("Data Saved Successfully");
+    }
+
+
+    @Override
+    @Transactional
+    public String deleteAllAllocatedLoans(Date fromDate, Date toDate) throws Exception {
+        try {
+            toDate = utilityService.addOneDay(toDate);
+            loanAllocationRepository.deleteByCreatedDateBetween(fromDate, toDate);
+        } catch (Exception e) {
+            throw new Exception("1016028");
+        }
+        return "Data Deleted Successfully";
     }
 
 }

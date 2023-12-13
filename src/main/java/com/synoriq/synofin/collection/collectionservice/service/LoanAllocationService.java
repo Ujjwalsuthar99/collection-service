@@ -5,6 +5,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.loanAllocat
 import com.synoriq.synofin.collection.collectionservice.rest.request.loanAllocationDTOs.LoanAllocationMultiUsersDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -14,5 +15,6 @@ public interface LoanAllocationService {
     public BaseDTOResponse<Object> createLoanAllocationToMultipleUserId(LoanAllocationMultiUsersDtoRequest loanAllocationMultiUsersDtoRequest) throws Exception;
     public List<LoanAllocationEntity> getLoansByUserId(Long allocatedToUserId) throws Exception;
     public List<Map<String, Object>> getAllocatedUsersByLoanId(Long loanId) throws Exception;
+    public String deleteAllAllocatedLoans(Date fromDate, Date toDate) throws Exception;
 
 }

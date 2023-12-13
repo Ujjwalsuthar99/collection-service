@@ -8,12 +8,14 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.service.LoanAllocationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -106,6 +108,28 @@ public class LoanAllocationServiceController {
         List<Map<String, Object>> result;
         try {
             result = loanAllocationService.getAllocatedUsersByLoanId(loanId);
+            baseResponse = new BaseDTOResponse<>(result);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "/loan-allocation/delete", method = RequestMethod.GET)
+    public ResponseEntity<Object> deleteAllAllocatedLoans(@RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date fromDate,
+                                                          @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate) throws SQLException {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+        String result;
+        try {
+            result = loanAllocationService.deleteAllAllocatedLoans(fromDate, toDate);
             baseResponse = new BaseDTOResponse<>(result);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {

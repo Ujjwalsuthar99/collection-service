@@ -2,9 +2,11 @@ package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -29,5 +31,10 @@ public interface LoanAllocationRepository extends JpaRepository<LoanAllocationEn
             "\tla.loan_id = :loanId\n" +
             "\tand la.deleted = false")
     List<Map<String, Object>> getAllocatedToUserIdsByLoanIdAndDeleted(Long loanId);
+
+    @Modifying
+    void deleteByCreatedDateBetween(Date fromDate, Date toDate);
+
+
 
 }
