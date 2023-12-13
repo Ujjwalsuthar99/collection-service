@@ -45,8 +45,9 @@ public class RepossessionEntity {
     @Column(name = "status")
     private String status;
 
-    @Column(name = "remarks", columnDefinition = "TEXT")
-    private String remarks;
+    @Column(name = "remarks")
+    @Type(type = "json")
+    private Object remarks;
 
     @Column(name = "lms_repo_id")
     private Long lmsRepoId;
