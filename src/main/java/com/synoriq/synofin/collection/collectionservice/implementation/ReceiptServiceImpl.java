@@ -504,8 +504,11 @@ public class ReceiptServiceImpl implements ReceiptService {
             }
             pageRequest = PageRequest.of(page, size);
             Boolean piiPermission = true;
+            Map<String, Object> mainData = new HashMap<>();
             List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferredForPortal(paymentMode, encryptionKey, password, piiPermission, pageRequest);
-            baseDTOResponse = new BaseDTOResponse<>(receiptsData);
+            mainData.put("receipt_data", receiptsData);
+            mainData.put("total_rows", receiptsData.get(0).get("total_rows"));
+            baseDTOResponse = new BaseDTOResponse<>(mainData);
         } catch (Exception e) {
             throw new Exception("1017002");
         }
