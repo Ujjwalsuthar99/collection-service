@@ -917,6 +917,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
 //            Boolean piiPermission = rsaUtils.getPiiPermission();
             Boolean piiPermission = true;
+            log.info("encryption key {}", encryptionKey);
+            log.info("password {}", password);
             String whereCondition = "";
             if (filterDTO.getCriteria() != null && filterDTO.getCriteria() != "") {
                 whereCondition = whereCondition + " sr.request_source =  '" + filterDTO.getCriteria() + "' and ";
