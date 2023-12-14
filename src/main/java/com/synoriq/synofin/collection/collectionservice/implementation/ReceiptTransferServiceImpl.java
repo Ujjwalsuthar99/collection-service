@@ -952,6 +952,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             int pageNumber = filterDTO.getPage() -1;
             int pageSize = filterDTO.getSize();
             queryString += " LIMIT " + pageSize + " OFFSET " + (pageNumber * pageSize);
+            log.info("here is the query for you {}", queryString);
 
             Query queryData = null;
             queryData = this.entityManager.createNativeQuery(queryString, Tuple.class);
