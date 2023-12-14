@@ -292,7 +292,8 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    when sr.request_source = 'bulk_upload' then 'Bulk Upload'\n" +
             "    when sr.request_source = 'bank_recon' then 'Bank Recon'\n" +
             "    else sr.request_source end as receipt_source,\n" +
-            "    (select concat(u.\"name\", ' - (', u.username, ')') from master.users u where u.user_id = sr.created_by) as created_by\n" +
+            "    (select concat(u.\"name\", ' - (', u.username, ')') from master.users u where u.user_id = sr.created_by) as created_by,\n" +
+            "    COUNT(sr.service_request_id) OVER () AS total_rows\n" +
             "from lms.service_request sr \n" +
             "join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id\n" +
             "join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id = sr.loan_id and clm.customer_type = 'applicant' \n" +
