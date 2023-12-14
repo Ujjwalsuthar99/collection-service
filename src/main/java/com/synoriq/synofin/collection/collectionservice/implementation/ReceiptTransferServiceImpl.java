@@ -15,10 +15,12 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvo
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestListDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferLmsFilterDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceWrapperResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.*;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferLmsFilterResponseDTOs.ReceiptTransferLmsFilterResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDataReturnResponseDTO;
@@ -41,6 +43,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.Tuple;
 import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityEvent.*;
@@ -53,6 +58,9 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     @Autowired
     private ReceiptRepository receiptRepository;
+    @Autowired
+    private EntityManager entityManager;
+
     @Autowired
     private CurrentUserInfo currentUserInfo;
     @Autowired
@@ -899,6 +907,56 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             log.info("error", e);
             e.printStackTrace();
             throw new Exception("1016028");
+        }
+    }
+    @Override
+    public BaseDTOResponse<Object> getReceiptTransferByFilter(String token, ReceiptTransferLmsFilterDTO filterDTO) throws Exception {
+        ReceiptTransferLmsFilterResponseDTO receiptTransferLmsFilterResponseDTO = new ReceiptTransferLmsFilterResponseDTO();
+        try {
+            String whereCondition = "";
+            if (filterDTO.getCriteria() != null && filterDTO.getCriteria() != "") {
+                whereCondition = whereCondition + " sr.request_source =  '" + filterDTO.getCriteria() + "' and ";
+            }
+            if (filterDTO.getFromDate() != null && filterDTO.getToDate() != null) {
+                whereCondition = whereCondition + "date(sr.form->>'date_of_receipt') between to_date(" + filterDTO.getFromDate() + ", 'DD-MM-YYYY') and to_date(" + filterDTO.getToDate() + ", 'DD-MM-YYYY') and ";
+            }
+            // remove last 4 characters of string
+            whereCondition = Optional.ofNullable(whereCondition)
+                    .filter(str -> str.length() != 0)
+                    .map(str -> str.substring(0, str.length() - 4))
+                    .orElse(whereCondition);
+
+            String queryString = "SELECT\n" +
+                    "    concat(c.first_name, ' ', c.last_name) as name,\n" +
+                    "    cast(sr.form->>'receipt_amount' as decimal) as receipt_amount, sr.service_request_id as receipt_id, sr.form->>'payment_mode' as payment_mode,\n" +
+                    "    COUNT(d.digital_site_visit_id) OVER () AS total_rows\n" +
+                    "from lms.service_request sr \n" +
+                    "join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = sr.loan_id \n" +
+                    "join (select customer_id, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id \n" +
+                    "WHERE" + whereCondition;
+
+            int pageNumber = filterDTO.getPage() -1;
+            int pageSize = filterDTO.getSize();
+            queryString += " LIMIT " + pageSize + " OFFSET " + (pageNumber * pageSize);
+
+            Query queryData = null;
+            queryData = this.entityManager.createNativeQuery(queryString, Tuple.class);
+            List<Tuple> queryRows = queryData.getResultList();
+            List<Map<String, Object>> data = utilityService.formatDigitalSiteVisitData(queryRows);
+
+            if (data.size() > 0) {
+                int totalCount = Integer.parseInt(String.valueOf(data.get(0).get("total_rows")));
+                receiptTransferLmsFilterResponseDTO.setData(data);
+                receiptTransferLmsFilterResponseDTO.setTotalCount(totalCount);
+                return new BaseDTOResponse<>(receiptTransferLmsFilterResponseDTO);
+            } else {
+                int totalCount = 0;
+                receiptTransferLmsFilterResponseDTO.setData(new ArrayList<>());
+                receiptTransferLmsFilterResponseDTO.setTotalCount(totalCount);
+                return new BaseDTOResponse<>(receiptTransferLmsFilterResponseDTO);
+            }
+        } catch (Exception e) {
+            throw new Exception("1017000");
         }
     }
 }

@@ -64,6 +64,7 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.ion.Decimal;
 
 import javax.imageio.ImageIO;
+import javax.persistence.Tuple;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -1387,6 +1388,27 @@ public class UtilityServiceImpl implements UtilityService {
             log.error("{}", ee.getMessage());
         }
         return res;
+    }
+    @Override
+    public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws Exception {
+        final List<Map<String, Object>> formattedRows = new ArrayList<>();
+        try {
+            data.forEach(row -> {
+                final Map<String, Object> formattedRow = new HashMap<>();
+                row.getElements().forEach(column -> {
+
+                    final String columnName = column.getAlias();
+                    Object columnValue = row.get(column);
+                    formattedRow.put(columnName, columnValue);
+                });
+
+                formattedRows.add(formattedRow);
+            });
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return formattedRows;
     }
 
 }

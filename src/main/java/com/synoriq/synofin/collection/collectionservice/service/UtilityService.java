@@ -18,8 +18,11 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetail
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.Tuple;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 
 public interface UtilityService {
@@ -50,5 +53,6 @@ public interface UtilityService {
     public MasterDTOResponse sendOtp(String token, String mobileNumber) throws Exception;
     public MasterDTOResponse verifyOtp(String token, String mobileNumber, String otp) throws Exception;
     public MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception;
+    public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws Exception;
 
 }
