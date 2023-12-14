@@ -915,16 +915,22 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         try {
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+            if(encryptionKey == null || encryptionKey.equals("")) {
+                encryptionKey = null;
+            }
+            if(password == null || password.equals("")) {
+                password = null;
+            }
 //            Boolean piiPermission = rsaUtils.getPiiPermission();
-            Boolean piiPermission = true;
+            boolean piiPermission = true;
             log.info("encryption key {}", encryptionKey);
             log.info("password {}", password);
             String whereCondition = "";
             if (filterDTO.getCriteria() != null && filterDTO.getCriteria() != "") {
-                whereCondition = whereCondition + " sr.request_source =  '" + filterDTO.getCriteria() + "' and ";
+                whereCondition = whereCondition + " and sr.request_source =  '" + filterDTO.getCriteria() + "'     ";
             }
             if (filterDTO.getFromDate() != null && filterDTO.getToDate() != null) {
-                whereCondition = whereCondition + " date(sr.form->>'date_of_receipt') between to_date(" + filterDTO.getFromDate() + ", 'DD-MM-YYYY') and to_date(" + filterDTO.getToDate() + ", 'DD-MM-YYYY') and ";
+                whereCondition = whereCondition + " and date(sr.form->>'date_of_receipt') between to_date('" + filterDTO.getFromDate() + "', 'DD-MM-YYYY') and to_date('" + filterDTO.getToDate() + "', 'DD-MM-YYYY') and ";
             }
             // remove last 4 characters of string
             whereCondition = Optional.ofNullable(whereCondition)
@@ -948,10 +954,10 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     "join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id\n" +
                     "join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id = sr.loan_id and clm.customer_type = 'applicant' \n" +
                     "join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
-                    "where sr.status = 'initiated' and sr.form->>'payment_mode' = \n"+ filterDTO.getPaymentMode() +
-                    "and sr.service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending')" + whereCondition;
+                    "where sr.status = 'initiated' and sr.form->>'payment_mode' ="+ "'" + filterDTO.getPaymentMode() + "'\n" +
+                    " and sr.service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending')" + whereCondition;
 
-            int pageNumber = filterDTO.getPage() -1;
+            int pageNumber = filterDTO.getPage();
             int pageSize = filterDTO.getSize();
             queryString += " LIMIT " + pageSize + " OFFSET " + (pageNumber * pageSize);
             log.info("here is the query for you {}", queryString);
