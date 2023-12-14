@@ -11,6 +11,12 @@ import java.util.Date;
 @NoArgsConstructor
 public class ReceiptTransferLmsFilterDTO {
 
+    @JsonProperty("is_filter")
+    private Boolean isFilter;
+
+    @JsonProperty("payment_mode")
+    private String paymentMode;
+
     @JsonProperty("from_date")
     private String fromDate;
 

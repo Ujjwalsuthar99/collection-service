@@ -40,6 +40,6 @@ public interface ReceiptTransferService {
     public BaseDTOResponse<Object> disableApproveButtonInLms(String token , Long receiptId) throws Exception;
     public DepositInvoiceResponseDataDTO depositInvoice(String token , DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception;
     public BaseDTOResponse<Object> airtelDepositStatusUpdate(String token , ReceiptTransferAirtelDepositStatusRequestDTO requestBody) throws Exception;
-    public BaseDTOResponse<Object> getReceiptTransferByFilter(String token , ReceiptTransferLmsFilterDTO requestBody) throws Exception;
+    public BaseDTOResponse<Object> getReceiptTransferByFilter(ReceiptTransferLmsFilterDTO requestBody) throws Exception;
 
 }

@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferLmsFilterDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,6 @@ public interface ReceiptService {
     public ServiceRequestSaveResponse createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception;
     public Object getReceiptDate(String bearerToken) throws Exception;
     public void getPdf(String token, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception;
-    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferredForPortal(String paymentMode, Integer pageNo, Integer pageSize) throws Exception;
+    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferredForPortal(ReceiptTransferLmsFilterDTO filterDTO) throws Exception;
 
 }

@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferLmsFilterDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
@@ -182,14 +183,13 @@ public class ReceiptController {
     }
 
 
-    @RequestMapping(value = "/receipts/receipts-not-transferred-portal", method = RequestMethod.GET)
-    public ResponseEntity<Object> getReceiptsByUserIdWhichNotTransferredForPortal(@RequestParam("paymentMode") String paymentMode, @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
-                                                                                  @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws SQLException {
+    @RequestMapping(value = "/receipts/receipts-not-transferred-portal", method = RequestMethod.POST)
+    public ResponseEntity<Object> getReceiptsByUserIdWhichNotTransferredForPortal(@RequestBody ReceiptTransferLmsFilterDTO filterDTO) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            baseResponse = receiptService.getReceiptsByUserIdWhichNotTransferredForPortal(paymentMode, pageNo, pageSize);
+            baseResponse = receiptService.getReceiptsByUserIdWhichNotTransferredForPortal(filterDTO);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

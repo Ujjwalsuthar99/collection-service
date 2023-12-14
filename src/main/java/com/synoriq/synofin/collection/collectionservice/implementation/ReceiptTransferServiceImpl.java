@@ -910,15 +910,19 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         }
     }
     @Override
-    public BaseDTOResponse<Object> getReceiptTransferByFilter(String token, ReceiptTransferLmsFilterDTO filterDTO) throws Exception {
+    public BaseDTOResponse<Object> getReceiptTransferByFilter(ReceiptTransferLmsFilterDTO filterDTO) throws Exception {
         ReceiptTransferLmsFilterResponseDTO receiptTransferLmsFilterResponseDTO = new ReceiptTransferLmsFilterResponseDTO();
         try {
+            String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+            String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+//            Boolean piiPermission = rsaUtils.getPiiPermission();
+            Boolean piiPermission = true;
             String whereCondition = "";
             if (filterDTO.getCriteria() != null && filterDTO.getCriteria() != "") {
                 whereCondition = whereCondition + " sr.request_source =  '" + filterDTO.getCriteria() + "' and ";
             }
             if (filterDTO.getFromDate() != null && filterDTO.getToDate() != null) {
-                whereCondition = whereCondition + "date(sr.form->>'date_of_receipt') between to_date(" + filterDTO.getFromDate() + ", 'DD-MM-YYYY') and to_date(" + filterDTO.getToDate() + ", 'DD-MM-YYYY') and ";
+                whereCondition = whereCondition + " date(sr.form->>'date_of_receipt') between to_date(" + filterDTO.getFromDate() + ", 'DD-MM-YYYY') and to_date(" + filterDTO.getToDate() + ", 'DD-MM-YYYY') and ";
             }
             // remove last 4 characters of string
             whereCondition = Optional.ofNullable(whereCondition)
@@ -926,14 +930,24 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     .map(str -> str.substring(0, str.length() - 4))
                     .orElse(whereCondition);
 
-            String queryString = "SELECT\n" +
-                    "    concat(c.first_name, ' ', c.last_name) as name,\n" +
-                    "    cast(sr.form->>'receipt_amount' as decimal) as receipt_amount, sr.service_request_id as receipt_id, sr.form->>'payment_mode' as payment_mode,\n" +
-                    "    COUNT(d.digital_site_visit_id) OVER () AS total_rows\n" +
+            String queryString = "select \n" +
+                    "    sr.service_request_id,\n" +
+                    "    concat(lms.decrypt_data(c.first_name, " + encryptionKey + "," + password + "," + piiPermission + "), ' ', lms.decrypt_data(c.last_name, " + encryptionKey + "," + password + "," + piiPermission + ")) as customer_name,\n" +
+                    "    (case when cast(sr.form->>'receipt_amount' as decimal) is null then 0 else cast(sr.form->>'receipt_amount' as decimal) end) as receipt_amount,\n" +
+                    "    sr.form->>'payment_mode' as payment_mode,\n" +
+                    "    case when sr.request_source = 'm_collect' then 'Syno Collect'\n" +
+                    "    when sr.request_source = 'manual_entry' then 'Manual Entry'\n" +
+                    "    when sr.request_source = 'bulk_upload' then 'Bulk Upload'\n" +
+                    "    when sr.request_source = 'bank_recon' then 'Bank Recon'\n" +
+                    "    else sr.request_source end as receipt_source,\n" +
+                    "    (select concat(u.\"name\", ' - (', u.username, ')') from master.users u where u.user_id = sr.created_by) as created_by,\n" +
+                    "    COUNT(sr.service_request_id) OVER () AS total_rows\n" +
                     "from lms.service_request sr \n" +
-                    "join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = sr.loan_id \n" +
-                    "join (select customer_id, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id \n" +
-                    "WHERE" + whereCondition;
+                    "join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id\n" +
+                    "join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id = sr.loan_id and clm.customer_type = 'applicant' \n" +
+                    "join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
+                    "where sr.status = 'initiated' and sr.form->>'payment_mode' = \n"+ filterDTO.getPaymentMode() +
+                    "and sr.service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending')" + whereCondition;
 
             int pageNumber = filterDTO.getPage() -1;
             int pageSize = filterDTO.getSize();

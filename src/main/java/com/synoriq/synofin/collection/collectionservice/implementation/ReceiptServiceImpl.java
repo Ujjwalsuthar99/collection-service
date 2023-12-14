@@ -9,6 +9,7 @@ import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceipt
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceRequestDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferLmsFilterDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.GetReceiptDateResponse;
@@ -87,6 +88,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Autowired
     private UtilityService utilityService;
+
+    @Autowired
+    private ReceiptTransferService receiptTransferService;
 
 
     @Override
@@ -490,7 +494,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferredForPortal(String paymentMode, Integer page, Integer size) throws Exception {
+    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferredForPortal(ReceiptTransferLmsFilterDTO filterDTO) throws Exception {
 
 
         BaseDTOResponse<Object> baseDTOResponse;
@@ -499,15 +503,16 @@ public class ReceiptServiceImpl implements ReceiptService {
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
 //            Boolean piiPermission = rsaUtils.getPiiPermission();
             Pageable pageRequest;
-            if (page > 0) {
-                page = page - 1;
-            }
-            pageRequest = PageRequest.of(page, size);
+            pageRequest = PageRequest.of(filterDTO.getPage(), filterDTO.getSize());
             Boolean piiPermission = true;
             Map<String, Object> mainData = new HashMap<>();
-            List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferredForPortal(paymentMode, encryptionKey, password, piiPermission, pageRequest);
-            mainData.put("receipt_data", receiptsData);
-            mainData.put("total_rows", receiptsData.get(0).get("total_rows"));
+            if(filterDTO.getIsFilter().equals(true)) {
+                return receiptTransferService.getReceiptTransferByFilter(filterDTO);
+            } else {
+                List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferredForPortal(filterDTO.getPaymentMode(), encryptionKey, password, piiPermission, pageRequest);
+                mainData.put("receipts_data", receiptsData);
+                mainData.put("total_rows", receiptsData.get(0).get("total_rows"));
+            }
             baseDTOResponse = new BaseDTOResponse<>(mainData);
         } catch (Exception e) {
             throw new Exception("1017002");
