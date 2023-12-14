@@ -299,5 +299,5 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
             "where sr.status = 'initiated' and (sr.form->>'payment_mode' = 'cash' or sr.form->>'payment_mode' = 'cheque')\n" +
             "and sr.service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending')")
-    List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferredForPortal(@Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission);
+    List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferredForPortal(@Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageRequest);
 }

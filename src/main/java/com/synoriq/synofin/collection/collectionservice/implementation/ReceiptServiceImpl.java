@@ -490,7 +490,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferredForPortal() throws Exception {
+    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferredForPortal(Integer page, Integer size) throws Exception {
 
 
         BaseDTOResponse<Object> baseDTOResponse;
@@ -498,8 +498,13 @@ public class ReceiptServiceImpl implements ReceiptService {
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
 //            Boolean piiPermission = rsaUtils.getPiiPermission();
+            Pageable pageRequest;
+            if (page > 0) {
+                page = page - 1;
+            }
+            pageRequest = PageRequest.of(page, size);
             Boolean piiPermission = true;
-            List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferredForPortal(encryptionKey, password, piiPermission);
+            List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferredForPortal(encryptionKey, password, piiPermission, pageRequest);
             baseDTOResponse = new BaseDTOResponse<>(receiptsData);
         } catch (Exception e) {
             throw new Exception("1017002");

@@ -183,12 +183,13 @@ public class ReceiptController {
 
 
     @RequestMapping(value = "/receipts/receipts-not-transferred-portal", method = RequestMethod.GET)
-    public ResponseEntity<Object> getReceiptsByUserIdWhichNotTransferredForPortal() throws SQLException {
+    public ResponseEntity<Object> getReceiptsByUserIdWhichNotTransferredForPortal(@RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
+                                                                                  @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            baseResponse = receiptService.getReceiptsByUserIdWhichNotTransferredForPortal();
+            baseResponse = receiptService.getReceiptsByUserIdWhichNotTransferredForPortal(pageNo, pageSize);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

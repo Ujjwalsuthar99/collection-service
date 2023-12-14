@@ -21,6 +21,6 @@ public interface ReceiptService {
     public ServiceRequestSaveResponse createReceipt(@RequestBody ReceiptServiceDtoRequest receiptServiceDtoRequest, String bearerToken) throws Exception;
     public Object getReceiptDate(String bearerToken) throws Exception;
     public void getPdf(String token, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception;
-    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferredForPortal() throws Exception;
+    public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferredForPortal(Integer pageNo, Integer pageSize) throws Exception;
 
 }
