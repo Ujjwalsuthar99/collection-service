@@ -926,8 +926,16 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             log.info("encryption key {}", encryptionKey);
             log.info("password {}", password);
             String whereCondition = "";
-            if (filterDTO.getCriteria() != null && filterDTO.getCriteria() != "") {
-                whereCondition = whereCondition + " and sr.request_source =  '" + filterDTO.getCriteria() + "'     ";
+
+            if (filterDTO.getCriteria() != null && filterDTO.getCriteria().size() > 0) {
+                String receiptCondition = "sr.request_source IN (";
+                for (String receipt : filterDTO.getCriteria()) {
+                    receiptCondition = receiptCondition + "'" + receipt + "'" + ",";
+                }
+                receiptCondition = receiptCondition.substring(0, receiptCondition.length() - 1);
+                receiptCondition = receiptCondition + ")    ";
+                whereCondition = whereCondition + receiptCondition;
+//                whereCondition = whereCondition + " and sr.request_source =  '" + filterDTO.getCriteria() + "'     ";
             }
             if (filterDTO.getFromDate() != null && filterDTO.getToDate() != null) {
                 whereCondition = whereCondition + " and date(sr.form->>'date_of_receipt') between to_date('" + filterDTO.getFromDate() + "', 'DD-MM-YYYY') and to_date('" + filterDTO.getToDate() + "', 'DD-MM-YYYY') and ";
