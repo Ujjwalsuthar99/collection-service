@@ -963,7 +963,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     "join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id = sr.loan_id and clm.customer_type = 'applicant' \n" +
                     "join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
                     "where sr.status = 'initiated' and sr.form->>'payment_mode' ="+ "'" + filterDTO.getPaymentMode() + "'\n" +
-                    " and sr.service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending')" + whereCondition;
+                    " and sr.service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending') and " + whereCondition;
 
             int pageNumber = filterDTO.getPage();
             int pageSize = filterDTO.getSize();
