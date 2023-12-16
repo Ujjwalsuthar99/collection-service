@@ -11,10 +11,10 @@ import java.util.Map;
 @NoArgsConstructor
 public class ReceiptTransferLmsFilterResponseDTO {
 
-    @JsonProperty("data")
+    @JsonProperty("receipts_data")
     private List<Map<String, Object>> data;
 
-    @JsonProperty("total_count")
+    @JsonProperty("total_rows")
     private int totalCount;
 
 }
