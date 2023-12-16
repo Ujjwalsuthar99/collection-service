@@ -941,7 +941,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             String queryString = "select \n" +
                     "    sr.service_request_id,\n" +
                     "    concat(lms.decrypt_data(c.first_name, " + encryptionKey + "," + password + "," + piiPermission + "), ' ', lms.decrypt_data(c.last_name, " + encryptionKey + "," + password + "," + piiPermission + ")) as customer_name,\n" +
-                    "    concat('₹',to_char(case when cast(sr.form->>'receipt_amount' as decimal) is null then 0 else cast(sr.form->>'receipt_amount' as decimal) end, 'FM9,99,999D00')) as receipt_amount,\n" +
+                    "    (case when cast(sr.form->>'receipt_amount' as decimal) is null then 0 else cast(sr.form->>'receipt_amount' as decimal) end) as receipt_amount,\n" +
                     "    sr.form->>'payment_mode' as payment_mode,\n" +
                     "    case when sr.request_source = 'm_collect' then 'Syno Collect'\n" +
                     "    when sr.request_source = 'manual_entry' then 'Manual Entry'\n" +
