@@ -1,7 +1,8 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request.repossessionDTOs;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -10,20 +11,18 @@ import lombok.*;
 @ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RepossessionRequestDTO {
 
     @JsonProperty("initiated_by")
     private Long initiatedBy;
 
-    @JsonIgnore
     @JsonProperty("status")
     private String status;
 
-    @JsonIgnore
     @JsonProperty("repo_id")
     private Long repoId;
 
-    @JsonIgnore
     @JsonProperty("yard_details_json")
     private Object yardDetailsJson;
 
