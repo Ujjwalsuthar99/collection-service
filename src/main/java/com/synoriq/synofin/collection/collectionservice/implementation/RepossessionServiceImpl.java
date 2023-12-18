@@ -113,9 +113,9 @@ public class RepossessionServiceImpl implements RepossessionService {
             collectionActivityLogDTO.setUserId(requestDto.getInitiatedBy());
             collectionActivityLogDTO.setDistanceFromUserBranch(0D);
             Long activityId = activityLogService.createActivityLogs(collectionActivityLogDTO, token);
-            BaseDTOResponse<Object> resp = activityLogService.getActivityLogsById(activityId);
+            CollectionActivityLogsEntity collectionActivityLogsEntity = collectionActivityLogsRepository.findByCollectionActivityLogsId(activityId);
 
-            CollectionActivityLogsEntity collectionActivityLogsEntity = new ObjectMapper().convertValue(resp.getData(), CollectionActivityLogsEntity.class);
+
             collectionActivityLogsEntity.setReferenceId(repossessionEntity.getRepossessionId());
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
