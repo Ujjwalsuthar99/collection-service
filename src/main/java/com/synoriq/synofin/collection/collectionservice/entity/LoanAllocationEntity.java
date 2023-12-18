@@ -40,4 +40,7 @@ public class LoanAllocationEntity {
     @Column(name = "allocated_to_user_id")
     private Long allocatedToUserId;
 
+    @Column(name = "task_purpose")
+    private String taskPurpose;
+
 }
