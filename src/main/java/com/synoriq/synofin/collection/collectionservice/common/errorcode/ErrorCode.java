@@ -195,7 +195,8 @@ public enum ErrorCode {
     DEPOSIT_CHALLAN_ERROR(1016042, "Deposit challan error"),
     PER_MONTH_CASH_COLLECTION_ERROR(1016043, "Per month cash collection limit exceeded"),
     UTR_NUMBER_ALREADY_EXIST_IN_DIGITAL_PAYMENT_TRANSACTION(1016044, "UTR number already exist"),
-    TRANSACTION_IS_ALREADY_GOT_SUCCESSFUL(1016045, "The transaction has been already successfully updated");
+    TRANSACTION_IS_ALREADY_GOT_SUCCESSFUL(1016045, "The transaction has been already successfully updated"),
+    REPOSSESSION_ALREADY_INITIATED(1016046, "Repossession already initiated for this loan");
     private Integer codeValue;
     private String responseMessage;
 

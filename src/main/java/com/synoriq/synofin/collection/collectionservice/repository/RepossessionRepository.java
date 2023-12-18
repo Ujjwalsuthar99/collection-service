@@ -11,6 +11,8 @@ import java.util.List;
 @Repository
 public interface RepossessionRepository extends JpaRepository<RepossessionEntity, Long> {
     public RepossessionEntity findTop1ByLoanIdOrderByCreatedDateDesc(Long loanId);
+    @Query(nativeQuery = true, value = "select * from repossession where loan_id = :loanId and status = 'initiated' and deleted = false")
+    public RepossessionEntity findByLoadIdAndInitiatedStatus(Long loanId);
 
     @Query(nativeQuery = true, value = "select cast(u.\"name\" as text) as name from master.users u where u.user_id = :userId")
     public String getNameFromUsers(@Param("userId") Long userId);

@@ -93,31 +93,36 @@ public class RepossessionServiceImpl implements RepossessionService {
             Map<String, Object> remarksJson = new HashMap<>();
             remarksJson.put("initiated_remarks", requestDto.getRemarks());
 
-            repossessionEntity.setRemarks(remarksJson);
-            repossessionEntity.setLoanId(requestDto.getLoanId());
-            repossessionEntity.setDeleted(false);
-            repossessionEntity.setCreatedDate(new Date());
-            repossessionEntity.setCreatedBy(requestDto.getInitiatedBy());
-            repossessionEntity.setStatus("initiated");
-            repossessionRepository.save(repossessionEntity);
+            RepossessionEntity repossessionEntity1 = repossessionRepository.findByLoadIdAndInitiatedStatus(requestDto.getLoanId());
+            if (repossessionEntity1 != null) {
+                repossessionEntity.setRemarks(remarksJson);
+                repossessionEntity.setLoanId(requestDto.getLoanId());
+                repossessionEntity.setDeleted(false);
+                repossessionEntity.setCreatedDate(new Date());
+                repossessionEntity.setCreatedBy(requestDto.getInitiatedBy());
+                repossessionEntity.setStatus("initiated");
+                repossessionRepository.save(repossessionEntity);
 
-            // created activity for repossession initiate
-            collectionActivityLogDTO.setActivityName("repossession_initiated");
-            collectionActivityLogDTO.setAddress("{}");
-            collectionActivityLogDTO.setBatteryPercentage(requestDto.getBatteryPercentage());
-            collectionActivityLogDTO.setImages(requestDto.getAttachments());
-            collectionActivityLogDTO.setDeleted(false);
-            collectionActivityLogDTO.setRemarks("Repossession initiated against loan id" + requestDto.getLoanId());
-            collectionActivityLogDTO.setGeolocationData(requestDto.getGeoLocationData());
-            collectionActivityLogDTO.setLoanId(requestDto.getLoanId());
-            collectionActivityLogDTO.setUserId(requestDto.getInitiatedBy());
-            collectionActivityLogDTO.setDistanceFromUserBranch(0D);
-            Long activityId = activityLogService.createActivityLogs(collectionActivityLogDTO, token);
-            CollectionActivityLogsEntity collectionActivityLogsEntity = collectionActivityLogsRepository.findByCollectionActivityLogsId(activityId);
+                // created activity for repossession initiate
+                collectionActivityLogDTO.setActivityName("repossession_initiated");
+                collectionActivityLogDTO.setAddress("{}");
+                collectionActivityLogDTO.setBatteryPercentage(requestDto.getBatteryPercentage());
+                collectionActivityLogDTO.setImages(requestDto.getAttachments());
+                collectionActivityLogDTO.setDeleted(false);
+                collectionActivityLogDTO.setRemarks("Repossession initiated against loan id" + requestDto.getLoanId());
+                collectionActivityLogDTO.setGeolocationData(requestDto.getGeoLocationData());
+                collectionActivityLogDTO.setLoanId(requestDto.getLoanId());
+                collectionActivityLogDTO.setUserId(requestDto.getInitiatedBy());
+                collectionActivityLogDTO.setDistanceFromUserBranch(0D);
+                Long activityId = activityLogService.createActivityLogs(collectionActivityLogDTO, token);
+                CollectionActivityLogsEntity collectionActivityLogsEntity = collectionActivityLogsRepository.findByCollectionActivityLogsId(activityId);
 
 
-            collectionActivityLogsEntity.setReferenceId(repossessionEntity.getRepossessionId());
-            collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+                collectionActivityLogsEntity.setReferenceId(repossessionEntity.getRepossessionId());
+                collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+            } else {
+                throw new Exception("1016046");
+            }
 
         } catch (Exception e) {
             throw new Exception(e.getMessage());
