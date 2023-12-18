@@ -122,6 +122,14 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
                             loanAllocation.setTaskPurpose(loanAllocationMultiUsersDtoRequest.getTaskPurpose());
                             loanAllocation.setAllocatedToUserId(userId);
                             loanAllocationRepository.save(loanAllocation);
+                        } else {
+                            loanAllocation.setCreatedDate(new Date());
+                            loanAllocation.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
+                            loanAllocation.setDeleted(false);
+                            loanAllocation.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
+                            loanAllocation.setTaskPurpose(loanAllocationMultiUsersDtoRequest.getTaskPurpose());
+                            loanAllocation.setAllocatedToUserId(userId);
+                            loanAllocationRepository.save(loanAllocation);
                         }
                     }
                 } else {
