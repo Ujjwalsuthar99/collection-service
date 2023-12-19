@@ -20,4 +20,7 @@ public class LoanAllocationMultiUsersDtoRequest {
     @JsonProperty("removedUserId")
     private List<Long> removedUserId;
 
+    @JsonProperty("taskPurpose")
+    private String taskPurpose;
+
 }

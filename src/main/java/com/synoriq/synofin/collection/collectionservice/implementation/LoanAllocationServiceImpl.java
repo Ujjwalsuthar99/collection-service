@@ -112,12 +112,22 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
                             loanAllocationEntity.setDeleted(false);
                             loanAllocationEntity.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
                             loanAllocationEntity.setAllocatedToUserId(userId);
+                            loanAllocationEntity.setTaskPurpose(loanAllocationMultiUsersDtoRequest.getTaskPurpose());
                             loanAllocationRepository.save(loanAllocationEntity);
                         } else if (loanAllocation.getDeleted()) {
                             loanAllocation.setCreatedDate(new Date());
                             loanAllocation.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
                             loanAllocation.setDeleted(false);
                             loanAllocation.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
+                            loanAllocation.setTaskPurpose(loanAllocationMultiUsersDtoRequest.getTaskPurpose());
+                            loanAllocation.setAllocatedToUserId(userId);
+                            loanAllocationRepository.save(loanAllocation);
+                        } else {
+                            loanAllocation.setCreatedDate(new Date());
+                            loanAllocation.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
+                            loanAllocation.setDeleted(false);
+                            loanAllocation.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
+                            loanAllocation.setTaskPurpose(loanAllocationMultiUsersDtoRequest.getTaskPurpose());
                             loanAllocation.setAllocatedToUserId(userId);
                             loanAllocationRepository.save(loanAllocation);
                         }
@@ -128,6 +138,7 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
                     loanAllocationEntity.setCreatedBy(loanAllocationMultiUsersDtoRequest.getCreatedBy());
                     loanAllocationEntity.setDeleted(false);
                     loanAllocationEntity.setLoanId(loanAllocationMultiUsersDtoRequest.getLoanId());
+                    loanAllocationEntity.setTaskPurpose(loanAllocationMultiUsersDtoRequest.getTaskPurpose());
                     loanAllocationEntity.setAllocatedToUserId(userId);
                     loanAllocationRepository.save(loanAllocationEntity);
                 }

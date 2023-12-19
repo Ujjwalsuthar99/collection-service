@@ -21,12 +21,12 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
     String getLoanApplicationNumber(@Param("loanId") Long loanId);
     @Query(nativeQuery = true, value = "select la.loan_application_id,\n" +
             "    branch.branch_name as branch,\n" +
-//            "    concat_ws(' ', c.first_name, c.last_name) as customer_name,\n" +
             "    concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as customer_name,\n" +
             "    c.phone1_json->>'mobile' as mobile,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    p.product_name as product,\n" +
             "    la.loan_application_number,\n" +
+            "    la2.task_purpose,\n" +
             "    (case\n" +
             "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
             "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
