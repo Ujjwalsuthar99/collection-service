@@ -895,7 +895,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
 
     @Override
     public BaseDTOResponse<Object> getReceiptTransferForAirtel(String token, ReceiptTransferForAirtelRequestDTO receiptTransferForAirtelRequestDTO) throws Exception {
-        ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(receiptTransferForAirtelRequestDTO.getReceiptTransferId());
+        Map<String, Object> receiptTransferEntity = receiptTransferRepository.getReceiptTransferById(receiptTransferForAirtelRequestDTO.getReceiptTransferId());
         try {
             if (receiptTransferEntity != null) {
                 return new BaseDTOResponse<>(receiptTransferEntity);

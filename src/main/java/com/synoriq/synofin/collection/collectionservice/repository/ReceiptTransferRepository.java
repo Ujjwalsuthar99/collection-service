@@ -143,10 +143,10 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "\t\tsr.status as status, cast(cal.images as text) as receipt_images, cast(cal.geo_location_data as text) as geo_location_data\n" +
             "         from collection.receipt_transfer rt \n" +
             "         join (select collection_receipts_id, receipt_transfer_id from collection.receipt_transfer_history) as rth on rt.receipt_transfer_id  = rth.receipt_transfer_id \n" +
-            "         join collection.collection_receipts cr on cr.receipt_id = rth.collection_receipts_id\n" +
+            "         left join collection.collection_receipts cr on cr.receipt_id = rth.collection_receipts_id\n" +
             "         join (select service_request_id, loan_id, form, created_date, status from lms.service_request) as sr on sr.service_request_id = rth.collection_receipts_id \n" +
             "         join (select loan_application_id, loan_application_number from lms.loan_application) as la on la.loan_application_id = sr.loan_id \n" +
-            "         join collection.collection_activity_logs cal on cal.collection_activity_logs_id = cr.collection_activity_logs_id\n" +
+            "         left join collection.collection_activity_logs cal on cal.collection_activity_logs_id = cr.collection_activity_logs_id\n" +
             "         where rt.receipt_transfer_id = :receiptTransferId")
     List<Map<String, Object>> getReceiptsDataByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
 
@@ -162,6 +162,29 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "\tand rt.transfer_type = 'bank'\n" +
             "\tand rth.deleted = false")
     String getDepositionOfReceipt(@Param("receiptId") Long receiptId);
-    
+
     ReceiptTransferEntity findByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
+
+    @Query(nativeQuery = true, value = "select\n" +
+            "\tcast(u.\"name\" as text) as executive_name,\n" +
+            "\trt.receipt_transfer_id,\n" +
+            "\trt.created_date,\n" +
+            "\trt.transfer_type,\n" +
+            "\trt.transfer_mode,\n" +
+            "\trt.transferred_to_user_id,\n" +
+            "\trt.amount,\n" +
+            "\trt.status,\n" +
+            "\trt.remarks,\n" +
+            "\trt.transfer_bank_code,\n" +
+            "\trt.action_datetime,\n" +
+            "\trt.action_reason,\n" +
+            "\trt.action_remarks,\n" +
+            "\trt.\"action_by\"\n" +
+            "from\n" +
+            "\tcollection.receipt_transfer rt\n" +
+            "join master.users u on\n" +
+            "\trt.transferred_by = u.user_id\n" +
+            "where\n" +
+            "\trt.receipt_transfer_id = :receiptTransferId")
+    Map<String, Object> getReceiptTransferById(@Param("receiptTransferId") Long receiptTransferId);
 }
