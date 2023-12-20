@@ -1,0 +1,1 @@
+UPDATE collection.collection_configurations SET configuration_value = '["collection_task", "receipt_transfer", "activity_log"]' WHERE configuration_name = 'side_navigation_panel';
