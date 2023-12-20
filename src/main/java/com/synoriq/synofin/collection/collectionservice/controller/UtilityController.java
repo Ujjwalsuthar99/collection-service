@@ -339,7 +339,7 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "qr-status-check", method = RequestMethod.POST)
+    @RequestMapping(value = "qr-status-check", method = RequestMethod.GET)
     public ResponseEntity<Object> qrStatusCheck(@RequestHeader("Authorization") String token, @RequestParam("merchant_id") String merchantId) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
