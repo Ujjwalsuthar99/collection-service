@@ -6,11 +6,23 @@ import lombok.Data;
 @Data
 public class CommunicationResponseDTO {
 
-    @JsonProperty("numbers")
-    public String numbers;
+    @JsonProperty("primary_number")
+    public String primaryNumber;
+
+    @JsonProperty("secondary_number")
+    public String secondaryNumber;
+
+    @JsonProperty("whatsapp_number")
+    public String whatsappNumber;
 
     @JsonProperty("state")
     public String state;
+
+    @JsonProperty("city")
+    public String city;
+
+    @JsonProperty("email_id")
+    public String emailId;
 
     @JsonProperty("address_type")
     public String addressType;

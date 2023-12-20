@@ -9,6 +9,7 @@ import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUser
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
+import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.*;
@@ -25,6 +26,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImage
 import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDTOs.VerifyOtpDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDTOs.VerifyOtpRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
@@ -47,6 +49,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ContactResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ThermalPrintDataDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
+import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.CslSmsService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
@@ -57,9 +60,13 @@ import com.synoriq.synofin.collection.collectionservice.service.utilityservice.H
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.ion.Decimal;
 
@@ -120,6 +127,8 @@ public class UtilityServiceImpl implements UtilityService {
     @Autowired
     private PaisabuddySmsService paisabuddySmsService;
 
+    @Autowired
+    private ReceiptService receiptService;
     @Autowired
     HttpServletRequest httpServletRequest;
 
@@ -1237,6 +1246,32 @@ public class UtilityServiceImpl implements UtilityService {
                 if (Objects.equals(requestBody.getStatus(), "SUCCESS")) {
                     digitalPaymentTransactionsEntity.setStatus("success");
                     digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getOriginalBankRRN());
+
+
+                    // implementing create receipt here
+//                    ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
+//                    ServiceRequestSaveResponse resp = receiptService.createReceipt(receiptServiceDtoRequest, token);
+//                    if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
+//                        receiptService.getPdf(resp.getData().getServiceRequestId());
+
+//                        String url = "http://localhost:1102/v1/getPdf?deliverableType=receipt_details&serviceRequestId=" + resp.getData().getServiceRequestId();
+//
+//                        HttpHeaders httpHeaders = new HttpHeaders();
+//                        httpHeaders.setBearerAuth(token);
+//
+//                        ResponseEntity<byte[]> res;
+//
+//                        RestTemplate restTemplate = new RestTemplate();
+//                        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+//                        res = restTemplate.exchange(
+//                                url,
+//                                HttpMethod.GET,
+//                                new HttpEntity<>(httpHeaders),
+//                                byte[].class);
+
+//                    }
+
+
                 }
                 digitalPaymentTransactionsEntity.setCallBackRequestBody(requestBody);
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
