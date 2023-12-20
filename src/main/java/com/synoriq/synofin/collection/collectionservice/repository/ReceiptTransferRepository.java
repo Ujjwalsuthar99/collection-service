@@ -162,6 +162,29 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "\tand rt.transfer_type = 'bank'\n" +
             "\tand rth.deleted = false")
     String getDepositionOfReceipt(@Param("receiptId") Long receiptId);
-    
+
     ReceiptTransferEntity findByReceiptTransferId(@Param("receiptTransferId") Long receiptTransferId);
+
+    @Query(nativeQuery = true, value = "select\n" +
+            "\tcast(u.\"name\" as text) as executive_name,\n" +
+            "\trt.receipt_transfer_id,\n" +
+            "\trt.created_date,\n" +
+            "\trt.transfer_type,\n" +
+            "\trt.transfer_mode,\n" +
+            "\trt.transferred_to_user_id,\n" +
+            "\trt.amount,\n" +
+            "\trt.status,\n" +
+            "\trt.remarks,\n" +
+            "\trt.transfer_bank_code,\n" +
+            "\trt.action_datetime,\n" +
+            "\trt.action_reason,\n" +
+            "\trt.action_remarks,\n" +
+            "\trt.\"action_by\"\n" +
+            "from\n" +
+            "\tcollection.receipt_transfer rt\n" +
+            "join master.users u on\n" +
+            "\trt.transferred_by = u.user_id\n" +
+            "where\n" +
+            "\trt.receipt_transfer_id = :receiptTransferId")
+    Map<String, Object> getReceiptTransferById(@Param("receiptTransferId") Long receiptTransferId);
 }
