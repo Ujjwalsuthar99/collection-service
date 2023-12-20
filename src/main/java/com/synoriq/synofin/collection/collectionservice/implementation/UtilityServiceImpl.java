@@ -1248,12 +1248,11 @@ public class UtilityServiceImpl implements UtilityService {
                     digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getOriginalBankRRN());
 
 
-                    // implementing create receipt here
+//                     implementing create receipt here
 //                    ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
 //                    ServiceRequestSaveResponse resp = receiptService.createReceipt(receiptServiceDtoRequest, token);
 //                    if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
-//                        receiptService.getPdf(resp.getData().getServiceRequestId());
-
+//
 //                        String url = "http://localhost:1102/v1/getPdf?deliverableType=receipt_details&serviceRequestId=" + resp.getData().getServiceRequestId();
 //
 //                        HttpHeaders httpHeaders = new HttpHeaders();
@@ -1268,10 +1267,8 @@ public class UtilityServiceImpl implements UtilityService {
 //                                HttpMethod.GET,
 //                                new HttpEntity<>(httpHeaders),
 //                                byte[].class);
-
+//
 //                    }
-
-
                 }
                 digitalPaymentTransactionsEntity.setCallBackRequestBody(requestBody);
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);

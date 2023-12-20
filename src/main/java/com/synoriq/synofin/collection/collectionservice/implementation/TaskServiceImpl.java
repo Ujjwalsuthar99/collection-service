@@ -267,15 +267,15 @@ public class TaskServiceImpl implements TaskService {
                             for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
                                 if (!(communicationData.getAddressType() == null)) {
                                     address.put(communicationData.getAddressType(), communicationData.getFullAddress());
-                                    if (!Objects.equals(communicationData.getNumbers(), "") && communicationData.getNumbers() != null) {
-                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                    if (!Objects.equals(communicationData.getPrimaryNumber(), "") && communicationData.getPrimaryNumber() != null) {
+                                        numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getPrimaryNumber()));
                                     }
-                                    if ((!Objects.equals(numbersReturnResponseDTO.getMobNo(), "")) && !(Objects.equals(numbersReturnResponseDTO.getMobNo(), communicationData.getNumbers()))) {
-                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                    if ((!Objects.equals(numbersReturnResponseDTO.getMobNo(), "")) && !(Objects.equals(numbersReturnResponseDTO.getMobNo(), communicationData.getPrimaryNumber()))) {
+                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getPrimaryNumber()));
                                     }
                                 } else {
-                                    if (!Objects.equals(communicationData.getNumbers(), "")) {
-                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getNumbers()));
+                                    if (!Objects.equals(communicationData.getPrimaryNumber(), "")) {
+                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getPrimaryNumber()));
                                     }
                                 }
                             }
