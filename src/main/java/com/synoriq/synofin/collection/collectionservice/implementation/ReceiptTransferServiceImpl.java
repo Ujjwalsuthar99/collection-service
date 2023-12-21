@@ -730,7 +730,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                             collectionReceiptRepository.save(collectionReceiptEntity);
                         }
                     }
-                    if(res.getResponse().equals(true) && res.getData().getSuccessfulRequests() != null) {
+                    if(res.getResponse().equals(true) && res.getData().getFailedRequestCount() > 0) {
                         receiptTransferEntity.setStatus(depositInvoiceRequestDTO.getAction());
                         receiptTransferEntity.setActionDatetime(new Date());
                         receiptTransferEntity.setActionReason("");
