@@ -1,7 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
@@ -9,7 +8,6 @@ import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUser
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
-import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.*;
@@ -26,15 +24,14 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImage
 import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDTOs.VerifyOtpDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDTOs.VerifyOtpRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.CflMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.FinovaMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.PaisabuddyMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.SpfcMsgDTOResponse;
@@ -51,24 +48,16 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
-import com.synoriq.synofin.collection.collectionservice.service.msgservice.CslSmsService;
-import com.synoriq.synofin.collection.collectionservice.service.msgservice.FinovaSmsService;
-import com.synoriq.synofin.collection.collectionservice.service.msgservice.PaisabuddySmsService;
-import com.synoriq.synofin.collection.collectionservice.service.msgservice.SpfcSmsService;
+import com.synoriq.synofin.collection.collectionservice.service.msgservice.*;
 import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.ion.Decimal;
 
 import javax.imageio.ImageIO;
 import javax.persistence.Tuple;
@@ -85,8 +74,8 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -111,6 +100,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Autowired
     private ReceiptRepository receiptRepository;
+
+    @Autowired
+    private CflSmsService cflSmsService;
 
     @Autowired
     private PrintServiceImplementation printServiceImplementation;
@@ -790,6 +782,51 @@ public class UtilityServiceImpl implements UtilityService {
 //                    log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
                 // creating api logs
                 consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), paisabuddySmsRequest, paisabuddyMsgDTOResponse, "success", Long.parseLong(loanId[0]));
+            }
+
+            if (clientId.equals("cfl")) {
+                RequestDataDTO requestDataDTO = new RequestDataDTO();
+                if (paymentMode.equals("cash")) {
+                    requestDataDTO.setTemplateName("template3");
+                } else if (paymentMode.equals("cheque")) {
+                    requestDataDTO.setTemplateName("template2");
+                } else {
+                    requestDataDTO.setTemplateName("template1");
+                }
+
+                requestDataDTO.setMessageType("text");
+                List<SmsListDTO> smsListDTOS = new ArrayList<>();
+                List<String> strings = new ArrayList<>();
+                strings.add(receiptAmount);
+                strings.add(loanNumber);
+                strings.add(shortenUrlResponseDTO.getData().getResult());
+                SmsListDTO smsListDTO = new SmsListDTO();
+                smsListDTO.setMessageType("english");
+                String receivedMobileNumber;
+                if (isProd) {
+                    if (Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null) {
+                        receivedMobileNumber = collectedFromMobileNumber;
+                    } else {
+                        receivedMobileNumber = applicantMobileNumber;
+                    }
+                    smsListDTO.setMobiles("91" + receivedMobileNumber);
+                } else {
+                    smsListDTO.setMobiles("919989761192");
+                }
+                smsListDTOS.add(smsListDTO);
+                requestDataDTO.setTemplateVariable(strings);
+                requestDataDTO.setSmsList(smsListDTOS);
+                CflSmsRequest cflSmsRequest = new CflSmsRequest();
+                cflSmsRequest.setSystemId("collection");
+                cflSmsRequest.setUserReferenceNumber("");
+                cflSmsRequest.setSpecificPartnerName("");
+                cflSmsRequest.setData(requestDataDTO);
+
+                CflMsgDTOResponse cflMsgDTOResponse = cflSmsService.sendSmsCfl(cflSmsRequest, token, springProfile);
+                log.info("cflMsgDTOResponse {}", cflMsgDTOResponse);
+                saveSendSMSActivityData(loanId, res, userId);
+                // creating api logs
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), cflSmsRequest, cflMsgDTOResponse, "success", Long.parseLong(loanId[0]));
             }
 
 //            if(clientId.equals("deccan")) {
