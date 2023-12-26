@@ -112,7 +112,7 @@ public class RepossessionController {
     }
 
     @RequestMapping(value = "repossession/{repoId}", method = RequestMethod.GET)
-    public ResponseEntity<Object> getAllRepossession(@RequestHeader("Authorization") String bearerToken, @PathVariable("repoId") Long repoId) {
+    public ResponseEntity<Object> getDataByRepoId(@RequestHeader("Authorization") String bearerToken, @PathVariable("repoId") Long repoId) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;

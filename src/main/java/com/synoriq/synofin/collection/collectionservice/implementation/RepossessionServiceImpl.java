@@ -189,13 +189,18 @@ public class RepossessionServiceImpl implements RepossessionService {
     public BaseDTOResponse<Object> getDataByRepoId(String token, Long repoId) throws Exception {
         LoanBasicDetailsDTOResponse loanDetailRes;
         RepossessionRepoIdResponseDTO repossessionRepoIdResponseDTO = new RepossessionRepoIdResponseDTO();
+        final String[] vehicleType = {""};
+        final String[] manufacturer = {""};
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
             Optional<RepossessionEntity> repossessionEntity = repossessionRepository.findById(repoId);
+//            RepossessionEntity repossessionEntity = repossessionRepository.findByRepossessionId(repoId);
             if (repossessionEntity.isPresent()) {
+//            if (repossessionEntity != null) {
                 long loanId = repossessionEntity.get().getLoanId();
+//                long loanId = repossessionEntity.getLoanId();
                 // --
                 loanDetailRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
                         .httpMethod(HttpMethod.GET)
@@ -219,8 +224,8 @@ public class RepossessionServiceImpl implements RepossessionService {
                     consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, "success", loanId);
 
                     collateralResponse.getData().forEach((key, value) -> {
-                        repossessionRepoIdResponseDTO.setVehicleType(String.valueOf(value.get("vehicle_type")));
-                        repossessionRepoIdResponseDTO.setManufacturer(String.valueOf(value.get("manufacturer")));
+                        vehicleType[0] = String.valueOf(value.get("vehicle_type"));
+                        manufacturer[0] = String.valueOf(value.get("manufacturer"));
                     });
 
                     int dpd = loanDetailRes.getData().getDpd();
@@ -242,8 +247,10 @@ public class RepossessionServiceImpl implements RepossessionService {
                     }
 
 
-                    repossessionRepoIdResponseDTO.builder().
+                    repossessionRepoIdResponseDTO = RepossessionRepoIdResponseDTO.builder().
                             dpd(dpdBucket).
+                            manufacturer(manufacturer[0]).
+                            vehicleType(vehicleType[0]).
                             repoStatus(repossessionEntity.get().getStatus()).
                             customerName(loanDetailRes.getData().getCustomerName()).
                             loanAmount(loanDetailRes.getData().getLoanAmount()).
@@ -251,7 +258,7 @@ public class RepossessionServiceImpl implements RepossessionService {
                             mobileNumber(mobileNumber).
                             emiStartDate(loanDetailRes.getData().getInterestStartDate()).
                             repoInitiateDate(repossessionEntity.get().getCreatedDate()).
-                            totalDue(loanDetailRes.getData().getBalancePrincipal());
+                            totalDue(loanDetailRes.getData().getBalancePrincipal()).build();
                 }
             }
         } catch (Exception e) {

@@ -13,6 +13,8 @@ import java.util.Map;
 public interface RepossessionRepository extends JpaRepository<RepossessionEntity, Long> {
     public RepossessionEntity findTop1ByLoanIdOrderByCreatedDateDesc(Long loanId);
 
+    public RepossessionEntity findByRepossessionId(Long repoId);
+
     @Query(nativeQuery = true, value = "select\n" +
             "\tr.repossession_id,\n" +
             "\tr.created_date,\n" +
