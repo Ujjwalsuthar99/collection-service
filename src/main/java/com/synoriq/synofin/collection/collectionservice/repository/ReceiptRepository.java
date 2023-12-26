@@ -285,7 +285,6 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
     @Query(nativeQuery = true, value = "select \n" +
             "    sr.service_request_id,\n" +
             "    concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as customer_name,\n" +
-//            "    concat('₹',to_char(case when cast(sr.form->>'receipt_amount' as decimal) is null then 0 else cast(sr.form->>'receipt_amount' as decimal) end, 'FM9,99,999D00')) as receipt_amount,\n" +
             "    (case when cast(sr.form->>'receipt_amount' as decimal) is null then 0 else cast(sr.form->>'receipt_amount' as decimal) end) as receipt_amount,\n" +
             "    sr.form->>'payment_mode' as payment_mode,\n" +
             "    case when sr.request_source = 'm_collect' then 'Syno Collect'\n" +
@@ -300,6 +299,6 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id = sr.loan_id and clm.customer_type = 'applicant' \n" +
             "join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
             "where sr.status = 'initiated' and sr.form->>'payment_mode' = :paymentMode\n" +
-            "and sr.service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending')")
+            "and sr.service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending') order by sr.created_date desc")
     List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferredForPortal(@Param("paymentMode") String paymentMode, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageRequest);
 }

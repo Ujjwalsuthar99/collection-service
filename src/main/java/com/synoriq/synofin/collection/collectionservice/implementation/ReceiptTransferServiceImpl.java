@@ -730,13 +730,15 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                             collectionReceiptRepository.save(collectionReceiptEntity);
                         }
                     }
-                    receiptTransferEntity.setStatus(depositInvoiceRequestDTO.getAction());
-                    receiptTransferEntity.setActionDatetime(new Date());
-                    receiptTransferEntity.setActionReason("");
-                    receiptTransferEntity.setActionRemarks(depositInvoiceRequestDTO.getRemarks());
-                    receiptTransferEntity.setActionBy(resp.getData().getUserData().getUserId());
-                    receiptTransferEntity.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
-                    receiptTransferRepository.save(receiptTransferEntity);
+                    if(res.getResponse().equals(true) && res.getData().getFailedRequestCount() == 0) {
+                        receiptTransferEntity.setStatus(depositInvoiceRequestDTO.getAction());
+                        receiptTransferEntity.setActionDatetime(new Date());
+                        receiptTransferEntity.setActionReason("");
+                        receiptTransferEntity.setActionRemarks(depositInvoiceRequestDTO.getRemarks());
+                        receiptTransferEntity.setActionBy(resp.getData().getUserData().getUserId());
+                        receiptTransferEntity.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+                        receiptTransferRepository.save(receiptTransferEntity);
+                    }
                     break;
                 case RECEIPT_TRANSFER_REJECT:
                     receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(depositInvoiceRequestDTO.getReceiptTransferId());
