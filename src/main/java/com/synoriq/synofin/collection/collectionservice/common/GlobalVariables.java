@@ -20,7 +20,6 @@ public class GlobalVariables {
     public static final String DEPOSIT_REMINDER = "deposit_reminder";
     public static final String DEPOSIT_REMINDER_HOURS = "deposit_reminder_hours";
     public static final String DEPOSIT_REMINDER_DAYTIME = "deposit_reminder_after_daytime";
-    public static final String IS_QR_CODE_CHECK_PAYMENT_STATUS_AVAILABLE = "is_check_qr_payment_status_available";
     public static final String SHORTEN_URL_PREPROD = "https://api-preprod.synofin.tech/integration-connector/v1/url/shortan";
 
     public static final String INTEGRATION_MSG_API_URL = "https://api-uat.synofin.tech/integration-connector/v1/send-sms";

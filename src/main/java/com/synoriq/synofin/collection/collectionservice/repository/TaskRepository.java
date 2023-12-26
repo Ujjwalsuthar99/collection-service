@@ -21,7 +21,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
     String getLoanApplicationNumber(@Param("loanId") Long loanId);
     @Query(nativeQuery = true, value = "select la.loan_application_id,\n" +
             "    branch.branch_name as branch,\n" +
-            "    concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as customer_name,\n" +
+            "    concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.middle_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as customer_name,\n" +
             "    c.phone1_json->>'mobile' as mobile,\n" +
             "    c.address1_json->>'address' as address,\n" +
             "    p.product_name as product,\n" +

@@ -118,7 +118,7 @@ public class LoanBasicDetailsDTO {
     private Integer noOfDisbursement;
     
     @JsonProperty("customer_id")
-    private Integer customerId;
+    private Long customerId;
     
     @JsonProperty("lending_rate")
     private Object lendingRate;

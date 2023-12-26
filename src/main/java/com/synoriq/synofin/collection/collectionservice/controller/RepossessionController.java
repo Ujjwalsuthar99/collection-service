@@ -88,5 +88,49 @@ public class RepossessionController {
         }
         return response;
     }
+
+    @RequestMapping(value = "repossession/all-repossession", method = RequestMethod.GET)
+    public ResponseEntity<Object> getAllRepossession(@RequestHeader("Authorization") String bearerToken) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+
+        try {
+            baseResponse = repossessionService.getAllRepossession();
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "repossession/{repoId}", method = RequestMethod.GET)
+    public ResponseEntity<Object> getDataByRepoId(@RequestHeader("Authorization") String bearerToken, @PathVariable("repoId") Long repoId) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+
+        try {
+            baseResponse = repossessionService.getDataByRepoId(bearerToken, repoId);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
 }
 

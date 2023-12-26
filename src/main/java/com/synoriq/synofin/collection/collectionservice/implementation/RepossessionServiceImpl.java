@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.RepossessionEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
@@ -9,11 +10,18 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionA
 import com.synoriq.synofin.collection.collectionservice.rest.request.repossessionDTOs.RepossessionRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.RepossessionDTOs.RepossessionCommonDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.RepossessionDTOs.RepossessionRepoIdResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.RepossessionDTOs.RepossessionResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanBasicDetailsDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
+import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.RepossessionService;
+import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -26,6 +34,8 @@ public class RepossessionServiceImpl implements RepossessionService {
     @Autowired
     private ActivityLogService activityLogService;
 
+    @Autowired
+    private ConsumedApiLogService consumedApiLogService;
     @Autowired
     private CollectionActivityLogsRepository collectionActivityLogsRepository;
 
@@ -80,6 +90,17 @@ public class RepossessionServiceImpl implements RepossessionService {
             }
 
             return new BaseDTOResponse<>(repossessionResponseDTO);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    @Override
+    public BaseDTOResponse<Object> getAllRepossession() throws Exception {
+        List<Map<String, Object>>  repossessionData;
+        try {
+            repossessionData = repossessionRepository.getAllRepossession();
+            return new BaseDTOResponse<>(repossessionData);
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
@@ -164,6 +185,87 @@ public class RepossessionServiceImpl implements RepossessionService {
         return new BaseDTOResponse<>(repossessionEntity);
     }
 
+    @Override
+    public BaseDTOResponse<Object> getDataByRepoId(String token, Long repoId) throws Exception {
+        LoanBasicDetailsDTOResponse loanDetailRes;
+        RepossessionRepoIdResponseDTO repossessionRepoIdResponseDTO = new RepossessionRepoIdResponseDTO();
+        final String[] vehicleType = {""};
+        final String[] manufacturer = {""};
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", token);
+            httpHeaders.add("Content-Type", "application/json");
+            Optional<RepossessionEntity> repossessionEntity = repossessionRepository.findById(repoId);
+//            RepossessionEntity repossessionEntity = repossessionRepository.findByRepossessionId(repoId);
+            if (repossessionEntity.isPresent()) {
+//            if (repossessionEntity != null) {
+                long loanId = repossessionEntity.get().getLoanId();
+//                long loanId = repossessionEntity.getLoanId();
+                // --
+                loanDetailRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
+                        .httpMethod(HttpMethod.GET)
+                        .url("http://localhost:1102/v1/getBasicLoanDetails?loanId=" + loanId)
+                        .httpHeaders(httpHeaders)
+                        .typeResponseType(LoanBasicDetailsDTOResponse.class)
+                        .build().call();
+
+                // creating api logs
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", loanId);
+                if(loanDetailRes.getData() != null) {
+                    String mobileNumber = repossessionRepository.getMobileNumber(loanDetailRes.getData().getCustomerId());
+
+                    CollateralDetailsResponseDTO collateralResponse = HTTPRequestService.<Object, CollateralDetailsResponseDTO>builder()
+                            .httpMethod(HttpMethod.GET)
+                            .url("http://localhost:1102/v1/getCollaterals?loanId=" + loanId)
+                            .httpHeaders(httpHeaders)
+                            .typeResponseType(CollateralDetailsResponseDTO.class)
+                            .build().call();
+
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, "success", loanId);
+
+                    collateralResponse.getData().forEach((key, value) -> {
+                        vehicleType[0] = String.valueOf(value.get("vehicle_type"));
+                        manufacturer[0] = String.valueOf(value.get("manufacturer"));
+                    });
+
+                    int dpd = loanDetailRes.getData().getDpd();
+                    String dpdBucket;
+                    if (dpd >= 0 && dpd <= 30) {
+                        dpdBucket = "0-30 DPD";
+                    } else if (dpd >= 31 && dpd <= 60) {
+                        dpdBucket = "31-60 DPD";
+                    } else if (dpd >= 61 && dpd <= 90) {
+                        dpdBucket = "61-90 DPD";
+                    } else if (dpd >= 91 && dpd <= 120) {
+                        dpdBucket = "91-120 DPD";
+                    } else if (dpd >= 121 && dpd <= 150) {
+                        dpdBucket = "121-150 DPD";
+                    } else if (dpd >= 151 && dpd <= 180) {
+                        dpdBucket = "151-180 DPD";
+                    } else {
+                        dpdBucket = "180+ DPD";
+                    }
+
+
+                    repossessionRepoIdResponseDTO = RepossessionRepoIdResponseDTO.builder().
+                            dpd(dpdBucket).
+                            manufacturer(manufacturer[0]).
+                            vehicleType(vehicleType[0]).
+                            repoStatus(repossessionEntity.get().getStatus()).
+                            customerName(loanDetailRes.getData().getCustomerName()).
+                            loanAmount(loanDetailRes.getData().getLoanAmount()).
+                            loanNumber(loanDetailRes.getData().getLoanApplicationNumber()).
+                            mobileNumber(mobileNumber).
+                            emiStartDate(loanDetailRes.getData().getInterestStartDate()).
+                            repoInitiateDate(repossessionEntity.get().getCreatedDate()).
+                            totalDue(loanDetailRes.getData().getBalancePrincipal()).build();
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return new BaseDTOResponse<>(repossessionRepoIdResponseDTO);
+    }
 }
 
 

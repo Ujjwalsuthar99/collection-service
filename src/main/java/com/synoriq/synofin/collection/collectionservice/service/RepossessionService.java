@@ -6,6 +6,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 public interface RepossessionService {
 
     public BaseDTOResponse<Object> getRepossessionData(Long loanId) throws Exception;
+    public BaseDTOResponse<Object> getAllRepossession() throws Exception;
     public BaseDTOResponse<Object> initiateRepossession(String token ,RepossessionRequestDTO requestDto) throws Exception;
     public BaseDTOResponse<Object> yardRepossession(String token ,RepossessionRequestDTO requestDto) throws Exception;
+    public BaseDTOResponse<Object> getDataByRepoId(String token ,Long repoId) throws Exception;
 }
