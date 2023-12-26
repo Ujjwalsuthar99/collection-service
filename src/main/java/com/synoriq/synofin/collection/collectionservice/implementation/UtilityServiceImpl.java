@@ -1,7 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
@@ -28,7 +27,6 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDT
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
@@ -58,6 +56,7 @@ import com.synoriq.synofin.collection.collectionservice.service.msgservice.SpfcS
 import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -68,7 +67,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.ion.Decimal;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.imageio.ImageIO;
 import javax.persistence.Tuple;
@@ -85,8 +84,8 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -483,7 +482,6 @@ public class UtilityServiceImpl implements UtilityService {
             }
 
 
-
             uploadImageOnS3DataRequestDTO.setFile(base64);
 
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -657,7 +655,7 @@ public class UtilityServiceImpl implements UtilityService {
                     }
                     finovaSmsRequest.setAmount(receiptAmount);
                     finovaSmsRequest.setLoanNumber(loanNumber);
-                    finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
+                    finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData() != null ? shortenUrlResponseDTO.getData().getResult() : null);
 
                     FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
                     saveSendSMSActivityData(loanId, res, userId);
@@ -1050,7 +1048,7 @@ public class UtilityServiceImpl implements UtilityService {
         integrationDataRequestBody.setLastName(requestBody.getLastName());
         String billNumber = null;
         String merchantTransId = null;
-        if(requestBody.getVendor().equals("kotak")) {
+        if (requestBody.getVendor().equals("kotak")) {
             billNumber = "." + requestBody.getLoanId() + "." + System.currentTimeMillis();
             merchantTransId = "." + requestBody.getLoanId() + "." + System.currentTimeMillis();
             integrationDataRequestBody.setBillNumber(billNumber);
@@ -1073,7 +1071,6 @@ public class UtilityServiceImpl implements UtilityService {
             httpHeaders.add("Content-Type", "application/json");
 
 
-
             res = HTTPRequestService.<Object, DynamicQrCodeResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/sendQrCode")
@@ -1091,9 +1088,9 @@ public class UtilityServiceImpl implements UtilityService {
             dynamicQrCodeResponseDto.setResponse(res.getResponse());
             dynamicQrCodeResponseDto.setRequestId(res.getRequestId());
             dynamicQrCodeResponseDto.setData(dynamicQrCodeDataResponseDTO);
-			res = dynamicQrCodeResponseDto;
+            res = dynamicQrCodeResponseDto;
 
-            if(res.getResponse().equals(true)) {
+            if (res.getResponse().equals(true)) {
 
                 CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
                 collectionActivityLogsEntity.setActivityName("generated_dynamic_qr_code");
@@ -1157,6 +1154,7 @@ public class UtilityServiceImpl implements UtilityService {
     @Override
     public DynamicQrCodeCheckStatusResponseDTO getQrCodeTransactionStatus(String token, DynamicQrCodeStatusCheckRequestDTO requestBody) throws Exception {
         DynamicQrCodeCheckStatusResponseDTO res = new DynamicQrCodeCheckStatusResponseDTO();
+        Map<String, Object> response = new HashMap<>();
         DynamicQrCodeStatusCheckIntegrationRequestDTO dynamicQrCodeStatusCheckIntegrationRequestDTO = new DynamicQrCodeStatusCheckIntegrationRequestDTO();
         DynamicQrCodeStatusCheckDataRequestDTO dynamicQrCodeStatusCheckDataRequestDTO = new DynamicQrCodeStatusCheckDataRequestDTO();
         try {
@@ -1168,11 +1166,7 @@ public class UtilityServiceImpl implements UtilityService {
             dynamicQrCodeStatusCheckIntegrationRequestDTO.setUserReferenceNumber(String.valueOf(digitalPaymentTransactionsEntityData.getCreatedBy()));
             dynamicQrCodeStatusCheckIntegrationRequestDTO.setSystemId("collection");
             dynamicQrCodeStatusCheckIntegrationRequestDTO.setSpecificPartnerName(digitalPaymentTransactionsEntityData.getVendor());
-//            String isCheckQrPaymentStatusAvailableConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(IS_QR_CODE_CHECK_PAYMENT_STATUS_AVAILABLE);
-//
-//            String[] isCheckQrPaymentStatusAvailable  = isCheckQrPaymentStatusAvailableConf.split("/");
 
-//            if(Arrays.asList(isCheckQrPaymentStatusAvailable).contains(requestBody.getVendor())) {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
@@ -1206,22 +1200,26 @@ public class UtilityServiceImpl implements UtilityService {
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
+            if (res.getData().getStatus().equals("success")) {
+                if (!digitalPaymentTransactionsEntityData.getReceiptGenerated()) {
+                    createReceiptByCallBack(digitalPaymentTransactionsEntityData, token, response);
+                } else {
+                    Map<String, Object> respMap = new ObjectMapper().convertValue(digitalPaymentTransactionsEntityData.getReceiptResponse(), Map.class);
+                    response.put("status", res.getData().getStatus().toLowerCase());
+                    response.put("receipt_generated", true);
+                    response.put("service_request_id", String.valueOf(respMap.get("service_request_id")));
+                }
+            } else {
+                response.put("status", "failure");
+                response.put("receipt_generated", digitalPaymentTransactionsEntityData.getReceiptGenerated());
+                response.put("service_request_id", null);
+            }
+
             digitalPaymentTransactionsEntityData.setUtrNumber(res.getData().getOriginalBankRRN());
             digitalPaymentTransactionsEntityData.setStatus(res.getData().getStatus().toLowerCase());
             digitalPaymentTransactionsEntityData.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
 
             digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
-//            } else {
-//                res.setResponse(true);
-//                Map<String, Object> digitalPaymentTransaction = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsIdForCheckStatusResponse(requestBody.getDigitalPaymentTransactionId(), requestBody.getMerchantTranId());
-//                DynamicQrCodeCheckStatusDataResponseDTO dynamicQrCodeCheckStatusDataResponseDTO = new DynamicQrCodeCheckStatusDataResponseDTO();
-//                dynamicQrCodeCheckStatusDataResponseDTO.setMerchantTranId(String.valueOf(digitalPaymentTransaction.get("merchantTransId")));
-//                dynamicQrCodeCheckStatusDataResponseDTO.setStatus(String.valueOf(digitalPaymentTransaction.get("status")));
-//                dynamicQrCodeCheckStatusDataResponseDTO.setAmount(String.valueOf(digitalPaymentTransaction.get("amount")));
-//                res.setData(dynamicQrCodeCheckStatusDataResponseDTO);
-//            }
-
-
 
             log.info("res {}", res);
             // creating api logs
@@ -1246,29 +1244,8 @@ public class UtilityServiceImpl implements UtilityService {
                 if (Objects.equals(requestBody.getStatus(), "SUCCESS")) {
                     digitalPaymentTransactionsEntity.setStatus("success");
                     digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getOriginalBankRRN());
-
-
-//                     implementing create receipt here
-//                    ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
-//                    ServiceRequestSaveResponse resp = receiptService.createReceipt(receiptServiceDtoRequest, token);
-//                    if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
-//
-//                        String url = "http://localhost:1102/v1/getPdf?deliverableType=receipt_details&serviceRequestId=" + resp.getData().getServiceRequestId();
-//
-//                        HttpHeaders httpHeaders = new HttpHeaders();
-//                        httpHeaders.setBearerAuth(token);
-//
-//                        ResponseEntity<byte[]> res;
-//
-//                        RestTemplate restTemplate = new RestTemplate();
-//                        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-//                        res = restTemplate.exchange(
-//                                url,
-//                                HttpMethod.GET,
-//                                new HttpEntity<>(httpHeaders),
-//                                byte[].class);
-//
-//                    }
+                    // calling create receipt function for call back
+                    createReceiptByCallBack(digitalPaymentTransactionsEntity, token, response);
                 }
                 digitalPaymentTransactionsEntity.setCallBackRequestBody(requestBody);
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
@@ -1286,9 +1263,11 @@ public class UtilityServiceImpl implements UtilityService {
                 collectionActivityLogsEntity.setGeolocation("{}");
 
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
-                response.put("status", true);
+                response.put("status", requestBody.getStatus().toLowerCase());
             } else {
-                response.put("status", false);
+                response.put("status", null);
+                response.put("receipt_generated", null);
+                response.put("service_request_id", null);
             }
         } catch (Exception e) {
             String errorMessage = e.getMessage();
@@ -1297,9 +1276,57 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return response;
     }
+    private void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response) throws Exception {
+        try {
+            CurrentUserInfo currentUserInfo = new CurrentUserInfo();
+            // implementing create receipt here
+            ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
+            ServiceRequestSaveResponse resp = receiptService.createReceipt(receiptServiceDtoRequest, token);
+            digitalPaymentTransactionsEntity.setReceiptResponse(resp.getData());
+            if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
+                response.put("receipt_generated", true);
+                response.put("service_request_id", resp.getData().getServiceRequestId());
+                digitalPaymentTransactionsEntity.setReceiptGenerated(true);
+                String url = "http://localhost:1102/v1/getPdf?deliverableType=receipt_details&serviceRequestId=" + resp.getData().getServiceRequestId();
+
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.setBearerAuth(token);
+
+                ResponseEntity<byte[]> res;
+
+                RestTemplate restTemplate = new RestTemplate();
+                restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+                res = restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        new HttpEntity<>(httpHeaders),
+                        byte[].class);
+
+//                String encodedString = Base64.getEncoder().encodeToString(res.getBody());
+
+                byte[] byteArray = res.getBody();
+                String filename = "file.jpg";
+
+                DiskFileItem fileItem = new DiskFileItem("file", "application/pdf", true, filename, byteArray.length, new java.io.File(System.getProperty("java.io.tmpdir")));
+                fileItem.getOutputStream().write(byteArray);
+
+                MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
+
+                String updatedFileName = receiptServiceDtoRequest.getRequestData().getLoanId() + "_" + new Date().getTime() + "_receipt_image.pdf";
+                String userRef = "receipt/" + receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy();
+                // hitting send sms to customer
+                sendPdfToCustomerUsingS3(token, multipartFile, userRef, currentUserInfo.getClientId(), receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode(), receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount(), updatedFileName,
+                        receiptServiceDtoRequest.getActivityData().getUserId().toString(), receiptServiceDtoRequest.getCustomerType(),
+                        receiptServiceDtoRequest.getCustomerName(), receiptServiceDtoRequest.getApplicantMobileNumber(), receiptServiceDtoRequest.getCollectedFromNumber(), receiptServiceDtoRequest.getLoanApplicationNumber(), resp.getData().getServiceRequestId());
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
 
     @Override
-    public Object qrStatusCheck(String token, String merchantId) throws Exception{
+    public Object qrStatusCheck(String token, String merchantId) throws Exception {
         Map<String, Object> resp = new HashMap<>();
         try {
             DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByMerchantTranId(merchantId);
@@ -1316,7 +1343,7 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public MasterDTOResponse sendOtp(String token, String mobileNumber) throws Exception{
+    public MasterDTOResponse sendOtp(String token, String mobileNumber) throws Exception {
         MasterDTOResponse res = new MasterDTOResponse();
 
         SendOtpRequestDTO sendOtpRequestDTO = new SendOtpRequestDTO();
@@ -1355,7 +1382,7 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public MasterDTOResponse verifyOtp(String token, String mobileNumber, String otp) throws Exception{
+    public MasterDTOResponse verifyOtp(String token, String mobileNumber, String otp) throws Exception {
         MasterDTOResponse res = new MasterDTOResponse();
 
         VerifyOtpRequestDTO verifyOtpRequestDTO = new VerifyOtpRequestDTO();
@@ -1389,7 +1416,7 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception{
+    public MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception {
         MasterDTOResponse res = new MasterDTOResponse();
 
         ResendOtpRequestDTO resendOtpRequestDTO = new ResendOtpRequestDTO();
@@ -1421,6 +1448,7 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return res;
     }
+
     @Override
     public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws Exception {
         final List<Map<String, Object>> formattedRows = new ArrayList<>();

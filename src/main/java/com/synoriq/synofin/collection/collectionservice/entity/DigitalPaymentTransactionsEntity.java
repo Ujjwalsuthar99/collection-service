@@ -70,6 +70,10 @@ public class DigitalPaymentTransactionsEntity {
     @Column(name = "receipt_generated")
     private Boolean receiptGenerated;
 
+    @Column(name = "receipt_response")
+    @Type(type = "json")
+    private Object receiptResponse;
+
     @Column(name = "collection_activity_logs_id")
     private Long collectionActivityLogsId;
 
