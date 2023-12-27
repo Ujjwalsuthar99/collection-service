@@ -30,7 +30,7 @@ public interface RepossessionRepository extends JpaRepository<RepossessionEntity
             "\tla.loan_application_id = r.loan_id\n" +
             "join lms.customer_loan_mapping clm on\n" +
             "\tclm.loan_id = la.loan_application_id and clm.customer_type = 'applicant'\n" +
-            "join customer c on\n" +
+            "join lms.customer c on\n" +
             "\tc.customer_id = clm.customer_id\n" +
             "order by\n" +
             "\tr.repossession_id desc")
