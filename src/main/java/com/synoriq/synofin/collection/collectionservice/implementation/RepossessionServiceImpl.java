@@ -1,6 +1,8 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.RepossessionEntity;
@@ -188,15 +190,34 @@ public class RepossessionServiceImpl implements RepossessionService {
     @Override
     public BaseDTOResponse<Object> getDataByRepoId(String token, Long repoId) throws Exception {
         LoanBasicDetailsDTOResponse loanDetailRes;
+        List<Map<String, Object>> list = new ArrayList<>();
         RepossessionRepoIdResponseDTO repossessionRepoIdResponseDTO = new RepossessionRepoIdResponseDTO();
         final String[] vehicleType = {""};
         final String[] manufacturer = {""};
+        ObjectMapper objectMapper = new ObjectMapper();
+        String activityBy = "";
+        String activityDate = "";
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
             Optional<RepossessionEntity> repossessionEntity = repossessionRepository.findById(repoId);
-            List<CollectionActivityLogsEntity> collectionActivityLogsEntityList = collectionActivityLogsRepository.getActivityLogsDataByReferenceIdLoanIdWithRepossession(repoId);
+            List<Map<String, Object>> collectionActivityLogsEntityList = collectionActivityLogsRepository.getActivityLogsDataByReferenceIdLoanIdWithRepossession(repoId);
+            for(Map<String, Object> entity: collectionActivityLogsEntityList) {
+                JsonNode imagesNode = objectMapper.readTree(String.valueOf(entity.get("images")));
+                Map<String, Object> ent = new HashMap<>();
+                ent.put("activity_date", entity.get("activity_date"));
+                ent.put("activity_name", entity.get("activity_name"));
+                ent.put("remarks", entity.get("remarks"));
+                ent.put("collection_activity_logs_id", entity.get("collection_activity_logs_id"));
+                ent.put("activity_by", entity.get("activity_by"));
+                ent.put("images", new Gson().fromJson(String.valueOf(imagesNode), Object.class));
+                list.add(ent);
+                if (Objects.equals(String.valueOf(entity.get("activity_name")), "repossession_yard")) {
+                    activityBy = String.valueOf(entity.get("activity_by"));
+                    activityDate = String.valueOf(entity.get("activity_date"));
+                }
+            }
             if (repossessionEntity.isPresent()) {
                 long loanId = repossessionEntity.get().getLoanId();
                 loanDetailRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
@@ -242,8 +263,9 @@ public class RepossessionServiceImpl implements RepossessionService {
                     } else {
                         dpdBucket = "180+ DPD";
                     }
-
-
+                    Map<String, Object> yardDetailsJson = objectMapper.convertValue(repossessionEntity.get().getYardDetailsJson(), Map.class);
+                    yardDetailsJson.put("activity_by", activityBy);
+                    yardDetailsJson.put("activity_date", activityDate);
                     repossessionRepoIdResponseDTO = RepossessionRepoIdResponseDTO.builder().
                             dpd(dpdBucket).
                             manufacturer(manufacturer[0]).
@@ -257,8 +279,8 @@ public class RepossessionServiceImpl implements RepossessionService {
                             repoInitiateDate(repossessionEntity.get().getCreatedDate()).
                             totalDue(loanDetailRes.getData().getBalancePrincipal()).
                             isYard(Objects.equals(repossessionEntity.get().getStatus(), "yard")).
-                            yardDetails(repossessionEntity.get().getYardDetailsJson()).
-                            auditLogs(collectionActivityLogsEntityList).
+                            yardDetails(yardDetailsJson).
+                            auditLogs(list).
                             build();
                 }
             }

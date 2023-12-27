@@ -57,6 +57,6 @@ public class RepossessionRepoIdResponseDTO {
     private Object yardDetails;
 
     @JsonProperty("audit_logs")
-    private List<CollectionActivityLogsEntity> auditLogs;
+    private List<Map<String, Object>> auditLogs;
 
 }
