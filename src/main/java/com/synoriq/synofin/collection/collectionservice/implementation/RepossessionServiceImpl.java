@@ -196,12 +196,9 @@ public class RepossessionServiceImpl implements RepossessionService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
             Optional<RepossessionEntity> repossessionEntity = repossessionRepository.findById(repoId);
-//            RepossessionEntity repossessionEntity = repossessionRepository.findByRepossessionId(repoId);
+            List<CollectionActivityLogsEntity> collectionActivityLogsEntityList = collectionActivityLogsRepository.getActivityLogsDataByReferenceIdLoanIdWithRepossession(repoId);
             if (repossessionEntity.isPresent()) {
-//            if (repossessionEntity != null) {
                 long loanId = repossessionEntity.get().getLoanId();
-//                long loanId = repossessionEntity.getLoanId();
-                // --
                 loanDetailRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
                         .httpMethod(HttpMethod.GET)
                         .url("http://localhost:1102/v1/getBasicLoanDetails?loanId=" + loanId)
@@ -258,7 +255,11 @@ public class RepossessionServiceImpl implements RepossessionService {
                             mobileNumber(mobileNumber).
                             emiStartDate(loanDetailRes.getData().getInterestStartDate()).
                             repoInitiateDate(repossessionEntity.get().getCreatedDate()).
-                            totalDue(loanDetailRes.getData().getBalancePrincipal()).build();
+                            totalDue(loanDetailRes.getData().getBalancePrincipal()).
+                            isYard(Objects.equals(repossessionEntity.get().getStatus(), "yard")).
+                            yardDetails(repossessionEntity.get().getYardDetailsJson()).
+                            auditLogs(collectionActivityLogsEntityList).
+                            build();
                 }
             }
         } catch (Exception e) {
