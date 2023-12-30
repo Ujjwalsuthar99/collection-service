@@ -11,7 +11,7 @@ import lombok.*;
 @ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RepossessionRequestDTO {
 
     @JsonProperty("initiated_by")
@@ -22,6 +22,12 @@ public class RepossessionRequestDTO {
 
     @JsonProperty("repo_id")
     private Long repoId;
+
+    @JsonProperty("assigned_to")
+    private Long assignedTo;
+
+    @JsonProperty("recovery_agency")
+    private String recoveryAgency;
 
     @JsonProperty("yard_details_json")
     private Object yardDetailsJson;

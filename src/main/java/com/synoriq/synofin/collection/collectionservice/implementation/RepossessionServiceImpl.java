@@ -156,10 +156,13 @@ public class RepossessionServiceImpl implements RepossessionService {
         CollectionActivityLogDTO collectionActivityLogDTO = new CollectionActivityLogDTO();
         RepossessionEntity repossessionEntity;
         try {
-            repossessionEntity = repossessionRepository.getById(requestDto.getRepoId());
+            repossessionEntity = repossessionRepository.findByRepossessionId(requestDto.getRepoId());
             Map<String, Object> remarksJson = new ObjectMapper().convertValue(repossessionEntity.getRemarks(), Map.class);
             remarksJson.put(requestDto.getStatus()+"_remarks", requestDto.getRemarks());
             repossessionEntity.setRemarks(remarksJson);
+            repossessionEntity.setStatus(requestDto.getStatus());
+            repossessionEntity.setAssignedTo(requestDto.getAssignedTo());
+            repossessionEntity.setRecoveryAgency(requestDto.getRecoveryAgency());
             repossessionEntity.setYardDetailsJson(requestDto.getYardDetailsJson());
             repossessionRepository.save(repossessionEntity);
 
@@ -169,7 +172,7 @@ public class RepossessionServiceImpl implements RepossessionService {
             collectionActivityLogDTO.setBatteryPercentage(requestDto.getBatteryPercentage());
             collectionActivityLogDTO.setImages(requestDto.getAttachments());
             collectionActivityLogDTO.setDeleted(false);
-            collectionActivityLogDTO.setRemarks("Repossession " + StringUtils.capitalize(requestDto.getStatus()) + " against loan id" + requestDto.getLoanId());
+            collectionActivityLogDTO.setRemarks("Repossession " + StringUtils.capitalize(requestDto.getStatus()) + " against loan id " + requestDto.getLoanId());
             collectionActivityLogDTO.setGeolocationData(requestDto.getGeoLocationData());
             collectionActivityLogDTO.setLoanId(requestDto.getLoanId());
             collectionActivityLogDTO.setUserId(requestDto.getInitiatedBy());
