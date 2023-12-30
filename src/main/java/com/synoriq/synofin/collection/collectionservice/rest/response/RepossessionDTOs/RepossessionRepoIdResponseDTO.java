@@ -1,12 +1,15 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.RepossessionDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -46,5 +49,14 @@ public class RepossessionRepoIdResponseDTO {
 
     @JsonProperty("total_due")
     private Double totalDue;
+
+    @JsonProperty("is_yard")
+    private Boolean isYard;
+
+    @JsonProperty("yard_details")
+    private Object yardDetails;
+
+    @JsonProperty("audit_logs")
+    private List<Map<String, Object>> auditLogs;
 
 }

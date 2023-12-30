@@ -71,6 +71,12 @@ public interface CollectionActivityLogsRepository extends PagingAndSortingReposi
 
     public List<CollectionActivityLogsEntity> findActivityLogByReferenceId(Long referenceId);
 
+    @Query(nativeQuery = true, value = "select \n" +
+            "cal.activity_date , cal.activity_name , cast(cal.images as text) as images, cal.remarks, cal.collection_activity_logs_id, (select \"name\" from master.users where user_id = cal.activity_by) as activity_by\n" +
+            " from collection.collection_activity_logs cal \n" +
+            "where cal.reference_id = :referenceId and cal.activity_name like 'repossession_%' order by cal.activity_date desc")
+    public List<Map<String, Object>> getActivityLogsDataByReferenceIdLoanIdWithRepossession(@Param("referenceId") Long referenceId);
+
     @Query(nativeQuery = true, value = "select * from collection.collection_activity_logs cal where cal.loan_id = :loanId and cal.activity_name like 'repossession_%' order by cal.activity_date desc")
     public List<CollectionActivityLogsEntity> getActivityLogsDataByLoanIdWithRepossession(@Param("loanId") Long loanId);
 
