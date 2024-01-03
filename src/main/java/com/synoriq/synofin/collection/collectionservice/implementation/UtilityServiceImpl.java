@@ -637,6 +637,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             log.info("clientId {}", clientId);
             if (clientId.equals("finova")) {
+                log.info("finova {}", clientId);
                 FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
                 if (paymentMode.equals("cash")) {
                     finovaSmsRequest.setTemplateId(FINOVA_CASH_MSG_FLOW_ID);
