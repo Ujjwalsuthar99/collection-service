@@ -624,6 +624,8 @@ public class UtilityServiceImpl implements UtilityService {
                 shortenUrl = SHORTEN_URL_PREPROD.replace("preprod", springProfile);
             }
 
+            log.info("1stsss {}", shortenUrl);
+
             shortenUrlResponseDTO = HTTPRequestService.<Object, ShortenUrlResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
                     .url(shortenUrl)
