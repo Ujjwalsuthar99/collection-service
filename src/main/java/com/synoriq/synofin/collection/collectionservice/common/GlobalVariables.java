@@ -22,7 +22,7 @@ public class GlobalVariables {
     public static final String DEPOSIT_REMINDER_DAYTIME = "deposit_reminder_after_daytime";
     public static final String SHORTEN_URL_PREPROD = "https://api-preprod.synofin.tech/integration-connector/v1/url/shortan";
 
-    public static final String INTEGRATION_MSG_API_URL = "https://api-uat.synofin.tech/integration-connector/v1/send-sms";
+    public static final String INTEGRATION_MSG_API_URL = "https://api-preprod.synofin.tech/integration-connector/v1/send-sms";
     public static final String FINOVA_MSG_API_URL = "https://api.msg91.com/api/v5/flow/";
 
     public static final String PAISABUDDY_MSG_API_URL = "https://api.msg91.com/api/v5/flow/";

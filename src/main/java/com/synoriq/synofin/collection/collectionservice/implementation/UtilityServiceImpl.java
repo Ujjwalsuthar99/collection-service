@@ -635,7 +635,7 @@ public class UtilityServiceImpl implements UtilityService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.shorten_url, Long.parseLong(userId), shortenUrlRequestDTO, shortenUrlResponseDTO, "success", Long.parseLong(loanId[0]));
 
-
+            log.info("clientId {}", clientId);
             if (clientId.equals("finova")) {
                 FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
                 if (paymentMode.equals("cash")) {
@@ -791,6 +791,8 @@ public class UtilityServiceImpl implements UtilityService {
             }
 
             if (clientId.equals("cfl")) {
+
+                log.info("in iffff");
                 RequestDataDTO requestDataDTO = new RequestDataDTO();
                 if (paymentMode.equals("cash")) {
                     requestDataDTO.setTemplateName("template3");

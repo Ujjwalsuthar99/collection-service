@@ -20,7 +20,7 @@ public class CflSmsService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
             String url = INTEGRATION_MSG_API_URL;
-            url = url.replace("uat", springProfile);
+            url = springProfile == "uat" ? url.replace("preprod", springProfile) : (springProfile == "prod" ? url.replace("preprod", "prod2") : url);
             log.info("integration url {}", url);
 
             res = HTTPRequestService.<Object, CflMsgDTOResponse>builder()
