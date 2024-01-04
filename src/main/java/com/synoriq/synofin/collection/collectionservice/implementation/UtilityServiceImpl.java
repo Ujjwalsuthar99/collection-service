@@ -797,19 +797,21 @@ public class UtilityServiceImpl implements UtilityService {
 
                 log.info("in iffff");
                 RequestDataDTO requestDataDTO = new RequestDataDTO();
-                if (paymentMode.equals("cash")) {
-                    requestDataDTO.setTemplateName("template3");
-                } else if (paymentMode.equals("cheque")) {
-                    requestDataDTO.setTemplateName("template2");
-                } else {
-                    requestDataDTO.setTemplateName("template1");
-                }
+//                if (paymentMode.equals("cash")) {
+//                    requestDataDTO.setTemplateName("template3");
+//                } else if (paymentMode.equals("cheque")) {
+//                    requestDataDTO.setTemplateName("template2");
+//                } else {
+//                    requestDataDTO.setTemplateName("template1");
+//                }
+                requestDataDTO.setTemplateName("template5");
 
                 requestDataDTO.setMessageType("text");
                 List<SmsListDTO> smsListDTOS = new ArrayList<>();
                 List<String> strings = new ArrayList<>();
                 strings.add(receiptAmount);
                 strings.add(loanNumber);
+                strings.add(String.valueOf(new Date()));
                 strings.add(shortenUrlResponseDTO.getData().getResult());
                 SmsListDTO smsListDTO = new SmsListDTO();
                 smsListDTO.setMessageType("english");
