@@ -804,6 +804,8 @@ public class UtilityServiceImpl implements UtilityService {
 //                } else {
 //                    requestDataDTO.setTemplateName("template1");
 //                }
+                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+                String receiptDate = formatter.format(new Date());
                 requestDataDTO.setTemplateName("template5");
 
                 requestDataDTO.setMessageType("text");
@@ -811,7 +813,7 @@ public class UtilityServiceImpl implements UtilityService {
                 List<String> strings = new ArrayList<>();
                 strings.add(receiptAmount);
                 strings.add(loanNumber);
-                strings.add(String.valueOf(new Date()));
+                strings.add(receiptDate);
                 strings.add(shortenUrlResponseDTO.getData().getResult());
                 SmsListDTO smsListDTO = new SmsListDTO();
                 smsListDTO.setMessageType("english");
