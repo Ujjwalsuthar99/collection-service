@@ -268,8 +268,10 @@ public class RepossessionServiceImpl implements RepossessionService {
                         dpdBucket = "180+ DPD";
                     }
                     Map<String, Object> yardDetailsJson = objectMapper.convertValue(repossessionEntity.get().getYardDetailsJson(), Map.class);
-                    yardDetailsJson.put("activity_by", activityBy);
-                    yardDetailsJson.put("activity_date", activityDate);
+                    if (yardDetailsJson != null) {
+                        yardDetailsJson.put("activity_by", activityBy);
+                        yardDetailsJson.put("activity_date", activityDate);
+                    }
                     repossessionRepoIdResponseDTO = RepossessionRepoIdResponseDTO.builder().
                             dpd(dpdBucket).
                             manufacturer(manufacturer[0]).
