@@ -36,7 +36,7 @@ public interface RepossessionRepository extends JpaRepository<RepossessionEntity
             "\tr.repossession_id desc")
     public List<Map<String, Object>> getAllRepossession();
 
-    @Query(nativeQuery = true, value = "select * from repossession where loan_id = :loanId and status = 'initiated' and deleted = false")
+    @Query(nativeQuery = true, value = "select * from collection.repossession where loan_id = :loanId and status = 'initiated' and deleted = false")
     public RepossessionEntity findByLoadIdAndInitiatedStatus(Long loanId);
 
     @Query(nativeQuery = true, value = "select cast(u.\"name\" as text) as name from master.users u where u.user_id = :userId")
