@@ -64,8 +64,8 @@ public class RepossessionServiceImpl implements RepossessionService {
                         Map<String, Object> yardJson = new ObjectMapper().convertValue(repossessionEntity.get().getYardDetailsJson(), Map.class);
                         Map<String, Object> remarksJson = new ObjectMapper().convertValue(repossessionEntity.get().getRemarks(), Map.class);
 
-//                        repossessionCommonDTO.setStatus(collectionActivityLogsEntity.getActivityName().substring(13));
-                        repossessionCommonDTO.setStatus(collectionActivityLogsEntity.getActivityName());
+                        repossessionCommonDTO.setStatus(collectionActivityLogsEntity.getActivityName().substring(13));
+//                        repossessionCommonDTO.setStatus(collectionActivityLogsEntity.getActivityName());
                         repossessionCommonDTO.setAgency(repossessionEntity.get().getRecoveryAgency());
                         repossessionCommonDTO.setAttachments(collectionActivityLogsEntity.getImages());
                         repossessionCommonDTO.setRemark(String.valueOf(remarksJson.get(collectionActivityLogsEntity.getActivityName().substring(13)+"_remarks")));
