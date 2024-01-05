@@ -118,7 +118,7 @@ public class RepossessionServiceImpl implements RepossessionService {
             remarksJson.put("initiated_remarks", requestDto.getRemarks());
 
             RepossessionEntity repossessionEntity1 = repossessionRepository.findByLoadIdAndInitiatedStatus(requestDto.getLoanId());
-            if (repossessionEntity1 != null) {
+            if (repossessionEntity1 == null) {
                 repossessionEntity.setRemarks(remarksJson);
                 repossessionEntity.setLoanId(requestDto.getLoanId());
                 repossessionEntity.setDeleted(false);
