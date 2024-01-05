@@ -21,6 +21,7 @@ import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogSe
 import com.synoriq.synofin.collection.collectionservice.service.RepossessionService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -210,7 +211,7 @@ public class RepossessionServiceImpl implements RepossessionService {
                 JsonNode imagesNode = objectMapper.readTree(String.valueOf(entity.get("images")));
                 Map<String, Object> ent = new HashMap<>();
                 ent.put("activity_date", entity.get("activity_date"));
-                ent.put("activity_name", entity.get("activity_name"));
+                ent.put("activity_name", WordUtils.capitalizeFully(String.valueOf(entity.get("activity_name")).replace("_", " ")));
                 ent.put("remarks", entity.get("remarks"));
                 ent.put("collection_activity_logs_id", entity.get("collection_activity_logs_id"));
                 ent.put("activity_by", entity.get("activity_by"));
