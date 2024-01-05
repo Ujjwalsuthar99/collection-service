@@ -20,6 +20,9 @@ public class RepossessionRequestDTO {
     @JsonProperty("status")
     private String status;
 
+    @JsonProperty("met_with")
+    private String metWith;
+
     @JsonProperty("repo_id")
     private Long repoId;
 

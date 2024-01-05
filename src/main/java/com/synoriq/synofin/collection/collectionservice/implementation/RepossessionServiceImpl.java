@@ -21,6 +21,7 @@ import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogSe
 import com.synoriq.synofin.collection.collectionservice.service.RepossessionService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -64,6 +65,7 @@ public class RepossessionServiceImpl implements RepossessionService {
                         Map<String, Object> remarksJson = new ObjectMapper().convertValue(repossessionEntity.get().getRemarks(), Map.class);
 
                         repossessionCommonDTO.setStatus(collectionActivityLogsEntity.getActivityName().substring(13));
+//                        repossessionCommonDTO.setStatus(collectionActivityLogsEntity.getActivityName());
                         repossessionCommonDTO.setAgency(repossessionEntity.get().getRecoveryAgency());
                         repossessionCommonDTO.setAttachments(collectionActivityLogsEntity.getImages());
                         repossessionCommonDTO.setRemark(String.valueOf(remarksJson.get(collectionActivityLogsEntity.getActivityName().substring(13)+"_remarks")));
@@ -117,7 +119,7 @@ public class RepossessionServiceImpl implements RepossessionService {
             remarksJson.put("initiated_remarks", requestDto.getRemarks());
 
             RepossessionEntity repossessionEntity1 = repossessionRepository.findByLoadIdAndInitiatedStatus(requestDto.getLoanId());
-            if (repossessionEntity1 != null) {
+            if (repossessionEntity1 == null) {
                 repossessionEntity.setRemarks(remarksJson);
                 repossessionEntity.setLoanId(requestDto.getLoanId());
                 repossessionEntity.setDeleted(false);
@@ -210,7 +212,7 @@ public class RepossessionServiceImpl implements RepossessionService {
                 JsonNode imagesNode = objectMapper.readTree(String.valueOf(entity.get("images")));
                 Map<String, Object> ent = new HashMap<>();
                 ent.put("activity_date", entity.get("activity_date"));
-                ent.put("activity_name", entity.get("activity_name"));
+                ent.put("activity_name", WordUtils.capitalizeFully(String.valueOf(entity.get("activity_name")).replace("_", " ")));
                 ent.put("remarks", entity.get("remarks"));
                 ent.put("collection_activity_logs_id", entity.get("collection_activity_logs_id"));
                 ent.put("activity_by", entity.get("activity_by"));
@@ -267,8 +269,10 @@ public class RepossessionServiceImpl implements RepossessionService {
                         dpdBucket = "180+ DPD";
                     }
                     Map<String, Object> yardDetailsJson = objectMapper.convertValue(repossessionEntity.get().getYardDetailsJson(), Map.class);
-                    yardDetailsJson.put("activity_by", activityBy);
-                    yardDetailsJson.put("activity_date", activityDate);
+                    if (yardDetailsJson != null) {
+                        yardDetailsJson.put("activity_by", activityBy);
+                        yardDetailsJson.put("activity_date", activityDate);
+                    }
                     repossessionRepoIdResponseDTO = RepossessionRepoIdResponseDTO.builder().
                             dpd(dpdBucket).
                             manufacturer(manufacturer[0]).
