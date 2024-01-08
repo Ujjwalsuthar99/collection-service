@@ -826,7 +826,8 @@ public class UtilityServiceImpl implements UtilityService {
                     }
                     smsListDTO.setMobiles("91" + receivedMobileNumber);
                 } else {
-                    smsListDTO.setMobiles("919989761192");
+                    smsListDTO.setMobiles("91" + collectedFromMobileNumber);
+//                    smsListDTO.setMobiles("919887432524");
                 }
                 smsListDTOS.add(smsListDTO);
                 requestDataDTO.setTemplateVariable(strings);
