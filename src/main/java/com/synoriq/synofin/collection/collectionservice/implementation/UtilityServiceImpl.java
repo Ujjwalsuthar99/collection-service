@@ -39,6 +39,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.MsgService
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.SpfcMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrlDTOs.ShortenUrlResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.UsersDataDTO;
@@ -66,6 +67,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
 import javax.imageio.ImageIO;
 import javax.persistence.Tuple;
 import javax.servlet.http.HttpServletRequest;
@@ -1331,6 +1333,7 @@ public class UtilityServiceImpl implements UtilityService {
         }
         return response;
     }
+
     private void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response) throws Exception {
         try {
             CurrentUserInfo currentUserInfo = new CurrentUserInfo();
@@ -1524,6 +1527,30 @@ public class UtilityServiceImpl implements UtilityService {
             throw new RuntimeException(e);
         }
         return formattedRows;
+    }
+
+    @Override
+    public BaseDTOResponse<Object> getCollaterals(Long loanIdNumber, String token) throws Exception {
+        CollateralDetailsResponseDTO collateralResponse = new CollateralDetailsResponseDTO();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Authorization", token);
+        httpHeaders.add("Content-Type", "application/json");
+        try {
+            collateralResponse = HTTPRequestService.<Object, CollateralDetailsResponseDTO>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getCollaterals?loanId=" + loanIdNumber)
+                    .httpHeaders(httpHeaders)
+                    .typeResponseType(CollateralDetailsResponseDTO.class)
+                    .build().call();
+
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, "success", loanIdNumber);
+        } catch (Exception e) {
+            String errorMessage = e.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, modifiedErrorMessage, "failure", loanIdNumber);
+            log.error("{}", e.getMessage());
+        }
+        return new BaseDTOResponse<>(collateralResponse);
     }
 
 }

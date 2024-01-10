@@ -13,9 +13,11 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrC
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.Tuple;
@@ -54,5 +56,6 @@ public interface UtilityService {
     public MasterDTOResponse verifyOtp(String token, String mobileNumber, String otp) throws Exception;
     public MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception;
     public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws Exception;
+    public BaseDTOResponse<Object> getCollaterals(Long loanIdNumber, String token) throws Exception;
 
 }

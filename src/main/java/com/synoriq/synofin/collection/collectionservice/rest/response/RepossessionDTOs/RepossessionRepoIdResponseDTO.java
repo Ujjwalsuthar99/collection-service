@@ -26,6 +26,9 @@ public class RepossessionRepoIdResponseDTO {
     @JsonProperty("loan_number")
     private String loanNumber;
 
+    @JsonProperty("loan_id")
+    private Long loanId;
+
     @JsonProperty("customer_name")
     private String customerName;
 

@@ -88,7 +88,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Object getTaskDetailByLoanId(String token, TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
-
+        BaseDTOResponse<Object> collateralRes;
         TaskDetailDTOResponse loanRes;
         CustomerDetailDTOResponse customerRes;
         LoanBasicDetailsDTOResponse loanDetailRes;
@@ -153,15 +153,8 @@ public class TaskServiceImpl implements TaskService {
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, customerRes, "success", Long.parseLong(loanId));
 
             if (Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", "vehicle")) {
-                CollateralDetailsResponseDTO collateralResponse = HTTPRequestService.<Object, CollateralDetailsResponseDTO>builder()
-                        .httpMethod(HttpMethod.GET)
-                        .url("http://localhost:1102/v1/getCollaterals?loanId=" + loanIdNumber)
-                        .httpHeaders(httpHeaders)
-                        .typeResponseType(CollateralDetailsResponseDTO.class)
-                        .build().call();
-
-                // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, "success", Long.parseLong(loanId));
+                collateralRes = utilityService.getCollaterals(loanIdNumber, token);
+                CollateralDetailsResponseDTO collateralResponse = new ObjectMapper().convertValue(collateralRes.getData(), CollateralDetailsResponseDTO.class);
 
                 if (collateralResponse.getData() != null) {
                     CollateralDetailsReturnResponseDTO collateralDetailsReturnResponseDTO = new CollateralDetailsReturnResponseDTO();

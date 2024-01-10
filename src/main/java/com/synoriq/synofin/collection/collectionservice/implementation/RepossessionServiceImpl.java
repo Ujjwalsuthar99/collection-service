@@ -10,6 +10,8 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionAct
 import com.synoriq.synofin.collection.collectionservice.repository.RepossessionRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.repossessionDTOs.RepossessionRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.repossessionDTOs.lmsRepossession.LmsRepossessionDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.repossessionDTOs.lmsRepossession.LmsRepossessionDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.RepossessionDTOs.RepossessionCommonDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.RepossessionDTOs.RepossessionRepoIdResponseDTO;
@@ -19,7 +21,9 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetail
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.RepossessionService;
+import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +31,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 @Service
+@Slf4j
 public class RepossessionServiceImpl implements RepossessionService {
 
     @Autowired
@@ -36,6 +42,9 @@ public class RepossessionServiceImpl implements RepossessionService {
 
     @Autowired
     private ActivityLogService activityLogService;
+
+    @Autowired
+    private UtilityService utilityService;
 
     @Autowired
     private ConsumedApiLogService consumedApiLogService;
@@ -161,6 +170,29 @@ public class RepossessionServiceImpl implements RepossessionService {
         RepossessionEntity repossessionEntity;
         try {
             repossessionEntity = repossessionRepository.findByRepossessionId(requestDto.getRepoId());
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String repoDate = dateFormat.format(repossessionEntity.getCreatedDate());
+            if (Objects.equals(requestDto.getStatus(), "yard")) {
+                LmsRepossessionDTO lmsRepossessionDTO = new LmsRepossessionDTO();
+                LmsRepossessionDataDTO lmsRepossessionDataDTO = new LmsRepossessionDataDTO();
+                Map<String, String> yardJson = new ObjectMapper().convertValue(repossessionEntity.getYardDetailsJson(), Map.class);
+                lmsRepossessionDataDTO.setRepoDate(repoDate);
+                lmsRepossessionDataDTO.setRemarks(requestDto.getStatus());
+                lmsRepossessionDataDTO.setRepossessionAgency(requestDto.getRecoveryAgency());
+                lmsRepossessionDataDTO.setCharges(new ArrayList<>());
+                lmsRepossessionDataDTO.setNumberOfInstruments(1);
+                lmsRepossessionDataDTO.setSourcingRm(repossessionRepository.getNameFromUsers(repossessionEntity.getAssignedTo()));
+                lmsRepossessionDataDTO.setBranch("");
+                lmsRepossessionDataDTO.setYardAddress("Yard Name: " + yardJson.get("yard_name") + " Yard Contact Number: " + yardJson.get("yard_contact_number"));
+                lmsRepossessionDataDTO.setTransactionDate(repoDate);
+                lmsRepossessionDTO.setServiceRequestId("");
+                lmsRepossessionDTO.setServiceRequestSubtype("2");
+                lmsRepossessionDTO.setServiceType("");
+                lmsRepossessionDTO.setRequestData(lmsRepossessionDataDTO);
+                lmsRepossessionDTO.setServiceRequestType("collateral_repossession");
+                // calling LMS repo & seize api
+                lmsRepossession(token, lmsRepossessionDTO);
+            }
             Map<String, Object> remarksJson = new ObjectMapper().convertValue(repossessionEntity.getRemarks(), Map.class);
             remarksJson.put(requestDto.getStatus()+"_remarks", requestDto.getRemarks());
             repossessionEntity.setRemarks(remarksJson);
@@ -281,6 +313,7 @@ public class RepossessionServiceImpl implements RepossessionService {
                             customerName(loanDetailRes.getData().getCustomerName()).
                             loanAmount(loanDetailRes.getData().getLoanAmount()).
                             loanNumber(loanDetailRes.getData().getLoanApplicationNumber()).
+                            loanId(loanId).
                             mobileNumber(mobileNumber).
                             emiStartDate(loanDetailRes.getData().getInterestStartDate()).
                             repoInitiateDate(repossessionEntity.get().getCreatedDate()).
@@ -295,6 +328,35 @@ public class RepossessionServiceImpl implements RepossessionService {
             throw new Exception(e.getMessage());
         }
         return new BaseDTOResponse<>(repossessionRepoIdResponseDTO);
+    }
+    @Override
+    public BaseDTOResponse<Object> lmsRepossession(String bearerToken, LmsRepossessionDTO requestDto) throws Exception {
+        Object res;
+        Map<String, Object> baseRequestDto  = new HashMap<>() {{
+            put("data", requestDto);
+            put("user_reference_number", "");
+        }};
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", bearerToken);
+            httpHeaders.add("Content-Type", "application/json");
+
+            res = HTTPRequestService.<Object, Object>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/createReceipt")
+                    .httpHeaders(httpHeaders)
+                    .body(baseRequestDto)
+                    .typeResponseType(Object.class)
+                    .build().call();
+
+        } catch (Exception e) {
+            String errorMessage = e.getMessage();
+            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, modifiedErrorMessage, "failure", Long.parseLong(requestDto.getLoanId()));
+            log.error("{}", e.getMessage());
+            throw new Exception(e.getMessage());
+        }
+        return new BaseDTOResponse<>(res);
     }
 }
 
