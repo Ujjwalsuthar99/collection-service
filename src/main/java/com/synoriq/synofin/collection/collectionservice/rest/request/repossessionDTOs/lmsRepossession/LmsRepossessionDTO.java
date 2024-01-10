@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Data
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class LmsRepossessionDTO {
 
     @JsonProperty("service_request_type")
