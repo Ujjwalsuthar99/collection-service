@@ -35,6 +35,9 @@ public class RepossessionRequestDTO {
     @JsonProperty("yard_details_json")
     private Object yardDetailsJson;
 
+    @JsonProperty("collateral_json")
+    private Object collateralJson;
+
     @JsonProperty("loan_id")
     private Long loanId;
 

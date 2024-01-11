@@ -59,6 +59,10 @@ public class RepossessionEntity {
     @Type(type = "json")
     private Object yardDetailsJson;
 
+    @Column(name = "collateral_json")
+    @Type(type = "json")
+    private Object collateralJson;
+
 
     @Override
     public boolean equals(Object o) {

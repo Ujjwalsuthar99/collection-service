@@ -13,6 +13,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.repossessio
 import com.synoriq.synofin.collection.collectionservice.rest.request.repossessionDTOs.lmsRepossession.LmsRepossessionDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.repossessionDTOs.lmsRepossession.LmsRepossessionDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.RepossessionDTOs.RepossessionCommonDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.RepossessionDTOs.RepossessionRepoIdResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.RepossessionDTOs.RepossessionResponseDTO;
@@ -168,10 +169,13 @@ public class RepossessionServiceImpl implements RepossessionService {
     public BaseDTOResponse<Object> yardRepossession(String token, RepossessionRequestDTO requestDto) throws Exception {
         CollectionActivityLogDTO collectionActivityLogDTO = new CollectionActivityLogDTO();
         RepossessionEntity repossessionEntity;
+        Long lmsRepoId = null;
+        BaseDTOResponse<Object> resp;
         try {
             repossessionEntity = repossessionRepository.findByRepossessionId(requestDto.getRepoId());
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             String repoDate = dateFormat.format(repossessionEntity.getCreatedDate());
+            String tranDate = dateFormat.format(new Date());
             if (Objects.equals(requestDto.getStatus(), "yard")) {
                 LmsRepossessionDTO lmsRepossessionDTO = new LmsRepossessionDTO();
                 LmsRepossessionDataDTO lmsRepossessionDataDTO = new LmsRepossessionDataDTO();
@@ -183,15 +187,16 @@ public class RepossessionServiceImpl implements RepossessionService {
                 lmsRepossessionDataDTO.setNumberOfInstruments(1);
                 lmsRepossessionDataDTO.setSourcingRm(repossessionRepository.getNameFromUsers(repossessionEntity.getAssignedTo()));
                 lmsRepossessionDataDTO.setBranch("");
-                lmsRepossessionDataDTO.setYardAddress("Yard Name: " + yardJson.get("yard_name") + " Yard Contact Number: " + yardJson.get("yard_contact_number"));
-                lmsRepossessionDataDTO.setTransactionDate(repoDate);
+                lmsRepossessionDataDTO.setYardAddress(yardJson.get("yard_address"));
+                lmsRepossessionDataDTO.setTransactionDate(tranDate);
                 lmsRepossessionDTO.setServiceRequestId("");
                 lmsRepossessionDTO.setServiceRequestSubtype("2");
                 lmsRepossessionDTO.setServiceType("");
                 lmsRepossessionDTO.setRequestData(lmsRepossessionDataDTO);
                 lmsRepossessionDTO.setServiceRequestType("collateral_repossession");
                 // calling LMS repo & seize api
-                lmsRepossession(token, lmsRepossessionDTO);
+                resp = lmsRepossession(token, lmsRepossessionDTO);
+                lmsRepoId = Long.parseLong(String.valueOf(resp.getData()));
             }
             Map<String, Object> remarksJson = new ObjectMapper().convertValue(repossessionEntity.getRemarks(), Map.class);
             remarksJson.put(requestDto.getStatus()+"_remarks", requestDto.getRemarks());
@@ -199,6 +204,8 @@ public class RepossessionServiceImpl implements RepossessionService {
             repossessionEntity.setStatus(requestDto.getStatus());
             repossessionEntity.setAssignedTo(requestDto.getAssignedTo());
             repossessionEntity.setRecoveryAgency(requestDto.getRecoveryAgency());
+            repossessionEntity.setCollateralJson(requestDto.getCollateralJson());
+            repossessionEntity.setLmsRepoId(lmsRepoId);
             repossessionEntity.setYardDetailsJson(requestDto.getYardDetailsJson());
             repossessionRepository.save(repossessionEntity);
 
@@ -331,7 +338,8 @@ public class RepossessionServiceImpl implements RepossessionService {
     }
     @Override
     public BaseDTOResponse<Object> lmsRepossession(String bearerToken, LmsRepossessionDTO requestDto) throws Exception {
-        Object res;
+        ServiceRequestSaveResponse res;
+        long receiptNumber;
         Map<String, Object> baseRequestDto  = new HashMap<>() {{
             put("data", requestDto);
             put("user_reference_number", "");
@@ -341,22 +349,24 @@ public class RepossessionServiceImpl implements RepossessionService {
             httpHeaders.add("Authorization", bearerToken);
             httpHeaders.add("Content-Type", "application/json");
 
-            res = HTTPRequestService.<Object, Object>builder()
+            res = HTTPRequestService.<Object, ServiceRequestSaveResponse>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/createReceipt")
                     .httpHeaders(httpHeaders)
                     .body(baseRequestDto)
-                    .typeResponseType(Object.class)
+                    .typeResponseType(ServiceRequestSaveResponse.class)
                     .build().call();
+            receiptNumber = res.getData() != null ? res.getData().getServiceRequestId() : null;
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.lms_repossession, null, null, res, "failure", Long.parseLong(requestDto.getLoanId()));
 
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, modifiedErrorMessage, "failure", Long.parseLong(requestDto.getLoanId()));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.lms_repossession, null, null, modifiedErrorMessage, "failure", Long.parseLong(requestDto.getLoanId()));
             log.error("{}", e.getMessage());
             throw new Exception(e.getMessage());
         }
-        return new BaseDTOResponse<>(res);
+        return new BaseDTOResponse<>(receiptNumber);
     }
 }
 
