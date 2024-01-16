@@ -10,7 +10,7 @@ import java.util.List;
 public class TaskDetailReturnResponseDTO {
 
     @JsonProperty("loanDetails")
-    public LoanDataDTO loanDetails;
+    public LoanDetailsResponseDTO loanDetails;
 
     @JsonProperty("customerDetails")
     public List<CustomerDetailsReturnResponseDTO> customerDetails;

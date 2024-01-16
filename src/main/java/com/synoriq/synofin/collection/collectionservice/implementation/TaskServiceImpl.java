@@ -90,11 +90,11 @@ public class TaskServiceImpl implements TaskService {
     public Object getTaskDetailByLoanId(String token, TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
         BaseDTOResponse<Object> collateralRes;
         TaskDetailDTOResponse loanRes;
+        LoanDetailsResponseDTO loanDetailsResponseDTO = new LoanDetailsResponseDTO();
         CustomerDetailDTOResponse customerRes;
         LoanBasicDetailsDTOResponse loanDetailRes;
 
         TaskDetailRequestDTO loanDataBody = new ObjectMapper().convertValue(taskDetailRequestDTO, TaskDetailRequestDTO.class);
-        TaskDetailDTOResponse resp = new TaskDetailDTOResponse();
         TaskDetailReturnResponseDTO response = new TaskDetailReturnResponseDTO();
         BaseDTOResponse<Object> baseDTOResponse = null;
         String loanId = taskDetailRequestDTO.getRequestData().getLoanId();
@@ -108,6 +108,7 @@ public class TaskServiceImpl implements TaskService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
 
+            // lms/loan-modification/v1/service-request/getDataForLoanActions
             loanRes = HTTPRequestService.<Object, TaskDetailDTOResponse>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/getDataForLoanActions")
@@ -303,22 +304,27 @@ public class TaskServiceImpl implements TaskService {
                     customerList.add(customerDetailsOther);
                 }
             }
-//            log.info("customerList {}", customerList);
+
             if (loanDetailRes.getData() != null) {
-                loanRes.getData().setLoanBranch(loanDetailRes.getData().getSourcingBranch());
-                loanRes.getData().setEmiCycle(utilityService.addSuffix(loanDetailRes.getData().getEmiCycle()));
-                loanRes.getData().setBalancePrincipal(loanDetailRes.getData().getBalancePrincipal());
+                loanDetailsResponseDTO.setLoanBranch(loanDetailRes.getData().getSourcingBranch());
+                loanDetailsResponseDTO.setEmiCycle(utilityService.addSuffix(loanDetailRes.getData().getEmiCycle()));
+                loanDetailsResponseDTO.setBalancePrincipal(loanDetailRes.getData().getBalancePrincipal());
             }
-            loanRes.getData().setEmiPaid(loanSummaryResponse.getData().getInstallmentAmount().getPaid());
-            loanRes.getData().setEmiPaidCount(loanSummaryResponse.getData().getNumberOfInstallments().getPaid());
-            loanRes.getData().setBalanceEmi(loanSummaryResponse.getData().getInstallmentAmount().getDuesAsOnDate());
-            loanRes.getData().setBalanceEmiCount(loanSummaryResponse.getData().getNumberOfInstallments().getDuesAsOnDate());
-            loanRes.getData().setLoanApplicationNumber(loanApplicationNumber);
-            loanRes.getData().setRepoStatus(repoStatus);
-            loanRes.getData().setRepoId(repoId);
-            loanRes.getData().setRepoCardShow(repoCardShow);
+            if (loanRes.getData() != null) {
+                loanDetailsResponseDTO.setOutStandingCharges(loanRes.getData().getOutStandingCharges());
+                loanDetailsResponseDTO.setDateOfReceipt(loanRes.getData().getDateOfReceipt());
+                loanDetailsResponseDTO.setAdditionInExcessMoney(loanRes.getData().getAdditionInExcessMoney());
+            }
+            loanDetailsResponseDTO.setEmiPaid(loanSummaryResponse.getData().getInstallmentAmount().getPaid());
+            loanDetailsResponseDTO.setEmiPaidCount(loanSummaryResponse.getData().getNumberOfInstallments().getPaid());
+            loanDetailsResponseDTO.setBalanceEmi(loanSummaryResponse.getData().getInstallmentAmount().getDuesAsOnDate());
+            loanDetailsResponseDTO.setBalanceEmiCount(loanSummaryResponse.getData().getNumberOfInstallments().getDuesAsOnDate());
+            loanDetailsResponseDTO.setLoanApplicationNumber(loanApplicationNumber);
+            loanDetailsResponseDTO.setRepoStatus(repoStatus);
+            loanDetailsResponseDTO.setRepoId(repoId);
+            loanDetailsResponseDTO.setRepoCardShow(repoCardShow);
             response.setCustomerDetails(customerList);
-            response.setLoanDetails(loanRes.getData());
+            response.setLoanDetails(loanDetailsResponseDTO);
             baseDTOResponse = new BaseDTOResponse<>(response);
         } catch (Exception e) {
             String errorMessage = e.getMessage();
