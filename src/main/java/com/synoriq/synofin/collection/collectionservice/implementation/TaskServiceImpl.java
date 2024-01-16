@@ -250,11 +250,13 @@ public class TaskServiceImpl implements TaskService {
                         basicInfoApplicant.setDpdBucket(dpdBucket);
                         basicInfoApplicant.setDpdBgColor(dpdBgColor);
                         basicInfoApplicant.setDpdTextColor(dpdTextColor);
-                        basicInfoApplicant.setPos(loanDetailRes.getData().getPrincipalOutstanding());
-                        basicInfoApplicant.setLoanAmount(loanDetailRes.getData().getLoanAmount());
-                        basicInfoApplicant.setEmiAmount(loanDetailRes.getData().getEmiAmount());
-                        basicInfoApplicant.setLoanTenure(loanDetailRes.getData().getLoanTenure());
-                        basicInfoApplicant.setAssetClassification(loanDetailRes.getData().getAssetClassification());
+                        if (loanDetailRes.getData() != null) {
+                            basicInfoApplicant.setPos(loanDetailRes.getData().getPrincipalOutstanding());
+                            basicInfoApplicant.setLoanAmount(loanDetailRes.getData().getLoanAmount());
+                            basicInfoApplicant.setEmiAmount(loanDetailRes.getData().getEmiAmount());
+                            basicInfoApplicant.setLoanTenure(loanDetailRes.getData().getLoanTenure());
+                            basicInfoApplicant.setAssetClassification(loanDetailRes.getData().getAssetClassification());
+                        }
                         basicInfoApplicant.setEmiDate("Pending LMS");
                         if (customerData.getCommunication() != null) {
                             for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
@@ -302,9 +304,11 @@ public class TaskServiceImpl implements TaskService {
                 }
             }
 //            log.info("customerList {}", customerList);
-            loanRes.getData().setLoanBranch(loanDetailRes.getData().getSourcingBranch());
-            loanRes.getData().setEmiCycle(utilityService.addSuffix(loanDetailRes.getData().getEmiCycle()));
-            loanRes.getData().setBalancePrincipal(loanDetailRes.getData().getBalancePrincipal());
+            if (loanDetailRes.getData() != null) {
+                loanRes.getData().setLoanBranch(loanDetailRes.getData().getSourcingBranch());
+                loanRes.getData().setEmiCycle(utilityService.addSuffix(loanDetailRes.getData().getEmiCycle()));
+                loanRes.getData().setBalancePrincipal(loanDetailRes.getData().getBalancePrincipal());
+            }
             loanRes.getData().setEmiPaid(loanSummaryResponse.getData().getInstallmentAmount().getPaid());
             loanRes.getData().setEmiPaidCount(loanSummaryResponse.getData().getNumberOfInstallments().getPaid());
             loanRes.getData().setBalanceEmi(loanSummaryResponse.getData().getInstallmentAmount().getDuesAsOnDate());
