@@ -167,7 +167,7 @@ public class TaskServiceImpl implements TaskService {
                             collateralDetailsReturnResponseDTO.setModel(String.valueOf(value.get("model")));
                             collateralDetailsReturnResponseDTO.setManufacturer(String.valueOf(value.get("manufacturer")));
                             collateralDetailsReturnResponseDTO.setEngineNumber(String.valueOf(value.get("engine_no")));
-                            collateralDetailsReturnResponseDTO.setCostOfAsset(Double.parseDouble(String.valueOf(value.get("cost_of_asset"))));
+                            collateralDetailsReturnResponseDTO.setCostOfAsset(value.get("cost_of_asset") != null ? Double.parseDouble(String.valueOf(value.get("cost_of_asset"))) : 0.0);
                         }
 
                     });
