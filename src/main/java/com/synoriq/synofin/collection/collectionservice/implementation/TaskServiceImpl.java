@@ -117,7 +117,7 @@ public class TaskServiceImpl implements TaskService {
                     .typeResponseType(TaskDetailDTOResponse.class)
                     .build().call();
 
-//            log.info("loan details {}", loanRes);
+            log.info("loan details jhadsuhbsduh {}", loanRes);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, "success", Long.parseLong(loanId));
 
@@ -128,7 +128,7 @@ public class TaskServiceImpl implements TaskService {
                     .typeResponseType(LoanBasicDetailsDTOResponse.class)
                     .build().call();
 
-//            log.info("getBasicLoanDetails {}", loanDetailRes);
+            log.info("getBasicLoanDetails {}", loanDetailRes);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", Long.parseLong(loanId));
 
