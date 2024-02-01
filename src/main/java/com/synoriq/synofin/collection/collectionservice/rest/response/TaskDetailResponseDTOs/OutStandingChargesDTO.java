@@ -35,7 +35,7 @@ public class OutStandingChargesDTO {
     Integer disbursalScheduleId;
 
     @JsonProperty("charge_code")
-    Integer chargeCode;
+    Object chargeCode;
 
     @JsonProperty("outstanding_amount")
     Decimal outstandingAmount;
