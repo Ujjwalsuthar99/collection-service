@@ -55,10 +55,10 @@ public class KafkaListnerService {
             log.info("messageObject.getPaymentMode() {}", messageObject.getPaymentMode());
 
             Long userId = 0L;
-            CollectionReceiptEntity collectionReceiptEntity1 = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
-            log.info("collectionReceiptEntity1 {}", collectionReceiptEntity1);
-            if (collectionReceiptEntity1 != null) {
-                userId = collectionReceiptEntity1.getReceiptHolderUserId();
+            CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
+            log.info("collectionReceiptEntity1 {}", collectionReceiptEntity);
+            if (collectionReceiptEntity != null) {
+                userId = collectionReceiptEntity.getReceiptHolderUserId();
             }
 
             CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.findByUserIdAndCollectionLimitStrategiesKey(userId, messageObject.getPaymentMode());
@@ -66,25 +66,27 @@ public class KafkaListnerService {
 //            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
             log.info("service request id {}", messageObject.getServiceRequestId());
-            CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
             Map<String, Object> loanIdByServiceId = receiptRepository.getLoanIdByServiceId(messageObject.getServiceRequestId());
             Long loanId = Long.valueOf(loanIdByServiceId.get("loanId").toString());
+            String serviceRequestTypeString = String.valueOf(loanIdByServiceId.get("service_request_type_string"));
 
             log.info("check service request, {}", collectionReceiptEntity);
 
             CollectionActivityLogsEntity checkCollectionActivityLogsEntity = collectionActivityLogsRepository.getActivityLogsKafkaByReceiptId(String.valueOf(messageObject.getServiceRequestId()));
             log.info("checkCollectionActivityLogsEntity {}", checkCollectionActivityLogsEntity);
             if (collectionLimitUser != null && collectionReceiptEntity != null && checkCollectionActivityLogsEntity == null) {
-                if(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())) < 0 ) {
-                    log.info("in iff for limit minus check {}", collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
-                    collectionLimitUser.setUtilizedLimitValue(0D);
-                } else {
-                    log.info("in else for limit minus check {}", collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
-                    collectionLimitUser.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                if(serviceRequestTypeString.equals("receipt")) {
+                    if(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())) < 0 ) {
+                        log.info("in iff for limit minus check {}", collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                        collectionLimitUser.setUtilizedLimitValue(0D);
+                    } else {
+                        log.info("in else for limit minus check {}", collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                        collectionLimitUser.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                    }
+                    collectionLimitUser.setUserName(messageObject.getUserName());
+                    log.info("collection limit user wise entity {}", collectionLimitUser);
+                    collectionLimitUserWiseRepository.save(collectionLimitUser);
                 }
-                collectionLimitUser.setUserName(messageObject.getUserName());
-                log.info("collection limit user wise entity {}", collectionLimitUser);
-                collectionLimitUserWiseRepository.save(collectionLimitUser);
 
                 CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
                 collectionActivityLogsEntity.setActivityBy(messageObject.getUserId());

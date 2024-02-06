@@ -1,0 +1,2 @@
+INSERT INTO collection.collection_configurations (created_date,created_by,deleted,configuration_name,configuration_value,configuration_description,modified_date,modified_by,active,stage) VALUES
+	 ('2024-01-08 17:04:11.345',1,false,'employee_mobile_number_validation','false','This configuration will enable and disable a validation where collection executive cannot enter a number which already exist in the employee database while creating receipt.',NULL,NULL,true,NULL);
