@@ -15,6 +15,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrC
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.service.QrCodeService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public class UtilityController {
 
     @Autowired
     UtilityService utilityService;
+
+    @Autowired
+    QrCodeService qrCodeService;
 
     @RequestMapping(value = "getMasterType", method = RequestMethod.POST)
     public ResponseEntity<Object> getMasterData(@RequestHeader("Authorization") String bearerToken, @RequestBody MasterDtoRequest masterDtoRequest) throws SQLException {
@@ -278,7 +282,7 @@ public class UtilityController {
         DynamicQrCodeResponseDTO result;
 
         try {
-            result = utilityService.sendQrCode(token, reqBody);
+            result = qrCodeService.sendQrCode(token, reqBody);
             if (result.getData() == null && result.getError() != null) {
                 response = new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
             } else {
@@ -302,7 +306,7 @@ public class UtilityController {
         DynamicQrCodeCheckStatusResponseDTO result;
 
         try {
-            result = utilityService.getQrCodeTransactionStatus(token, reqBody);
+            result = qrCodeService.getQrCodeTransactionStatus(token, reqBody);
             if (result.getData() == null && result.getError() != null) {
                 response = new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
             } else {
@@ -326,7 +330,7 @@ public class UtilityController {
         Object result;
 
         try {
-            result = utilityService.qrCodeCallBack(token, reqBody);
+            result = qrCodeService.qrCodeCallBack(token, reqBody);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -346,7 +350,7 @@ public class UtilityController {
         Object result;
 
         try {
-            result = utilityService.qrStatusCheck(token, merchantId);
+            result = qrCodeService.qrStatusCheck(token, merchantId);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

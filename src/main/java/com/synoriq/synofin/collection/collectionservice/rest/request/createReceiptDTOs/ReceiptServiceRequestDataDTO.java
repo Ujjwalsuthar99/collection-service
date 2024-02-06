@@ -1,13 +1,16 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ReceiptServiceRequestDataDTO {
+
     @JsonProperty("transaction_date")
     public String transactionDate;
 
@@ -26,6 +29,9 @@ public class ReceiptServiceRequestDataDTO {
 
     @JsonProperty("instrument_number")
     public String instrumentNumber;
+
+    @JsonProperty("is_auto_approved")
+    public boolean isAutoApproved;
 
     @JsonProperty("created_by")
     public String createdBy;

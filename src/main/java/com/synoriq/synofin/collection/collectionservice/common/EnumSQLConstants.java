@@ -32,7 +32,8 @@ public class EnumSQLConstants {
         send_otp,
         verify_otp,
         resend_otp,
-        lms_repossession;
+        lms_repossession,
+        qr_callback;
 
 
         private LogNames() {

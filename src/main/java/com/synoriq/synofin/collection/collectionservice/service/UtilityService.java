@@ -48,10 +48,7 @@ public interface UtilityService {
     public BaseDTOResponse<Object> getDocuments(String token, String loanId) throws Exception;
     public String convertToJSON(String input);
     public String splitCodeName(String input);
-    public DynamicQrCodeResponseDTO sendQrCode(String token, DynamicQrCodeRequestDTO requestBody) throws Exception;
-    public DynamicQrCodeCheckStatusResponseDTO getQrCodeTransactionStatus(String token, DynamicQrCodeStatusCheckRequestDTO requestBody) throws Exception;
-    public Object qrCodeCallBack(String token, DynamicQrCodeCallBackRequestDTO requestBody) throws Exception;
-    public Object qrStatusCheck(String token, String merchantId) throws Exception;
+
     public MasterDTOResponse sendOtp(String token, String mobileNumber) throws Exception;
     public MasterDTOResponse verifyOtp(String token, String mobileNumber, String otp) throws Exception;
     public MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception;
