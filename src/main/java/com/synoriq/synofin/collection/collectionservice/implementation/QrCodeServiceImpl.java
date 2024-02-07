@@ -34,6 +34,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -178,6 +179,7 @@ public class QrCodeServiceImpl implements QrCodeService {
     }
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public DynamicQrCodeCheckStatusResponseDTO getQrCodeTransactionStatus(String token, DynamicQrCodeStatusCheckRequestDTO requestBody) throws Exception {
         DynamicQrCodeCheckStatusResponseDTO res = new DynamicQrCodeCheckStatusResponseDTO();
         Map<String, Object> response = new HashMap<>();
@@ -261,6 +263,7 @@ public class QrCodeServiceImpl implements QrCodeService {
     }
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public Object qrCodeCallBack(String token, DynamicQrCodeCallBackRequestDTO requestBody) throws Exception {
         String merchantTransId = requestBody.getMerchantTranId();
         Map<String, Object> response = new HashMap<>();
@@ -316,7 +319,7 @@ public class QrCodeServiceImpl implements QrCodeService {
             CurrentUserInfo currentUserInfo = new CurrentUserInfo();
             // implementing create receipt here
             ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
-            ServiceRequestSaveResponse resp = receiptService.createReceipt(receiptServiceDtoRequest, token);
+            ServiceRequestSaveResponse resp = receiptService.createReceipt(receiptServiceDtoRequest, token, true);
             digitalPaymentTransactionsEntity.setReceiptResponse(resp.getData());
             if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
                 response.put("receipt_generated", true);

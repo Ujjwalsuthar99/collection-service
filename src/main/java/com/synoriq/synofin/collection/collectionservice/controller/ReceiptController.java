@@ -106,7 +106,7 @@ public class ReceiptController {
         ServiceRequestSaveResponse createReceiptResponse;
 
         try {
-            createReceiptResponse = receiptService.createReceipt(receiptServiceDtoRequest, bearerToken);
+            createReceiptResponse = receiptService.createReceipt(receiptServiceDtoRequest, bearerToken, false);
             if (createReceiptResponse.getData() == null && createReceiptResponse.getError() == null) {
                 response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
             } else if (createReceiptResponse.getData() == null && createReceiptResponse.getError() != null) {
