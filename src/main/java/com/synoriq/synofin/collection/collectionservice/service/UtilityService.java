@@ -54,5 +54,6 @@ public interface UtilityService {
     public MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception;
     public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws Exception;
     public BaseDTOResponse<Object> getCollaterals(Long loanIdNumber, String token) throws Exception;
+    public BaseDTOResponse<Object> employeeMobileNumberValidator(String token, String mobileNumber) throws Exception;
 
 }

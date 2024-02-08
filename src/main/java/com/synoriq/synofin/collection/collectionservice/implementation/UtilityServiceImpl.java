@@ -139,6 +139,9 @@ public class UtilityServiceImpl implements UtilityService {
     @Autowired
     DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository;
 
+    @Autowired
+    RegisteredDeviceInfoRepository registeredDeviceInfoRepository;
+
     @Override
     public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception {
 
@@ -1243,6 +1246,19 @@ public class UtilityServiceImpl implements UtilityService {
             log.error("{}", e.getMessage());
         }
         return new BaseDTOResponse<>(collateralResponse);
+    }
+
+    @Override
+    public BaseDTOResponse<Object> employeeMobileNumberValidator(String token, String mobileNumber) throws Exception {
+        try {
+            String employeeMobileNumber = registeredDeviceInfoRepository.getEmployeeMobileNumber(mobileNumber);
+            if(!Objects.equals(employeeMobileNumber, null)) {
+                return new BaseDTOResponse<>("Match Found");
+            }
+        } catch (Exception e) {
+            log.error("{}", e.getMessage());
+        }
+        return new BaseDTOResponse<Object>("No Match Found");
     }
 
 }

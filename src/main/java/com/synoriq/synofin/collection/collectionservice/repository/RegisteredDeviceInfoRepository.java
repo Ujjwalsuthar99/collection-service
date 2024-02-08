@@ -35,4 +35,16 @@ public interface RegisteredDeviceInfoRepository extends JpaRepository<Registered
     List<Map<String, Object>> getDeviceDataByUserId(@Param("userId") Long userId);
     RegisteredDeviceInfoEntity findByRegisteredDeviceInfoId(Long registeredDeviceInfoId);
 
+    @Query(nativeQuery = true, value = "select\n" +
+            "\tu.username\n" +
+            "from\n" +
+            "\tmaster.users u\n" +
+            "where\n" +
+            "\tu.mobile_number = :mobileNumber\n" +
+            "\tor u.phone_number = :mobileNumber\n" +
+            "\tor cast(u.phone1_json as text) like concat('%', :mobileNumber, '%')\n" +
+            "\tor cast(u.phone2_json as text) like concat('%', :mobileNumber, '%')\n" +
+            "\tor cast(u.phone3_json as text) like concat('%', :mobileNumber, '%')")
+    String getEmployeeMobileNumber(@Param("mobileNumber") String mobileNumber);
+
 }
