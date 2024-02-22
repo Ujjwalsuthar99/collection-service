@@ -267,8 +267,9 @@ public class QrCodeServiceImpl implements QrCodeService {
     public Object qrCodeCallBack(String token, DynamicQrCodeCallBackRequestDTO requestBody) throws Exception {
         String merchantTransId = requestBody.getMerchantTranId();
         Map<String, Object> response = new HashMap<>();
+        Map<String, Object> res = new HashMap<>();
         Long loanId = null;
-        boolean isSuccess = false;
+
         try {
             log.info("hurray! callback received for QR");
             DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByMerchantTranId(merchantTransId);
@@ -294,13 +295,16 @@ public class QrCodeServiceImpl implements QrCodeService {
                 collectionActivityLogsEntity.setImages("{}");
                 collectionActivityLogsEntity.setLoanId(digitalPaymentTransactionsEntity.getLoanId());
                 collectionActivityLogsEntity.setGeolocation("{}");
-
+                res.put("status", true);
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
                 response.put("status", requestBody.getStatus().toLowerCase());
+                response.put("connector_response", res);
             } else {
+                res.put("status", false);
                 response.put("status", null);
                 response.put("receipt_generated", null);
                 response.put("service_request_id", null);
+                response.put("connector_response", res);
 
             }
             // creating api logs
@@ -312,9 +316,7 @@ public class QrCodeServiceImpl implements QrCodeService {
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.qr_callback, null, requestBody, errorMessage, "failure", loanId);
             throw new Exception();
         }
-        response.remove("receipt_generated");
-        response.remove("service_request_id");
-        return response.replace("status", isSuccess);
+        return res;
     }
 
     private void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response) throws Exception {
