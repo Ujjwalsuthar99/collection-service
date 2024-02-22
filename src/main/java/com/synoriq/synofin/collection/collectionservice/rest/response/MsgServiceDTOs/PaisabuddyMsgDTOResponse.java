@@ -6,10 +6,10 @@ import lombok.Data;
 
 @Data
 public class PaisabuddyMsgDTOResponse {
-    @JsonProperty("response")
+    @JsonProperty("message")
     public String message;
 
-    @JsonProperty("data")
+    @JsonProperty("type")
     public String type;
 
 }
