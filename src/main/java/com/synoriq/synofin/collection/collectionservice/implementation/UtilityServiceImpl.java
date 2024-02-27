@@ -408,7 +408,7 @@ public class UtilityServiceImpl implements UtilityService {
             int width = bufferedImage.getWidth();
             int height = bufferedImage.getHeight();
             System.out.println("Resolution: width: " + width + "x" + height + " :height");
-            isCameraImage = width > 1000;
+            isCameraImage = width > 1000 || height > 1000;
         } else {
             System.out.println("Failed to decode the image or image is null.");
         }
@@ -431,9 +431,9 @@ public class UtilityServiceImpl implements UtilityService {
 
             if (geoTaggingEnabled.equals("true")) {
                 if ((latitude != null) && (longitude != null)) {
-                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                    LocalDateTime now = LocalDateTime.now();
-                    // Create a BufferedImage object from the byte array
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    String date = simpleDateFormat.format(new Date());
+
                     InputStream inputStream = new ByteArrayInputStream(imageData.getBytes());
                     BufferedImage image = ImageIO.read(inputStream);
 
@@ -441,8 +441,8 @@ public class UtilityServiceImpl implements UtilityService {
                     Graphics2D graphics2D = image.createGraphics();
 
                     // Set the font and color for the watermark
-                    Font font = new Font("Arial", Font.BOLD, isCameraImage ? 50 : 25);
-                    String watermarkText = "Latitude: " + latitude + ", Longitude: " + longitude + ", Datetime:" + now;
+                    Font font = new Font("Arial", Font.BOLD, 28);
+                    String watermarkText = "Latitude: " + latitude + ", Longitude: " + longitude + ", Datetime:" + date;
 
                     // Define margins and padding
                     int leftMargin = 20;
