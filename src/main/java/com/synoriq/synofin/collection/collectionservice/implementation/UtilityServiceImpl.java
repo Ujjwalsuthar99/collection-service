@@ -400,6 +400,19 @@ public class UtilityServiceImpl implements UtilityService {
 
         Base64.Encoder encoder = Base64.getEncoder();
         String base64 = encoder.encodeToString(imageData.getBytes());
+        // we are getting the width and height as resolution of the image
+        ByteArrayInputStream bis = new ByteArrayInputStream(imageData.getBytes());
+        BufferedImage bufferedImage = ImageIO.read(bis);
+        boolean isCameraImage = false;
+        if (bufferedImage != null) {
+            int width = bufferedImage.getWidth();
+            int height = bufferedImage.getHeight();
+            System.out.println("Resolution: width: " + width + "x" + height + " :height");
+            isCameraImage = width > 1000;
+        } else {
+            System.out.println("Failed to decode the image or image is null.");
+        }
+        log.info("isCameraImage {}", isCameraImage);
 
         UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO = new UploadImageOnS3RequestDTO();
         UploadImageOnS3DataRequestDTO uploadImageOnS3DataRequestDTO = new UploadImageOnS3DataRequestDTO();
@@ -428,7 +441,7 @@ public class UtilityServiceImpl implements UtilityService {
                     Graphics2D graphics2D = image.createGraphics();
 
                     // Set the font and color for the watermark
-                    Font font = new Font("Arial", Font.BOLD, 50);
+                    Font font = new Font("Arial", Font.BOLD, isCameraImage ? 50 : 25);
                     String watermarkText = "Latitude: " + latitude + ", Longitude: " + longitude + ", Datetime:" + now;
 
                     // Define margins and padding
