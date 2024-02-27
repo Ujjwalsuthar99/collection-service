@@ -441,7 +441,7 @@ public class UtilityServiceImpl implements UtilityService {
                     Graphics2D graphics2D = image.createGraphics();
 
                     // Set the font and color for the watermark
-                    Font font = new Font("Arial", Font.BOLD, 30);
+                    Font font = new Font("Arial", Font.BOLD, 42);
 //                    String watermarkText = "lat: " + latitude + ", long: " + longitude + ", Datetime:" + date;
 
                     String latLongWatermarkText = "lat: " + latitude + ", long: " + longitude;
@@ -468,7 +468,7 @@ public class UtilityServiceImpl implements UtilityService {
                     // Draw the watermark onto the image
                     graphics2D.setFont(font);
                     graphics2D.setColor(Color.RED);
-                    graphics2D.drawString(latLongWatermarkText, latitudeLongitudeX, latitudeLongitudeY + padding + fontMetrics.getAscent());
+                    graphics2D.drawString(latLongWatermarkText, latitudeLongitudeX, latitudeLongitudeY + fontMetrics.getAscent());
 
                     int dateTimeTextHeight = fontMetrics.getHeight() + 2 * padding;
 
@@ -476,7 +476,7 @@ public class UtilityServiceImpl implements UtilityService {
                     int dateTimeX = (image.getWidth() - maxTextWidth) / 2;
                     int dateTimeY = topMargin + dateTimeTextHeight;
 
-                    graphics2D.drawString(dateTimeWatermarkText, dateTimeX, dateTimeY + padding + fontMetrics.getAscent());
+                    graphics2D.drawString(dateTimeWatermarkText, dateTimeX, dateTimeY + fontMetrics.getAscent());
 
                     // Save the updated image as a byte array
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
