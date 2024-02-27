@@ -400,19 +400,19 @@ public class UtilityServiceImpl implements UtilityService {
 
         Base64.Encoder encoder = Base64.getEncoder();
         String base64 = encoder.encodeToString(imageData.getBytes());
-        // we are getting the width and height as resolution of the image
-        ByteArrayInputStream bis = new ByteArrayInputStream(imageData.getBytes());
-        BufferedImage bufferedImage = ImageIO.read(bis);
-        boolean isCameraImage = false;
-        if (bufferedImage != null) {
-            int width = bufferedImage.getWidth();
-            int height = bufferedImage.getHeight();
-            System.out.println("Resolution: width: " + width + "x" + height + " :height");
-            isCameraImage = width > 1000 || height > 1000;
-        } else {
-            System.out.println("Failed to decode the image or image is null.");
-        }
-        log.info("isCameraImage {}", isCameraImage);
+//        // we are getting the width and height as resolution of the image
+//        ByteArrayInputStream bis = new ByteArrayInputStream(imageData.getBytes());
+//        BufferedImage bufferedImage = ImageIO.read(bis);
+//        boolean isCameraImage = false;
+//        if (bufferedImage != null) {
+//            int width = bufferedImage.getWidth();
+//            int height = bufferedImage.getHeight();
+//            System.out.println("Resolution: width: " + width + "x" + height + " :height");
+//            isCameraImage = width > 1000 || height > 1000;
+//        } else {
+//            System.out.println("Failed to decode the image or image is null.");
+//        }
+//        log.info("isCameraImage {}", isCameraImage);
 
         UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO = new UploadImageOnS3RequestDTO();
         UploadImageOnS3DataRequestDTO uploadImageOnS3DataRequestDTO = new UploadImageOnS3DataRequestDTO();
@@ -431,7 +431,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             if (geoTaggingEnabled.equals("true")) {
                 if ((latitude != null) && (longitude != null)) {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String date = simpleDateFormat.format(new Date());
 
                     InputStream inputStream = new ByteArrayInputStream(imageData.getBytes());
@@ -441,8 +441,11 @@ public class UtilityServiceImpl implements UtilityService {
                     Graphics2D graphics2D = image.createGraphics();
 
                     // Set the font and color for the watermark
-                    Font font = new Font("Arial", Font.BOLD, 28);
-                    String watermarkText = "Latitude: " + latitude + ", Longitude: " + longitude + ", Datetime:" + date;
+                    Font font = new Font("Arial", Font.BOLD, 30);
+//                    String watermarkText = "lat: " + latitude + ", long: " + longitude + ", Datetime:" + date;
+
+                    String latLongWatermarkText = "lat: " + latitude + ", long: " + longitude;
+                    String dateTimeWatermarkText = "Datetime: " + date;
 
                     // Define margins and padding
                     int leftMargin = 20;
@@ -456,39 +459,24 @@ public class UtilityServiceImpl implements UtilityService {
 
                     // Create a FontMetrics object to calculate text dimensions
                     FontMetrics fontMetrics = graphics2D.getFontMetrics(font);
-
-                    // Split the watermarkText into words
-                    String[] words = watermarkText.split("\\s+");
-                    StringBuilder currentLine = new StringBuilder();
-                    ArrayList<String> lines = new ArrayList<>();
-
-                    for (String word : words) {
-                        // Check if adding the next word exceeds the max text width
-                        if (fontMetrics.stringWidth(currentLine.toString() + " " + word) > maxTextWidth - 2 * padding) {
-                            lines.add(currentLine.toString().trim());
-                            currentLine = new StringBuilder();
-                        }
-                        currentLine.append(word).append(" ");
-                    }
-                    // Add the last line
-                    lines.add(currentLine.toString().trim());
-
                     // Calculate the total text height
-                    int totalTextHeight = lines.size() * (fontMetrics.getHeight() + 2 * padding);
+                    int latLongHeight = fontMetrics.getHeight() + 2 * padding;
 
-                    // Calculate the position of the watermark on the bottom center of the image
-                    int x = (image.getWidth() - maxTextWidth) / 2;
-                    int y = image.getHeight() - totalTextHeight - bottomMargin;
+                    int latitudeLongitudeX = (image.getWidth() - maxTextWidth) / 2;
+                    int latitudeLongitudeY = image.getHeight() - bottomMargin - latLongHeight;
 
                     // Draw the watermark onto the image
                     graphics2D.setFont(font);
                     graphics2D.setColor(Color.RED);
-                    for (String line : lines) {
-                        int textWidth = fontMetrics.stringWidth(line);
-                        int textX = x + (maxTextWidth - textWidth) / 2;
-                        graphics2D.drawString(line, textX, y + padding + fontMetrics.getAscent());
-                        y += fontMetrics.getHeight() + 2 * padding;
-                    }
+                    graphics2D.drawString(latLongWatermarkText, latitudeLongitudeX, latitudeLongitudeY + padding + fontMetrics.getAscent());
+
+                    int dateTimeTextHeight = fontMetrics.getHeight() + 2 * padding;
+
+                    // Calculate the position of the datetime text at the top center of the image
+                    int dateTimeX = (image.getWidth() - maxTextWidth) / 2;
+                    int dateTimeY = topMargin + dateTimeTextHeight;
+
+                    graphics2D.drawString(dateTimeWatermarkText, dateTimeX, dateTimeY + padding + fontMetrics.getAscent());
 
                     // Save the updated image as a byte array
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
