@@ -463,18 +463,20 @@ public class UtilityServiceImpl implements UtilityService {
                     int latLongHeight = fontMetrics.getHeight() + 2 * padding;
 
                     int latitudeLongitudeX = (image.getWidth() - maxTextWidth) / 2;
-                    int latitudeLongitudeY = image.getHeight() - bottomMargin - latLongHeight;
+//                    int latitudeLongitudeY = image.getHeight() - bottomMargin - latLongHeight;
+                    int latitudeLongitudeY = topMargin + fontMetrics.getHeight() + padding;
 
                     // Draw the watermark onto the image
                     graphics2D.setFont(font);
                     graphics2D.setColor(Color.RED);
                     graphics2D.drawString(latLongWatermarkText, latitudeLongitudeX, latitudeLongitudeY + fontMetrics.getAscent());
 
-                    int dateTimeTextHeight = fontMetrics.getHeight() + 2 * padding;
+//                    int dateTimeTextHeight = fontMetrics.getHeight() + 2 * padding;
 
                     // Calculate the position of the datetime text at the top center of the image
                     int dateTimeX = (image.getWidth() - maxTextWidth) / 2;
-                    int dateTimeY = topMargin + dateTimeTextHeight;
+//                    int dateTimeY = topMargin + dateTimeTextHeight;
+                    int dateTimeY = image.getHeight() - bottomMargin - fontMetrics.getHeight() - padding;
 
                     graphics2D.drawString(dateTimeWatermarkText, dateTimeX, dateTimeY + fontMetrics.getAscent());
 
