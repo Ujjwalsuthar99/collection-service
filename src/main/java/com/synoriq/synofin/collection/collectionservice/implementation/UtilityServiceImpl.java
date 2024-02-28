@@ -400,19 +400,6 @@ public class UtilityServiceImpl implements UtilityService {
 
         Base64.Encoder encoder = Base64.getEncoder();
         String base64 = encoder.encodeToString(imageData.getBytes());
-//        // we are getting the width and height as resolution of the image
-//        ByteArrayInputStream bis = new ByteArrayInputStream(imageData.getBytes());
-//        BufferedImage bufferedImage = ImageIO.read(bis);
-//        boolean isCameraImage = false;
-//        if (bufferedImage != null) {
-//            int width = bufferedImage.getWidth();
-//            int height = bufferedImage.getHeight();
-//            System.out.println("Resolution: width: " + width + "x" + height + " :height");
-//            isCameraImage = width > 1000 || height > 1000;
-//        } else {
-//            System.out.println("Failed to decode the image or image is null.");
-//        }
-//        log.info("isCameraImage {}", isCameraImage);
 
         UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO = new UploadImageOnS3RequestDTO();
         UploadImageOnS3DataRequestDTO uploadImageOnS3DataRequestDTO = new UploadImageOnS3DataRequestDTO();
@@ -442,8 +429,6 @@ public class UtilityServiceImpl implements UtilityService {
 
                     // Set the font and color for the watermark
                     Font font = new Font("Arial", Font.BOLD, 42);
-//                    String watermarkText = "lat: " + latitude + ", long: " + longitude + ", Datetime:" + date;
-
                     String latLongWatermarkText = "lat: " + latitude + ", long: " + longitude;
                     String dateTimeWatermarkText = "Datetime: " + date;
 
@@ -462,8 +447,7 @@ public class UtilityServiceImpl implements UtilityService {
                     // Calculate the total text height
                     int latLongHeight = fontMetrics.getHeight() + 2 * padding;
 
-                    int latitudeLongitudeX = (image.getWidth() - maxTextWidth) / 2;
-//                    int latitudeLongitudeY = image.getHeight() - bottomMargin - latLongHeight;
+                    int latitudeLongitudeX = (image.getWidth() - fontMetrics.stringWidth(latLongWatermarkText)) / 2;
                     int latitudeLongitudeY = topMargin + fontMetrics.getHeight() + padding;
 
                     // Draw the watermark onto the image
@@ -474,8 +458,7 @@ public class UtilityServiceImpl implements UtilityService {
 //                    int dateTimeTextHeight = fontMetrics.getHeight() + 2 * padding;
 
                     // Calculate the position of the datetime text at the top center of the image
-                    int dateTimeX = (image.getWidth() - maxTextWidth) / 2;
-//                    int dateTimeY = topMargin + dateTimeTextHeight;
+                    int dateTimeX = (image.getWidth() - fontMetrics.stringWidth(dateTimeWatermarkText)) / 2;
                     int dateTimeY = image.getHeight() - bottomMargin - fontMetrics.getHeight() - padding;
 
                     graphics2D.drawString(dateTimeWatermarkText, dateTimeX, dateTimeY + fontMetrics.getAscent());
