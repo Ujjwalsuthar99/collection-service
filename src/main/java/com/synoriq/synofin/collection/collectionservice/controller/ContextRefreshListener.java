@@ -45,7 +45,7 @@ public class ContextRefreshListener implements ApplicationListener<ContextRefres
                     key.getPatternsCondition().getPatterns().forEach(pattern -> {
                         ApiMigrationDetails requestElement = new ApiMigrationDetails();
                         requestElement.setServiceName(applicationName);
-                        requestElement.setPrefix(applicationName);
+                        requestElement.setPrefix("");
                         requestElement.setApiType(method.name());
                         requestElement.setEndpoint(pattern);
                         requestElement.setPermissionName(pattern);// default permission name is the URL, can be changed manually later
