@@ -130,7 +130,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 if ((utilizedAmount + transferredAmount) < totalLimitValue) {
                     Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
 
-                    ReceiptTransferEntity receiptTransferEntity = saveReceiptTransferData(receiptTransferDtoRequest, collectionActivityId);
+                    ReceiptTransferEntity receiptTransferEntity = saveReceiptTransferData(receiptTransferDtoRequest, collectionActivityId, token);
                     CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
                     String remarks = receiptTransferDtoRequest.getActivityData().getRemarks();
                     String lastWord = remarks.substring(remarks.lastIndexOf(" ") + 1);
@@ -170,7 +170,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
 
 
-                ReceiptTransferEntity receiptTransferEntity = saveReceiptTransferData(receiptTransferDtoRequest, collectionActivityId);
+                ReceiptTransferEntity receiptTransferEntity = saveReceiptTransferData(receiptTransferDtoRequest, collectionActivityId, token);
 
                 CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
                 String remarks = receiptTransferDtoRequest.getActivityData().getRemarks();
@@ -778,11 +778,11 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         return depositInvoiceResponseDataDTO;
     }
 
-    private ReceiptTransferEntity saveReceiptTransferData(ReceiptTransferDtoRequest receiptTransferDtoRequest, Long collectionActivityId) {
+    private ReceiptTransferEntity saveReceiptTransferData(ReceiptTransferDtoRequest receiptTransferDtoRequest, Long collectionActivityId, String token) {
         ReceiptTransferEntity receiptTransferEntity = new ReceiptTransferEntity();
-
+        UserDetailByTokenDTOResponse res = utilityService.getUserDetailsByToken(token);
         receiptTransferEntity.setCreatedDate(new Date());
-        receiptTransferEntity.setTransferredBy(receiptTransferDtoRequest.getTransferredBy());
+        receiptTransferEntity.setTransferredBy(res.getData().getUserData().getUserId());
         receiptTransferEntity.setDeleted(false);
         receiptTransferEntity.setTransferType(receiptTransferDtoRequest.getTransferType());
         receiptTransferEntity.setTransferMode(receiptTransferDtoRequest.getTransferMode());

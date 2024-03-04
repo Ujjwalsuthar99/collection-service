@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 import lombok.Data;
 
@@ -7,9 +8,10 @@ import java.util.Date;
 import java.util.List;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ReceiptTransferDtoRequest {
 
-    Long transferredBy;
+//    Long transferredBy;
     Boolean deleted;
     String transferType;
     String transferMode;

@@ -10,7 +10,7 @@ public class UserDetailDataByTokenDTO {
     private String userType;
 
     @JsonProperty("user_data")
-    private userDataDTO userData;
+    private UserDataDTO userData;
 
     @JsonProperty("client_id")
     private String clientId;

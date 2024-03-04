@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class userDataDTO {
+public class UserDataDTO {
 
     @JsonProperty("statusCode")
     private String statusCode;

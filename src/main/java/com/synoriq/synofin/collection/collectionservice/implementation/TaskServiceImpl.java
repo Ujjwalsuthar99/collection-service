@@ -70,9 +70,8 @@ public class TaskServiceImpl implements TaskService {
 //            Boolean piiPermission = rsaUtils.getPiiPermission();
             Boolean piiPermission = true;
             List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsByPages(userId, encryptionKey, password, piiPermission, pageRequest);
-
             if (pageNo > 0) {
-                if (taskDetailPages.size() == 0) {
+                if (taskDetailPages.isEmpty()) {
                     return new BaseDTOResponse<>(taskDetailPages);
                 }
             }

@@ -53,7 +53,8 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        when la.days_past_due between 121 and 150 then '#ffffff'\n" +
             "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
             "        else '#ffffff'\n" +
-            "    end) as dpd_text_color_key\n" +
+            "    end) as dpd_text_color_key,\n" +
+            "    COUNT(sr.service_request_id) OVER () AS total_rows\n" +
             "from\n" +
             "    lms.loan_application la\n" +
             "    join lms.customer_loan_mapping clm on la.loan_application_id = clm.loan_id\n" +
@@ -104,7 +105,8 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        when la.days_past_due between 121 and 150 then '#ffffff'\n" +
             "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
             "        else '#ffffff'\n" +
-            "    end) as dpd_text_color_key\n" +
+            "    end) as dpd_text_color_key,\n" +
+            "    COUNT(sr.service_request_id) OVER () AS total_rows\n" +
             "from\n" +
             "    lms.loan_application la\n" +
             "    join lms.customer_loan_mapping clm on la.loan_application_id = clm.loan_id\n" +
