@@ -13,6 +13,7 @@ public class GlobalVariables {
     public static final String CURRENT_APP_VERSION_ANDROID = "current_app_version_android";
     public static final String CHEQUE_COLLECTION_DEFAULT_LIMIT = "cheque_collection_default_limit";
     public static final String RECEIPT_TIME_VALIDATE = "duplicate_receipt_time_validation";
+    public static final String EMPLOYEE_MOBILE_NUMBER_VALIDATION = "employee_mobile_number_validation";
     public static final String MONTH_CASH_VALIDATION = "monthly_x_rupees_cash_collection";
     public static final String ONLINE_COLLECTION_DEFAULT_LIMIT = "online_collection_default_limit";
     public static final String CASH_COLLECTION_DEFAULT_LIMIT = "cash_collection_default_limit";
