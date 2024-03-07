@@ -2,12 +2,11 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.DashboardRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.LoanAllocationRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DashboardDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.service.DashboardService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +23,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Autowired
     private DashboardRepository dashboardRepository;
+
+    @Autowired
+    private LoanAllocationRepository loanAllocationRepository;
 
     @Autowired
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
@@ -52,6 +54,7 @@ public class DashboardServiceImpl implements DashboardService {
             Map<String, Object> cashInHandDataCounts = dashboardRepository.getCashInHandByUserIdByDuration(userId);
             Map<String, Object> chequeAmountData = dashboardRepository.getChequeByUserIdByDuration(userId);
             Map<String, Object> upiAmountData = dashboardRepository.getUpiByUserIdByDuration(userId);
+            int taskCountData = loanAllocationRepository.getCountByAllocatedToUserIdAndDeleted(userId);
             // cash in hand
             if (cashInHandDataCounts.isEmpty()) {
                 Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT));
@@ -106,6 +109,7 @@ public class DashboardServiceImpl implements DashboardService {
             dashboardResponseDTO.setChequeAmount(chequeAmountDashboardDTO);
             dashboardResponseDTO.setUpiAmount(upiAmountDashboardDTO);
             dashboardResponseDTO.setFollowUp(followUpDashboardDTO);
+            dashboardResponseDTO.setTaskCount(taskCountData);
             dashboardResponseDTO.setDepositReminder(false);
             String depositReminder = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER);
             if (Objects.equals(depositReminder, "hours")) {

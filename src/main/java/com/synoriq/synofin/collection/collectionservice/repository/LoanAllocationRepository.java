@@ -16,7 +16,8 @@ public interface LoanAllocationRepository extends JpaRepository<LoanAllocationEn
     List<LoanAllocationEntity> findByAllocatedToUserIdAndLoanId(Long userId, Long loanId);
     LoanAllocationEntity findByAllocatedToUserIdAndLoanIdAndDeleted(Long userId, Long loanId, boolean deleted);
     List<LoanAllocationEntity> getLoansByAllocatedToUserIdAndDeleted(Long allocatedToUserId, boolean deleted);
-
+    @Query(nativeQuery = true, value = "select count(la) from collection.loan_allocation la where la.allocated_to_user_id = :allocatedToUserId and la.deleted is false")
+    int getCountByAllocatedToUserIdAndDeleted(Long allocatedToUserId);
     List<Object> getLoansByLoanIdAndDeleted(Long loanId, boolean deleted);
 
     @Query(nativeQuery = true, value = "select\n" +

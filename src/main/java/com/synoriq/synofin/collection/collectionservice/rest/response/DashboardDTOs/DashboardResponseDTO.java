@@ -33,6 +33,9 @@ public class DashboardResponseDTO {
     @JsonProperty("amount_transfer_inprocess")
     private CommonCountDashboardDTO amountTransferInProcess;
 
+    @JsonProperty("task_count")
+    private int taskCount;
+
     @JsonProperty("deposit_reminder")
     private boolean depositReminder;
 
