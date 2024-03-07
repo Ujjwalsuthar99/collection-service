@@ -92,6 +92,9 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Autowired
     private ReceiptTransferService receiptTransferService;
 
+    @Autowired
+    private RegisteredDeviceInfoRepository registeredDeviceInfoRepository;
+
 
     @Override
     public BaseDTOResponse<Object> getReceiptsByUserIdWithDuration(String userName, String fromDate, String toDate, String searchKey, Integer page, Integer size) throws Exception {
@@ -170,9 +173,13 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         ReceiptServiceRequestDataDTO receiptServiceRequestDataDTO = new ReceiptServiceRequestDataDTO();
         try {
+
             String employeeMobileNumberValidation = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(EMPLOYEE_MOBILE_NUMBER_VALIDATION);
             if(!employeeMobileNumberValidation.equals("true")) {
-                throw new Exception("1016047");
+                String employeeMobileNumber = registeredDeviceInfoRepository.getEmployeeMobileNumber(receiptServiceDtoRequest.getCollectedFromNumber());
+                if(employeeMobileNumber != null) {
+                    throw new Exception("1016047");
+                }
             }
 
             // always in minutes
