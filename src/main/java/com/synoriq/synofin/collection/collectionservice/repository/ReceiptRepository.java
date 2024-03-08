@@ -37,7 +37,8 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\t\twhen sr.status = 'rejected' then '#FFCECC'\n" +
             "\t\twhen sr.status = 'initiated' then '#D0E1F7'\n" +
             "\t\telse '#FCEBDB'\n" +
-            "\tend) as status_bg_color_key\n" +
+            "\tend) as status_bg_color_key,\n" +
+            "sra.\"comment\" as action_remarks_from_lms\n" +
             "from\n" +
             "\tlms.service_request sr\n" +
             "join collection.collection_receipts cr on\n" +
@@ -54,6 +55,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tand clm.customer_type = 'applicant'\n" +
             "join lms.customer c on\n" +
             "\tclm.customer_id = c.customer_id\n" +
+            "join lms.service_request_action sra on sr.service_request_id = sra.service_request_id and sra.\"action_by\" = 'checker'\n" +
             "where\n" +
             "\tsr.request_source = 'm_collect'\n" +
             "\tand sr.created_by = (\n" +
@@ -258,12 +260,14 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "    when sr.status = 'rejected' then '#FFCECC'\n" +
             "    when sr.status = 'initiated' then '#D0E1F7'\n" +
             "    else '#FCEBDB'\n" +
-            "end) as status_bg_color_key\n" +
+            "end) as status_bg_color_key,\n" +
+            "sra.\"comment\" as action_remarks_from_lms\n" +
             "from lms.service_request sr \n" +
             "join collection.collection_receipts cr on cr.receipt_id = sr.service_request_id\n" +
             "join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id \n" +
             "join lms.customer_loan_mapping clm on clm.loan_id = sr.loan_id \n" +
             "join lms.customer c on clm.customer_id = c.customer_id \n" +
+            "join lms.service_request_action sra on sr.service_request_id = sra.service_request_id and sra.\"action_by\" = 'checker'\n" +
             "where clm.customer_type = 'applicant' and sr.request_source = 'm_collect' \n" +
             "and sr.created_by = (select user_id from master.users where username = :userName)\n" +
             "and (\n" +
