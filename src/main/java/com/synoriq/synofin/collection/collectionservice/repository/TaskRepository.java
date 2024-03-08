@@ -63,7 +63,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    left join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
-            "    and la.deleted = false\n" +
+            "    and la.deleted = false\n and la2.deleted = false\n" +
             "    and la.loan_status in ( 'active', 'maturity_closure')\n" +
             "    and la2.allocated_to_user_id = :userId\n" +
             "order by\n" +
@@ -115,7 +115,7 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "left join (select loan_id, vehicle_registration_no from lms.collateral_vehicle) as vehicle on vehicle.loan_id = la.loan_application_id \n" +
             "where\n" +
             "    clm.\"customer_type\" = 'applicant'\n" +
-            "    and la.deleted = false\n" +
+            "    and la.deleted = false\n and la2.deleted = false\n" +
             "    and la.loan_status in ( 'active', 'maturity_closure')\n" +
             "    and la2.allocated_to_user_id = :userId\n" +
             "    and (LOWER(concat_ws(' ', c.first_name, c.last_name)) like LOWER(concat('%', :searchKey,'%')) or LOWER(la.product) like LOWER(concat('%', :searchKey, '%')) or \n" +

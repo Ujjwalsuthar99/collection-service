@@ -90,7 +90,7 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
         List<Long> allocatedUserIds = loanAllocationMultiUsersDtoRequest.getAllocatedToUserId();
         List<Long> removeUserIds = loanAllocationMultiUsersDtoRequest.getRemovedUserId();
 
-        if(removeUserIds.size() > 0) {
+        if(!removeUserIds.isEmpty()) {
             for (Long removeUserId: removeUserIds) {
                 LoanAllocationEntity loanAllocation = loanAllocationRepository.findByAllocatedToUserIdAndLoanIdAndDeleted(removeUserId, loanAllocationMultiUsersDtoRequest.getLoanId(), false);
                 if (loanAllocation != null && !loanAllocation.getDeleted()) {
@@ -100,10 +100,10 @@ public class LoanAllocationServiceImpl implements LoanAllocationService {
             }
         }
 
-        if(allocatedUserIds.size() > 0) {
+        if(!allocatedUserIds.isEmpty()) {
             for (Long userId : allocatedUserIds) {
                 List<LoanAllocationEntity> loanAllocationList = loanAllocationRepository.findByAllocatedToUserIdAndLoanId(userId, loanAllocationMultiUsersDtoRequest.getLoanId());
-                if (loanAllocationList.size() > 0) {
+                if (!loanAllocationList.isEmpty()) {
                     for (LoanAllocationEntity loanAllocation : loanAllocationList) {
                         if (loanAllocation == null) {
                             LoanAllocationEntity loanAllocationEntity = new LoanAllocationEntity();
