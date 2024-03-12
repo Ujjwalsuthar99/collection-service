@@ -405,6 +405,7 @@ public class UtilityServiceImpl implements UtilityService {
         String userRefNo = "";
 
         String fileType = detectFileType(base64);
+        fileType = fileType.split("image/")[1];
         CurrentUserInfo currentUserInfo = new CurrentUserInfo();
         int randomNumber = (int) (100000 + Math.random() * 900000);
         switch (module) {
