@@ -128,8 +128,7 @@ public class UtilityController {
 
     @RequestMapping(value = "uploadImageOnS3", method = RequestMethod.POST)
     public ResponseEntity<Object> uploadImageOnS3(@RequestHeader("Authorization") String token, @RequestParam("image") MultipartFile imageData,
-                                                  @RequestParam("user_ref_no") String userRefNo,
-                                                  @RequestParam("file_name") String fileName,
+                                                  @RequestParam("module") String module,
                                                   @RequestParam("latitude") String latitude,
                                                   @RequestParam("longitude") String longitude) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
@@ -137,7 +136,7 @@ public class UtilityController {
         UploadImageOnS3ResponseDTO result;
 
         try {
-            result = utilityService.uploadImageOnS3(token, imageData, userRefNo, fileName, latitude, longitude);
+            result = utilityService.uploadImageOnS3(token, imageData, module, latitude, longitude);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
