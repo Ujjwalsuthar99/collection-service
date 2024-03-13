@@ -394,12 +394,48 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String userRefNo, String fileName, String latitude, String longitude) throws IOException {
+    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, String latitude, String longitude) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
 
         Base64.Encoder encoder = Base64.getEncoder();
         String base64 = encoder.encodeToString(imageData.getBytes());
+
+        String fileName = "";
+        String userRefNo = "";
+
+        String fileType = detectFileType(base64);
+        fileType = fileType.split("image/")[1];
+        CurrentUserInfo currentUserInfo = new CurrentUserInfo();
+        int randomNumber = (int) (100000 + Math.random() * 900000);
+        switch (module) {
+            case "follow_up":
+                fileName = randomNumber + "_" + new Date().getTime() + "_" + "_followup_image." + fileType;
+                userRefNo = "followUp/" + currentUserInfo.getCurrentUser().getUsername();
+                break;
+            case "create_receipt":
+                fileName = randomNumber + "_" + new Date().getTime() + "_" + "_create_receipt_image." + fileType;
+                userRefNo = "bankDepositSlip/" + currentUserInfo.getCurrentUser().getUsername();
+                break;
+            case "receipt_transfer":
+                fileName = randomNumber + "_" + new Date().getTime() + "_" + "_deposit_image." + fileType;
+                userRefNo = "depositSlip/" + currentUserInfo.getCurrentUser().getUsername();
+                break;
+            case "profile":
+                fileName = "collection_" + currentUserInfo.getClientId().toLowerCase() + "_logo.png";
+                userRefNo = "documents/logo";
+                break;
+            case "repossession_initiated_image":
+            case "repossession_yard_image":
+                fileName = randomNumber + "_" + new Date().getTime() + "_" + module + "." + fileType;
+                userRefNo = "repossession/" + currentUserInfo.getCurrentUser().getUsername();
+                break;
+            default:
+                fileName = "";
+                userRefNo = "";
+                break;
+        }
+
 
         UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO = new UploadImageOnS3RequestDTO();
         UploadImageOnS3DataRequestDTO uploadImageOnS3DataRequestDTO = new UploadImageOnS3DataRequestDTO();
@@ -410,7 +446,7 @@ public class UtilityServiceImpl implements UtilityService {
         uploadImageOnS3RequestDTO.setSystemId("collection");
         uploadImageOnS3RequestDTO.setUserReferenceNumber("");
         uploadImageOnS3RequestDTO.setSpecificPartnerName("");
-
+        log.info("uploadImageOnS3RequestDTO {}", uploadImageOnS3RequestDTO);
 
         try {
 
@@ -500,6 +536,33 @@ public class UtilityServiceImpl implements UtilityService {
             log.error("{}", ee.getMessage());
         }
         return res;
+    }
+
+    private String detectFileType(String base64String) {
+        byte[] decodedBytes = Base64.getDecoder().decode(base64String);
+
+        if (decodedBytes.length < 2) {
+            return "unknown";
+        }
+
+        byte byte1 = decodedBytes[0];
+        byte byte2 = decodedBytes[1];
+
+        if ((byte1 & 0xFF) == 0xFF && (byte2 & 0xFF) == 0xD8) {
+            return "image/jpeg";
+        } else if ((byte1 & 0xFF) == 0x89 && (byte2 & 0xFF) == 0x50) {
+            return "image/png";
+        } else if ((byte1 & 0xFF) == 0x47 && (byte2 & 0xFF) == 0x49) {
+            return "image/gif";
+        } else if ((byte1 & 0xFF) == 0x42 && (byte2 & 0xFF) == 0x4D) {
+            return "image/bmp";
+        } else if ((byte1 & 0xFF) == 0x1F && (byte2 & 0xFF) == 0x8B) {
+            return "application/gzip";
+        } else if ((byte1 & 0xFF) == 0x50 && (byte2 & 0xFF) == 0x4B) {
+            return "application/zip";
+        } else {
+            return "unknown";
+        }
     }
 
     @Override

@@ -1,11 +1,14 @@
 package com.synoriq.synofin.collection.collectionservice.config.oauth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.config.DatabaseContextHolder;
 import com.synoriq.synofin.master.entity.usersmgmt.UserEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -16,6 +19,10 @@ public class CurrentUserInfo {
         if (user == null) {
             OAuth2Authentication principal = (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
             log.info(principal.getOAuth2Request().getClientId());
+            UserEntity userEntity = new UserEntity();
+            Map<String, Object> detailsMap = new ObjectMapper().convertValue(principal.getUserAuthentication().getDetails(), Map.class);
+            userEntity.setUsername(String.valueOf(detailsMap.get("username")));
+            return userEntity;
         }
         return user;
     }
