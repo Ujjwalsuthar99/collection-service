@@ -1,7 +1,8 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.rest.request.FollowUpDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.followUpDTOs.FollowUpDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.followUpDTOs.FollowUpStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.FollowUpService;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_NUMBER;
@@ -20,6 +26,7 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @RestController
 @RequestMapping("/v1")
 @Slf4j
+@Validated
 public class FollowupRestController {
 
     @Autowired
@@ -114,6 +121,36 @@ public class FollowupRestController {
 
 
 
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "/followups/status", method = RequestMethod.PUT)
+    public ResponseEntity<Object> updateStatus(@Valid @RequestBody FollowUpStatusRequestDTO followUpDtoRequest, @RequestHeader("Authorization") String bearerToken) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response;
+
+        try {
+            baseResponse = followUpService.updateStatus(followUpDtoRequest, bearerToken);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+
+        } catch (MethodArgumentNotValidException ex) {
+            Map<String, String> errors = new HashMap<>();
+            ex.getBindingResult().getAllErrors().forEach((error) -> {
+                String fieldName = ((FieldError) error).getField();
+                String errorMessage = error.getDefaultMessage();
+                errors.put(fieldName, errorMessage);
+            });
+            baseResponse = new BaseDTOResponse<>(errors);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));

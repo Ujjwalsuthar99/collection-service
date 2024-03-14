@@ -64,7 +64,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\t\tmaster.users\n" +
             "\twhere\n" +
             "\t\tusername = :userName)\n" +
-            "\tand date(sr.form->>'date_of_receipt') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY')")
+            "\tand date(sr.form->>'date_of_receipt') between to_date(:fromDate, 'DD-MM-YYYY') and to_date(:toDate, 'DD-MM-YYYY') order by sr.created_date desc")
     List<Map<String, Object>> getReceiptsByUserIdWithDuration(@Param("userName") String userName, @Param("fromDate") String fromDate
             , @Param("toDate") String toDate, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageRequest);
 
@@ -273,7 +273,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "\tor LOWER(cast(sr.status as text)) like LOWER(concat('%', :searchKey, '%'))\n" +
             "\tor LOWER(sr.form->>'payment_mode') like LOWER(concat('%',:searchKey, '%'))\n" +
             "\tor LOWER(cast(sr.service_request_id as text)) like LOWER(concat('%', :searchKey, '%'))\n" +
-            ")")
+            ") order by sr.created_date desc")
     List<Map<String, Object>> getReceiptsBySearchKey(@Param("userName") String userName, @Param("searchKey") String searchKey, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageRequest);
 
     @Query(nativeQuery = true, value = "select\n" +
@@ -283,6 +283,9 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "where\n" +
             "\tsr.service_request_id=:receiptId")
     String getPaymentModeByReceiptId(@Param("receiptId") Long receiptId);
+
+    @Query(nativeQuery = true, value = "select sr.created_date as created_date from lms.service_request sr where sr.service_request_id = :receiptId and sr.loan_id = :loanId")
+    Map<String, Object> getServiceRequestDataById(Long receiptId, Long loanId);
 
     @Query(nativeQuery = true, value = "select \n" +
             "    sr.service_request_id,\n" +
