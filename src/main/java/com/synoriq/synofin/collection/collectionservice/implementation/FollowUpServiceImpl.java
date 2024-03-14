@@ -248,19 +248,22 @@ public class FollowUpServiceImpl implements FollowUpService {
                     if (currentMonth != createdDateMonth) {
                         throw new Exception("1016048");
                     }
+
+                    followUpEntity.get().setClosingRemarks(followUpStatusRequestDTO.getRemarks());
+                    followUpEntity.get().setServiceRequestId(followUpStatusRequestDTO.getServiceRequestId());
+                    followUpEntity.get().setFollowUpStatus(followUpStatusRequestDTO.getStatus());
+
+                    followUpRepository.save(followUpEntity.get());
+                    String updatedRemarks = CLOSE_FOLLOWUP;
+                    updatedRemarks = updatedRemarks.replace("{request_id}", followUpEntity.get().getFollowupId().toString());
+                    updatedRemarks = updatedRemarks.replace("{loan_number}", followUpEntity.get().getLoanId().toString());
+                    followUpStatusRequestDTO.getActivityLog().setRemarks(updatedRemarks);
+
+                    // creating activity logs
+                    activityLogService.createActivityLogs(followUpStatusRequestDTO.getActivityLog(), token);
+                } else {
+                    throw new Exception("1016049");
                 }
-                followUpEntity.get().setClosingRemarks(followUpStatusRequestDTO.getRemarks());
-                followUpEntity.get().setServiceRequestId(followUpStatusRequestDTO.getServiceRequestId());
-                followUpEntity.get().setFollowUpStatus(followUpStatusRequestDTO.getStatus());
-
-                followUpRepository.save(followUpEntity.get());
-                String updatedRemarks = CLOSE_FOLLOWUP;
-                updatedRemarks = updatedRemarks.replace("{request_id}", followUpEntity.get().getFollowupId().toString());
-                updatedRemarks = updatedRemarks.replace("{loan_number}", followUpEntity.get().getLoanId().toString());
-                followUpStatusRequestDTO.getActivityLog().setRemarks(updatedRemarks);
-
-                // creating activity logs
-                activityLogService.createActivityLogs(followUpStatusRequestDTO.getActivityLog(), token);
             } else {
                 throw new Exception("1016025");
             }

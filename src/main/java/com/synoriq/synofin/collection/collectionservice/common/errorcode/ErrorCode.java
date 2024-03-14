@@ -198,7 +198,8 @@ public enum ErrorCode {
     TRANSACTION_IS_ALREADY_GOT_SUCCESSFUL(1016045, "The transaction has been already successfully updated"),
     REPOSSESSION_ALREADY_INITIATED(1016046, "Repossession already initiated for this loan"),
     EMPLOYEE_MOBILE_NUMBER_VALIDATION(1016047, "Mobile number is already registered with our employee database"),
-    FOLLOWUP_CLOSE_DATE_VALIDATION(1016048, "Can't Close the followup as the receipt is of previous month");
+    FOLLOWUP_CLOSE_DATE_VALIDATION(1016048, "Can't Close the followup as the receipt is of previous month"),
+    RECEIPT_ID_NOT_FOUND(1016049, "Receipt id not there for this loan Id");
     private Integer codeValue;
     private String responseMessage;
 
