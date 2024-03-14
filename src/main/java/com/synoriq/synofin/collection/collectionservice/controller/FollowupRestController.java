@@ -133,7 +133,7 @@ public class FollowupRestController {
     }
 
     @RequestMapping(value = "/followups/status", method = RequestMethod.PUT)
-    public ResponseEntity<Object> updateStatus(@Valid @RequestBody FollowUpStatusRequestDTO followUpDtoRequest, @RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<Object> updateStatus(@Valid @RequestBody FollowUpStatusRequestDTO followUpDtoRequest, @RequestHeader("Authorization") String bearerToken) throws Exception {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
@@ -141,16 +141,6 @@ public class FollowupRestController {
         try {
             baseResponse = followUpService.updateStatus(followUpDtoRequest, bearerToken);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-
-        } catch (MethodArgumentNotValidException ex) {
-            Map<String, String> errors = new HashMap<>();
-            ex.getBindingResult().getAllErrors().forEach((error) -> {
-                String fieldName = ((FieldError) error).getField();
-                String errorMessage = error.getDefaultMessage();
-                errors.put(fieldName, errorMessage);
-            });
-            baseResponse = new BaseDTOResponse<>(errors);
-            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
