@@ -1300,9 +1300,12 @@ public class UtilityServiceImpl implements UtilityService {
     @Override
     public BaseDTOResponse<Object> employeeMobileNumberValidator(String token, String mobileNumber) throws Exception {
         try {
-            String employeeMobileNumber = registeredDeviceInfoRepository.getEmployeeMobileNumber(mobileNumber);
-            if(!Objects.equals(employeeMobileNumber, null)) {
-                return new BaseDTOResponse<>("Match Found");
+            String mobileNumberValidationConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(EMPLOYEE_MOBILE_NUMBER_VALIDATION);
+            if(mobileNumberValidationConf.equals("true")) {
+                String employeeMobileNumber = registeredDeviceInfoRepository.getEmployeeMobileNumber(mobileNumber);
+                if(!Objects.equals(employeeMobileNumber, null)) {
+                    return new BaseDTOResponse<>("Match Found");
+                }
             }
         } catch (Exception e) {
             log.error("{}", e.getMessage());
