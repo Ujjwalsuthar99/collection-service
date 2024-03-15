@@ -46,4 +46,13 @@ public class FollowUpEntity {
 
     @Column(name = "collection_activity_logs_id")
     private Long collectionActivityLogsId;
+
+    @Column(name = "followup_status")
+    private String followUpStatus;
+
+    @Column(name = "closing_remarks")
+    private String closingRemarks;
+
+    @Column(name = "service_request_id")
+    private Long serviceRequestId;
 }

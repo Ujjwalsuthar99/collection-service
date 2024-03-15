@@ -8,11 +8,12 @@ import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivit
 import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.FollowUpRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.request.FollowUpDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.request.followUpDTOs.FollowUpDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.FollowUpResponseDTO.FollowUpCustomDataResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.followUpDTOs.FollowUpStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.FollowUpResponseDTO.FollowUpDataResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferCustomDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.FollowupResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
 import com.synoriq.synofin.collection.collectionservice.service.FollowUpService;
@@ -24,10 +25,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
-import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_FOLLOWUP;
+import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.*;
 
 @Service
 @Slf4j
@@ -42,6 +47,8 @@ public class FollowUpServiceImpl implements FollowUpService {
     @Autowired
     FollowUpRepository followUpRepository;
     @Autowired
+    ReceiptRepository receiptRepository;
+    @Autowired
     CollectionActivityLogsRepository collectionActivityLogsRepository;
     @Autowired
     ActivityLogService activityLogService;
@@ -55,7 +62,7 @@ public class FollowUpServiceImpl implements FollowUpService {
         FollowUpEntity followUpEntity = followUpRepository.findByFollowupId(followupById);
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         if(followUpEntity != null){
-
+//            FollowupResponseDTO.builder().followUpId(followUpEntity.getFollowupId()).followUpReason().otherFollowupReason().loanId().remarks().createdBy().
             followupResponseDTO.setFollowUpId(followUpEntity.getFollowupId());
             followupResponseDTO.setFollowUpReason(followUpEntity.getFollowUpReason());
             followupResponseDTO.setOtherFollowupReason(followUpEntity.getOtherFollowUpReason());
@@ -186,6 +193,7 @@ public class FollowUpServiceImpl implements FollowUpService {
             followUpEntity.setIsDeleted(false);
             followUpEntity.setCreatedDate(new Date());
             followUpEntity.setCreatedBy(followUpDtoRequest.getCreatedBy());
+            followUpEntity.setFollowUpStatus(followUpDtoRequest.getStatus());
 
             followUpEntity.setFollowUpReason(followUpDtoRequest.getFollowUpReason());
             followUpEntity.setOtherFollowUpReason(followUpDtoRequest.getOtherFollowupReason());
@@ -198,7 +206,7 @@ public class FollowUpServiceImpl implements FollowUpService {
 
             CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityLogsId);
             String remarks = collectionActivityLogsEntity1.getRemarks();
-            String updatedRemarks = CREATE_FOLLOWUP;
+            String updatedRemarks = Objects.equals(followUpDtoRequest.getStatus(), "pending") ? CREATE_FOLLOWUP : RESCHEDULE_FOLLOWUP;
             updatedRemarks = updatedRemarks.replace("{request_id}", followUpEntity.getFollowupId().toString());
             updatedRemarks = updatedRemarks.replace("{loan_number}", followUpDtoRequest.getLoanId().toString());
             updatedRemarks = updatedRemarks + remarks;
@@ -213,6 +221,58 @@ public class FollowUpServiceImpl implements FollowUpService {
         }
         return baseResponse;
 
+    }
+
+
+    @Override
+    @Transactional(rollbackOn = RuntimeException.class)
+    public BaseDTOResponse<Object> updateStatus(FollowUpStatusRequestDTO followUpStatusRequestDTO, String token) throws Exception {
+        try {
+            Optional<FollowUpEntity> followUpEntity = followUpRepository.findById(followUpStatusRequestDTO.getFollowUpId());
+            if (followUpEntity.isPresent()) {
+                Map<String, Object> receiptExist = receiptRepository.getServiceRequestDataById(followUpStatusRequestDTO.getServiceRequestId(), followUpStatusRequestDTO.getLoanId());
+                if (receiptExist.size() > 0) {
+
+                    // receipt created date
+                    Date date = (Date) receiptExist.get("created_date");
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(date);
+                    int createdDateMonth = cal.get(Calendar.MONTH);
+
+                    // current date
+                    Date toDay = new Date();
+                    Calendar currentCalendar = Calendar.getInstance();
+                    currentCalendar.setTime(toDay);
+                    int currentMonth = currentCalendar.get(Calendar.MONTH);
+
+                    if (currentMonth != createdDateMonth) {
+                        throw new Exception("1016048");
+                    }
+
+                    followUpEntity.get().setClosingRemarks(followUpStatusRequestDTO.getRemarks());
+                    followUpEntity.get().setServiceRequestId(followUpStatusRequestDTO.getServiceRequestId());
+                    followUpEntity.get().setFollowUpStatus(followUpStatusRequestDTO.getStatus());
+
+                    followUpRepository.save(followUpEntity.get());
+                    String updatedRemarks = CLOSE_FOLLOWUP;
+                    updatedRemarks = updatedRemarks.replace("{request_id}", followUpEntity.get().getFollowupId().toString());
+                    updatedRemarks = updatedRemarks.replace("{loan_number}", followUpEntity.get().getLoanId().toString());
+                    followUpStatusRequestDTO.getActivityLog().setRemarks(updatedRemarks);
+
+                    // creating activity logs
+                    activityLogService.createActivityLogs(followUpStatusRequestDTO.getActivityLog(), token);
+                } else {
+                    throw new Exception("1016049");
+                }
+            } else {
+                throw new Exception("1016025");
+            }
+
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+
+        return new BaseDTOResponse<>("Updated Successfully");
     }
 
     private Date checkToDate(Date toDate) {
