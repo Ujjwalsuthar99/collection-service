@@ -1,8 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -10,6 +9,9 @@ import java.util.Date;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class FollowupResponseDTO {
 
     @JsonProperty("followup_id")

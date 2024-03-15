@@ -62,7 +62,7 @@ public class FollowUpServiceImpl implements FollowUpService {
         FollowUpEntity followUpEntity = followUpRepository.findByFollowupId(followupById);
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         if(followUpEntity != null){
-
+//            FollowupResponseDTO.builder().followUpId(followUpEntity.getFollowupId()).followUpReason().otherFollowupReason().loanId().remarks().createdBy().
             followupResponseDTO.setFollowUpId(followUpEntity.getFollowupId());
             followupResponseDTO.setFollowUpReason(followUpEntity.getFollowUpReason());
             followupResponseDTO.setOtherFollowupReason(followUpEntity.getOtherFollowUpReason());

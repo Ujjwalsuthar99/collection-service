@@ -78,6 +78,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "f.loan_id as loanId,\n" +
             "la.loan_application_number as loan_number,\n" +
             "f.created_by as created_by, \n" +
+            "f.status as status, \n" +
             "date(f.created_date) as created_date,\n" +
             "f.followup_reason as followup_reason,\n" +
             "date(f.next_followup_datetime) as next_followup_date,\n" +
@@ -129,6 +130,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "f.loan_id as loanId,\n" +
             "la.loan_application_number as loan_number,\n" +
             "f.created_by as created_by, \n" +
+            "f.status as status, \n" +
             "date(f.created_date) as created_date,\n" +
             "f.followup_reason as followup_reason,\n" +
             "date(f.next_followup_datetime) as next_followup_date,\n" +
