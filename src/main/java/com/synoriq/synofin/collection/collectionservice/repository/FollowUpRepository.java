@@ -78,7 +78,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "f.loan_id as loanId,\n" +
             "la.loan_application_number as loan_number,\n" +
             "f.created_by as created_by, \n" +
-            "f.status as status, \n" +
+            "f.status as followup_status, \n" +
             "date(f.created_date) as created_date,\n" +
             "f.followup_reason as followup_reason,\n" +
             "date(f.next_followup_datetime) as next_followup_date,\n" +
@@ -130,7 +130,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "f.loan_id as loanId,\n" +
             "la.loan_application_number as loan_number,\n" +
             "f.created_by as created_by, \n" +
-            "f.status as status, \n" +
+            "f.status as followup_status, \n" +
             "date(f.created_date) as created_date,\n" +
             "f.followup_reason as followup_reason,\n" +
             "date(f.next_followup_datetime) as next_followup_date,\n" +
@@ -187,6 +187,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "f.next_followup_datetime as next_followup_date,\n" +
             "f.other_followup_reason as other_followup_reason,\n" +
             "f.remarks as remarks,\n" +
+            "f.status as followup_status, \n" +
             "la.days_past_due as dpd,\n" +
             "    (case\n" +
             "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
