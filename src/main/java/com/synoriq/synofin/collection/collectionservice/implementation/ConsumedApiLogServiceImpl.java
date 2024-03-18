@@ -33,7 +33,7 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
         log.info("create cionsumed log here");
 
         String apiType = logName.name().equals("kafka_activity") ? "KAFKA" : httpServletRequest.getMethod();
-        String endPoint = utilityService.getApiUrl("kafka");
+        String endPoint = logName.name().equals("kafka_activity") ? utilityService.getApiUrl("kafka") : utilityService.getApiUrl();
 
         log.info("create cionsumed log here");
 
