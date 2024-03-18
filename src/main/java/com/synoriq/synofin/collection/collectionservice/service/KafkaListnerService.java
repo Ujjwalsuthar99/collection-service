@@ -158,8 +158,10 @@ public class KafkaListnerService {
                     response.put("pendingCount", pendingCount);
                     response.put("restApprovedReceipts", restApprovedReceipts);
                     response.put("totalReceiptCountFromReceiptTransfer", totalReceiptCountFromReceiptTransfer);
+                    log.info("response {}", response);
                     consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.kafka_activity, userId, messageObject, response, "success", loanId);
 
+                    log.info("end consumedApiLog");
                 } else {
                     log.info("receipt transfer id not found");
                 }

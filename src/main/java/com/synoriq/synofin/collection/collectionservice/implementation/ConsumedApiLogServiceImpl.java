@@ -30,8 +30,11 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
     @Override
     public void createConsumedApiLog(EnumSQLConstants.LogNames logName, Long userId, Object requestBody, Object responseBody, String responseStatus, Long loanId) {
 
-        String apiType = httpServletRequest.getMethod();
-        String endPoint = utilityService.getApiUrl();
+        log.info("create cionsumed log here");
+        log.info("httpServletRequest.getMethod() {}", httpServletRequest.getMethod());
+
+        String apiType = httpServletRequest.getMethod() != null ? httpServletRequest.getMethod() : "KAFKA";
+        String endPoint = utilityService.getApiUrl("kafka");
 
         log.info("create cionsumed log here");
 

@@ -339,6 +339,16 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
+    public String getApiUrl(String type) {
+        if (Objects.equals(springProfile, "pre-prod")) {
+            springProfile = "preprod";
+        }
+        String queryString = "kafka";
+        log.info("queryString {}", queryString);
+        return "https://api-" + springProfile + ".synofin.tech" + queryString;
+    }
+
+    @Override
     public Object getBankNameByIFSC(String keyword) throws Exception {
 
         Object res = new Object();
