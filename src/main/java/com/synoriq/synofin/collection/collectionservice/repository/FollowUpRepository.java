@@ -189,6 +189,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "f.remarks as remarks,\n" +
             "f.followup_status as status, \n" +
             "la.days_past_due as dpd,\n" +
+            "la.loan_application_number as loan_application_number,\n" +
             "    (case\n" +
             "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
             "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
@@ -219,7 +220,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "    CAST(cal.geo_location_data as TEXT) as geo_location_data,\n" +
             "    CAST(cal.images as TEXT) as images\n" +
             "             from collection.followups f \n" +
-            "            join (select loan_application_id ,days_past_due from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
+            "            join (select loan_application_id, loan_application_number, days_past_due from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
             "            join (select loan_id, customer_id from lms.customer_loan_mapping where customer_type = 'applicant') as clm on clm.loan_id  = la.loan_application_id \n" +
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id\n" +
             "           join (select collection_activity_logs_id, geo_location_data, images from collection.collection_activity_logs) as cal on cal.collection_activity_logs_id  = f.collection_activity_logs_id\n" +
