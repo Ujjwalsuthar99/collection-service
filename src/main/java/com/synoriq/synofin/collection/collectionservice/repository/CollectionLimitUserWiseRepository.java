@@ -27,5 +27,7 @@ public interface CollectionLimitUserWiseRepository extends JpaRepository<Collect
             "and deleted is false")
     List<CollectionLimitUserWiseEntity> getAllCollectionLimitUserWiseByUserId(@Param("userId") Long userId);
 
+    @Query(nativeQuery = true, value = "select cast(u.username as text) as name from master.users u where u.user_id = :userId")
+    public String getUserNameFromUser(@Param("userId") Long userId);
 
 }

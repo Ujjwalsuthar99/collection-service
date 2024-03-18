@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.DatabaseContextHolder;
 import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
@@ -42,10 +43,13 @@ public class KafkaListnerService {
     @Autowired
     private ReceiptTransferRepository receiptTransferRepository;
 
+    @Autowired
+    private ConsumedApiLogService consumedApiLogService;
+
     @KafkaListener(topics = "${spring.kafka.events.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "${spring.kafka.groupId}")
     public void consumerTest(@Payload MessageContainerTemplate message, @Headers MessageHeaders headers, Acknowledgment acknowledgment) {
         try {
-//            changeAnnotationValue();
+
             log.info("client id in kafka {}", message.getClientId());
             DatabaseContextHolder.set(message.getClientId());
             log.info("message datatatatat ->  {}", message.getMessage());
@@ -53,87 +57,111 @@ public class KafkaListnerService {
             log.info("message object, {}", messageObject);
             log.info("messageObject.getUserId() {}", messageObject.getUserId());
             log.info("messageObject.getPaymentMode() {}", messageObject.getPaymentMode());
+            log.info("service request id {}", messageObject.getServiceRequestId());
 
-            Long userId = 0L;
-            CollectionReceiptEntity collectionReceiptEntity = collectionReceiptRepository.findByReceiptId(messageObject.getServiceRequestId());
-            log.info("collectionReceiptEntity1 {}", collectionReceiptEntity);
-            if (collectionReceiptEntity != null) {
-                userId = collectionReceiptEntity.getReceiptHolderUserId();
+            double loanAmount = messageObject.getReceiptAmount();
+            long receiptId = messageObject.getServiceRequestId();
+            String status = messageObject.getStatus();
+            String paymentMode = messageObject.getPaymentMode();
+            long userId = 0;
+            String userName = "";
+            boolean isDepositHit = false;
+            Map<String, Object> response = new HashMap<>();
+
+            // checking this receipt id is already processed or not
+            CollectionActivityLogsEntity checkCollectionActivityLogsEntity = collectionActivityLogsRepository.getActivityLogsKafkaByReceiptId(String.valueOf(receiptId));
+            log.info("checkCollectionActivityLogsEntity {}", checkCollectionActivityLogsEntity);
+
+            Optional<CollectionReceiptEntity> collectionReceiptEntity = Optional.ofNullable(collectionReceiptRepository.findByReceiptId(receiptId));
+            log.info("collectionReceiptEntity {}", collectionReceiptEntity);
+            if (collectionReceiptEntity.isPresent()) {
+                userId = collectionReceiptEntity.get().getReceiptHolderUserId();
+                userName = collectionLimitUserWiseRepository.getUserNameFromUser(userId);
             }
 
-            CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.findByUserIdAndCollectionLimitStrategiesKey(userId, messageObject.getPaymentMode());
+            Optional<CollectionLimitUserWiseEntity> collectionLimitUser = Optional.ofNullable(collectionLimitUserWiseRepository.findByUserIdAndCollectionLimitStrategiesKey(userId, paymentMode));
             log.info("collection limit user wise surpassed {}", collectionLimitUser);
-//            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
-            log.info("service request id {}", messageObject.getServiceRequestId());
-            Map<String, Object> loanIdByServiceId = receiptRepository.getLoanIdByServiceId(messageObject.getServiceRequestId());
-            Long loanId = Long.valueOf(loanIdByServiceId.get("loanId").toString());
+            // getting some data of receipt id
+            Map<String, Object> loanIdByServiceId = receiptRepository.getLoanIdByServiceId(receiptId);
+
+            // loanId & serviceRequestTypeString
+            long loanId = Long.parseLong(loanIdByServiceId.get("loanId").toString());
             String serviceRequestTypeString = String.valueOf(loanIdByServiceId.get("service_request_type_string"));
 
-            log.info("check service request, {}", collectionReceiptEntity);
 
-            CollectionActivityLogsEntity checkCollectionActivityLogsEntity = collectionActivityLogsRepository.getActivityLogsKafkaByReceiptId(String.valueOf(messageObject.getServiceRequestId()));
-            log.info("checkCollectionActivityLogsEntity {}", checkCollectionActivityLogsEntity);
-            if (collectionLimitUser != null && collectionReceiptEntity != null && checkCollectionActivityLogsEntity == null) {
+
+            if (collectionLimitUser.isPresent() && collectionReceiptEntity.isPresent() && checkCollectionActivityLogsEntity == null) {
                 if(serviceRequestTypeString.equals("receipt")) {
-                    if(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())) < 0 ) {
-                        log.info("in iff for limit minus check {}", collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
-                        collectionLimitUser.setUtilizedLimitValue(0D);
+                    if(collectionLimitUser.get().getUtilizedLimitValue() - loanAmount < 0) {
+                        log.info("iff limit check {}", collectionLimitUser.get().getUtilizedLimitValue() - loanAmount);
+                        collectionLimitUser.get().setUtilizedLimitValue(0D);
                     } else {
-                        log.info("in else for limit minus check {}", collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
-                        collectionLimitUser.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() - Double.parseDouble(String.valueOf(messageObject.getReceiptAmount())));
+                        log.info("else limit check {}", collectionLimitUser.get().getUtilizedLimitValue() - loanAmount);
+                        collectionLimitUser.get().setUtilizedLimitValue(collectionLimitUser.get().getUtilizedLimitValue() - loanAmount);
                     }
-                    collectionLimitUser.setUserName(messageObject.getUserName());
-                    log.info("collection limit user wise entity {}", collectionLimitUser);
-                    collectionLimitUserWiseRepository.save(collectionLimitUser);
+                    collectionLimitUser.get().setUserName(userName);
+                    log.info("collectionLimitUserWise entity {}", collectionLimitUser);
+                    collectionLimitUserWiseRepository.save(collectionLimitUser.get());
                 }
+                // activity creating
+                createActivityLogs(messageObject.getUserId(), status, receiptId, loanId);
 
-                CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
-                collectionActivityLogsEntity.setActivityBy(messageObject.getUserId());
-                String updatedRemarks = KAFKA_RECEIPT_STATUS;
-                updatedRemarks = updatedRemarks.replace("{status}", messageObject.getStatus());
-                updatedRemarks = updatedRemarks.replace("{receipt_id}", String.valueOf(messageObject.getServiceRequestId()));
-                collectionActivityLogsEntity.setRemarks(updatedRemarks);
-                collectionActivityLogsEntity.setActivityDate(new Date());
-                collectionActivityLogsEntity.setActivityName("receipt_" + messageObject.getStatus());
-                collectionActivityLogsEntity.setDeleted(false);
-                collectionActivityLogsEntity.setLoanId(loanId);
-                collectionActivityLogsEntity.setDistanceFromUserBranch(0.0);
-                collectionActivityLogsEntity.setAddress("{}");
-                collectionActivityLogsEntity.setImages(null);
-                collectionActivityLogsEntity.setGeolocation("{}");
-                collectionActivityLogsRepository.save(collectionActivityLogsEntity);
-
-                Long currentTotalReceiptsCount = 0L;
+                Long restApprovedReceipts = 0L;
                 // find the receipt transfer id in which this current receipt lies
-                Long receiptTransferId = receiptTransferHistoryRepository.getReceiptTransferIdUsingReceiptId(messageObject.getServiceRequestId());
+                Long receiptTransferId = receiptTransferHistoryRepository.getReceiptTransferIdUsingReceiptId(receiptId);
+
                 log.info("receiptTransferId {}", receiptTransferId);
-                // find the total number of receipts lies within the receipt transfer id
-                Long totalReceiptCountFromReceiptTransfer = receiptTransferHistoryRepository.getReceiptCountFromReceiptTransfer(receiptTransferId);
-                log.info("totalReceiptCountFromReceiptTransfer {}", totalReceiptCountFromReceiptTransfer);
-                // find the number of approved receipts within the receipt transfer and add the current receipt id count to it
+                if (receiptTransferId != null) {
 
-                List<Map<String, Object>> receiptHistoryCount = receiptTransferHistoryRepository.getDepositPendingReceipt(receiptTransferId);
-                log.info("receiptHistoryCount {}", Collections.singletonList(receiptHistoryCount));
-                log.info("receiptHistoryCount {}", Arrays.asList(receiptHistoryCount));
-                log.info("receiptHistoryCount {}", receiptHistoryCount);
+                    // find the total number of receipts lies within the receipt transfer id
+                    Long totalReceiptCountFromReceiptTransfer = receiptTransferHistoryRepository.getReceiptCountFromReceiptTransfer(receiptTransferId);
+                    log.info("totalReceiptCountFromReceiptTransfer {}", totalReceiptCountFromReceiptTransfer);
 
-                log.info("receiptHistoryCount.size() {}", receiptHistoryCount.size());
-                // add the condition where will compare the approved count with total number of receipts
 
-                currentTotalReceiptsCount += receiptHistoryCount.size();
+                    // find the number of approved receipts within the receipt transfer and add the current receipt id count to it
+                    int approvedCount = 0;
+                    int pendingCount = 0;
+                    List<Map<String, Object>> receiptHistoryList = receiptTransferHistoryRepository.getDepositPendingReceipt(receiptTransferId);
+                    for (Map<String, Object> mp : receiptHistoryList) {
+                        if (Objects.equals(mp.get("service_request_id"), receiptId) && Objects.equals(mp.get("status"), "pending") && status.equals("approved")) {
+                            pendingCount++;
+                            log.info("in pending count {}", pendingCount);
+                        } else if (Objects.equals(mp.get("service_request_id"), receiptId) && Objects.equals(mp.get("status"), "approved") && status.equals("approved")) {
+                            approvedCount++;
+                            log.info("in approve count {}", approvedCount);
+                        } else if (status.equals("approved")) {
+                            restApprovedReceipts++;
+                            log.info("restApprovedReceipts {}", restApprovedReceipts);
+                            log.info("receiptId and receiptStatus {}", mp);
+                        }
+                    }
 
-                log.info("currentTotalReceiptsCount {}", currentTotalReceiptsCount);
+                    // 2 += 0 + 1/ 1 + 0
+                    restApprovedReceipts += pendingCount + approvedCount;
+                    log.info("restApprovedReceiptsrestApprovedReceiptsrestApprovedReceipts {}", restApprovedReceipts);
 
-                // if the total number of receipts are equal to the approved counts then only will approve the receipt transfer
+                    // if the total number of receipts are equal to the approved counts then only will approve the receipt transfer
 
-                if (currentTotalReceiptsCount.equals(totalReceiptCountFromReceiptTransfer)) {
-                    log.info("in ifffff");
-                    ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(receiptTransferId);
-                    receiptTransferEntity.setStatus("approved");
-                    receiptTransferEntity.setActionBy(messageObject.getUserId());
-                    receiptTransferEntity.setActionDatetime(new Date());
-                    receiptTransferRepository.save(receiptTransferEntity);
+                    if (restApprovedReceipts.equals(totalReceiptCountFromReceiptTransfer)) {
+                        log.info("in ifffff");
+                        isDepositHit = true;
+                        ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(receiptTransferId);
+                        receiptTransferEntity.setStatus("approved");
+                        receiptTransferEntity.setActionBy(messageObject.getUserId());
+                        receiptTransferEntity.setActionDatetime(new Date());
+                        receiptTransferRepository.save(receiptTransferEntity);
+                    }
+
+                    response.put("isDepositHit", isDepositHit);
+                    response.put("approvedCount", approvedCount);
+                    response.put("pendingCount", pendingCount);
+                    response.put("restApprovedReceipts", restApprovedReceipts);
+                    response.put("totalReceiptCountFromReceiptTransfer", totalReceiptCountFromReceiptTransfer);
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.kafka_activity, userId, messageObject, response, "success", loanId);
+
+                } else {
+                    log.info("receipt transfer id not found");
                 }
 
                 log.info(" ---------- Things acknowledged -------------");
@@ -142,5 +170,24 @@ public class KafkaListnerService {
         } catch (Exception ee) {
             ee.printStackTrace();
         }
+    }
+    public void createActivityLogs(long userId, String status, long receiptId, long loanId) {
+        log.info("begin createActivityLogs");
+        CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+        collectionActivityLogsEntity.setActivityBy(userId);
+        String updatedRemarks = KAFKA_RECEIPT_STATUS;
+        updatedRemarks = updatedRemarks.replace("{status}", status);
+        updatedRemarks = updatedRemarks.replace("{receipt_id}", String.valueOf(receiptId));
+        collectionActivityLogsEntity.setRemarks(updatedRemarks);
+        collectionActivityLogsEntity.setActivityDate(new Date());
+        collectionActivityLogsEntity.setActivityName("receipt_" + status);
+        collectionActivityLogsEntity.setDeleted(false);
+        collectionActivityLogsEntity.setLoanId(loanId);
+        collectionActivityLogsEntity.setDistanceFromUserBranch(0.0);
+        collectionActivityLogsEntity.setAddress("{}");
+        collectionActivityLogsEntity.setImages(null);
+        collectionActivityLogsEntity.setGeolocation("{}");
+        collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+        log.info("end createActivityLogs");
     }
 }

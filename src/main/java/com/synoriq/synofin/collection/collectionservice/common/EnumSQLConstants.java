@@ -33,7 +33,8 @@ public class EnumSQLConstants {
         verify_otp,
         resend_otp,
         lms_repossession,
-        qr_callback;
+        qr_callback,
+        kafka_activity;
 
 
         private LogNames() {
