@@ -58,6 +58,7 @@ public class KafkaListnerService {
             log.info("messageObject.getUserId() {}", messageObject.getUserId());
             log.info("messageObject.getPaymentMode() {}", messageObject.getPaymentMode());
             log.info("service request id {}", messageObject.getServiceRequestId());
+            log.info("servi id {}", messageObject.getReceiptAmount());
 
             double loanAmount = messageObject.getReceiptAmount();
             long receiptId = messageObject.getServiceRequestId();
@@ -69,9 +70,11 @@ public class KafkaListnerService {
             Map<String, Object> response = new HashMap<>();
 
             // checking this receipt id is already processed or not
+            log.info("1");
             CollectionActivityLogsEntity checkCollectionActivityLogsEntity = collectionActivityLogsRepository.getActivityLogsKafkaByReceiptId(String.valueOf(receiptId));
             log.info("checkCollectionActivityLogsEntity {}", checkCollectionActivityLogsEntity);
 
+            log.info("2");
             Optional<CollectionReceiptEntity> collectionReceiptEntity = Optional.ofNullable(collectionReceiptRepository.findByReceiptId(receiptId));
             log.info("collectionReceiptEntity {}", collectionReceiptEntity);
             if (collectionReceiptEntity.isPresent()) {
@@ -79,12 +82,14 @@ public class KafkaListnerService {
                 userName = collectionLimitUserWiseRepository.getUserNameFromUser(userId);
             }
 
+            log.info("3");
             Optional<CollectionLimitUserWiseEntity> collectionLimitUser = Optional.ofNullable(collectionLimitUserWiseRepository.findByUserIdAndCollectionLimitStrategiesKey(userId, paymentMode));
             log.info("collection limit user wise surpassed {}", collectionLimitUser);
 
             // getting some data of receipt id
             Map<String, Object> loanIdByServiceId = receiptRepository.getLoanIdByServiceId(receiptId);
 
+            log.info("4");
             // loanId & serviceRequestTypeString
             long loanId = Long.parseLong(loanIdByServiceId.get("loanId").toString());
             String serviceRequestTypeString = String.valueOf(loanIdByServiceId.get("service_request_type_string"));
