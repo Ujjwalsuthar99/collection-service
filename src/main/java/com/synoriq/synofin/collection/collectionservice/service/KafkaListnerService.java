@@ -132,6 +132,7 @@ public class KafkaListnerService {
                     int approvedCount = 0;
                     int pendingCount = 0;
                     List<Map<String, Object>> receiptHistoryList = receiptTransferHistoryRepository.getDepositPendingReceipt(receiptTransferId);
+                    log.info("receiptHistoryList {}", receiptHistoryList);
                     for (Map<String, Object> mp : receiptHistoryList) {
                         log.info("map data {}", mp);
                         if (Objects.equals(Long.parseLong(String.valueOf(mp.get("service_request_id"))), receiptId) && Objects.equals(String.valueOf(mp.get("status")), "pending") && status.equals("approved")) {
