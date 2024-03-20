@@ -30,12 +30,10 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
     @Override
     public void createConsumedApiLog(EnumSQLConstants.LogNames logName, Long userId, Object requestBody, Object responseBody, String responseStatus, Long loanId) {
 
-        log.info("create cionsumed log here");
+        log.info("create consumed log start");
 
         String apiType = logName.name().equals("kafka_activity") ? "KAFKA" : httpServletRequest.getMethod();
         String endPoint = logName.name().equals("kafka_activity") ? utilityService.getApiUrl("kafka") : utilityService.getApiUrl();
-
-        log.info("create cionsumed log here");
 
         if (userId == null) {
             userId = 0L;
@@ -64,6 +62,6 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
 
         consumedApiLogRepository.save(consumedApiLogsEntity);
 
-        log.info("log created successfully {}", consumedApiLogsEntity);
+        log.info("consumed log created successfully");
     }
 }

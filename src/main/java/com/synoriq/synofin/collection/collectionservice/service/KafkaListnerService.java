@@ -88,16 +88,20 @@ public class KafkaListnerService {
 
             // getting some data of receipt id
             Map<String, Object> loanIdByServiceId = receiptRepository.getLoanIdByServiceId(receiptId);
+            log.info("loanIdByServiceId {}", loanIdByServiceId);
 
             log.info("4");
             // loanId & serviceRequestTypeString
             long loanId = Long.parseLong(loanIdByServiceId.get("loanId").toString());
+            log.info("loanId {}", loanId);
             String serviceRequestTypeString = String.valueOf(loanIdByServiceId.get("service_request_type_string"));
+            log.info("serviceRequestTypeString {}", serviceRequestTypeString);
 
 
 
             if (collectionLimitUser.isPresent() && collectionReceiptEntity.isPresent() && checkCollectionActivityLogsEntity == null) {
                 if(serviceRequestTypeString.equals("receipt")) {
+                    log.info("in serviceRequestTypeString");
                     if(collectionLimitUser.get().getUtilizedLimitValue() - loanAmount < 0) {
                         log.info("iff limit check {}", collectionLimitUser.get().getUtilizedLimitValue() - loanAmount);
                         collectionLimitUser.get().setUtilizedLimitValue(0D);
