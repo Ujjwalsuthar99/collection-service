@@ -89,4 +89,7 @@ public class ReceiptServiceRequestDataDTO {
 
     @JsonProperty("remarks")
     public String remarks;
+
+    @JsonProperty("sourcing_branch")
+    public String sourcingBranch;
 }
