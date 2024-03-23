@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferAirtelDepositStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
@@ -43,19 +44,19 @@ public class ReceiptTransferController {
 
     @RequestMapping(value = "/receipt-transfer/generate", method = RequestMethod.POST)
     public ResponseEntity<Object> createReceiptTransfer(@RequestBody ReceiptTransferDtoRequest receiptTransferDtoRequest, @RequestHeader("Authorization") String bearerToken) {
-//        log.info("my request body {}", receiptTransferDtoRequest);
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            BaseDTOResponse result = receiptTransferService.createReceiptTransfer(receiptTransferDtoRequest, bearerToken);
-            baseResponse = new BaseDTOResponse<>(result.getData());
+            baseResponse = receiptTransferService.createReceiptTransfer(receiptTransferDtoRequest, bearerToken);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
-
+        } catch (CustomException ee) {
+            baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(ee.getCode(), ee.getMessage()));
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            if (com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
-                baseResponse = new BaseDTOResponse<>(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
             } else {
                 baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
             }

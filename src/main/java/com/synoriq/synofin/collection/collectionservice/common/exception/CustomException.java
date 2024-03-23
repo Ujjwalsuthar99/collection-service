@@ -1,6 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.common.exception;
 
-import com.synoriq.synofin.lms.commondto.rest.constants.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import lombok.Data;
 
 @Data

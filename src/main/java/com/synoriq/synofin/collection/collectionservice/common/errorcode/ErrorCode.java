@@ -7,7 +7,8 @@ import java.util.Map;
 
 public enum ErrorCode {
 
-    //    DEFAULT_ERROR_CODE(1015000),
+    DEFAULT_ERROR_CODE(1015000),
+    UNAUTHORIZED_API_TRANSACTION(1015002, "Sorry you are not authorized to perform this transaction. Please contact your administrator"),
     DATA_FETCH_ERROR(1017000, "An Exception occurred in fetching data"),
         DATA_SAVE_ERROR(1017001, "An Exception occurred in saving data"),
     NO_DATA_FOUND(1017002, "No Data Found"),
@@ -18,6 +19,7 @@ public enum ErrorCode {
     CHEQUE_LIMIT_IS_LESS_THAN_UTILIZED_AMOUNT(1017007, "Total limit of cheque cannot be less than utilized limit"),
     UPI_LIMIT_IS_LESS_THAN_UTILIZED_AMOUNT(1017008, "Total limit of upi cannot be less than utilized limit"),
     LIMIT_IS_LESS_THAN_UTILIZED_AMOUNT(1017009, "Total limit of cannot be less than utilized limit"),
+
 //    CREDENTIALS_ERROR(1017002, "Incorrect username or password"),
 //    LOGIN_ERROR(1017003, "An Exception occurred in login. Please try again"),
 //    LOGIN_SUCCESS_CODE(1017004, "Login successfully"),

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
@@ -103,10 +105,11 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             String limitConf;
             String updatedRemarks;
 
-            for(Long receiptId : receiptTransferDtoRequest.getReceipts()) {
+            for (Long receiptId : receiptTransferDtoRequest.getReceipts()) {
                 ReceiptTransferHistoryEntity receiptTransferIdCheck = receiptTransferHistoryRepository.findByCollectionReceiptsId(receiptId);
-                if(receiptTransferIdCheck != null) {
-                    throw new Exception("1016050");
+                if (receiptTransferIdCheck != null) {
+                    ErrorCode errorCode = ErrorCode.getErrorCode(1016050, "Receipt " + receiptId + " already has been transferred");
+                    throw new CustomException(errorCode);
                 }
             }
 
@@ -198,6 +201,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 }
                 baseResponse = new BaseDTOResponse<>(receiptTransferEntity);
             }
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getCode());
         } catch (Exception ee) {
             log.error("RestControllers error occurred for vanWebHookDetails {}", ee.getMessage());
             throw new Exception(ee.getMessage());

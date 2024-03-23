@@ -38,6 +38,7 @@ public interface UtilityService {
     public String capitalizeName(String name);
     public String getApiUrl();
     public String getApiUrl(String type);
+    public boolean isInteger(String str);
     public Object getBankNameByIFSC(String keyword) throws Exception;
     public UserDetailByTokenDTOResponse getUserDetailsByToken(String token);
     public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, String latitude, String longitude) throws IOException;

@@ -229,7 +229,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                 currentReceiptAmountAllowed = totalLimitValue - collectionLimitUser.getUtilizedLimitValue();
                 log.info("Utilized limit {}", collectionLimitUser.getUtilizedLimitValue());
             } else {
-                currentReceiptAmountAllowed = Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
+                currentReceiptAmountAllowed = limitConf != null ? Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf)) : 0.0;
             }
 
             // per day cash limit check

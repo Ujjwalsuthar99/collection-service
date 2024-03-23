@@ -349,6 +349,11 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
+    public boolean isInteger(String str) {
+        return str.matches("-?\\d+");
+    }
+
+    @Override
     public Object getBankNameByIFSC(String keyword) throws Exception {
 
         Object res = new Object();

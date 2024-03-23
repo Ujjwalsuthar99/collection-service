@@ -6,7 +6,7 @@ import com.synoriq.synofin.apipermissionvalidator.ApiPermissionUtility;
 import com.synoriq.synofin.collection.collectionservice.apiPermissionValidators.PermissionValidators;
 import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
-import com.synoriq.synofin.lms.commondto.rest.constants.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
