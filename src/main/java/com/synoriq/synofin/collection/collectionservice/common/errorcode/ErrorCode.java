@@ -199,7 +199,8 @@ public enum ErrorCode {
     REPOSSESSION_ALREADY_INITIATED(1016046, "Repossession already initiated for this loan"),
     EMPLOYEE_MOBILE_NUMBER_VALIDATION(1016047, "Mobile number is already registered with our employee database"),
     FOLLOWUP_CLOSE_DATE_VALIDATION(1016048, "Can't Close the followup as the receipt is of previous month"),
-    RECEIPT_ID_NOT_FOUND(1016049, "Receipt id not there for this loan Id");
+    RECEIPT_ID_NOT_FOUND(1016049, "Receipt id not there for this loan Id"),
+    RECEIPT_TRANSFERRED_ALREADY(1016050, "Receipt already has been transferred");
     private Integer codeValue;
     private String responseMessage;
 
@@ -237,8 +238,16 @@ public enum ErrorCode {
         return integerErrorCodeMap.get(codeValue);
     }
 
+    public static ErrorCode getErrorCode(Integer codeValue, String message) throws IllegalArgumentException {
+        ErrorCode errorMessage = integerErrorCodeMap.get(codeValue);
+        errorMessage.setResponseMessage(message);
+        return errorMessage;
+    }
+
     public Integer getErrorCodeValue() {
         return this.codeValue;
     }
+
+    public void setResponseMessage(String message) { this.responseMessage = message;}
 
 }

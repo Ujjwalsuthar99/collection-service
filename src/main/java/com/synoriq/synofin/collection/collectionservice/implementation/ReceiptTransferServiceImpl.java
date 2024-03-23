@@ -103,6 +103,13 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             String limitConf;
             String updatedRemarks;
 
+            for(Long receiptId : receiptTransferDtoRequest.getReceipts()) {
+                ReceiptTransferHistoryEntity receiptTransferIdCheck = receiptTransferHistoryRepository.findByCollectionReceiptsId(receiptId);
+                if(receiptTransferIdCheck != null) {
+                    throw new Exception("1016050");
+                }
+            }
+
             Double utilizedAmount;
             Double totalLimitValue;
             Double transferredAmount = receiptTransferDtoRequest.getAmount();

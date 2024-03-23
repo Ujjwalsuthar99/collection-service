@@ -86,7 +86,12 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
             "where\n" +
             "\trth.collection_receipts_id = :receiptId\n" +
             "\tand rt.transfer_type = 'bank'\n" +
-            "\tand rt.deleted = false")
+            "\tand rt.deleted = false\n" +
+            "order by\n" +
+            "\trt.created_date asc\n" +
+            "limit 1")
     Long getReceiptTransferIdUsingReceiptId(@Param("receiptId") Long receiptId);
+
+    public ReceiptTransferHistoryEntity findByCollectionReceiptsId(Long receiptId);
 
 }
