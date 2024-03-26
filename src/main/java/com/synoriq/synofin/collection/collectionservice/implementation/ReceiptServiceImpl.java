@@ -229,7 +229,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                 currentReceiptAmountAllowed = totalLimitValue - collectionLimitUser.getUtilizedLimitValue();
                 log.info("Utilized limit {}", collectionLimitUser.getUtilizedLimitValue());
             } else {
-                currentReceiptAmountAllowed = limitConf != null ? Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf)) : 0.0;
+                // Initializing currentReceiptAmountAllowed with same receipt amount in case of payment mode configuration not found ( NEFT & RTGS ).
+                currentReceiptAmountAllowed = limitConf != null ? Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf)) : Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()) + 1.0;
             }
 
             // per day cash limit check
