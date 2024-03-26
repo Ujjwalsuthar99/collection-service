@@ -216,6 +216,12 @@ public class ReceiptServiceImpl implements ReceiptService {
                 case "upi":
                     limitConf = ONLINE_COLLECTION_DEFAULT_LIMIT;
                     break;
+                case "neft":
+                    limitConf = NEFT_COLLECTION_DEFAULT_LIMIT;
+                    break;
+                case "rtgs":
+                    limitConf = RTGS_COLLECTION_DEFAULT_LIMIT;
+                    break;
             }
 
 
