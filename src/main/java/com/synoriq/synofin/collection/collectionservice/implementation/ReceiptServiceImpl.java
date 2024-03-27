@@ -347,7 +347,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
                 collectionReceiptRepository.save(collectionReceiptEntity);
 
-                if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi")) {
+                if (receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cash") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("cheque") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("neft") || receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("rtgs")) {
                     CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
 
 //                    log.info("collection limit user wise entity already exist {}", collectionLimitUser);
