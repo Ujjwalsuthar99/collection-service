@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
+import com.synoriq.synofin.apipermissionvalidator.annotations.CheckPermission;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.AdditionalContactDetailsDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.DeviceStatusUpdateDTORequest;
@@ -22,6 +23,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
+//@CheckPermission
 @RequestMapping("/v1")
 public class CollectionRestController {
 
