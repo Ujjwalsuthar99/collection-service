@@ -17,6 +17,8 @@ public class GlobalVariables {
     public static final String MONTH_CASH_VALIDATION = "monthly_x_rupees_cash_collection";
     public static final String ONLINE_COLLECTION_DEFAULT_LIMIT = "online_collection_default_limit";
     public static final String CASH_COLLECTION_DEFAULT_LIMIT = "cash_collection_default_limit";
+    public static final String NEFT_COLLECTION_DEFAULT_LIMIT = "neft_collection_default_limit";
+    public static final String RTGS_COLLECTION_DEFAULT_LIMIT = "rtgs_collection_default_limit";
     public static final String DISABLE_APPROVE_BUTTON_IN_LMS = "disable_approve_button_in_lms";
     public static final String DEPOSIT_REMINDER = "deposit_reminder";
     public static final String DEPOSIT_REMINDER_HOURS = "deposit_reminder_hours";
