@@ -303,7 +303,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "join (select loan_application_number, loan_application_id from lms.loan_application) as la on la.loan_application_id = sr.loan_id\n" +
             "join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id = sr.loan_id and clm.customer_type = 'applicant' \n" +
             "join (select customer_id, first_name, last_name  from lms.customer) as c on clm.customer_id = c.customer_id\n" +
-            "where sr.status = 'initiated' and sr.form->>'payment_mode' = :paymentMode\n" +
+            "where sr.status = 'initiated' and sr.service_request_type_string = 'receipt' and sr.form->>'payment_mode' = :paymentMode\n" +
             "and sr.service_request_id not in (select rth.collection_receipts_id from collection.receipt_transfer_history rth join collection.receipt_transfer rt on rth.receipt_transfer_id = rt.receipt_transfer_id where rt.status = 'pending') order by sr.created_date desc")
     List<Map<String, Object>> getReceiptsByUserIdWhichNotTransferredForPortal(@Param("paymentMode") String paymentMode, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageRequest);
 }
