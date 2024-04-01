@@ -826,7 +826,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
 
             String disableApproveButtonConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DISABLE_APPROVE_BUTTON_IN_LMS);
             if (disableApproveButtonConf.equals("true")) {
-                if (!paymentMode.equals("upi")) {
+                if (paymentMode.equals("cash") || paymentMode.equals("cheque")) {
                     disableApproveButtonResponseDTO.setDisableApproveButton(receiptTransferId == null);
                 } else {
                     disableApproveButtonResponseDTO.setDisableApproveButton(false);
