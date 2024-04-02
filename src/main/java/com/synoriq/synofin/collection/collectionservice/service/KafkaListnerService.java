@@ -8,6 +8,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.events.template.MessageContainerTemplate;
 import com.synoriq.synofin.events.template.lms.CollectionRequestActionEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -54,6 +55,7 @@ public class KafkaListnerService {
             DatabaseContextHolder.set(message.getClientId());
             log.info("message datatatatat ->  {}", message.getMessage());
             CollectionRequestActionEvent messageObject = new ObjectMapper().convertValue(message.getMessage(), CollectionRequestActionEvent.class);
+            MDC.put("SERVICE ID", messageObject.getServiceRequestId().toString());
             log.info("message object, {}", messageObject);
             log.info("messageObject.getUserId() {}", messageObject.getUserId());
             log.info("messageObject.getPaymentMode() {}", messageObject.getPaymentMode());
@@ -181,7 +183,10 @@ public class KafkaListnerService {
             }
             acknowledgment.acknowledge();
         } catch (Exception ee) {
-            ee.printStackTrace();
+            log.error("Kafka having an issue", ee);
+        }
+        finally {
+            MDC.clear();
         }
     }
     public void createActivityLogs(long userId, String status, long receiptId, long loanId) {
