@@ -39,4 +39,13 @@ public class DashboardResponseDTO {
     @JsonProperty("deposit_reminder")
     private boolean depositReminder;
 
+    @JsonProperty("neft_amount")
+    private NeftAmountDashboardDTO neftAmount;
+
+    @JsonProperty("rtgs_amount")
+    private RtgsAmountDashboardDTO rtgsAmount;
+
+    @JsonProperty("total_payment_amount")
+    private Double totalPaymentAmount;
+
 }

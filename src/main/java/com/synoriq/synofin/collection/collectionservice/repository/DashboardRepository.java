@@ -57,4 +57,16 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
             "where clu.user_id = :userId and clu.collection_limit_strategies_key = 'upi'")
     Map<String,Object> getUpiByUserIdByDuration(@Param("userId") Long userId);
 
+    @Query(nativeQuery = true, value = "select clu.utilized_limit_value as neft_amount,\n" +
+            "clu.total_limit_value as neft_limit\n" +
+            "from collection.collection_limit_userwise clu\n" +
+            "where clu.user_id = :userId and clu.collection_limit_strategies_key = 'neft'")
+    Map<String,Object> getNeftByUserIdByDuration(@Param("userId") Long userId);
+
+    @Query(nativeQuery = true, value = "select clu.utilized_limit_value as rtgs_amount,\n" +
+            "clu.total_limit_value as rtgs_limit\n" +
+            "from collection.collection_limit_userwise clu\n" +
+            "where clu.user_id = :userId and clu.collection_limit_strategies_key = 'rtgs'")
+    Map<String,Object> getRtgsByUserIdByDuration(@Param("userId") Long userId);
+
 }

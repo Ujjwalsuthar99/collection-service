@@ -584,7 +584,7 @@ public class UtilityServiceImpl implements UtilityService {
     @Override
     public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder, boolean isCustomerPhotos) throws Exception {
         DownloadBase64FromS3ResponseDTO res = new DownloadBase64FromS3ResponseDTO();
-
+        CurrentUserInfo currentUserInfo = new CurrentUserInfo();
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", token);
@@ -605,6 +605,19 @@ public class UtilityServiceImpl implements UtilityService {
             String modifiedResponse = "response: " + res.getResponse() + " requestId: " + res.getRequestId() + " error: " + res.getError();
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, convertToJSON(modifiedResponse), "success", null);
+// again calling the download api for aadharfin usernames
+            if (res.getData().contains("File or bucket not") && Objects.equals(currentUserInfo.getClientId(), "aadharfin")) {
+                log.info("Again calling the download API for Aadharfin Client");
+                String[] userRefArr = userRefNo.split("/");
+                String newUserRef = userRefArr[0] + "/" + userRefArr[1].substring(0, 1).toUpperCase() + userRefArr[1].substring(1);
+
+                res = HTTPRequestService.<Object, DownloadBase64FromS3ResponseDTO>builder()
+                        .httpMethod(HttpMethod.GET)
+                        .url("http://localhost:1102/v1/getBase64ByFileName?fileName=" + fileName + "&userRefNo=" + newUserRef + "&isNativeFolder=" + isNativeFolder + "&systemId=" + systemId)
+                        .httpHeaders(httpHeaders)
+                        .typeResponseType(DownloadBase64FromS3ResponseDTO.class)
+                        .build().call();
+            }
 
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();

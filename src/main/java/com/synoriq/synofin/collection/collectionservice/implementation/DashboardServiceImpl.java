@@ -47,6 +47,8 @@ public class DashboardServiceImpl implements DashboardService {
             UpiAmountDashboardDTO upiAmountDashboardDTO = new UpiAmountDashboardDTO();
             CommonCountDashboardDTO commonCountDashboardDTO = new CommonCountDashboardDTO();
             FollowUpDashboardDTO followUpDashboardDTO = new FollowUpDashboardDTO();
+            NeftAmountDashboardDTO neftAmountDashboardDTO = new NeftAmountDashboardDTO();
+            RtgsAmountDashboardDTO rtgsAmountDashboardDTO = new RtgsAmountDashboardDTO();
             Map<String, Object> followupDataCounts = dashboardRepository.getFollowupCountByUserIdByDuration(userId, fromDate, endDate);
             Map<String, Object> amountTransferDataCounts = dashboardRepository.getAmountTransferCountByUserIdByDuration(userId, fromDate, endDate);
             Map<String, Object> amountTransferInProcessDataCounts = dashboardRepository.getAmountTransferInProcessCountByUserIdByDuration(userId, fromDate, endDate);
@@ -55,6 +57,9 @@ public class DashboardServiceImpl implements DashboardService {
             Map<String, Object> chequeAmountData = dashboardRepository.getChequeByUserIdByDuration(userId);
             Map<String, Object> upiAmountData = dashboardRepository.getUpiByUserIdByDuration(userId);
             int taskCountData = loanAllocationRepository.getCountByAllocatedToUserIdAndDeleted(userId);
+            Map<String, Object> netfAmountData = dashboardRepository.getNeftByUserIdByDuration(userId);
+            Map<String, Object> rtgsAmountData = dashboardRepository.getRtgsByUserIdByDuration(userId);
+            double totalCashInHand = 0.0;
             // cash in hand
             if (cashInHandDataCounts.isEmpty()) {
                 Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT));
@@ -62,6 +67,7 @@ public class DashboardServiceImpl implements DashboardService {
                 cashInHandDashboardDTO.setCashInHandLimit(totalLimitValue);
             } else {
                 cashInHandDashboardDTO.setCashInHand(Double.valueOf(String.valueOf(cashInHandDataCounts.get("cash_in_hand"))));
+                totalCashInHand += cashInHandDashboardDTO.getCashInHand();
                 cashInHandDashboardDTO.setCashInHandLimit(Double.valueOf(String.valueOf(cashInHandDataCounts.get("cash_in_hand_limit"))));
             }
 
@@ -72,6 +78,7 @@ public class DashboardServiceImpl implements DashboardService {
                 chequeAmountDashboardDTO.setChequeLimit(totalLimitValue);
             } else {
                 chequeAmountDashboardDTO.setChequeAmount(Double.valueOf(String.valueOf(chequeAmountData.get("cheque_amount"))));
+                totalCashInHand += chequeAmountDashboardDTO.getChequeAmount();
                 chequeAmountDashboardDTO.setChequeLimit(Double.valueOf(String.valueOf(chequeAmountData.get("cheque_limit"))));
             }
 
@@ -82,7 +89,30 @@ public class DashboardServiceImpl implements DashboardService {
                 upiAmountDashboardDTO.setUpiLimit(totalLimitValue);
             } else {
                 upiAmountDashboardDTO.setUpiAmount(Double.valueOf(String.valueOf(upiAmountData.get("upi_amount"))));
+                totalCashInHand += upiAmountDashboardDTO.getUpiAmount();
                 upiAmountDashboardDTO.setUpiLimit(Double.valueOf(String.valueOf(upiAmountData.get("upi_limit"))));
+            }
+
+            // neft amount
+            if (netfAmountData.isEmpty()) {
+                Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(NEFT_COLLECTION_DEFAULT_LIMIT));
+                neftAmountDashboardDTO.setNeftAmount(0D);
+                neftAmountDashboardDTO.setNeftLimit(totalLimitValue);
+            } else {
+                neftAmountDashboardDTO.setNeftAmount(Double.valueOf(String.valueOf(netfAmountData.get("neft_amount"))));
+                totalCashInHand += neftAmountDashboardDTO.getNeftAmount();
+                neftAmountDashboardDTO.setNeftLimit(Double.valueOf(String.valueOf(netfAmountData.get("neft_limit"))));
+            }
+
+            // rtgs amount
+            if (rtgsAmountData.isEmpty()) {
+                Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(RTGS_COLLECTION_DEFAULT_LIMIT));
+                rtgsAmountDashboardDTO.setRtgsAmount(0D);
+                rtgsAmountDashboardDTO.setRtgsLimit(totalLimitValue);
+            } else {
+                rtgsAmountDashboardDTO.setRtgsAmount(Double.valueOf(String.valueOf(rtgsAmountData.get("rtgs_amount"))));
+                totalCashInHand += rtgsAmountDashboardDTO.getRtgsAmount();
+                rtgsAmountDashboardDTO.setRtgsLimit(Double.valueOf(String.valueOf(rtgsAmountData.get("rtgs_limit"))));
             }
             // followUp
             followUpDashboardDTO.setActionCount(0D);
@@ -111,6 +141,9 @@ public class DashboardServiceImpl implements DashboardService {
             dashboardResponseDTO.setFollowUp(followUpDashboardDTO);
             dashboardResponseDTO.setTaskCount(taskCountData);
             dashboardResponseDTO.setDepositReminder(false);
+            dashboardResponseDTO.setNeftAmount(neftAmountDashboardDTO);
+            dashboardResponseDTO.setRtgsAmount(rtgsAmountDashboardDTO);
+            dashboardResponseDTO.setTotalPaymentAmount(totalCashInHand);
             String depositReminder = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER);
             if (Objects.equals(depositReminder, "hours")) {
                 String depositReminderHours = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER_HOURS);
