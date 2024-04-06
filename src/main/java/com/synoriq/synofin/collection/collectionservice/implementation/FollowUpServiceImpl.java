@@ -10,9 +10,9 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionAct
 import com.synoriq.synofin.collection.collectionservice.repository.FollowUpRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.followUpDTOs.FollowUpDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.followUpDTOs.FollowUpStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.FollowUpResponseDTO.FollowUpCustomDataResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.followUpDTOs.FollowUpStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.FollowUpResponseDTO.FollowUpDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.FollowupResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
@@ -25,11 +25,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.*;
@@ -52,6 +50,9 @@ public class FollowUpServiceImpl implements FollowUpService {
     CollectionActivityLogsRepository collectionActivityLogsRepository;
     @Autowired
     ActivityLogService activityLogService;
+
+    @Autowired
+    EntityManager entityManager;
 
     @Override
     public BaseDTOResponse<Object> getFollowupById(Long followupById) throws Exception {
@@ -145,7 +146,7 @@ public class FollowUpServiceImpl implements FollowUpService {
         return new BaseDTOResponse<>(followUpDataResponseDTO);
     }
     @Override
-    public BaseDTOResponse<Object> getFollowupUserWiseWithDuration(Integer page, Integer size, Long userId, Date fromDate, Date toDate, String type) throws Exception {
+    public BaseDTOResponse<Object> getFollowupUserWiseWithDuration(Integer page, Integer size, Long userId, Date fromDate, Date toDate, String searchKey) throws Exception {
 
         List<Map<String,Object>> followUpEntityPages;
         toDate = checkToDate(toDate);
@@ -157,22 +158,14 @@ public class FollowUpServiceImpl implements FollowUpService {
 //            Boolean piiPermission = rsaUtils.getPiiPermission();
         Boolean piiPermission = true;
 
-        if (type.equals("pending")) {
-            followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForPending(userId, fromDate, toDate, encryptionKey, password, piiPermission, pageable);
-        } else {
-            followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForCreated(userId, fromDate, toDate, encryptionKey, password, piiPermission, pageable);
-        }
+
+        followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForCreated(userId, fromDate, toDate, searchKey, encryptionKey, password, piiPermission, pageable);
         if (page > 0) {
-            if (followUpEntityPages.size() == 0) {
+            if (followUpEntityPages.isEmpty()) {
                 return new BaseDTOResponse<>(followUpEntityPages);
             }
         }
-        if (!followUpEntityPages.isEmpty()) {
-            baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
-        } else {
-            log.error("Followup data not found for loan Id {}", userId);
-            baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
-        }
+        baseDTOResponse = new BaseDTOResponse<>(followUpEntityPages);
 
         return baseDTOResponse;
 
