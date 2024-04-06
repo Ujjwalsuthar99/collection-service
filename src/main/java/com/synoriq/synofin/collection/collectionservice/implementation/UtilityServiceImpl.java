@@ -423,18 +423,19 @@ public class UtilityServiceImpl implements UtilityService {
         fileType = fileType.split("image/")[1];
         CurrentUserInfo currentUserInfo = new CurrentUserInfo();
         int randomNumber = (int) (100000 + Math.random() * 900000);
+        String userName = getUserDetailsByToken(token).getData().getUserName();
         switch (module) {
             case "follow_up":
                 fileName = randomNumber + "_" + new Date().getTime() + "_" + "_followup_image." + fileType;
-                userRefNo = "followUp/" + currentUserInfo.getCurrentUser().getUsername();
+                userRefNo = "followUp/" + userName;
                 break;
             case "create_receipt":
                 fileName = randomNumber + "_" + new Date().getTime() + "_" + "_create_receipt_image." + fileType;
-                userRefNo = "bankDepositSlip/" + currentUserInfo.getCurrentUser().getUsername();
+                userRefNo = "bankDepositSlip/" + userName;
                 break;
             case "receipt_transfer":
                 fileName = randomNumber + "_" + new Date().getTime() + "_" + "_deposit_image." + fileType;
-                userRefNo = "depositSlip/" + currentUserInfo.getCurrentUser().getUsername();
+                userRefNo = "depositSlip/" + userName;
                 break;
             case "profile":
                 fileName = "collection_" + currentUserInfo.getClientId().toLowerCase() + "_logo.png";
@@ -443,7 +444,7 @@ public class UtilityServiceImpl implements UtilityService {
             case "repossession_initiated_image":
             case "repossession_yard_image":
                 fileName = randomNumber + "_" + new Date().getTime() + "_" + module + "." + fileType;
-                userRefNo = "repossession/" + currentUserInfo.getCurrentUser().getUsername();
+                userRefNo = "repossession/" + userName;
                 break;
             default:
                 fileName = "";
