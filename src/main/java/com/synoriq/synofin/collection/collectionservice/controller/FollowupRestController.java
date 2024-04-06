@@ -87,13 +87,13 @@ public class FollowupRestController {
                                                                        @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
                                                                        @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") Date fromDate,
                                                                        @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate,
-                                                                       @RequestParam("type") String type) {
+                                                                       @RequestParam("searchKey") String searchKey) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = followUpService.getFollowupUserWiseWithDuration(page, size, userId, fromDate, toDate, type);
+            baseResponse = followUpService.getFollowupUserWiseWithDuration(page, size, userId, fromDate, toDate, searchKey);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
 
