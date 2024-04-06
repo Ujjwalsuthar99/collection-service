@@ -157,9 +157,16 @@ public class FollowUpServiceImpl implements FollowUpService {
         String password = rsaUtils.getPassword(currentUserInfo.getClientId());
 //            Boolean piiPermission = rsaUtils.getPiiPermission();
         Boolean piiPermission = true;
+        List<String> statusList = new ArrayList<>();
+        if (searchKey.isEmpty()) {
+            statusList.add("pending");
+            statusList.add("reschedule");
+            statusList.add("closed");
+        } else {
+            statusList.add(searchKey.toLowerCase());
+        }
 
-
-        followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForCreated(userId, fromDate, toDate, searchKey, encryptionKey, password, piiPermission, pageable);
+        followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForCreated(userId, fromDate, toDate, statusList, encryptionKey, password, piiPermission, pageable);
         if (page > 0) {
             if (followUpEntityPages.isEmpty()) {
                 return new BaseDTOResponse<>(followUpEntityPages);

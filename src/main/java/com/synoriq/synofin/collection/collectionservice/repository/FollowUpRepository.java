@@ -118,9 +118,9 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "                join (select loan_id, customer_id, customer_type from lms.customer_loan_mapping) as clm on clm.loan_id  = la.loan_application_id \n" +
             "               join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id  \n" +
             " where f.created_by = :userId and clm.customer_type = 'applicant' \n" +
-            "            and f.created_date between :fromDate and :toDate and lower(f.followup_status) = lower(:searchKey)")
+            "            and f.created_date between :fromDate and :toDate and f.followup_status in :#{#statusList}")
     List<Map<String,Object>> getFollowupsUserWiseByDurationForCreated(@Param("userId") Long userId, @Param("fromDate") Date fromDate
-            , @Param("toDate") Date toDate, @Param("searchKey") String searchKey, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageable);
+            , @Param("toDate") Date toDate, @Param("statusList") List<String> statusList, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageable);
 
 
     @Query(nativeQuery = true,value = "select " +
