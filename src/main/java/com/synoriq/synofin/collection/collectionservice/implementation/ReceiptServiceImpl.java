@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 
 
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.common.exception.DataLockException;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
@@ -40,6 +41,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_RECEIPT;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
@@ -94,6 +96,8 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Autowired
     private RegisteredDeviceInfoRepository registeredDeviceInfoRepository;
+
+    private final Map<String, ReentrantLock> lockMap = new HashMap<>();
 
 
     @Override
@@ -172,6 +176,23 @@ public class ReceiptServiceImpl implements ReceiptService {
         ReceiptServiceDtoRequest createReceiptBody = new ObjectMapper().convertValue(receiptServiceDtoRequest, ReceiptServiceDtoRequest.class);
 
         ReceiptServiceRequestDataDTO receiptServiceRequestDataDTO = new ReceiptServiceRequestDataDTO();
+
+
+        boolean lockAcquired = false;
+// Acquire a lock for the customer record
+        ReentrantLock lock = null;
+        String lockId = null;
+        if (receiptServiceDtoRequest.getLoanApplicationNumber() != null) {
+            lockId = receiptServiceDtoRequest.getLoanApplicationNumber();
+            log.info("lockId -> {}", lockId);
+            lock = lockMap.computeIfAbsent(lockId, id -> new ReentrantLock());
+            if (lock.isLocked()) {
+                throw new DataLockException("Record is already locked for modification");
+            }
+            lock.lock();
+            lockAcquired = true;
+        }
+
         try {
 
 //            String employeeMobileNumberValidation = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(EMPLOYEE_MOBILE_NUMBER_VALIDATION);
@@ -230,7 +251,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             double receiptAmount = Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
             CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode);
 
-            if(collectionLimitUser != null) {
+            if (collectionLimitUser != null) {
                 totalLimitValue = collectionLimitUser.getTotalLimitValue();
                 currentReceiptAmountAllowed = totalLimitValue - collectionLimitUser.getUtilizedLimitValue();
                 log.info("Utilized limit {}", collectionLimitUser.getUtilizedLimitValue());
@@ -290,14 +311,13 @@ public class ReceiptServiceImpl implements ReceiptService {
 //            log.info("Receipt amount can be collected by a user at current situation {}", currentReceiptAmountAllowed);
 //            log.info("Receipt amount {}", receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
 
-            if(currentReceiptAmountAllowed < Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount())) {
+            if (currentReceiptAmountAllowed < Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount())) {
                 throw new Exception("1017003");
             }
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", bearerToken);
             httpHeaders.add("Content-Type", "application/json");
-
 
 
             String bDate = receiptServiceDtoRequest.getRequestData().getRequestData().getDateOfReceipt();
@@ -321,7 +341,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .typeResponseType(ServiceRequestSaveResponse.class)
                     .build().call();
 
-                log.info("response create receipt {}", res);
+            log.info("response create receipt {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, res, "success", createReceiptBody.getActivityData().getLoanId());
             if (res.getData() != null) {
@@ -380,8 +400,6 @@ public class ReceiptServiceImpl implements ReceiptService {
             }
 
 
-
-
         } catch (Exception ee) {
 //            if (collectionActivityId != null) {
 //                collectionActivityLogsRepository.deleteById(collectionActivityId);
@@ -391,6 +409,13 @@ public class ReceiptServiceImpl implements ReceiptService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, modifiedErrorMessage, "failure", createReceiptBody.getActivityData().getLoanId());
             throw new Exception(ee.getMessage());
+        } finally {
+            // Release the lock
+            if (lock != null && lockAcquired) {
+                log.info("lock release for id {}", lockId);
+                // Release the lock
+                lock.unlock();
+            }
         }
         return res;
     }
@@ -476,7 +501,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         HttpHeaders httpHeaders = new HttpHeaders();
 //        httpHeaders.setBearerAuth("6c6e74fe-7dc4-4a8f-891e-fbe4d061cafc");
-            httpHeaders.setBearerAuth(token);
+        httpHeaders.setBearerAuth(token);
 
         ResponseEntity<byte[]> response;
 
@@ -499,12 +524,14 @@ public class ReceiptServiceImpl implements ReceiptService {
         calendar.setTime(new Date());
         return calendar;
     }
+
     private static void setTimeToBeginningOfDay(Calendar calendar) {
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
     }
+
     private static void setTimeToEndofDay(Calendar calendar) {
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
@@ -525,7 +552,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             pageRequest = PageRequest.of(filterDTO.getPage(), filterDTO.getSize());
             Boolean piiPermission = true;
             Map<String, Object> mainData = new HashMap<>();
-            if(filterDTO.getIsFilter().equals(true)) {
+            if (filterDTO.getIsFilter().equals(true)) {
                 return receiptTransferService.getReceiptTransferByFilter(filterDTO);
             } else {
                 List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferredForPortal(filterDTO.getPaymentMode(), encryptionKey, password, piiPermission, pageRequest);
