@@ -102,8 +102,10 @@ public class QrCodeServiceImpl implements QrCodeService {
         try {
             // Checking UserLimit as it is exceeded or not with this amount
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(requestBody.getUserId(), UPI);
-            if (collectionLimitUserWiseEntity.getTotalLimitValue() < collectionLimitUserWiseEntity.getUtilizedLimitValue() + Double.parseDouble(requestBody.getAmount()))
-                throw new Exception("1017003");
+            if(collectionLimitUserWiseEntity != null) {
+                if (collectionLimitUserWiseEntity.getTotalLimitValue() < collectionLimitUserWiseEntity.getUtilizedLimitValue() + Double.parseDouble(requestBody.getAmount()))
+                    throw new Exception("1017003");
+            }
 
             // Calling Generate QR Code API
             res = HTTPRequestService.<Object, DynamicQrCodeResponseDTO>builder()

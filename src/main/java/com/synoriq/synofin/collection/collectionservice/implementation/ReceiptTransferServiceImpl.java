@@ -595,7 +595,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 statusList = Arrays.asList("approved", "cancelled", "rejected");
             }
             receiptTransferDataList = receiptTransferHistoryRepository.getAllBankTransfers(statusList, searchKey, pageable);
-            if (receiptTransferDataList.size() > 0) {
+            if (!receiptTransferDataList.isEmpty()) {
                 for (Map<String, Object> receiptTransferData : receiptTransferDataList) {
                     JsonNode geoLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("transfer_location_data")));
                     JsonNode imagesNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("receipt_image")));
