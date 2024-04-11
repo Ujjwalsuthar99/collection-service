@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.rest.request;
+package com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs;
 
 import lombok.Data;
 

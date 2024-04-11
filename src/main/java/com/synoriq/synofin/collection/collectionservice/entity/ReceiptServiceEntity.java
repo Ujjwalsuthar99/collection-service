@@ -10,12 +10,14 @@ import javax.persistence.*;
 import javax.transaction.Transactional;
 import java.util.Date;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
+
 @Transactional
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @TypeDef(name = "json", typeClass = JsonType.class)
-@Table(name = "loan_allocation", schema = "collection")
+@Table(name = "loan_allocation", schema = COLLECTION)
 @Data
 public class ReceiptServiceEntity {
 

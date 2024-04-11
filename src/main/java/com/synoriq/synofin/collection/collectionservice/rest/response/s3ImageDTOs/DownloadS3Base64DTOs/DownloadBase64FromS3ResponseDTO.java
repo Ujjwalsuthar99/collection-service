@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs;
+package com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DownloadS3Base64DTOs;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

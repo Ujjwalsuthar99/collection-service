@@ -7,10 +7,12 @@ import org.hibernate.annotations.TypeDef;
 import javax.persistence.*;
 import javax.transaction.Transactional;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
+
 @Transactional
 @Entity
 @TypeDef(name = "json", typeClass = JsonType.class)
-@Table(name = "collection_receipts", schema = "collection")
+@Table(name = "collection_receipts", schema = COLLECTION)
 @Data
 public class CollectionReceiptEntity {
 

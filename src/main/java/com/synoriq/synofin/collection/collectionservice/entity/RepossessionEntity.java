@@ -11,10 +11,12 @@ import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.Objects;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
+
 @Transactional
 @Entity
 @TypeDef(name = "json", typeClass = JsonType.class)
-@Table(name = "repossession", schema = "collection")
+@Table(name = "repossession", schema = COLLECTION)
 @Getter
 @Setter
 @ToString

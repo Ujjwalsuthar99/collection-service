@@ -529,12 +529,17 @@ public class ReceiptServiceImpl implements ReceiptService {
                 return receiptTransferService.getReceiptTransferByFilter(filterDTO);
             } else {
                 List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferredForPortal(filterDTO.getPaymentMode(), encryptionKey, password, piiPermission, pageRequest);
-                mainData.put("receipts_data", receiptsData);
-                mainData.put("total_rows", receiptsData.get(0).get("total_rows"));
+                if (!receiptsData.isEmpty()) {
+                    mainData.put("receipts_data", receiptsData);
+                    mainData.put("total_rows", receiptsData.get(0).get("total_rows"));
+                } else {
+                    mainData.put("receipts_data", new ArrayList<>());
+                    mainData.put("total_rows", 0);
+                }
             }
             baseDTOResponse = new BaseDTOResponse<>(mainData);
         } catch (Exception e) {
-            throw new Exception("1017002");
+            throw new Exception("1017000");
         }
 
         return baseDTOResponse;

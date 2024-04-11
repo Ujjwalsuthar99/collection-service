@@ -1,13 +1,16 @@
-package com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3;
+package com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 
 @Data
-public class UploadImageOnS3RequestDTO {
+@NoArgsConstructor
+public class DeleteImageOnS3RequestDTO {
 
     @JsonProperty("data")
-    private UploadImageOnS3DataRequestDTO data;
+    private Object data;
 
     @JsonProperty("system_id")
     private String systemId;

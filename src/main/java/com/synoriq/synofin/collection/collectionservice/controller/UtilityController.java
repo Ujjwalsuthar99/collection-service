@@ -6,15 +6,15 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCo
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.sendOtpDTOs.SendOtpRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDTOs.VerifyOtpRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DeleteImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.service.IntegrationConnectorService;
 import com.synoriq.synofin.collection.collectionservice.service.QrCodeService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +37,9 @@ public class UtilityController {
 
     @Autowired
     UtilityService utilityService;
+
+    @Autowired
+    IntegrationConnectorService integrationConnectorService;
 
     @Autowired
     QrCodeService qrCodeService;
@@ -136,7 +139,7 @@ public class UtilityController {
         UploadImageOnS3ResponseDTO result;
 
         try {
-            result = utilityService.uploadImageOnS3(token, imageData, module, latitude, longitude);
+            result = integrationConnectorService.uploadImageOnS3(token, imageData, module, latitude, longitude);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -193,7 +196,29 @@ public class UtilityController {
         DownloadBase64FromS3ResponseDTO result;
 
         try {
-            result = utilityService.downloadBase64FromS3(token, userRefNo, fileName, isNativeFolder, isCustomerPhotos);
+            result = integrationConnectorService.downloadBase64FromS3(token, userRefNo, fileName, isNativeFolder, isCustomerPhotos);
+            response = new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "deleteImageOnS3", method = RequestMethod.GET)
+    public ResponseEntity<Object> deleteImageOnS3(@RequestHeader("Authorization") String token,
+                                                       @RequestParam("file_name") String fileName,
+                                                       @RequestParam("user_ref_no") String userRefNo) throws SQLException {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        DeleteImageOnS3ResponseDTO result;
+
+        try {
+            result = integrationConnectorService.deleteImageOnS3(token, userRefNo, fileName);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -234,7 +259,7 @@ public class UtilityController {
         OcrCheckResponseDTO result;
 
         try {
-            result = utilityService.ocrCheck(token, reqBody);
+            result = integrationConnectorService.ocrCheck(token, reqBody);
             if (result.getData() == null && result.getError() != null) {
                 response = new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
             } else {
@@ -370,7 +395,7 @@ public class UtilityController {
         MasterDTOResponse result;
 
         try {
-            result = utilityService.sendOtp(token, mobileNumber);
+            result = integrationConnectorService.sendOtp(token, mobileNumber);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -390,7 +415,7 @@ public class UtilityController {
         MasterDTOResponse result;
 
         try {
-            result = utilityService.verifyOtp(token, mobileNumber, otp);
+            result = integrationConnectorService.verifyOtp(token, mobileNumber, otp);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
@@ -410,7 +435,7 @@ public class UtilityController {
         MasterDTOResponse result;
 
         try {
-            result = utilityService.resendOtp(token, mobileNumber);
+            result = integrationConnectorService.resendOtp(token, mobileNumber);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

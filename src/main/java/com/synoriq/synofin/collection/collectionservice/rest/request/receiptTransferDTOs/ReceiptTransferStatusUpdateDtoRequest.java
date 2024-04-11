@@ -1,5 +1,6 @@
-package com.synoriq.synofin.collection.collectionservice.rest.request;
+package com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs;
 
+import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 import lombok.Data;
 
 import java.util.Date;

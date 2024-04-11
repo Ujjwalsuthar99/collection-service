@@ -7,11 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.*;
 import java.util.Date;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
+
 @Getter
 @Setter
 @Transactional
 @Entity
-@Table(name = "followups", schema = "collection")
+@Table(name = "followups", schema = COLLECTION)
 public class FollowUpEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -7,11 +7,13 @@ import javax.persistence.*;
 import javax.transaction.Transactional;
 import java.util.Date;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
+
 @Getter
 @Setter
 @Transactional
 @Entity
-@Table(name = "additional_contact_details", schema = "collection")
+@Table(name = "additional_contact_details", schema = COLLECTION)
 public class AdditionalContactDetailsEntity {
 
     @Id

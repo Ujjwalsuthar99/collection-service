@@ -1,18 +1,16 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
-import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferAirtelDepositStatusRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferForAirtelRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.ReceiptTransferStatusUpdateDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferAirtelDepositStatusRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferForAirtelRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferStatusUpdateDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferLmsFilterDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.AllBankTransferResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferCustomDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.ReceiptTransferDataByReceiptIdResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferResponseDTO;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
 import org.springframework.web.bind.annotation.RequestBody;
 

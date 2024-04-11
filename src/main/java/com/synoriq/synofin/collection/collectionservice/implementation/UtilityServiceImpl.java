@@ -2,34 +2,17 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
-import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.*;
-import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDataDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.sendOtpDTOs.ResendOtpDataRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.sendOtpDTOs.ResendOtpRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.sendOtpDTOs.SendOtpDataRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.sendOtpDTOs.SendOtpRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3DataRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3.UploadImageOnS3RequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDTOs.VerifyOtpDataRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDTOs.VerifyOtpRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.UploadImageOnS3DataRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeDataResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
@@ -37,11 +20,11 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.MsgService
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.FinovaMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.PaisabuddyMsgDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.SpfcMsgDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrlDTOs.ShortenUrlResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.FilteredUsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
@@ -49,41 +32,25 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ContactResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ThermalPrintDataDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
-import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.*;
 import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import javax.imageio.ImageIO;
 import javax.persistence.Tuple;
 import javax.servlet.http.HttpServletRequest;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -127,17 +94,11 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Autowired
     private PaisabuddySmsService paisabuddySmsService;
-
-    @Autowired
-    private ReceiptService receiptService;
     @Autowired
     HttpServletRequest httpServletRequest;
 
     @Autowired
     ConsumedApiLogService consumedApiLogService;
-
-    @Autowired
-    DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository;
 
     @Autowired
     RegisteredDeviceInfoRepository registeredDeviceInfoRepository;
@@ -200,12 +161,12 @@ public class UtilityServiceImpl implements UtilityService {
             }
             log.info("userData.toArray().length {}", userData.toArray().length);
             int pageRequest = (page * size) - 10;
-            List<UsersDataDTO> pageableArr = new LinkedList<>();
+            List<FilteredUsersDataDTO> pageableArr = new LinkedList<>();
 
 //            List<UsersDataDTO> filteredList = userData.parallelStream().filter(user -> (user.getUsername().contains(key) || user.getName().contains(key))).collect(Collectors.toList());
             if (key.equals("")) {
                 for (int i = pageRequest; i < (pageRequest + 10); i++) {
-                    pageableArr.add(userData.get(i));
+                    pageableArr.add((FilteredUsersDataDTO) userData.get(i));
                 }
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);
             } else {
@@ -222,7 +183,7 @@ public class UtilityServiceImpl implements UtilityService {
                     length = filterSize + pageRequest;
                 }
                 for (int i = pageRequest; i < length; i++) {
-                    pageableArr.add(filteredList.get(i));
+                    pageableArr.add((FilteredUsersDataDTO) filteredList.get(i));
                 }
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);
             }
@@ -322,7 +283,6 @@ public class UtilityServiceImpl implements UtilityService {
         return newStr.trim();
     }
 
-    ;
 
     @Override
     public String getApiUrl() {
@@ -409,231 +369,6 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, String latitude, String longitude) throws IOException {
-        UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
-
-
-        Base64.Encoder encoder = Base64.getEncoder();
-        String base64 = encoder.encodeToString(imageData.getBytes());
-
-        String fileName = "";
-        String userRefNo = "";
-
-        String fileType = detectFileType(base64);
-        fileType = fileType.split("image/")[1];
-        CurrentUserInfo currentUserInfo = new CurrentUserInfo();
-        int randomNumber = (int) (100000 + Math.random() * 900000);
-        String userName = getUserDetailsByToken(token).getData().getUserName();
-        switch (module) {
-            case "follow_up":
-                fileName = randomNumber + "_" + new Date().getTime() + "_" + "_followup_image." + fileType;
-                userRefNo = "followUp/" + userName;
-                break;
-            case "create_receipt":
-                fileName = randomNumber + "_" + new Date().getTime() + "_" + "_create_receipt_image." + fileType;
-                userRefNo = "bankDepositSlip/" + userName;
-                break;
-            case "receipt_transfer":
-                fileName = randomNumber + "_" + new Date().getTime() + "_" + "_deposit_image." + fileType;
-                userRefNo = "depositSlip/" + userName;
-                break;
-            case "profile":
-                fileName = "collection_" + currentUserInfo.getClientId().toLowerCase() + "_logo.png";
-                userRefNo = "documents/logo";
-                break;
-            case "repossession_initiated_image":
-            case "repossession_yard_image":
-                fileName = randomNumber + "_" + new Date().getTime() + "_" + module + "." + fileType;
-                userRefNo = "repossession/" + userName;
-                break;
-            default:
-                fileName = "";
-                userRefNo = "";
-                break;
-        }
-
-
-        UploadImageOnS3RequestDTO uploadImageOnS3RequestDTO = new UploadImageOnS3RequestDTO();
-        UploadImageOnS3DataRequestDTO uploadImageOnS3DataRequestDTO = new UploadImageOnS3DataRequestDTO();
-        uploadImageOnS3DataRequestDTO.setUserRefNo(userRefNo);
-        uploadImageOnS3DataRequestDTO.setFileContentType("");
-        uploadImageOnS3DataRequestDTO.setFileName(fileName);
-        uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
-        uploadImageOnS3RequestDTO.setSystemId("collection");
-        uploadImageOnS3RequestDTO.setUserReferenceNumber("");
-        uploadImageOnS3RequestDTO.setSpecificPartnerName("");
-        log.info("uploadImageOnS3RequestDTO {}", uploadImageOnS3RequestDTO);
-
-        try {
-
-            String geoTaggingEnabled = collectionConfigurationsRepository.findConfigurationValueByConfigurationName("geo_tagging_enabled_on_photos");
-
-            if (geoTaggingEnabled.equals("true")) {
-                if ((latitude != null) && (longitude != null)) {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                    String date = simpleDateFormat.format(new Date());
-
-                    InputStream inputStream = new ByteArrayInputStream(imageData.getBytes());
-                    BufferedImage image = ImageIO.read(inputStream);
-
-                    // Create a Graphics2D object from the BufferedImage object
-                    Graphics2D graphics2D = image.createGraphics();
-
-                    // Set the font and color for the watermark
-                    Font font = new Font("Arial", Font.BOLD, 42);
-                    String latLongWatermarkText = "lat: " + latitude + ", long: " + longitude;
-                    String dateTimeWatermarkText = "Datetime: " + date;
-
-                    // Define margins and padding
-                    int leftMargin = 20;
-                    int rightMargin = 20;
-                    int topMargin = 20;
-                    int bottomMargin = 20;
-                    int padding = 10; // Padding between image borders and text
-
-                    // Calculate the maximum text width based on the image width and margins
-                    int maxTextWidth = image.getWidth() - leftMargin - rightMargin;
-
-                    // Create a FontMetrics object to calculate text dimensions
-                    FontMetrics fontMetrics = graphics2D.getFontMetrics(font);
-                    // Calculate the total text height
-                    int latLongHeight = fontMetrics.getHeight() + 2 * padding;
-
-                    int latitudeLongitudeX = (image.getWidth() - fontMetrics.stringWidth(latLongWatermarkText)) / 2;
-                    int latitudeLongitudeY = topMargin + fontMetrics.getHeight() + padding;
-
-                    // Draw the watermark onto the image
-                    graphics2D.setFont(font);
-                    graphics2D.setColor(Color.RED);
-                    graphics2D.drawString(latLongWatermarkText, latitudeLongitudeX, latitudeLongitudeY + fontMetrics.getAscent());
-
-//                    int dateTimeTextHeight = fontMetrics.getHeight() + 2 * padding;
-
-                    // Calculate the position of the datetime text at the top center of the image
-                    int dateTimeX = (image.getWidth() - fontMetrics.stringWidth(dateTimeWatermarkText)) / 2;
-                    int dateTimeY = image.getHeight() - bottomMargin - fontMetrics.getHeight() - padding;
-
-                    graphics2D.drawString(dateTimeWatermarkText, dateTimeX, dateTimeY + fontMetrics.getAscent());
-
-                    // Save the updated image as a byte array
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    ImageIO.write(image, "jpg", outputStream);
-                    byte[] updatedBytes = outputStream.toByteArray();
-
-                    base64 = encoder.encodeToString(updatedBytes);
-                }
-            }
-
-
-            uploadImageOnS3DataRequestDTO.setFile(base64);
-
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
-
-
-            res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
-                    .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:1102/v1/uploadImageOnS3")
-                    .body(uploadImageOnS3RequestDTO)
-                    .httpHeaders(httpHeaders)
-                    .typeResponseType(UploadImageOnS3ResponseDTO.class)
-                    .build().call();
-
-            log.info("upload result {}", res);
-            // creating api logs
-            uploadImageOnS3DataRequestDTO.setFile("base64 string");
-            uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, res, "success", null);
-        } catch (Exception ee) {
-            String errorMessage = ee.getMessage();
-            String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, modifiedErrorMessage, "failure", null);
-            log.error("{}", ee.getMessage());
-        }
-        return res;
-    }
-
-    private String detectFileType(String base64String) {
-        byte[] decodedBytes = Base64.getDecoder().decode(base64String);
-
-        if (decodedBytes.length < 2) {
-            return "unknown";
-        }
-
-        byte byte1 = decodedBytes[0];
-        byte byte2 = decodedBytes[1];
-
-        if ((byte1 & 0xFF) == 0xFF && (byte2 & 0xFF) == 0xD8) {
-            return "image/jpeg";
-        } else if ((byte1 & 0xFF) == 0x89 && (byte2 & 0xFF) == 0x50) {
-            return "image/png";
-        } else if ((byte1 & 0xFF) == 0x47 && (byte2 & 0xFF) == 0x49) {
-            return "image/gif";
-        } else if ((byte1 & 0xFF) == 0x42 && (byte2 & 0xFF) == 0x4D) {
-            return "image/bmp";
-        } else if ((byte1 & 0xFF) == 0x1F && (byte2 & 0xFF) == 0x8B) {
-            return "application/gzip";
-        } else if ((byte1 & 0xFF) == 0x50 && (byte2 & 0xFF) == 0x4B) {
-            return "application/zip";
-        } else {
-            return "unknown";
-        }
-    }
-
-    @Override
-    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder, boolean isCustomerPhotos) throws Exception {
-        DownloadBase64FromS3ResponseDTO res = new DownloadBase64FromS3ResponseDTO();
-        CurrentUserInfo currentUserInfo = new CurrentUserInfo();
-        try {
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
-
-            String systemId = "collection";
-            if (isCustomerPhotos) {
-                systemId = "collection_lms";
-            }
-
-            res = HTTPRequestService.<Object, DownloadBase64FromS3ResponseDTO>builder()
-                    .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getBase64ByFileName?fileName=" + fileName + "&userRefNo=" + userRefNo + "&isNativeFolder=" + isNativeFolder + "&systemId=" + systemId)
-                    .httpHeaders(httpHeaders)
-                    .typeResponseType(DownloadBase64FromS3ResponseDTO.class)
-                    .build().call();
-
-            String modifiedResponse = "response: " + res.getResponse() + " requestId: " + res.getRequestId() + " error: " + res.getError();
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, convertToJSON(modifiedResponse), "success", null);
-// again calling the download api for aadharfin usernames
-            if (res.getData().contains("File or bucket not") && Objects.equals(currentUserInfo.getClientId(), "aadharfin")) {
-                log.info("Again calling the download API for Aadharfin Client");
-                String[] userRefArr = userRefNo.split("/");
-                String newUserRef = userRefArr[0] + "/" + userRefArr[1].substring(0, 1).toUpperCase() + userRefArr[1].substring(1);
-
-                res = HTTPRequestService.<Object, DownloadBase64FromS3ResponseDTO>builder()
-                        .httpMethod(HttpMethod.GET)
-                        .url("http://localhost:1102/v1/getBase64ByFileName?fileName=" + fileName + "&userRefNo=" + newUserRef + "&isNativeFolder=" + isNativeFolder + "&systemId=" + systemId)
-                        .httpHeaders(httpHeaders)
-                        .typeResponseType(DownloadBase64FromS3ResponseDTO.class)
-                        .build().call();
-            }
-
-        } catch (Exception ee) {
-            String errorMessage = ee.getMessage();
-            String modifiedErrorMessage = convertToJSON(errorMessage);
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, modifiedErrorMessage, "failure", null);
-            log.error("juuju{}", ee.getMessage());
-            res.setResponse(false);
-            res.setData(null);
-            res.setErrorFields(ee.getMessage());
-
-        }
-        return res;
-    }
-
-    @Override
     public String convertToJSON(String input) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
@@ -662,7 +397,7 @@ public class UtilityServiceImpl implements UtilityService {
         uploadImageOnS3DataRequestDTO.setFileName(fileName);
         uploadImageOnS3DataRequestDTO.setFile(base64);
         uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
-        uploadImageOnS3RequestDTO.setSystemId("collection");
+        uploadImageOnS3RequestDTO.setSystemId(COLLECTION);
         uploadImageOnS3RequestDTO.setUserReferenceNumber("");
         uploadImageOnS3RequestDTO.setSpecificPartnerName("");
         String[] loanId = fileName.split("_");
@@ -697,7 +432,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             shortenUrlRequestDTO.setUserReferenceNumber("");
             shortenUrlRequestDTO.setSpecificPartnerName("");
-            shortenUrlRequestDTO.setSystemId("collection");
+            shortenUrlRequestDTO.setSystemId(COLLECTION);
             shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
             shortenUrlRequestDTO.setData(shortenUrlDataRequestDTO);
             String shortenUrl = "";
@@ -843,7 +578,7 @@ public class UtilityServiceImpl implements UtilityService {
                 requestDataDTO.setTemplateVariable(strings);
                 requestDataDTO.setSmsList(smsListDTOS);
                 SpfcSmsRequestDTO spfcSmsRequestDTO = new SpfcSmsRequestDTO();
-                spfcSmsRequestDTO.setSystemId("collection");
+                spfcSmsRequestDTO.setSystemId(COLLECTION);
                 spfcSmsRequestDTO.setUserReferenceNumber("");
                 spfcSmsRequestDTO.setSpecificPartnerName("");
                 spfcSmsRequestDTO.setData(requestDataDTO);
@@ -916,7 +651,7 @@ public class UtilityServiceImpl implements UtilityService {
                 requestDataDTO.setTemplateVariable(strings);
                 requestDataDTO.setSmsList(smsListDTOS);
                 CflSmsRequest cflSmsRequest = new CflSmsRequest();
-                cflSmsRequest.setSystemId("collection");
+                cflSmsRequest.setSystemId(COLLECTION);
                 cflSmsRequest.setUserReferenceNumber("");
                 cflSmsRequest.setSpecificPartnerName("");
                 cflSmsRequest.setData(requestDataDTO);
@@ -1070,45 +805,6 @@ public class UtilityServiceImpl implements UtilityService {
         return new BaseDTOResponse<>(base64);
     }
 
-    @Override
-    public OcrCheckResponseDTO ocrCheck(String token, OcrCheckRequestDTO requestBody) throws Exception {
-        OcrCheckResponseDTO res = new OcrCheckResponseDTO();
-        String base64 = requestBody.getData().getImgBaseUrl();
-        base64 = base64.replace("\n", "");
-        OcrCheckRequestDataDTO ocrCheckRequestDataDTO = new OcrCheckRequestDataDTO();
-        ocrCheckRequestDataDTO.setImgBaseUrl(base64);
-        ocrCheckRequestDataDTO.setImgType(requestBody.getData().getImgType());
-        requestBody.setData(ocrCheckRequestDataDTO);
-        try {
-            OcrCheckRequestDTO ocrCheckBody = new ObjectMapper().convertValue(requestBody, OcrCheckRequestDTO.class);
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
-            log.info("ocrCheckBody {}", ocrCheckBody);
-
-            res = HTTPRequestService.<Object, OcrCheckResponseDTO>builder()
-                    .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:1102/v1/ocrCheck")
-                    .httpHeaders(httpHeaders)
-                    .body(ocrCheckBody)
-                    .typeResponseType(OcrCheckResponseDTO.class)
-                    .build().call();
-
-            log.info("res {}", res);
-            ocrCheckRequestDataDTO.setImgBaseUrl("base64 string");
-            requestBody.setData(ocrCheckRequestDataDTO);
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
-        } catch (Exception ee) {
-            String errorMessage = ee.getMessage();
-            String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, modifiedErrorMessage, "failure", null);
-            log.error("{}", ee.getMessage());
-        }
-
-        return res;
-    }
-
     public String splitCodeName(String codeName) {
         String patternString = "\\((.*?)\\)";
         Pattern pattern = Pattern.compile(patternString);
@@ -1171,113 +867,6 @@ public class UtilityServiceImpl implements UtilityService {
         }
 
         return new BaseDTOResponse<>(documentsDataArr);
-    }
-
-    @Override
-    public MasterDTOResponse sendOtp(String token, String mobileNumber) throws Exception {
-        MasterDTOResponse res = new MasterDTOResponse();
-
-        SendOtpRequestDTO sendOtpRequestDTO = new SendOtpRequestDTO();
-        SendOtpDataRequestDTO sendOtpDataRequestDTO = new SendOtpDataRequestDTO();
-        sendOtpDataRequestDTO.setOtpExpiry("10");
-        sendOtpDataRequestDTO.setSpecificOtp("");
-        sendOtpDataRequestDTO.setOtpCodeLength(6);
-        sendOtpDataRequestDTO.setTemplateName("template1");
-        sendOtpDataRequestDTO.setPhoneNumber("91" + mobileNumber);
-        sendOtpDataRequestDTO.setTemplateVariable(new ArrayList<>());
-        sendOtpRequestDTO.setSystemId("collection");
-        sendOtpRequestDTO.setData(sendOtpDataRequestDTO);
-
-        try {
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
-
-            res = HTTPRequestService.<Object, MasterDTOResponse>builder()
-                    .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:1102/v1/send-otp")
-                    .body(sendOtpRequestDTO)
-                    .httpHeaders(httpHeaders)
-                    .typeResponseType(MasterDTOResponse.class)
-                    .build().call();
-
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_otp, null, sendOtpRequestDTO, res, "success", null);
-        } catch (Exception ee) {
-            String errorMessage = ee.getMessage();
-            String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_otp, null, sendOtpRequestDTO, modifiedErrorMessage, "failure", null);
-            log.error("{}", ee.getMessage());
-        }
-        return res;
-    }
-
-    @Override
-    public MasterDTOResponse verifyOtp(String token, String mobileNumber, String otp) throws Exception {
-        MasterDTOResponse res = new MasterDTOResponse();
-
-        VerifyOtpRequestDTO verifyOtpRequestDTO = new VerifyOtpRequestDTO();
-        VerifyOtpDataRequestDTO verifyOtpDataRequestDTO = new VerifyOtpDataRequestDTO();
-        verifyOtpDataRequestDTO.setOtp(otp);
-        verifyOtpDataRequestDTO.setId("91" + mobileNumber);
-        verifyOtpRequestDTO.setSystemId("collection");
-        verifyOtpRequestDTO.setData(verifyOtpDataRequestDTO);
-        try {
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
-
-            res = HTTPRequestService.<Object, MasterDTOResponse>builder()
-                    .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:1102/v1/verify-otp")
-                    .body(verifyOtpRequestDTO)
-                    .httpHeaders(httpHeaders)
-                    .typeResponseType(MasterDTOResponse.class)
-                    .build().call();
-
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.verify_otp, null, verifyOtpRequestDTO, res, "success", null);
-        } catch (Exception ee) {
-            String errorMessage = ee.getMessage();
-            String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.verify_otp, null, verifyOtpRequestDTO, modifiedErrorMessage, "failure", null);
-            log.error("{}", ee.getMessage());
-        }
-        return res;
-    }
-
-    @Override
-    public MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception {
-        MasterDTOResponse res = new MasterDTOResponse();
-
-        ResendOtpRequestDTO resendOtpRequestDTO = new ResendOtpRequestDTO();
-        ResendOtpDataRequestDTO resendOtpDataRequestDTO = new ResendOtpDataRequestDTO();
-        resendOtpDataRequestDTO.setRetryType("text");
-        resendOtpDataRequestDTO.setPhoneNumber("91" + mobileNumber);
-        resendOtpRequestDTO.setSystemId("collection");
-        resendOtpRequestDTO.setData(resendOtpDataRequestDTO);
-        try {
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
-
-            res = HTTPRequestService.<Object, MasterDTOResponse>builder()
-                    .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:1102/v1/resend-otp")
-                    .body(resendOtpRequestDTO)
-                    .httpHeaders(httpHeaders)
-                    .typeResponseType(MasterDTOResponse.class)
-                    .build().call();
-
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.resend_otp, null, resendOtpRequestDTO, res, "success", null);
-        } catch (Exception ee) {
-            String errorMessage = ee.getMessage();
-            String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.resend_otp, null, resendOtpRequestDTO, modifiedErrorMessage, "failure", null);
-            log.error("{}", ee.getMessage());
-        }
-        return res;
     }
 
     @Override

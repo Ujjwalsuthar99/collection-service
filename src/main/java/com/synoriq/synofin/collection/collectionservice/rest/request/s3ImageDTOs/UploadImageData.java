@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.rest.request.uploadImageOnS3;
+package com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

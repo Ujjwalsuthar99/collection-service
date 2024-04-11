@@ -8,10 +8,12 @@ import javax.persistence.*;
 import javax.transaction.Transactional;
 import java.util.Date;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
+
 @Transactional
 @Entity
 @TypeDef(name = "json", typeClass = JsonType.class)
-@Table(name = "collection_limit_userwise", schema = "collection")
+@Table(name = "collection_limit_userwise", schema = COLLECTION)
 @Data
 public class CollectionLimitUserWiseEntity {
 

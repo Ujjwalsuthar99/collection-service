@@ -10,11 +10,13 @@ import javax.persistence.*;
 import javax.transaction.Transactional;
 import java.util.Date;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
+
 @Transactional
 @Entity
 @TypeDef(name = "json", typeClass = JsonType.class)
 @TypeDef(name = "enum_type", typeClass = com.synoriq.synofin.collection.collectionservice.entity.EnumTypeCast.class)
-@Table(name = "consumed_api_logs", schema = "collection")
+@Table(name = "consumed_api_logs", schema = COLLECTION)
 @Data
 public class ConsumedApiLogsEntity {
 

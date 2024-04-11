@@ -8,9 +8,11 @@ import javax.persistence.*;
 import javax.transaction.Transactional;
 import java.util.Date;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
+
 @Transactional
 @Entity
-@Table(name = "registered_device_info", schema = "collection")
+@Table(name = "registered_device_info", schema = COLLECTION)
 @Data
 public class RegisteredDeviceInfoEntity {
 
