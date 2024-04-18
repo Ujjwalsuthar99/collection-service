@@ -13,6 +13,7 @@ import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.collection.collectionservice.service.GlobalSearchService;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -39,7 +40,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
         List<TaskListDTOReturnResponse> result = new ArrayList<>();
         SearchDTOReturnResponse searchDataResponse = new SearchDTOReturnResponse();
         SearchDtoRequest searchBody = new ObjectMapper().convertValue(requestBody, SearchDtoRequest.class);
-
+        searchBody.getRequestData().setSearchTerm(searchBody.getRequestData().getSearchTerm().trim());
         //  Restrict Global Search Loan id for user with last 7 digit
 //        if (Objects.equals(requestBody.getRequestData().getFilterBy(), "loan_account_number")) {
 //            if (stringSize >= 7) {
@@ -75,47 +76,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.global_search, null, searchBody, res, "success", null);
             if (res.getData() != null && res.getData().getLoanDetails() != null) {
                 for (LMSLoanDataDTO loanDataDTO : res.getData().getLoanDetails()) {
-                    TaskListDTOReturnResponse taskListDTOReturnResponse = new TaskListDTOReturnResponse();
-                    taskListDTOReturnResponse.setAddress(loanDataDTO.getCustomerDetails().getCustomerAddress());
-                    taskListDTOReturnResponse.setCustomerName(loanDataDTO.getCustomerDetails().getName());
-                    taskListDTOReturnResponse.setProduct(loanDataDTO.getProduct());
-                    taskListDTOReturnResponse.setLoanApplicationId(Long.parseLong(loanDataDTO.getLoanId()));
-                    taskListDTOReturnResponse.setLoanApplicationNumber(loanDataDTO.getLoanApplicationNumber());
-                    taskListDTOReturnResponse.setOverdueRepayment(loanDataDTO.getOverDueAmount());
-                    taskListDTOReturnResponse.setBranch(loanDataDTO.getBranch());
-                    taskListDTOReturnResponse.setDaysPastDue(loanDataDTO.getDpd());
-                    taskListDTOReturnResponse.setMobile(loanDataDTO.getCustomerDetails().getPhoneNumber());
-
-                    int dpd = loanDataDTO.getDpd();
-                    if (dpd >= 0 && dpd <= 30) {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#61B2FF");
-                        taskListDTOReturnResponse.setDaysPastDueBucket("0-30 DPD");
-                    } else if (dpd >= 31 && dpd <= 60) {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#2F80ED");
-                        taskListDTOReturnResponse.setDaysPastDueBucket("31-60 DPD");
-                    } else if (dpd >= 61 && dpd <= 90) {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#FDAAAA");
-                        taskListDTOReturnResponse.setDaysPastDueBucket("61-90 DPD");
-                    } else if (dpd >= 91 && dpd <= 120) {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#323232");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#F2994A");
-                        taskListDTOReturnResponse.setDaysPastDueBucket("91-120 DPD");
-                    } else if (dpd >= 121 && dpd <= 150) {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#FF5359");
-                        taskListDTOReturnResponse.setDaysPastDueBucket("121-150 DPD");
-                    } else if (dpd >= 151 && dpd <= 180) {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#C83939");
-                        taskListDTOReturnResponse.setDaysPastDueBucket("151-180 DPD");
-                    } else {
-                        taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
-                        taskListDTOReturnResponse.setDpdBgColorKey("#722F37");
-                        taskListDTOReturnResponse.setDaysPastDueBucket("180+ DPD");
-                    }
+                    TaskListDTOReturnResponse taskListDTOReturnResponse = getTaskListDTOReturnResponse(loanDataDTO);
                     result.add(taskListDTOReturnResponse);
                 }
             } else {
@@ -132,5 +93,51 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
             throw new Exception(ee.getMessage());
         }
         return baseDTOResponse;
+    }
+
+    @NotNull
+    private static TaskListDTOReturnResponse getTaskListDTOReturnResponse(LMSLoanDataDTO loanDataDTO) {
+        TaskListDTOReturnResponse taskListDTOReturnResponse = new TaskListDTOReturnResponse();
+        taskListDTOReturnResponse.setAddress(loanDataDTO.getCustomerDetails().getCustomerAddress());
+        taskListDTOReturnResponse.setCustomerName(loanDataDTO.getCustomerDetails().getName());
+        taskListDTOReturnResponse.setProduct(loanDataDTO.getProduct());
+        taskListDTOReturnResponse.setLoanApplicationId(Long.parseLong(loanDataDTO.getLoanId()));
+        taskListDTOReturnResponse.setLoanApplicationNumber(loanDataDTO.getLoanApplicationNumber());
+        taskListDTOReturnResponse.setOverdueRepayment(loanDataDTO.getOverDueAmount());
+        taskListDTOReturnResponse.setBranch(loanDataDTO.getBranch());
+        taskListDTOReturnResponse.setDaysPastDue(loanDataDTO.getDpd());
+        taskListDTOReturnResponse.setMobile(loanDataDTO.getCustomerDetails().getPhoneNumber());
+
+        int dpd = loanDataDTO.getDpd();
+        if (dpd >= 0 && dpd <= 30) {
+            taskListDTOReturnResponse.setDpdTextColorKey("#323232");
+            taskListDTOReturnResponse.setDpdBgColorKey("#61B2FF");
+            taskListDTOReturnResponse.setDaysPastDueBucket("0-30 DPD");
+        } else if (dpd >= 31 && dpd <= 60) {
+            taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
+            taskListDTOReturnResponse.setDpdBgColorKey("#2F80ED");
+            taskListDTOReturnResponse.setDaysPastDueBucket("31-60 DPD");
+        } else if (dpd >= 61 && dpd <= 90) {
+            taskListDTOReturnResponse.setDpdTextColorKey("#323232");
+            taskListDTOReturnResponse.setDpdBgColorKey("#FDAAAA");
+            taskListDTOReturnResponse.setDaysPastDueBucket("61-90 DPD");
+        } else if (dpd >= 91 && dpd <= 120) {
+            taskListDTOReturnResponse.setDpdTextColorKey("#323232");
+            taskListDTOReturnResponse.setDpdBgColorKey("#F2994A");
+            taskListDTOReturnResponse.setDaysPastDueBucket("91-120 DPD");
+        } else if (dpd >= 121 && dpd <= 150) {
+            taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
+            taskListDTOReturnResponse.setDpdBgColorKey("#FF5359");
+            taskListDTOReturnResponse.setDaysPastDueBucket("121-150 DPD");
+        } else if (dpd >= 151 && dpd <= 180) {
+            taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
+            taskListDTOReturnResponse.setDpdBgColorKey("#C83939");
+            taskListDTOReturnResponse.setDaysPastDueBucket("151-180 DPD");
+        } else {
+            taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
+            taskListDTOReturnResponse.setDpdBgColorKey("#722F37");
+            taskListDTOReturnResponse.setDaysPastDueBucket("180+ DPD");
+        }
+        return taskListDTOReturnResponse;
     }
 }

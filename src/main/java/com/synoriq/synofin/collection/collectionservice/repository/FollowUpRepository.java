@@ -136,6 +136,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "f.other_followup_reason as other_followup_reason,\n" +
             "f.remarks as remarks,\n" +
             "f.followup_status as status, \n" +
+            "f.closing_remarks, \n" +
+            "f.service_request_id, \n" +
             "la.days_past_due as dpd,\n" +
             "la.loan_application_number as loan_application_number,\n" +
             "    (case\n" +

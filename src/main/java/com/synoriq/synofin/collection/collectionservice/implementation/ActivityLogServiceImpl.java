@@ -112,12 +112,12 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         ActivityLogDataDTO activityLogDataDTO = new ActivityLogDataDTO();
         List<ActivityLogCustomResponseDTO> responseData = new ArrayList<>();
 
-        if (!filterBy.equals("")) {
+        if (!filterBy.isEmpty()) {
             collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDurationByFilter(loanId, fromDate, toDate, filterBy, pageable);
         } else {
             collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsLoanWiseByDuration(loanId, fromDate, toDate, pageable);
         }
-        if (collectionActivityLogs.size() > 0) {
+        if (!collectionActivityLogs.isEmpty()) {
             for (Map<String, Object> collectionActivityLog : collectionActivityLogs) {
                 String followUpReason = "";
                 ActivityLogCustomResponseDTO activityLogCustomResponseDTO = new ActivityLogCustomResponseDTO();

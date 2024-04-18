@@ -187,7 +187,7 @@ public enum ErrorCode {
     STATUS_NOT_MATCHED(1016032, "Request status is not matched"),
     LMS_CREATE_RECEIPT_ERROR(1016033, "LMS create receipt is getting null response"),
     REGEX_NOT_MATCHING(1016034, "Input is not matched with the REGEX"),
-    DATA_NOT_FOUND_IN_LMS(1016035, "Receipt id is getting null from LMS"),
+    DATA_NOT_FOUND_IN_LMS(1016035, "Loan Number is not found in LMS"),
     TRANSFER_TO_USER_ID(1016036, "Transfer to user id is getting null against this entry"),
     LIMIT_CHECK_ON_APPROVAL(1016037, "Cannot process the request as your collection limit is exceeded"),
     RECEIPT_TIME_BOUND_LIMIT(1016038, "Receipt collection time bound on same loan, try after 10 min"),
