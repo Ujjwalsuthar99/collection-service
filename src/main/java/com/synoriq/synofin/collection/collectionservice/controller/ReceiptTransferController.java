@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -47,6 +48,33 @@ public class ReceiptTransferController {
 
         try {
             baseResponse = receiptTransferService.createReceiptTransfer(receiptTransferDtoRequest, bearerToken);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (CustomException ee) {
+            baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(ee.getCode(), ee.getMessage()));
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        return response;
+
+    }
+
+    @RequestMapping(value = "/receipt-transfer/generate-new", method = RequestMethod.POST)
+    public ResponseEntity<Object> createReceiptTransferNew(@RequestHeader("Authorization") String bearerToken,
+                                                           @RequestParam("transfer_proof") MultipartFile transferProof,
+                                                           @RequestParam("data") Object object) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+
+        try {
+            baseResponse = receiptTransferService.createReceiptTransferNew(object, transferProof, bearerToken);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
         } catch (CustomException ee) {
             baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(ee.getCode(), ee.getMessage()));

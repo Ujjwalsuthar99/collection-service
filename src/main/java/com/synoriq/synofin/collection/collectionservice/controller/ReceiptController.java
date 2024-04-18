@@ -1,5 +1,9 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferLmsFilterDTO;
@@ -7,12 +11,14 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -119,6 +125,43 @@ public class ReceiptController {
 
         } catch (Exception e) {
             e.printStackTrace();
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        return response;
+
+    }
+
+    @RequestMapping(value = "/create-receipt-new", method = RequestMethod.POST)
+    public ResponseEntity<Object> createReceiptNew(@RequestHeader("Authorization") String bearerToken,
+                                                   @RequestParam("paymentReferenceImage") MultipartFile paymentReferenceImage,
+                                                   @RequestParam("selfieImage") MultipartFile selfieImage,
+                                                   @RequestParam("data") Object object) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        ServiceRequestSaveResponse createReceiptResponse;
+
+        try {
+
+            createReceiptResponse = receiptService.createReceiptNew(object, paymentReferenceImage, selfieImage, bearerToken, false);
+            if (createReceiptResponse.getData() == null && createReceiptResponse.getError() == null) {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
+            } else if (createReceiptResponse.getData() == null) {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
+            } else if (createReceiptResponse.getData().getServiceRequestId() == null && createReceiptResponse.getError() != null) {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
+            } else  {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.OK);
+            }
+
+        } catch (Exception e) {
+            log.info("Exception", e);
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
                 baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
             } else {
