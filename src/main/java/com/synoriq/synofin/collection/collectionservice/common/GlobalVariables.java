@@ -16,6 +16,7 @@ public class GlobalVariables {
     public static final String RECEIPT_TIME_VALIDATE = "duplicate_receipt_time_validation";
     public static final String EMPLOYEE_MOBILE_NUMBER_VALIDATION = "employee_mobile_number_validation";
     public static final String MONTH_CASH_VALIDATION = "monthly_x_rupees_cash_collection";
+    public static final String MULTI_RECEIPT_CLIENT_CREDENTIALS = "multi_receipt_client_credentials";
     public static final String ONLINE_COLLECTION_DEFAULT_LIMIT = "online_collection_default_limit";
     public static final String CASH_COLLECTION_DEFAULT_LIMIT = "cash_collection_default_limit";
     public static final String NEFT_COLLECTION_DEFAULT_LIMIT = "neft_collection_default_limit";

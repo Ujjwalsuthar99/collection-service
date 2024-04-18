@@ -202,7 +202,8 @@ public enum ErrorCode {
     EMPLOYEE_MOBILE_NUMBER_VALIDATION(1016047, "Mobile number is already registered with our employee database"),
     FOLLOWUP_CLOSE_DATE_VALIDATION(1016048, "Can't Close the followup as the receipt is of previous month"),
     RECEIPT_ID_NOT_FOUND(1016049, "Receipt id not there for this loan Id"),
-    RECEIPT_TRANSFERRED_ALREADY(1016050, "Receipt already has been transferred");
+    RECEIPT_TRANSFERRED_ALREADY(1016050, "Receipt already has been transferred"),
+    FOLLOWUP_CLOSED_RECEIPT_ID(1016051, "FollowUp was already closed using this Receipt Id");
     private Integer codeValue;
     private String responseMessage;
 

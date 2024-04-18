@@ -190,6 +190,9 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
                     .build().call();
 
             log.info("upload result {}", res);
+            // setting userRefNo here
+            res.getData().setUserRefNo(userRefNo);
+
             // creating api logs
             uploadImageOnS3DataRequestDTO.setFile("base64 string");
             uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
