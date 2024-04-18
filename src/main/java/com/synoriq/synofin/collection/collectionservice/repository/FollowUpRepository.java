@@ -177,5 +177,5 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "           where f.followups_id = :followupId")
     Map<String, Object> getFollowupDetailsById(@Param("followupId") Long followupId, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission);
 
-    FollowUpEntity findDataByServiceRequestId(Long serviceRequestId);
+    List<FollowUpEntity> findDataByServiceRequestId(Long serviceRequestId);
 }

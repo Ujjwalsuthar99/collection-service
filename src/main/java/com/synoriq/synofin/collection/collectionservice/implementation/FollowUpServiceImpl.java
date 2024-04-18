@@ -232,7 +232,7 @@ public class FollowUpServiceImpl implements FollowUpService {
             if (followUpEntity.isPresent()) {
                 Map<String, Object> receiptExist = receiptRepository.getServiceRequestDataById(followUpStatusRequestDTO.getServiceRequestId(), followUpStatusRequestDTO.getLoanId());
                 if (!receiptExist.isEmpty()) {
-                    Optional<FollowUpEntity> var = Optional.ofNullable(followUpRepository.findDataByServiceRequestId(followUpStatusRequestDTO.getServiceRequestId()));
+                    Optional<List<FollowUpEntity>> var = Optional.ofNullable(followUpRepository.findDataByServiceRequestId(followUpStatusRequestDTO.getServiceRequestId()));
                     if (var.isPresent()) {
                         throw new Exception("1016051");
                     }
