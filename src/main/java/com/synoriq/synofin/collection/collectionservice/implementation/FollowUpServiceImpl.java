@@ -232,8 +232,8 @@ public class FollowUpServiceImpl implements FollowUpService {
             if (followUpEntity.isPresent()) {
                 Map<String, Object> receiptExist = receiptRepository.getServiceRequestDataById(followUpStatusRequestDTO.getServiceRequestId(), followUpStatusRequestDTO.getLoanId());
                 if (!receiptExist.isEmpty()) {
-                    Optional<List<FollowUpEntity>> var = Optional.ofNullable(followUpRepository.findDataByServiceRequestId(followUpStatusRequestDTO.getServiceRequestId()));
-                    if (var.isPresent()) {
+                    List<FollowUpEntity> var = followUpRepository.findDataByServiceRequestId(followUpStatusRequestDTO.getServiceRequestId());
+                    if (!var.isEmpty()) {
                         throw new Exception("1016051");
                     }
                     // receipt created date
