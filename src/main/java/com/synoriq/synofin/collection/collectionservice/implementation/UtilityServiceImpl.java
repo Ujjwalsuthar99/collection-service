@@ -931,4 +931,9 @@ public class UtilityServiceImpl implements UtilityService {
         return new BaseDTOResponse<Object>("No Match Found");
     }
 
+    @Override
+    public Object getBankAccountDetails(Long bankAccountId) {
+        return receiptRepository.getBankAccountDetails(bankAccountId);
+    }
+
 }

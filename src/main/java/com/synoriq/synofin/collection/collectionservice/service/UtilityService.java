@@ -50,4 +50,5 @@ public interface UtilityService {
     public BaseDTOResponse<Object> getCollaterals(Long loanIdNumber, String token) throws Exception;
     public BaseDTOResponse<Object> employeeMobileNumberValidator(String token, String mobileNumber) throws Exception;
 
+    public Object getBankAccountDetails(Long bankAccountId);
 }
