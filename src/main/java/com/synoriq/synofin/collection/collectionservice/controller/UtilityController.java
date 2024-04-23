@@ -323,6 +323,33 @@ public class UtilityController {
         return response;
     }
 
+    @RequestMapping(value = "send-qr-code-new", method = RequestMethod.POST)
+    public ResponseEntity<Object> sendQrCodeNew(@RequestHeader("Authorization") String token,
+                                                @RequestParam("paymentReferenceImage") MultipartFile paymentReferenceImage,
+                                                @RequestParam("selfieImage") MultipartFile selfieImage,
+                                                @RequestParam("data") Object data) {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        DynamicQrCodeResponseDTO result;
+
+        try {
+            result = qrCodeService.sendQrCodeNew(token, data, paymentReferenceImage, selfieImage);
+            if (result.getData() == null && result.getError() != null) {
+                response = new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+            } else {
+                response = new ResponseEntity<>(result, HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
+
     @RequestMapping(value = "get-qr-code-transaction-status", method = RequestMethod.POST)
     public ResponseEntity<Object> getQrCodeTransactionStatus(@RequestHeader("Authorization") String token, @RequestBody DynamicQrCodeStatusCheckRequestDTO reqBody) {
         BaseDTOResponse<Object> baseResponse;

@@ -430,6 +430,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Override
     @Transactional
     public ServiceRequestSaveResponse createReceiptNew(Object object, MultipartFile paymentReferenceImage, MultipartFile selfieImage, String bearerToken, boolean receiptFromQR) throws Exception {
+        log.info("createReceiptNew Begin");
         ServiceRequestSaveResponse res;
         Long collectionActivityId;
         ObjectMapper objectMapper = new ObjectMapper();
@@ -439,23 +440,25 @@ public class ReceiptServiceImpl implements ReceiptService {
         ReceiptServiceRequestDataDTO receiptServiceRequestDataDTO = new ReceiptServiceRequestDataDTO();
 
         GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
-        UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(bearerToken, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
-        UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(bearerToken, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
+        if (!receiptFromQR) {
+            UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(bearerToken, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
+            UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(bearerToken, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
 
-        String url1 = paymentReference.getData() != null ? paymentReference.getData().getFileName() : null;
-        String url2 = selfie.getData() != null ? selfie.getData().getFileName() : null;
+            String url1 = paymentReference.getData() != null ? paymentReference.getData().getFileName() : null;
+            String url2 = selfie.getData() != null ? selfie.getData().getFileName() : null;
 
-        // creating images Object
-        Map<String, Object> imageMap = new HashMap<>();
-        int i = 1;
-        if (url1 != null) {
-            imageMap.put("url" + i, url1);
-            i++;
+            // creating images Object
+            Map<String, Object> imageMap = new HashMap<>();
+            int i = 1;
+            if (url1 != null) {
+                imageMap.put("url" + i, url1);
+                i++;
+            }
+            if (url2 != null) {
+                imageMap.put("url" + i, url2);
+            }
+            receiptServiceDtoRequest.getActivityData().setImages(imageMap);
         }
-        if (url2 != null) {
-            imageMap.put("url" + i, url2);
-        }
-        receiptServiceDtoRequest.getActivityData().setImages(imageMap);
 
         boolean lockAcquired = false;
         // Acquire a lock for the customer record
@@ -716,9 +719,8 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 
         } catch (Exception ee) {
-//            if (collectionActivityId != null) {
-//                collectionActivityLogsRepository.deleteById(collectionActivityId);
-//            }
+            log.error("error occurred", ee);
+            log.error("error message {}", ee.getMessage());
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             // creating api logs
@@ -732,6 +734,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                 lock.unlock();
             }
         }
+        log.info("createReceiptNew End");
         return res;
     }
 

@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
@@ -10,6 +11,7 @@ import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTra
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionLimitUserWiseRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.DigitalPaymentTransactionsRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
@@ -17,10 +19,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.CreateRece
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
-import com.synoriq.synofin.collection.collectionservice.service.QrCodeService;
-import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
-import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -37,10 +37,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.transaction.Transactional;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
 import static com.synoriq.synofin.collection.collectionservice.common.QRCodeVariables.*;
@@ -64,6 +64,9 @@ public class QrCodeServiceImpl implements QrCodeService {
 
     @Autowired
     ReceiptService receiptService;
+
+    @Autowired
+    IntegrationConnectorService integrationConnectorService;
 
     @Autowired
     CollectionLimitUserWiseRepository collectionLimitUserWiseRepository;
@@ -181,6 +184,147 @@ public class QrCodeServiceImpl implements QrCodeService {
         return res;
     }
 
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public DynamicQrCodeResponseDTO sendQrCodeNew(String token, Object data, MultipartFile paymentReferenceImage, MultipartFile selfieImage) throws Exception {
+        log.info("Begin QR Generate");
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(String.valueOf(data));
+        DynamicQrCodeRequestDTO requestBody = objectMapper.convertValue(jsonNode, DynamicQrCodeRequestDTO.class);
+
+        DynamicQrCodeResponseDTO res;
+        DynamicQrCodeDataRequestDTO integrationDataRequestBody = new DynamicQrCodeDataRequestDTO();
+        DynamicQrCodeIntegrationDataRequestDTO integrationRequestBody = new DynamicQrCodeIntegrationDataRequestDTO();
+
+        integrationDataRequestBody.setAmount(String.valueOf(requestBody.getAmount()));
+        integrationDataRequestBody.setPayerAccount(requestBody.getPayerAccount());
+        integrationDataRequestBody.setPayerIFSC(requestBody.getPayerIFSC());
+        integrationDataRequestBody.setFirstName(requestBody.getFirstName());
+        integrationDataRequestBody.setLastName(requestBody.getLastName());
+        String billNumber;
+        String merchantTransId;
+        if (requestBody.getVendor().equals(KOTAK_VENDOR)) {
+            billNumber = "." + requestBody.getLoanId() + "." + System.currentTimeMillis();
+            merchantTransId = "." + requestBody.getLoanId() + "." + System.currentTimeMillis();
+        } else {
+            billNumber = requestBody.getLoanId() + "_" + System.currentTimeMillis();
+            merchantTransId = requestBody.getLoanId() + "_" + System.currentTimeMillis();
+        }
+        integrationDataRequestBody.setBillNumber(billNumber);
+        integrationDataRequestBody.setMerchantTranId(merchantTransId);
+
+        integrationRequestBody.setDynamicQrCodeDataRequestDTO(integrationDataRequestBody);
+        integrationRequestBody.setSystemId(COLLECTION);
+        integrationRequestBody.setUserReferenceNumber(String.valueOf(requestBody.getUserId()));
+        integrationRequestBody.setSpecificPartnerName(requestBody.getVendor());
+
+        try {
+            ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(requestBody.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
+
+            GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
+            UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(token, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
+            UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(token, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
+
+            Map<String, Object> imageMap = getStringObjectMap(paymentReference, selfie);
+            receiptServiceDtoRequest.getActivityData().setImages(imageMap);
+
+            // Checking UserLimit as it is exceeded or not with this amount
+            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(requestBody.getUserId(), UPI);
+            if(collectionLimitUserWiseEntity != null) {
+                if (collectionLimitUserWiseEntity.getTotalLimitValue() < collectionLimitUserWiseEntity.getUtilizedLimitValue() + Double.parseDouble(requestBody.getAmount()))
+                    throw new Exception("1017003");
+            }
+
+            // Calling Generate QR Code API
+            res = HTTPRequestService.<Object, DynamicQrCodeResponseDTO>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url(SEND_QR_CODE_GENERATE_API)
+                    .httpHeaders(createHeaders(token))
+                    .body(integrationRequestBody)
+                    .typeResponseType(DynamicQrCodeResponseDTO.class)
+                    .build().call();
+
+            DynamicQrCodeDataResponseDTO dynamicQrCodeDataResponseDTO = new DynamicQrCodeDataResponseDTO();
+            dynamicQrCodeDataResponseDTO.setMerchantTranId(merchantTransId);
+            dynamicQrCodeDataResponseDTO.setLink(res.getData().getLink());
+            dynamicQrCodeDataResponseDTO.setStatus(res.getData().getStatus());
+
+            DynamicQrCodeResponseDTO dynamicQrCodeResponseDto = new DynamicQrCodeResponseDTO();
+            dynamicQrCodeResponseDto.setResponse(res.getResponse());
+            dynamicQrCodeResponseDto.setRequestId(res.getRequestId());
+            dynamicQrCodeResponseDto.setData(dynamicQrCodeDataResponseDTO);
+            res = dynamicQrCodeResponseDto;
+
+            // QR code API successFull Response
+            if (res.getResponse().equals(true)) {
+                String activityRemarks = "Generated a QR code against loan id " + requestBody.getLoanId() + " of payment Rs. " + requestBody.getAmount();
+                CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("generated_dynamic_qr_code", requestBody.getUserId(), requestBody.getLoanId(), activityRemarks, requestBody.getGeolocation());
+
+                collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+
+                ObjectNode resultNode = objectMapper.createObjectNode();
+
+                ObjectNode requestNode = objectMapper.valueToTree(integrationDataRequestBody);
+                ObjectNode responseNode = objectMapper.valueToTree(res);
+                resultNode.set("request", requestNode);
+                resultNode.set("response", responseNode);
+
+
+                DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
+                digitalPaymentTransactionsEntity.setCreatedDate(new Date());
+                digitalPaymentTransactionsEntity.setCreatedBy(requestBody.getUserId());
+                digitalPaymentTransactionsEntity.setModifiedDate(null);
+                digitalPaymentTransactionsEntity.setModifiedBy(null);
+                digitalPaymentTransactionsEntity.setLoanId(requestBody.getLoanId());
+                digitalPaymentTransactionsEntity.setPaymentServiceName(DYNAMIC_QR_CODE);
+                digitalPaymentTransactionsEntity.setStatus(PENDING);
+                digitalPaymentTransactionsEntity.setMerchantTranId(merchantTransId);
+                digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(requestBody.getAmount()));
+                digitalPaymentTransactionsEntity.setUtrNumber(null);
+                digitalPaymentTransactionsEntity.setReceiptRequestBody(receiptServiceDtoRequest);
+                digitalPaymentTransactionsEntity.setPaymentLink(null);
+                digitalPaymentTransactionsEntity.setMobileNo(Long.parseLong(requestBody.getMobileNumber()));
+                digitalPaymentTransactionsEntity.setVendor(requestBody.getVendor());
+                digitalPaymentTransactionsEntity.setReceiptGenerated(false);
+                digitalPaymentTransactionsEntity.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+                digitalPaymentTransactionsEntity.setActionActivityLogsId(null);
+                digitalPaymentTransactionsEntity.setOtherResponseData(resultNode);
+
+                digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+                dynamicQrCodeDataResponseDTO.setDigitalPaymentTransactionsId(digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId());
+            }
+
+            log.info("res {}", res);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, res, "success", null);
+        } catch (Exception ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, modifiedErrorMessage, "failure", null);
+            log.error("{}", ee.getMessage());
+            throw new Exception(ee.getMessage());
+        }
+        log.info("Ending QR Generate");
+        return res;
+    }
+
+    @NotNull
+    private static Map<String, Object> getStringObjectMap(UploadImageOnS3ResponseDTO paymentReference, UploadImageOnS3ResponseDTO selfie) {
+        String url1 = paymentReference.getData() != null ? paymentReference.getData().getFileName() : null;
+        String url2 = selfie.getData() != null ? selfie.getData().getFileName() : null;
+
+        // creating images Object
+        Map<String, Object> imageMap = new HashMap<>();
+        int i = 1;
+        if (url1 != null) {
+            imageMap.put("url" + i, url1);
+            i++;
+        }
+        if (url2 != null) {
+            imageMap.put("url" + i, url2);
+        }
+        return imageMap;
+    }
 
 
     @Override
@@ -304,13 +448,57 @@ public class QrCodeServiceImpl implements QrCodeService {
         return connectorResponse;
     }
 
+    private static MultipartFile createBlankMultiPartFile() {
+        return new MultipartFile() {
+            @Override
+            public String getName() {
+                return null;
+            }
+
+            @Override
+            public String getOriginalFilename() {
+                return null;
+            }
+
+            @Override
+            public String getContentType() {
+                return null;
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return false;
+            }
+
+            @Override
+            public long getSize() {
+                return 0;
+            }
+
+            @Override
+            public byte[] getBytes() throws IOException {
+                return new byte[0];
+            }
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return null;
+            }
+
+            @Override
+            public void transferTo(File file) throws IOException, IllegalStateException {
+
+            }
+        };
+    }
+
     private void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response) throws Exception {
         log.info("Begin callback create receipt function");
         try {
             CurrentUserInfo currentUserInfo = new CurrentUserInfo();
             // implementing create receipt here
             ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
-            ServiceRequestSaveResponse resp = receiptService.createReceipt(receiptServiceDtoRequest, token, true);
+            ServiceRequestSaveResponse resp = receiptService.createReceiptNew(receiptServiceDtoRequest, createBlankMultiPartFile(), createBlankMultiPartFile(), token, true);
             digitalPaymentTransactionsEntity.setReceiptResponse(resp.getData());
             if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
                 response.put(RECEIPT_GENERATED, true);

@@ -71,6 +71,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
         if (base64.isEmpty()) {
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, null, res, "failure", null);
             res.getError().setMessage("image base64 is empty");
+            res.setData(null);
             return res;
         }
         fileType = fileType.split("image/")[1];
