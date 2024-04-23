@@ -164,6 +164,12 @@
 			<artifactId>apipermissionvalidator</artifactId>
 			<version>uat-SNAPSHOT</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.synoriq.synofin</groupId>
+			<artifactId>performance-monitoring-service</artifactId>
+			<version>uat-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>

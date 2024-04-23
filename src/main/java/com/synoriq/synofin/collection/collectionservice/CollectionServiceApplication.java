@@ -18,6 +18,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan("com.synoriq.synofin.events.*")
 @ComponentScan("com.synoriq.synofin.dataencryptionservice")
 @ComponentScan("com.synoriq.synofin.apipermissionvalidator")
+@ComponentScan("com.synoriq.synofin.performancemonitoringservice")
 public class CollectionServiceApplication {
 
 	public static void main(String[] args) {

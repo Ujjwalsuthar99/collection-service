@@ -17,6 +17,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTO
 import com.synoriq.synofin.collection.collectionservice.service.IntegrationConnectorService;
 import com.synoriq.synofin.collection.collectionservice.service.QrCodeService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
+import com.synoriq.synofin.performancemonitoringservice.annotation.TimedAlert;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -489,6 +490,7 @@ public class UtilityController {
     }
 
     @GetMapping("get-bank-account-details")
+    @TimedAlert(threshold = 4000)
     public ResponseEntity<Object> getBankAccountDetails(@RequestHeader("Authorization") String token, @RequestParam("bank_account_id") Long bankAccountId) {
         Object response;
         HttpStatus status;
