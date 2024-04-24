@@ -163,7 +163,7 @@ public class FollowUpServiceImpl implements FollowUpService {
             statusList.add("reschedule");
             statusList.add("closed");
         } else {
-            statusList.add(searchKey.toLowerCase());
+            statusList.add(searchKey.toLowerCase().contains("reschedule") ? "reschedule" : searchKey.toLowerCase());
         }
 
         followUpEntityPages = followUpRepository.getFollowupsUserWiseByDurationForCreated(userId, fromDate, toDate, statusList, encryptionKey, password, piiPermission, pageable);
