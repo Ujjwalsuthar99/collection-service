@@ -30,9 +30,6 @@ public class ReceiptServiceRequestDataDTO {
     @JsonProperty("instrument_number")
     public String instrumentNumber;
 
-    @JsonProperty("is_auto_approved")
-    public boolean isAutoApproved;
-
     @JsonProperty("created_by")
     public String createdBy;
 

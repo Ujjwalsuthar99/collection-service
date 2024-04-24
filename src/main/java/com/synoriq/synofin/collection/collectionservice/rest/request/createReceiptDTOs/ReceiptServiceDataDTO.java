@@ -19,4 +19,7 @@ public class ReceiptServiceDataDTO {
 
     @JsonProperty("request_data")
     public ReceiptServiceRequestDataDTO requestData;
+
+    @JsonProperty("is_auto_approved")
+    public boolean isAutoApproved;
 }
