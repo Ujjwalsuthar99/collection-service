@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class FilteredUsersDataDTO extends UsersDataDTO {
+public class FilteredUsersDataDTO {
 
     @JsonProperty("id")
     public Long id;

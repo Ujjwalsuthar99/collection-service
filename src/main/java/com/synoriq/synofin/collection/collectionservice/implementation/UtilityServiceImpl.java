@@ -166,7 +166,14 @@ public class UtilityServiceImpl implements UtilityService {
 //            List<UsersDataDTO> filteredList = userData.parallelStream().filter(user -> (user.getUsername().contains(key) || user.getName().contains(key))).collect(Collectors.toList());
             if (key.equals("")) {
                 for (int i = pageRequest; i < (pageRequest + 10); i++) {
-                    pageableArr.add((FilteredUsersDataDTO) userData.get(i));
+                    FilteredUsersDataDTO filteredUser = new FilteredUsersDataDTO();
+                    filteredUser.setId(userData.get(i).getId());
+                    filteredUser.setName(userData.get(i).getName());
+                    filteredUser.setEmployeeCode(userData.get(i).getEmployeeCode());
+                    filteredUser.setUsername(userData.get(i).getUsername());
+                    filteredUser.setTransferTo(userData.get(i).getTransferTo());
+                    // Set other properties if needed
+                    pageableArr.add(filteredUser);
                 }
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);
             } else {
@@ -183,7 +190,14 @@ public class UtilityServiceImpl implements UtilityService {
                     length = filterSize + pageRequest;
                 }
                 for (int i = pageRequest; i < length; i++) {
-                    pageableArr.add((FilteredUsersDataDTO) filteredList.get(i));
+                    FilteredUsersDataDTO filteredUser = new FilteredUsersDataDTO();
+                    filteredUser.setId(userData.get(i).getId());
+                    filteredUser.setName(userData.get(i).getName());
+                    filteredUser.setEmployeeCode(userData.get(i).getEmployeeCode());
+                    filteredUser.setUsername(userData.get(i).getUsername());
+                    filteredUser.setTransferTo(userData.get(i).getTransferTo());
+                    // Set other properties if needed
+                    pageableArr.add(filteredUser);
                 }
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);
             }
