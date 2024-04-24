@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import java.util.Date;
 
 @Service
@@ -28,6 +29,7 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
     private UtilityService utilityService;
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
     public void createConsumedApiLog(EnumSQLConstants.LogNames logName, Long userId, Object requestBody, Object responseBody, String responseStatus, Long loanId) {
 
         log.info("create consumed log start");
