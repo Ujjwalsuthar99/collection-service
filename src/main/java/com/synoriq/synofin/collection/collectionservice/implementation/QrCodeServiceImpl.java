@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class QrCodeServiceImpl implements QrCodeService {
     @Transactional(rollbackOn = Exception.class)
     public DynamicQrCodeResponseDTO sendQrCode(String token, DynamicQrCodeRequestDTO requestBody) throws Exception {
         log.info("Begin QR Generate");
-        DynamicQrCodeResponseDTO res;
+        DynamicQrCodeResponseDTO res = null;
         DynamicQrCodeDataRequestDTO integrationDataRequestBody = new DynamicQrCodeDataRequestDTO();
         DynamicQrCodeIntegrationDataRequestDTO integrationRequestBody = new DynamicQrCodeIntegrationDataRequestDTO();
 
@@ -177,7 +178,7 @@ public class QrCodeServiceImpl implements QrCodeService {
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, modifiedErrorMessage, "failure", requestBody.getLoanId());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, modifiedErrorMessage + res, "failure", requestBody.getLoanId());
             log.error("{}", ee.getMessage());
             throw new Exception(ee.getMessage());
         }

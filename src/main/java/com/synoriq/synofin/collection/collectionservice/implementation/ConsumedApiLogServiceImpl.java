@@ -38,30 +38,33 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
         if (userId == null) {
             userId = 0L;
         }
+        try {
+            ConsumedApiLogRequestDTO consumedApiLogRequestDTO = new ConsumedApiLogRequestDTO();
+            consumedApiLogRequestDTO.setLogName(logName);
+            consumedApiLogRequestDTO.setCreatedBy(userId);
+            consumedApiLogRequestDTO.setRequestBody(requestBody);
+            consumedApiLogRequestDTO.setResponseData(responseBody);
+            consumedApiLogRequestDTO.setResponseStatus(responseStatus);
+            consumedApiLogRequestDTO.setLoanId(loanId);
+            consumedApiLogRequestDTO.setApiType(apiType);
+            consumedApiLogRequestDTO.setEndPoint(endPoint);
 
-        ConsumedApiLogRequestDTO consumedApiLogRequestDTO = new ConsumedApiLogRequestDTO();
-        consumedApiLogRequestDTO.setLogName(logName);
-        consumedApiLogRequestDTO.setCreatedBy(userId);
-        consumedApiLogRequestDTO.setRequestBody(requestBody);
-        consumedApiLogRequestDTO.setResponseData(responseBody);
-        consumedApiLogRequestDTO.setResponseStatus(responseStatus);
-        consumedApiLogRequestDTO.setLoanId(loanId);
-        consumedApiLogRequestDTO.setApiType(apiType);
-        consumedApiLogRequestDTO.setEndPoint(endPoint);
+            ConsumedApiLogsEntity consumedApiLogsEntity = new ConsumedApiLogsEntity();
+            consumedApiLogsEntity.setCreatedDate(new Date());
+            consumedApiLogsEntity.setCreatedBy(consumedApiLogRequestDTO.getCreatedBy());
+            consumedApiLogsEntity.setLogName(consumedApiLogRequestDTO.getLogName());
+            consumedApiLogsEntity.setLoanId(consumedApiLogRequestDTO.getLoanId());
+            consumedApiLogsEntity.setApiType(consumedApiLogRequestDTO.getApiType());
+            consumedApiLogsEntity.setRequestBody(consumedApiLogRequestDTO.getRequestBody());
+            consumedApiLogsEntity.setResponseData(consumedApiLogRequestDTO.getResponseData());
+            consumedApiLogsEntity.setResponseStatus(consumedApiLogRequestDTO.getResponseStatus());
+            consumedApiLogsEntity.setEndPoint(consumedApiLogRequestDTO.getEndPoint());
 
-        ConsumedApiLogsEntity consumedApiLogsEntity = new ConsumedApiLogsEntity();
-        consumedApiLogsEntity.setCreatedDate(new Date());
-        consumedApiLogsEntity.setCreatedBy(consumedApiLogRequestDTO.getCreatedBy());
-        consumedApiLogsEntity.setLogName(consumedApiLogRequestDTO.getLogName());
-        consumedApiLogsEntity.setLoanId(consumedApiLogRequestDTO.getLoanId());
-        consumedApiLogsEntity.setApiType(consumedApiLogRequestDTO.getApiType());
-        consumedApiLogsEntity.setRequestBody(consumedApiLogRequestDTO.getRequestBody());
-        consumedApiLogsEntity.setResponseData(consumedApiLogRequestDTO.getResponseData());
-        consumedApiLogsEntity.setResponseStatus(consumedApiLogRequestDTO.getResponseStatus());
-        consumedApiLogsEntity.setEndPoint(consumedApiLogRequestDTO.getEndPoint());
-
-        consumedApiLogRepository.save(consumedApiLogsEntity);
-
+            consumedApiLogRepository.save(consumedApiLogsEntity);
+        } catch (Exception ee) {
+            log.error("Error in consumed Log", ee);
+            log.error("Error in consumed Log Message {}", ee.getMessage());
+        }
         log.info("consumed log created successfully");
     }
 }
