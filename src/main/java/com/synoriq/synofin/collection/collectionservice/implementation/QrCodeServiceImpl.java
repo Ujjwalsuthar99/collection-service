@@ -224,7 +224,7 @@ public class QrCodeServiceImpl implements QrCodeService {
 
             if (res.getData().getStatus().equals(SUCCESS)) {
                 if (!digitalPaymentTransactionsEntityData.getReceiptGenerated()) {
-                    createReceiptByCallBack(digitalPaymentTransactionsEntityData, token, response);
+                    createReceiptByCallBack(digitalPaymentTransactionsEntityData, token, response, res.getData().getOriginalBankRRN());
                 } else {
                     Map<String, Object> respMap = new ObjectMapper().convertValue(digitalPaymentTransactionsEntityData.getReceiptResponse(), Map.class);
                     response.put(STATUS, res.getData().getStatus().toLowerCase());
@@ -273,7 +273,7 @@ public class QrCodeServiceImpl implements QrCodeService {
                     digitalPaymentTransactionsEntity.setStatus(SUCCESS);
                     digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getOriginalBankRRN());
                     // calling create receipt function for call back
-                    createReceiptByCallBack(digitalPaymentTransactionsEntity, token, mainResponse);
+                    createReceiptByCallBack(digitalPaymentTransactionsEntity, token, mainResponse, requestBody.getOriginalBankRRN());
                 }
                 loanId = digitalPaymentTransactionsEntity.getLoanId();
                 digitalPaymentTransactionsEntity.setCallBackRequestBody(requestBody);
@@ -309,12 +309,13 @@ public class QrCodeServiceImpl implements QrCodeService {
         return connectorResponse;
     }
 
-    private void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response) throws Exception {
+    private void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response, String utrNumber) throws Exception {
         log.info("Begin callback create receipt function");
         try {
             CurrentUserInfo currentUserInfo = new CurrentUserInfo();
             // implementing create receipt here
             ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
+            receiptServiceDtoRequest.getRequestData().getRequestData().setTransactionReference(utrNumber);
             ServiceRequestSaveResponse resp = receiptService.createReceipt(receiptServiceDtoRequest, token, true);
             digitalPaymentTransactionsEntity.setReceiptResponse(resp.getData());
             if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
