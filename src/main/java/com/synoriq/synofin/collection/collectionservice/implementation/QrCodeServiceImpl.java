@@ -105,7 +105,7 @@ public class QrCodeServiceImpl implements QrCodeService {
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(requestBody.getUserId(), UPI);
             if(collectionLimitUserWiseEntity != null) {
                 if (collectionLimitUserWiseEntity.getTotalLimitValue() < collectionLimitUserWiseEntity.getUtilizedLimitValue() + Double.parseDouble(requestBody.getAmount()))
-                    throw new Exception("1017003");
+                    throw new Exception("1016053");
             }
 
             // Calling Generate QR Code API
@@ -176,7 +176,7 @@ public class QrCodeServiceImpl implements QrCodeService {
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, res, "success", requestBody.getLoanId());
         } catch (Exception ee) {
-            String errorMessage = ee.getMessage();
+            String errorMessage = ee.getMessage() + res;
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, modifiedErrorMessage + res, "failure", requestBody.getLoanId());
             log.error("{}", ee.getMessage());

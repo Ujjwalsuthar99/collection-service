@@ -8,11 +8,13 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetail
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
 import java.util.Date;
 
 @Service
@@ -29,7 +31,7 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
     private UtilityService utilityService;
 
     @Override
-    @Transactional(rollbackOn = Exception.class)
+    @org.springframework.transaction.annotation.Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void createConsumedApiLog(EnumSQLConstants.LogNames logName, Long userId, Object requestBody, Object responseBody, String responseStatus, Long loanId) {
 
         log.info("create consumed log start");

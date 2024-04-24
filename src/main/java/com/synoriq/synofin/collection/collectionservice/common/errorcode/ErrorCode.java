@@ -204,7 +204,8 @@ public enum ErrorCode {
     RECEIPT_ID_NOT_FOUND(1016049, "Receipt id not there for this loan Id"),
     RECEIPT_TRANSFERRED_ALREADY(1016050, "Receipt already has been transferred"),
     FOLLOWUP_CLOSED_RECEIPT_ID(1016051, "FollowUp was already closed using this Receipt Id"),
-    QR_CODE_DATA_NULL(1016052, "Getting Error from vendor side while generating QR Code");
+    QR_CODE_DATA_NULL(1016052, "Getting Error from bank side while generating QR Code"),
+    RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT_QR_CODE(1016053, "Yo do not have such limit to generate the QR code, contact with IT team");
     private Integer codeValue;
     private String responseMessage;
 
