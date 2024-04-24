@@ -203,7 +203,8 @@ public enum ErrorCode {
     FOLLOWUP_CLOSE_DATE_VALIDATION(1016048, "Can't Close the followup as the receipt is of previous month"),
     RECEIPT_ID_NOT_FOUND(1016049, "Receipt id not there for this loan Id"),
     RECEIPT_TRANSFERRED_ALREADY(1016050, "Receipt already has been transferred"),
-    FOLLOWUP_CLOSED_RECEIPT_ID(1016051, "FollowUp was already closed using this Receipt Id");
+    FOLLOWUP_CLOSED_RECEIPT_ID(1016051, "FollowUp was already closed using this Receipt Id"),
+    QR_CODE_DATA_NULL(1016052, "Getting Error from vendor side while generating QR Code");
     private Integer codeValue;
     private String responseMessage;
 

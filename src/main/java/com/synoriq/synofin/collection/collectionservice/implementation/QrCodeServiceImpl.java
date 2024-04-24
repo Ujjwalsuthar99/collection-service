@@ -116,6 +116,10 @@ public class QrCodeServiceImpl implements QrCodeService {
                     .typeResponseType(DynamicQrCodeResponseDTO.class)
                     .build().call();
 
+            if (res.getData() == null) {
+                log.info("QR Null Response {}", res);
+                throw new Exception("1016052");
+            }
             DynamicQrCodeDataResponseDTO dynamicQrCodeDataResponseDTO = new DynamicQrCodeDataResponseDTO();
             dynamicQrCodeDataResponseDTO.setMerchantTranId(merchantTransId);
             dynamicQrCodeDataResponseDTO.setLink(res.getData().getLink());
@@ -169,11 +173,11 @@ public class QrCodeServiceImpl implements QrCodeService {
 
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, res, "success", requestBody.getLoanId());
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, modifiedErrorMessage, "failure", requestBody.getLoanId());
             log.error("{}", ee.getMessage());
             throw new Exception(ee.getMessage());
         }
