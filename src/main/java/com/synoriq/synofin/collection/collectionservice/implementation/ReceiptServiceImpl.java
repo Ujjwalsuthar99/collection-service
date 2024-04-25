@@ -7,6 +7,7 @@ import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUser
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionReceiptEntity;
+import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferHistoryEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceRequestDataDTO;
@@ -42,6 +43,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_RECEIPT;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
@@ -97,6 +99,9 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Autowired
     private RegisteredDeviceInfoRepository registeredDeviceInfoRepository;
 
+    @Autowired
+    ReceiptTransferHistoryRepository receiptTransferHistoryRepository;
+
     private final Map<String, ReentrantLock> lockMap = new HashMap<>();
 
 
@@ -142,7 +147,23 @@ public class ReceiptServiceImpl implements ReceiptService {
 //            Boolean piiPermission = rsaUtils.getPiiPermission();
             Boolean piiPermission = true;
             List<Map<String, Object>> receiptsData = receiptRepository.getReceiptsByUserIdWhichNotTransferred(userName, encryptionKey, password, piiPermission);
-            baseDTOResponse = new BaseDTOResponse<>(receiptsData);
+
+            Set<Long> receiptIds = receiptsData.stream()
+                    .map(data -> Long.parseLong(data.get("id").toString()))
+                    .collect(Collectors.toSet());
+
+            Set<Long> transferredReceiptIds = receiptTransferHistoryRepository.findByDeletedAndCollectionReceiptsIdIn(false, receiptIds)
+                    .stream()
+                    .map(ReceiptTransferHistoryEntity::getCollectionReceiptsId)
+                    .collect(Collectors.toSet());
+
+            receiptIds.removeAll(transferredReceiptIds);
+
+            List<Map<String, Object>> ans = receiptsData.stream()
+                    .filter(data -> receiptIds.contains(Long.parseLong(data.get("id").toString())))
+                    .collect(Collectors.toList());
+
+            baseDTOResponse = new BaseDTOResponse<>(ans);
         } catch (Exception e) {
             throw new Exception("1017002");
         }
