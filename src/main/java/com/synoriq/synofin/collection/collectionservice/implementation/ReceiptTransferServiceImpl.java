@@ -105,7 +105,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             String updatedRemarks;
 
             for (Long receiptId : receiptTransferDtoRequest.getReceipts()) {
-                ReceiptTransferHistoryEntity receiptTransferIdCheck = receiptTransferHistoryRepository.findByCollectionReceiptsId(receiptId, false);
+                ReceiptTransferHistoryEntity receiptTransferIdCheck = receiptTransferHistoryRepository.findByCollectionReceiptsIdAndDeleted(receiptId, false);
                 if (receiptTransferIdCheck != null) {
                     ErrorCode errorCode = ErrorCode.getErrorCode(1016050, "Receipt " + receiptId + " already has been transferred");
                     throw new CustomException(errorCode);
