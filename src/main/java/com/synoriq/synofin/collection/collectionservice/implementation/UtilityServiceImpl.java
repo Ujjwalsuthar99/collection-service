@@ -950,4 +950,18 @@ public class UtilityServiceImpl implements UtilityService {
         return receiptRepository.getBankAccountDetails(bankAccountId);
     }
 
+
+    @Override
+    public BaseDTOResponse<Object> checkTransactionReferenceNumber(String token, String transactionReferenceNumber) throws Exception {
+        try {
+            Map<String, Object> transactionNumberCheck = receiptRepository.transactionNumberCheck(transactionReferenceNumber);
+            if (!transactionNumberCheck.isEmpty()) {
+                return new BaseDTOResponse<Object>("UTR number already exist");
+            }
+        } catch (Exception e) {
+            log.error("{}", e.getMessage());
+        }
+        return new BaseDTOResponse<Object>("UTR number not found");
+    }
+
 }
