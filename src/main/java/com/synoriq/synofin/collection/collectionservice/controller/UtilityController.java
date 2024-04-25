@@ -503,4 +503,24 @@ public class UtilityController {
         }
         return new ResponseEntity<>(new BaseDTOResponse<>(response), status);
     }
+
+
+    @RequestMapping(value = "check-transaction-reference-number", method = RequestMethod.GET)
+    public ResponseEntity<Object> checkTransactionReferenceNumber(@RequestHeader("Authorization") String token, @RequestParam("transactionReferenceNumber") String transactionReferenceNumber) {
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+
+        try {
+            baseResponse = utilityService.checkTransactionReferenceNumber(token, transactionReferenceNumber);
+            response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
 }
