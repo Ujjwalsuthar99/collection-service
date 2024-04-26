@@ -24,7 +24,6 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrl
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.FilteredUsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
@@ -161,19 +160,12 @@ public class UtilityServiceImpl implements UtilityService {
             }
             log.info("userData.toArray().length {}", userData.toArray().length);
             int pageRequest = (page * size) - 10;
-            List<FilteredUsersDataDTO> pageableArr = new LinkedList<>();
+            List<UsersDataDTO> pageableArr = new LinkedList<>();
 
 //            List<UsersDataDTO> filteredList = userData.parallelStream().filter(user -> (user.getUsername().contains(key) || user.getName().contains(key))).collect(Collectors.toList());
             if (key.equals("")) {
                 for (int i = pageRequest; i < (pageRequest + 10); i++) {
-                    FilteredUsersDataDTO filteredUser = new FilteredUsersDataDTO();
-                    filteredUser.setId(userData.get(i).getId());
-                    filteredUser.setName(userData.get(i).getName());
-                    filteredUser.setEmployeeCode(userData.get(i).getEmployeeCode());
-                    filteredUser.setUsername(userData.get(i).getUsername());
-                    filteredUser.setTransferTo(userData.get(i).getTransferTo());
-                    // Set other properties if needed
-                    pageableArr.add(filteredUser);
+                    pageableArr.add(userData.get(i));
                 }
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);
             } else {
@@ -190,14 +182,8 @@ public class UtilityServiceImpl implements UtilityService {
                     length = filterSize + pageRequest;
                 }
                 for (int i = pageRequest; i < length; i++) {
-                    FilteredUsersDataDTO filteredUser = new FilteredUsersDataDTO();
-                    filteredUser.setId(userData.get(i).getId());
-                    filteredUser.setName(userData.get(i).getName());
-                    filteredUser.setEmployeeCode(userData.get(i).getEmployeeCode());
-                    filteredUser.setUsername(userData.get(i).getUsername());
-                    filteredUser.setTransferTo(userData.get(i).getTransferTo());
                     // Set other properties if needed
-                    pageableArr.add(filteredUser);
+                    pageableArr.add(filteredList.get(i));
                 }
                 baseDTOResponse = new BaseDTOResponse<>(pageableArr);
             }
