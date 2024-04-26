@@ -310,7 +310,7 @@ public class TaskServiceImpl implements TaskService {
                 loanDetailsResponseDTO.setBalancePrincipal(loanDetailRes.getData().getBalancePrincipal());
             }
             if (loanRes.getData() != null) {
-                loanDetailsResponseDTO.setOutStandingCharges(loanRes.getData().getOutStandingCharges());
+                loanDetailsResponseDTO.setOutStandingCharges(loanRes.getData().getOutStandingCharges() == null ? new ArrayList<>() : loanRes.getData().getOutStandingCharges());
                 loanDetailsResponseDTO.setDateOfReceipt(loanRes.getData().getDateOfReceipt());
                 loanDetailsResponseDTO.setAdditionInExcessMoney(loanRes.getData().getAdditionInExcessMoney());
             }
