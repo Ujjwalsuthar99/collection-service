@@ -15,6 +15,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs
 import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDTOs.VerifyOtpDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.verifyOtpDTOs.VerifyOtpRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.IntegrationServiceErrorResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DeleteImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
@@ -70,7 +71,10 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
         String fileType = detectFileType(base64);
         if (base64.isEmpty()) {
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, null, res, "failure", null);
-            res.getError().setMessage("image base64 is empty");
+            IntegrationServiceErrorResponseDTO integrationServiceErrorResponseDTO = new IntegrationServiceErrorResponseDTO();
+            integrationServiceErrorResponseDTO.setMessage("image base64 is empty");
+            integrationServiceErrorResponseDTO.setCode("00000");
+            res.setError(integrationServiceErrorResponseDTO);
             res.setData(null);
             return res;
         }
