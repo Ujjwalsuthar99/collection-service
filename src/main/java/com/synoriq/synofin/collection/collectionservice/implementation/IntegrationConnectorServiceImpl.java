@@ -58,7 +58,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
 
 
     @Override
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, String latitude, String longitude) throws IOException {
+    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, String latitude, String longitude, boolean multiReceiptUrl) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
 
@@ -183,12 +183,12 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
                 }
             }
 
-
+            String url = multiReceiptUrl ? "http://localhost:1102/v1/uploadImageOnS3?multiReceiptUrl=true" : "http://localhost:1102/v1/uploadImageOnS3";
             uploadImageOnS3DataRequestDTO.setFile(base64);
 
             res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:1102/v1/uploadImageOnS3")
+                    .url(url)
                     .body(uploadImageOnS3RequestDTO)
                     .httpHeaders(UtilityService.createHeaders(token))
                     .typeResponseType(UploadImageOnS3ResponseDTO.class)

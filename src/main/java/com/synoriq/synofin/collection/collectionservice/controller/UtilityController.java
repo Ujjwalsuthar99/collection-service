@@ -139,7 +139,7 @@ public class UtilityController {
         UploadImageOnS3ResponseDTO result;
 
         try {
-            result = integrationConnectorService.uploadImageOnS3(token, imageData, module, latitude, longitude);
+            result = integrationConnectorService.uploadImageOnS3(token, imageData, module, latitude, longitude, false);
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
