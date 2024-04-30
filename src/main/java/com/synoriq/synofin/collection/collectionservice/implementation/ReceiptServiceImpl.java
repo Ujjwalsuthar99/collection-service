@@ -756,6 +756,10 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         log.info("multiReceiptAfterReceipt Response {}", res);
         log.info("End multiReceiptAfterReceipt");
+
+        // creating consumed log api
+        consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.multi_create_receipt, receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest, res, "success", receiptServiceDtoRequest.getActivityData().getLoanId());
+
     }
 
     @Override

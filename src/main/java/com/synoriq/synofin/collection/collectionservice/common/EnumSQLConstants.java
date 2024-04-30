@@ -35,7 +35,8 @@ public class EnumSQLConstants {
         lms_repossession,
         qr_callback,
         kafka_activity,
-        s3_delete;
+        s3_delete,
+        multi_create_receipt;
 
 
         private LogNames() {
