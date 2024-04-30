@@ -216,7 +216,7 @@ public class QrCodeServiceImpl implements QrCodeService {
                     .typeResponseType(DynamicQrCodeCheckStatusResponseDTO.class)
                     .build().call();
 
-            String activityRemarks = "The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + digitalPaymentTransactionsEntityData.getLoanId() + " has been updated as" + res.getData().getStatus().toLowerCase() + " by checking the status manually";
+            String activityRemarks = "The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + digitalPaymentTransactionsEntityData.getLoanId() + " has been updated as " + res.getData().getStatus().toLowerCase() + " by checking the status manually";
             String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
             CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntityData.getCreatedBy(), digitalPaymentTransactionsEntityData.getLoanId(), activityRemarks, requestBody.getGeolocation());
 
