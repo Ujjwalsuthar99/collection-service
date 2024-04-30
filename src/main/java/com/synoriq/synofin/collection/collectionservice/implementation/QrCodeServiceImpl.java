@@ -222,8 +222,8 @@ public class QrCodeServiceImpl implements QrCodeService {
             ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(requestBody.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
 
             GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
-            UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(token, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), false);
-            UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(token, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), false);
+            UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(token, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
+            UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(token, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
 
             Map<String, Object> imageMap = getStringObjectMap(paymentReference, selfie);
             receiptServiceDtoRequest.getActivityData().setImages(imageMap);

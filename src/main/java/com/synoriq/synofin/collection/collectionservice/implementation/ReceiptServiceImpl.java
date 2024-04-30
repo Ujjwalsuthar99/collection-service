@@ -441,8 +441,8 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
         if (!receiptFromQR) {
-            UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(bearerToken, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), false);
-            UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(bearerToken, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), false);
+            UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(bearerToken, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
+            UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(bearerToken, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
 
             String url1 = paymentReference.getData() != null ? paymentReference.getData().getFileName() : null;
             String url2 = selfie.getData() != null ? selfie.getData().getFileName() : null;
@@ -644,8 +644,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                         String token = utilityService.getTokenByApiKeySecret(map);
 
 
-                        UploadImageOnS3ResponseDTO paymentReferenceMulti = integrationConnectorService.uploadImageOnS3(token, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), true);
-                        UploadImageOnS3ResponseDTO selfieMulti = integrationConnectorService.uploadImageOnS3(token, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), true);
+                        UploadImageOnS3ResponseDTO paymentReferenceMulti = integrationConnectorService.uploadImageOnS3(token, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
+                        UploadImageOnS3ResponseDTO selfieMulti = integrationConnectorService.uploadImageOnS3(token, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
 
 
                         String var0 = paymentReferenceMulti.getData() != null ? paymentReferenceMulti.getData().getFileName() : null;
@@ -748,7 +748,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         ServiceRequestSaveResponse res = HTTPRequestService.<Object, ServiceRequestSaveResponse>builder()
                 .httpMethod(HttpMethod.POST)
-                .url("http://localhost:1102/v1/createReceipt?multiReceiptUrl=true")
+                .url("http://localhost:1102/v1/createReceipt")
                 .httpHeaders(httpHeaders)
                 .body(receiptServiceDtoRequest)
                 .typeResponseType(ServiceRequestSaveResponse.class)
