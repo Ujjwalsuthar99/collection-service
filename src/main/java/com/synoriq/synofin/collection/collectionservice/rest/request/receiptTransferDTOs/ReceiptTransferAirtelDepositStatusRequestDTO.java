@@ -20,4 +20,7 @@ public class ReceiptTransferAirtelDepositStatusRequestDTO {
     @JsonProperty("utr_number")
     private String utrNumber;
 
+    @JsonProperty("transaction_id")
+    private String transaction_id;
+
 }
