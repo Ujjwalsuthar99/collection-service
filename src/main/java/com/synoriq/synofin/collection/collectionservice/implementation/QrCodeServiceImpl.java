@@ -222,7 +222,7 @@ public class QrCodeServiceImpl implements QrCodeService {
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
-            if (res.getData().getStatus().equals(SUCCESS)) {
+            if (res.getData().getStatus().equalsIgnoreCase(QR_CALLBACK_SUCCESS)) {
                 if (!digitalPaymentTransactionsEntityData.getReceiptGenerated()) {
                     createReceiptByCallBack(digitalPaymentTransactionsEntityData, token, response, res.getData().getOriginalBankRRN());
                 } else {
