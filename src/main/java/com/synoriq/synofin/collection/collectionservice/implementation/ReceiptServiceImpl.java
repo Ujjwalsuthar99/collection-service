@@ -117,9 +117,9 @@ public class ReceiptServiceImpl implements ReceiptService {
             Boolean piiPermission = true;
             List<Map<String, Object>> taskDetailPages;
             Pageable pageRequest;
-            if (page > 0) {
-                page = page - 1;
-            }
+//            if (page > 0) {
+//                page = page - 1;
+//            }
             pageRequest = PageRequest.of(page, size);
             if (!Objects.equals(searchKey, "")) {
                 taskDetailPages = receiptRepository.getReceiptsBySearchKey(userName, searchKey, encryptionKey, password, piiPermission, pageRequest);

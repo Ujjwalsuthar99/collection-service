@@ -61,9 +61,9 @@ public class TaskServiceImpl implements TaskService {
         BaseDTOResponse<Object> baseDTOResponse;
         try {
             Pageable pageRequest;
-            if (pageNo > 0) {
-                pageNo = pageNo - 1;
-            }
+//            if (pageNo > 0) {
+//                pageNo = pageNo - 1;
+//            }
             pageRequest = PageRequest.of(pageNo, pageSize);
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
