@@ -486,6 +486,7 @@ public class TaskServiceImpl implements TaskService {
                 "    join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
                 "    left join (select product_code, product_name from master.product) as p on p.product_code = la.product\n" +
                 "    left join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
+                "    left join (select loan_id, vehicle_registration_no from lms.collateral_vehicle) as vehicle on vehicle.loan_id = la.loan_application_id \n" +
                 "where\n" +
                 "    clm.\"customer_type\" = 'applicant'\n" +
                 "    and la.deleted = false\n and la2.deleted = false\n" +
