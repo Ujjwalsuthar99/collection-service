@@ -10,6 +10,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionCon
 import com.synoriq.synofin.collection.collectionservice.repository.RepossessionRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskFilterRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
@@ -28,7 +29,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.Tuple;
+import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
 @Service
@@ -50,33 +57,87 @@ public class TaskServiceImpl implements TaskService {
     private ConsumedApiLogService consumedApiLogService;
 
     @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
     private AdditionalContactDetailsRepository additionalContactDetailsRepository;
     @Autowired
     private CurrentUserInfo currentUserInfo;
 
     @Override
-    public BaseDTOResponse<Object> getTaskDetails(Long userId, Integer pageNo, Integer pageSize) throws Exception {
+    public BaseDTOResponse<Object> getTaskDetails(Long userId, Integer pageNo, Integer pageSize, TaskFilterRequestDTO taskFilterRequestDTO) throws Exception {
 
 
         BaseDTOResponse<Object> baseDTOResponse;
         try {
-            Pageable pageRequest;
-//            if (pageNo > 0) {
-//                pageNo = pageNo - 1;
-//            }
-            pageRequest = PageRequest.of(pageNo, pageSize);
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
 //            Boolean piiPermission = rsaUtils.getPiiPermission();
             Boolean piiPermission = true;
-            List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsByPages(userId, encryptionKey, password, piiPermission, pageRequest);
-            if (pageNo > 0) {
-                if (taskDetailPages.isEmpty()) {
-                    return new BaseDTOResponse<>(taskDetailPages);
-                }
+            StringBuilder whereCondition = new StringBuilder();
+            whereCondition.append(" and la2.allocated_to_user_id = ").append(userId).append(" ");
+
+
+            if (taskFilterRequestDTO.getDpd() != null && !taskFilterRequestDTO.getDpd().isEmpty()) {
+
+                Optional<Integer> maxValue = taskFilterRequestDTO.getDpd().stream()
+                        .map(s -> {
+                            String[] parts = s.split("-");
+                            return Integer.parseInt(parts[1]);
+                        })
+                        .max(Integer::compareTo);
+
+                Optional<Integer> minValue = taskFilterRequestDTO.getDpd().stream()
+                        .map(s -> {
+                            String[] parts = s.split("-");
+                            return Integer.parseInt(parts[0]);
+                        })
+                        .min(Integer::compareTo);
+
+                Integer max = maxValue.orElse(null);
+                Integer min = minValue.orElse(null);
+
+
+                whereCondition.append(" and la.days_past_due between ").append(min).append(" and ").append(max);
+
             }
 
-            baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
+            if (!taskFilterRequestDTO.getSearchKey().isEmpty()) {
+                whereCondition.append(" and (LOWER(concat_ws(' ', c.first_name, c.last_name)) like LOWER(concat('%', '")
+                        .append(taskFilterRequestDTO.getSearchKey())
+                        .append("','%')) or LOWER(la.product) like LOWER(concat('%','")
+                        .append(taskFilterRequestDTO.getSearchKey()).append("', '%')) or \n")
+                        .append("      LOWER(la.loan_application_number) like LOWER(concat('%', '")
+                        .append(taskFilterRequestDTO.getSearchKey())
+                        .append("', '%')) or LOWER(branch.branch_name) like LOWER(concat('%','")
+                        .append(taskFilterRequestDTO.getSearchKey())
+                        .append("', '%')) or \n")
+                        .append("      LOWER(vehicle.vehicle_registration_no) like LOWER(concat('%','")
+                        .append(taskFilterRequestDTO.getSearchKey())
+                        .append("', '%'))) ");
+            }
+
+            if (taskFilterRequestDTO.getOrder() != null) {
+                if (taskFilterRequestDTO.getOrder().equals("ASC")) {
+                    whereCondition.append(" order by la.days_past_due asc");
+                } else {
+                    whereCondition.append(" order by la.days_past_due desc");
+                }
+            } else {
+                whereCondition.append(" order by la.loan_application_id asc");
+            }
+
+            String queryString = taskListViewQuery(encryptionKey, password) + whereCondition;
+
+
+            queryString += " LIMIT " + pageSize + " OFFSET " + (pageNo * pageSize);
+
+
+            Query queryData = null;
+            queryData = this.entityManager.createNativeQuery(queryString, Tuple.class);
+            List<Tuple> queryRows = queryData.getResultList();
+
+            baseDTOResponse = new BaseDTOResponse<>(utilityService.formatDigitalSiteVisitData(queryRows));
         } catch (Exception e) {
             throw new Exception("1017002");
         }
@@ -379,6 +440,56 @@ public class TaskServiceImpl implements TaskService {
 
         return baseDTOResponse;
 
+    }
+
+    private static String taskListViewQuery(String encryptionKey, String password) {
+
+        return "select la.loan_application_id,\n" +
+                "    branch.branch_name as branch,\n" +
+                "    concat(lms.decrypt_data(c.first_name, '" + encryptionKey + "', '" + password + "', true), ' ', lms.decrypt_data(c.middle_name, '" + encryptionKey + "', '" + password + "', true), ' ', lms.decrypt_data(c.last_name, '" + encryptionKey + "', '" + password + "', true)) as customer_name,\n" +
+                "    c.phone1_json->>'mobile' as mobile,\n" +
+                "    c.address1_json->>'address' as address,\n" +
+                "    p.product_name as product,\n" +
+                "    la.loan_application_number,\n" +
+                "    la2.task_purpose,\n" +
+                "    (case\n" +
+                "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
+                "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
+                "       when la.days_past_due between 61 and 90 then '61-90 DPD'\n" +
+                "       when la.days_past_due between 91 and 120 then '91-120 DPD'\n" +
+                "       when la.days_past_due between 121 and 150 then '121-150 DPD'\n" +
+                "       when la.days_past_due between 151 and 180 then '151-180 DPD'\n" +
+                "       else '180+ DPD' end) as days_past_due_bucket,\n" +
+                "   la.days_past_due,\n" +
+                "    (case\n" +
+                "        when la.days_past_due between 0 and 30 then '#61B2FF'\n" +
+                "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
+                "        when la.days_past_due between 61 and 90 then '#FDAAAA'\n" +
+                "        when la.days_past_due between 91 and 120 then '#F2994A'\n" +
+                "        when la.days_past_due between 121 and 150 then '#FF5359'\n" +
+                "        when la.days_past_due between 151 and 180 then '#C83939'\n" +
+                "        else '#722F37'\n" +
+                "    end) as dpd_bg_color_key,\n" +
+                "    (case\n" +
+                "        when la.days_past_due between 0 and 30 then '#323232'\n" +
+                "        when la.days_past_due between 31 and 60 then '#ffffff'\n" +
+                "        when la.days_past_due between 61 and 90 then '#323232'\n" +
+                "        when la.days_past_due between 91 and 120 then '#323232'\n" +
+                "        when la.days_past_due between 121 and 150 then '#ffffff'\n" +
+                "        when la.days_past_due between 151 and 180 then '#ffffff'\n" +
+                "        else '#ffffff'\n" +
+                "    end) as dpd_text_color_key\n" +
+                "from\n" +
+                "    lms.loan_application la\n" +
+                "    join lms.customer_loan_mapping clm on la.loan_application_id = clm.loan_id\n" +
+                "    join lms.customer c on clm.customer_id = c.customer_id\n" +
+                "    join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
+                "    left join (select product_code, product_name from master.product) as p on p.product_code = la.product\n" +
+                "    left join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
+                "where\n" +
+                "    clm.\"customer_type\" = 'applicant'\n" +
+                "    and la.deleted = false\n and la2.deleted = false\n" +
+                "    and la.loan_status in ('active')\n";
     }
 
 }

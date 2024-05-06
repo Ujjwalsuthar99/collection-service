@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskFilterRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,15 +25,15 @@ public class TaskController {
     @Autowired
     TaskService taskService;
 
-    @RequestMapping(value = "users/{userId}/tasks", method = RequestMethod.GET)
+    @RequestMapping(value = "users/{userId}/tasks", method = RequestMethod.POST)
     public ResponseEntity<Object> getTaskDetails(@PathVariable("userId") Long userId, @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
-                                                                       @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) {
+                                                 @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize, @RequestBody TaskFilterRequestDTO taskFilterRequestDTO) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
 
         try {
-            baseResponse = taskService.getTaskDetails(userId, pageNo, pageSize);
+            baseResponse = taskService.getTaskDetails(userId, pageNo, pageSize, taskFilterRequestDTO);
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
 
