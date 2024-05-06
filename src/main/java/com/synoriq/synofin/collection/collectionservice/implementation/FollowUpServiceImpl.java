@@ -7,6 +7,7 @@ import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUser
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.FollowUpRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.followUpDTOs.FollowUpDtoRequest;
@@ -50,6 +51,9 @@ public class FollowUpServiceImpl implements FollowUpService {
     CollectionActivityLogsRepository collectionActivityLogsRepository;
     @Autowired
     ActivityLogService activityLogService;
+
+    @Autowired
+    CollectionConfigurationsRepository collectionConfigurationsRepository;
 
     @Autowired
     EntityManager entityManager;
@@ -188,6 +192,13 @@ public class FollowUpServiceImpl implements FollowUpService {
 
             Long collectionActivityLogsId = activityLogService.
                     createActivityLogs(followUpDtoRequest.getActivityLog(), token);
+
+            if (Objects.equals(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("show_close_reschedule_followup_button"), "true")) {
+                List<FollowUpEntity> followUpEntities = followUpRepository.findByLoanIdAndStatus(followUpDtoRequest.getLoanId(), "pending");
+                if (!followUpEntities.isEmpty())
+                    throw new Exception("1016054");
+            }
+
             FollowUpEntity followUpEntity = new FollowUpEntity();
             followUpEntity.setLoanId(followUpDtoRequest.getLoanId());
             followUpEntity.setIsDeleted(false);

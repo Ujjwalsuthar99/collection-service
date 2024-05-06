@@ -16,6 +16,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
 
     FollowUpEntity findByFollowupId(Long followupId);
 
+    List<FollowUpEntity> findByLoanIdAndStatus(Long loanId, String status);
+
     @Query(nativeQuery = true,value = "select " +
 //            "concat_ws(' ', c.first_name, c.last_name) as name,\n" +
             "concat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as name,\n" +
