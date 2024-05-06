@@ -216,6 +216,8 @@ public class QrCodeServiceImpl implements QrCodeService {
                     .typeResponseType(DynamicQrCodeCheckStatusResponseDTO.class)
                     .build().call();
 
+            log.info("response from qr status check {}", res);
+
             String activityRemarks = "The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + digitalPaymentTransactionsEntityData.getLoanId() + " has been updated as " + res.getData().getStatus().toLowerCase() + " by checking the status manually";
             String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
             CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntityData.getCreatedBy(), digitalPaymentTransactionsEntityData.getLoanId(), activityRemarks, requestBody.getGeolocation());
@@ -223,8 +225,11 @@ public class QrCodeServiceImpl implements QrCodeService {
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
             if (res.getData().getStatus().equalsIgnoreCase(QR_CALLBACK_SUCCESS)) {
+                log.info("In ifff for success match {}", res);
                 if (!digitalPaymentTransactionsEntityData.getReceiptGenerated()) {
+                    log.info("receipt generate check {}", res);
                     createReceiptByCallBack(digitalPaymentTransactionsEntityData, token, response, res.getData().getOriginalBankRRN());
+                    log.info("create receipt done");
                 } else {
                     Map<String, Object> respMap = new ObjectMapper().convertValue(digitalPaymentTransactionsEntityData.getReceiptResponse(), Map.class);
                     response.put(STATUS, res.getData().getStatus().toLowerCase());
@@ -317,8 +322,10 @@ public class QrCodeServiceImpl implements QrCodeService {
             ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
             receiptServiceDtoRequest.getRequestData().getRequestData().setTransactionReference(utrNumber);
             ServiceRequestSaveResponse resp = receiptService.createReceipt(receiptServiceDtoRequest, token, true);
+            log.info("receipt response {}", resp);
             digitalPaymentTransactionsEntity.setReceiptResponse(resp.getData());
             if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
+                log.info("in ifff receipt response {}", resp);
                 response.put(RECEIPT_GENERATED, true);
                 response.put(SR_ID, resp.getData().getServiceRequestId());
                 digitalPaymentTransactionsEntity.setReceiptGenerated(true);
