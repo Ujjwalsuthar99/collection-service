@@ -16,10 +16,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.CflMsgDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.FinovaMsgDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.PaisabuddyMsgDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.SpfcMsgDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrlDTOs.ShortenUrlResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
@@ -87,6 +84,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Autowired
     CslSmsService cslSmsService;
+
+    @Autowired
+    LifcSmsService lifcSmsService;
 
     @Autowired
     private SpfcSmsService spfcSmsService;
@@ -661,6 +661,58 @@ public class UtilityServiceImpl implements UtilityService {
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
                 consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), cflSmsRequest, cflMsgDTOResponse, "success", Long.parseLong(loanId[0]));
+            }
+
+            if (clientId.equals("lifc")) {
+
+                log.info("in iffff");
+                RequestDataDTO requestDataDTO = new RequestDataDTO();
+//                if (paymentMode.equals("cash")) {
+//                    requestDataDTO.setTemplateName("template3");
+//                } else if (paymentMode.equals("cheque")) {
+//                    requestDataDTO.setTemplateName("template2");
+//                } else {
+//                    requestDataDTO.setTemplateName("template1");
+//                }
+                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+                String receiptDate = formatter.format(new Date());
+                requestDataDTO.setTemplateName("template1");
+
+                requestDataDTO.setMessageType("text");
+                List<SmsListDTO> smsListDTOS = new ArrayList<>();
+                List<String> strings = new ArrayList<>();
+                strings.add(receiptAmount);
+                strings.add(loanNumber);
+                strings.add(receiptDate);
+                strings.add(shortenUrlResponseDTO.getData().getResult());
+                SmsListDTO smsListDTO = new SmsListDTO();
+                smsListDTO.setMessageType("english");
+                String receivedMobileNumber;
+                if (isProd) {
+                    if (Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null) {
+                        receivedMobileNumber = collectedFromMobileNumber;
+                    } else {
+                        receivedMobileNumber = applicantMobileNumber;
+                    }
+                    smsListDTO.setMobiles("91" + receivedMobileNumber);
+                } else {
+                    smsListDTO.setMobiles("91" + collectedFromMobileNumber);
+//                    smsListDTO.setMobiles("919887432524");
+                }
+                smsListDTOS.add(smsListDTO);
+                requestDataDTO.setTemplateVariable(strings);
+                requestDataDTO.setSmsList(smsListDTOS);
+                LifcSmsRequest lifcSmsRequest = new LifcSmsRequest();
+                lifcSmsRequest.setSystemId(COLLECTION);
+                lifcSmsRequest.setUserReferenceNumber("");
+                lifcSmsRequest.setSpecificPartnerName("");
+                lifcSmsRequest.setData(requestDataDTO);
+
+                LifcMsgDTOResponse lifcMsgDTOResponse = lifcSmsService.sendSmsLifc(lifcSmsRequest, token, springProfile);
+                log.info("cflMsgDTOResponse {}", lifcMsgDTOResponse);
+                saveSendSMSActivityData(loanId, res, userId);
+                // creating api logs
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), lifcSmsRequest, lifcMsgDTOResponse, "success", Long.parseLong(loanId[0]));
             }
 
 //            if(clientId.equals("deccan")) {

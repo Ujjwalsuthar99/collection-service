@@ -255,7 +255,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, utilityService.convertToJSON(modifiedResponse), "success", null);
             // again calling the download api for aadharfin usernames
-            if (res.getData().contains("File or bucket not") && Objects.equals(currentUserInfo.getClientId(), "aadharfin")) {
+            if ((res.getData().isEmpty() || res.getData().contains("File or bucket not")) && Objects.equals(currentUserInfo.getClientId(), "aadharfin")) {
                 log.info("Again calling the download API for Aadharfin Client");
                 String[] userRefArr = userRefNo.split("/");
                 String newUserRef = userRefArr[0] + "/" + userRefArr[1].substring(0, 1).toUpperCase() + userRefArr[1].substring(1);
