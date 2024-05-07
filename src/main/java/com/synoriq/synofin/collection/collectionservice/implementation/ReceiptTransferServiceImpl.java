@@ -225,7 +225,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             Long receiptTransferTableId = receiptTransferDtoRequest.getReceiptTransferId();
 
             GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptTransferDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
-            UploadImageOnS3ResponseDTO transferProofUploaded = integrationConnectorService.uploadImageOnS3(token, transferProof, "receipt_transfer", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude());
+            UploadImageOnS3ResponseDTO transferProofUploaded = integrationConnectorService.uploadImageOnS3(token, transferProof, "receipt_transfer", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), "");
             String filePath = "";
             if (transferProofUploaded.getData() != null) {
                 filePath = transferProofUploaded.getData().getUserRefNo() + "/" + transferProofUploaded.getData().getFileName();

@@ -58,7 +58,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
 
 
     @Override
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, String latitude, String longitude) throws IOException {
+    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, String latitude, String longitude, String userName) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
 
@@ -81,8 +81,9 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
         fileType = fileType.split("image/")[1];
         CurrentUserInfo currentUserInfo = new CurrentUserInfo();
         int randomNumber = (int) (100000 + Math.random() * 900000);
-        String userName = utilityService.getUserDetailsByToken(token).getData().getUserName();
-//        String userName = currentUserInfo.getCurrentUser().getUsername();
+        if (userName.isEmpty()) {
+            userName = utilityService.getUserDetailsByToken(token).getData().getUserName();
+        }
         switch (module) {
             case "follow_up":
                 fileName = randomNumber + "_" + new Date().getTime() + "_" + "_followup_image." + fileType;
