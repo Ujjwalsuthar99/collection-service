@@ -804,7 +804,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         // creating consumed log api
         consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.multi_create_receipt, receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest, res, "success", receiptServiceDtoRequest.getActivityData().getLoanId());
-
+        return res;
     }
 
     @Override
