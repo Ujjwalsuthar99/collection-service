@@ -63,18 +63,21 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
     public String createCollectionLimitUserWise(String token, CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws Exception {
 
         Long userId;
+        String name;
         UserDetailByUserIdDTOResponse userDetailByUserIdDTOResponse;
         String userName = utilityService.splitCodeName(collectionLimitUserWiseDtoRequest.getUsername());
         ProfileDetailResponseDTO profileDetailResponseDTO;
         if (collectionLimitUserWiseDtoRequest.getUserId() != null) { // update
             userDetailByUserIdDTOResponse = utilityService.getUserDetailsByUserId(token, collectionLimitUserWiseDtoRequest.getUserId());
             userId = collectionLimitUserWiseDtoRequest.getUserId();
+            name = userDetailByUserIdDTOResponse.getData().getEmployeeName();
             userName = userDetailByUserIdDTOResponse.getData().getEmployeeUserName();
             log.info(" if user name {}", userName);
         } else {
             profileDetailResponseDTO = profileService.getProfileDetails(token, userName);
             if (profileDetailResponseDTO.getData() != null) {
                 userId = profileDetailResponseDTO.getData().getUserId();
+                name = profileDetailResponseDTO.getData().getName();
 //                userName = utilityService.splitCodeName(collectionLimitUserWiseDtoRequest.getUsername());
                 log.info(" else user name {}", userName);
             } else {
@@ -89,6 +92,7 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
                 throw new Exception("1017009");
             }
             existingLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getTotalLimitValue());
+            existingLimit.setName(name);
             collectionLimitUserWiseRepository.save(existingLimit);
         } else {
             String defaultLimit = collectionLimitUserWiseDtoRequest.getTotalLimitValue().toString();
@@ -104,6 +108,7 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
             collectionLimitUserWiseEntity.setCreatedDate(new Date());
             collectionLimitUserWiseEntity.setDeleted(false);
+            collectionLimitUserWiseEntity.setName(name);
             collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
             collectionLimitUserWiseEntity.setUserId(userId);
             collectionLimitUserWiseEntity.setUserName(userName);
