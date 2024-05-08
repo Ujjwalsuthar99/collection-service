@@ -114,6 +114,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#ffffff'\n" +
             "    end) as dpd_text_color_key,\n" +
             "    la.product as loan_type,\n" +
+            "    count(f.followups_id) over () as total_count," +
             "    (select coalesce(sum(rs.pending_amount), 0) from lms.repayment_schedule rs where rs.status = 'outstanding' and rs.loan_id = la.loan_application_id group by rs.loan_id) as overdue_repayment\n" +
             "             from collection.followups f \n" +
             "            join (select loan_application_id ,days_past_due,product, loan_application_number from lms.loan_application) as la on la.loan_application_id = f.loan_id \n" +
