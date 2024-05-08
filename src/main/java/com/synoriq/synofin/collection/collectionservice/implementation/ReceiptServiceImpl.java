@@ -707,11 +707,11 @@ public class ReceiptServiceImpl implements ReceiptService {
                         hashMap.put("user_id", receiptServiceDtoRequest.getActivityData().getUserId());
                         hashMap.put("activity_id", collectionActivityId);
 
-                        ResponseEntity<String> collectionReceiptResponse = new RestTemplate().exchange(
+                        ResponseEntity<Object> collectionReceiptResponse = new RestTemplate().exchange(
                                 url + "create-collection-receipt",
                                 HttpMethod.POST,
                                 new HttpEntity<>(hashMap, httpHeader),
-                                String.class
+                                Object.class
                         );
                     }
                 }
