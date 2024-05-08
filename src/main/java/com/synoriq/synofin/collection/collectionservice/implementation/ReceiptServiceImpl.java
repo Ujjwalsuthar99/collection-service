@@ -680,7 +680,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                         receiptServiceDtoRequest.getActivityData().setRemarks(updatedRemarks);
 
                         // calling activity logs API for lifpl client
-                        String url = "http://localhost:1101/collection-service/v1/";
+                        String url = "http://localhost:1101/v1/";
 
                         HttpHeaders httpHeader = new HttpHeaders();
                         httpHeader.add("Content-Type", "application/json");
