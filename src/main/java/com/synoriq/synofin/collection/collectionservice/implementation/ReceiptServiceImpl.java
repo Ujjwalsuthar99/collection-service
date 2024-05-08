@@ -684,7 +684,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
                         HttpHeaders httpHeader = new HttpHeaders();
                         httpHeader.add("Content-Type", "application/json");
-                        httpHeader.add("Authorization", token);
+                        httpHeader.setBearerAuth(token);
 
                         ResponseEntity<String> activityResponse = new RestTemplate().exchange(
                                 url + "activity-logs",
