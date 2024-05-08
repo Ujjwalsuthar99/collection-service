@@ -651,7 +651,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                     );
 
                     for (Map<String, Object> map : list) {
-                        DatabaseContextHolder.set(map.get("client").toString());
                         String token = utilityService.getTokenByApiKeySecret(map);
 
 
@@ -673,19 +672,47 @@ public class ReceiptServiceImpl implements ReceiptService {
                             imageMapMulti.put("url" + j, var1);
                         }
                         receiptServiceDtoRequest.getActivityData().setImages(imageMapMulti);
-                        multiReceiptAfterReceipt(receiptServiceDtoRequest, token);
+                        ServiceRequestSaveResponse multiReceiptResponse = multiReceiptAfterReceipt(receiptServiceDtoRequest, token);
 
                         updatedRemarks = CREATE_RECEIPT;
                         updatedRemarks = updatedRemarks.replace("{receipt_number}", res.getData().getServiceRequestId().toString());
                         updatedRemarks = updatedRemarks.replace("{loan_number}", receiptServiceDtoRequest.getRequestData().getLoanId());
                         receiptServiceDtoRequest.getActivityData().setRemarks(updatedRemarks);
-                        collectionActivityId = activityLogService.createActivityLogs(receiptServiceDtoRequest.getActivityData(), bearerToken);
+
+                        // calling activity logs API for lifpl client
+                        String url = "http://localhost:1101/collection-service/v1/";
+
+                        HttpHeaders httpHeader = new HttpHeaders();
+                        httpHeader.add("Content-Type", "application/json");
+                        httpHeader.add("Authorization", token);
+
+                        ResponseEntity<String> activityResponse = new RestTemplate().exchange(
+                                url + "activity-logs",
+                                HttpMethod.POST,
+                                new HttpEntity<>(receiptServiceDtoRequest.getActivityData(), httpHeader),
+                                String.class
+                        );
+
+                        collectionActivityId = Long.parseLong(Objects.requireNonNull(activityResponse.getBody()));
+
 
                         collectionReceiptEntity = new CollectionReceiptEntity();
                         collectionReceiptEntity.setReceiptId(res.getData().getServiceRequestId());
                         collectionReceiptEntity.setCreatedBy(receiptServiceDtoRequest.getActivityData().getUserId());
                         collectionReceiptEntity.setReceiptHolderUserId(receiptServiceDtoRequest.getActivityData().getUserId());
                         collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityId);
+
+                        Map<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("service_request_id", multiReceiptResponse.getData().getServiceRequestId());
+                        hashMap.put("user_id", receiptServiceDtoRequest.getActivityData().getUserId());
+                        hashMap.put("activity_id", collectionActivityId);
+
+                        ResponseEntity<String> collectionReceiptResponse = new RestTemplate().exchange(
+                                url + "create-collection-receipt",
+                                HttpMethod.POST,
+                                new HttpEntity<>(hashMap, httpHeader),
+                                String.class
+                        );
                     }
                 }
             } else {
@@ -756,7 +783,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         return imageMap;
     }
 
-    private void multiReceiptAfterReceipt(ReceiptServiceDtoRequest receiptServiceDtoRequest, String token) throws Exception {
+    private ServiceRequestSaveResponse multiReceiptAfterReceipt(ReceiptServiceDtoRequest receiptServiceDtoRequest, String token) throws Exception {
         log.info("Begin multiReceiptAfterReceipt");
 
 
@@ -931,5 +958,17 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         return baseDTOResponse;
 
+    }
+
+    @Override
+    public BaseDTOResponse<Object> createCollectionReceipt(Map<String, Object> requestBody, String token) throws Exception {
+        CollectionReceiptEntity collectionReceiptEntity = new CollectionReceiptEntity();
+        collectionReceiptEntity.setReceiptId(Long.parseLong(requestBody.get("receipt_service_id").toString()));
+        collectionReceiptEntity.setCreatedBy(Long.parseLong(requestBody.get("user_id").toString()));
+        collectionReceiptEntity.setReceiptHolderUserId(Long.parseLong(requestBody.get("user_id").toString()));
+        collectionReceiptEntity.setCollectionActivityLogsId(Long.parseLong(requestBody.get("activity_id").toString()));
+
+        collectionReceiptRepository.save(collectionReceiptEntity);
+        return new BaseDTOResponse<>(collectionReceiptEntity);
     }
 }

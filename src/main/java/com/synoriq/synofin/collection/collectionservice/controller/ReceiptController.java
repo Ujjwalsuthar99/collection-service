@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
+import java.util.Map;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_NUMBER;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_SIZE;
@@ -243,5 +244,11 @@ public class ReceiptController {
             response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
         }
         return response;
+    }
+
+    @PostMapping("create-collection-receipt")
+    public ResponseEntity<Object> createCollectionReceipt(@RequestBody Map<String, Object> requestBody, @RequestHeader("Authorization") String token) throws Exception {
+        Object result = receiptService.createCollectionReceipt(requestBody, token);
+        return new ResponseEntity<>(new BaseDTOResponse<>(result), HttpStatus.OK);
     }
 }
