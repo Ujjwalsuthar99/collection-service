@@ -27,6 +27,6 @@ public interface ReceiptService {
     public Object getReceiptDate(String bearerToken) throws Exception;
     public void getPdf(String token, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception;
     public BaseDTOResponse<Object> getReceiptsByUserIdWhichNotTransferredForPortal(ReceiptTransferLmsFilterDTO filterDTO) throws Exception;
-    BaseDTOResponse<Object> createCollectionReceipt(Map<String, Object> requestBody, String token) throws Exception;
+    String createCollectionReceipt(Map<String, Object> requestBody, String token) throws Exception;
 
 }
