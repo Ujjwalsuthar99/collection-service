@@ -452,6 +452,7 @@ public class TaskServiceImpl implements TaskService {
                 "    p.product_name as product,\n" +
                 "    la.loan_application_number,\n" +
                 "    la2.task_purpose,\n" +
+                "    count(la.loan_application_id) over () as total_count,\n" +
                 "    (case\n" +
                 "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
                 "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +

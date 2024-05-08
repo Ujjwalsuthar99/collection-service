@@ -241,6 +241,10 @@ public class FollowUpServiceImpl implements FollowUpService {
         try {
             Optional<FollowUpEntity> followUpEntity = followUpRepository.findById(followUpStatusRequestDTO.getFollowUpId());
             if (followUpEntity.isPresent()) {
+                if (followUpStatusRequestDTO.getStatus().equals("reschedule")) {
+                    updateStatus(followUpEntity.get(), followUpStatusRequestDTO, token);
+                    return new BaseDTOResponse<>("Updated Successfully");
+                }
                 Map<String, Object> receiptExist = receiptRepository.getServiceRequestDataById(followUpStatusRequestDTO.getServiceRequestId(), followUpStatusRequestDTO.getLoanId());
                 if (!receiptExist.isEmpty()) {
                     List<FollowUpEntity> var = followUpRepository.findDataByServiceRequestId(followUpStatusRequestDTO.getServiceRequestId());
@@ -262,19 +266,8 @@ public class FollowUpServiceImpl implements FollowUpService {
                     if (currentMonth != createdDateMonth) {
                         throw new Exception("1016048");
                     }
-
-                    followUpEntity.get().setClosingRemarks(followUpStatusRequestDTO.getRemarks());
-                    followUpEntity.get().setServiceRequestId(followUpStatusRequestDTO.getServiceRequestId());
-                    followUpEntity.get().setFollowUpStatus(followUpStatusRequestDTO.getStatus());
-
-                    followUpRepository.save(followUpEntity.get());
-                    String updatedRemarks = CLOSE_FOLLOWUP;
-                    updatedRemarks = updatedRemarks.replace("{request_id}", followUpEntity.get().getFollowupId().toString());
-                    updatedRemarks = updatedRemarks.replace("{loan_number}", followUpEntity.get().getLoanId().toString());
-                    followUpStatusRequestDTO.getActivityLog().setRemarks(updatedRemarks);
-
-                    // creating activity logs
-                    activityLogService.createActivityLogs(followUpStatusRequestDTO.getActivityLog(), token);
+                    // updating the status and creating activity log
+                    updateStatus(followUpEntity.get(), followUpStatusRequestDTO, token);
                 } else {
                     throw new Exception("1016049");
                 }
@@ -293,6 +286,21 @@ public class FollowUpServiceImpl implements FollowUpService {
 
         return DateUtils.addDays(toDate,1);
 
+    }
+
+    private void updateStatus(FollowUpEntity followUpEntity, FollowUpStatusRequestDTO followUpStatusRequestDTO, String token) throws Exception {
+        followUpEntity.setClosingRemarks(followUpStatusRequestDTO.getRemarks());
+        followUpEntity.setServiceRequestId(followUpStatusRequestDTO.getServiceRequestId());
+        followUpEntity.setFollowUpStatus(followUpStatusRequestDTO.getStatus());
+
+        followUpRepository.save(followUpEntity);
+        String updatedRemarks = CLOSE_FOLLOWUP;
+        updatedRemarks = updatedRemarks.replace("{request_id}", followUpEntity.getFollowupId().toString());
+        updatedRemarks = updatedRemarks.replace("{loan_number}", followUpEntity.getLoanId().toString());
+        followUpStatusRequestDTO.getActivityLog().setRemarks(updatedRemarks);
+
+        // creating activity logs
+        activityLogService.createActivityLogs(followUpStatusRequestDTO.getActivityLog(), token);
     }
 
 }

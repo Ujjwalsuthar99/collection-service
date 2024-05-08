@@ -32,7 +32,7 @@ public class GlobalVariables {
 
     public static final String PAISABUDDY_MSG_API_URL = "https://api.msg91.com/api/v5/flow/";
     public static final String CSL_MSG_API_URL = "http://foxxsms.net/sms//submitsms.jsp";
-    public static final String USE_BUSINESS_DATE_AS_RECEIPT_DATE = "use_business_date_as_receipt_trx_date";
+    public static final String USE_BUSINESS_DATE_AS_RECEIPT_DATE = "use_business_date_as_date_of_receipt";
     public static final String USE_BUSINESS_DATE_AS_TRANSACTION_DATE = "use_business_date_as_transaction_date";
     public static final String IS_REPOSSESSION_ENABLED = "is_repossession_enabled";
     public static final String SHOW_REPOSSESSION_AFTER_X_DPD = "show_repossession_after_x_dpd";
