@@ -729,7 +729,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                         hashMap.put("service_request_id", multiReceiptResponse.getData().getServiceRequestId());
                         hashMap.put("user_id", receiptServiceDtoRequest.getActivityData().getUserId());
                         hashMap.put("activity_id", collectionActivityId);
-
+                        log.info("hashMap {}", hashMap);
                         new RestTemplate().exchange(
                                 url + "create-collection-receipt",
                                 HttpMethod.POST,
@@ -985,11 +985,12 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public String createCollectionReceipt(Map<String, Object> requestBody, String token) throws Exception {
+
         CollectionReceiptEntity collectionReceiptEntity = new CollectionReceiptEntity();
-        collectionReceiptEntity.setReceiptId(Long.parseLong(String.valueOf(requestBody.get("receipt_service_id"))));
-        collectionReceiptEntity.setCreatedBy(Long.parseLong(String.valueOf(requestBody.get("user_id"))));
-        collectionReceiptEntity.setReceiptHolderUserId(Long.parseLong(String.valueOf(requestBody.get("user_id"))));
-        collectionReceiptEntity.setCollectionActivityLogsId(Long.parseLong(String.valueOf(requestBody.get("activity_id"))));
+        collectionReceiptEntity.setReceiptId(Long.parseLong(requestBody.get("service_request_id").toString()));
+        collectionReceiptEntity.setCreatedBy(Long.parseLong(requestBody.get("user_id").toString()));
+        collectionReceiptEntity.setReceiptHolderUserId(Long.parseLong(requestBody.get("user_id").toString()));
+        collectionReceiptEntity.setCollectionActivityLogsId(Long.parseLong(requestBody.get("activity_id").toString()));
 
         collectionReceiptRepository.save(collectionReceiptEntity);
         return "data_saved_successfully";
