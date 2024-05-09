@@ -715,8 +715,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                                 Object.class
                         );
                         log.info("here^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-                        BaseDTOResponse<Long> baseResponse = objectMapper.convertValue(activityResponse.getBody(), BaseDTOResponse.class);
-                        collectionActivityId = baseResponse.getData();
+                        Map<String, Object> baseResponse = objectMapper.convertValue(activityResponse.getBody(), Map.class);
+                        collectionActivityId = Long.parseLong(baseResponse.get("data").toString());
                         log.info("**********************************************reached");
 
                         collectionReceiptEntity = new CollectionReceiptEntity();
