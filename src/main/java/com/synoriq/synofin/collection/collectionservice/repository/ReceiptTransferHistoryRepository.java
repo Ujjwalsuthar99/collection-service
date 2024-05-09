@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Repository
 public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptTransferHistoryEntity, Long> {
@@ -92,6 +93,7 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
             "limit 1")
     Long getReceiptTransferIdUsingReceiptId(@Param("receiptId") Long receiptId);
 
-    public ReceiptTransferHistoryEntity findByCollectionReceiptsId(Long receiptId);
+    ReceiptTransferHistoryEntity findByCollectionReceiptsId(Long receiptId);
+    List<ReceiptTransferHistoryEntity> findByDeletedAndCollectionReceiptsIdIn(boolean deleted, Set<Long> collectionReceiptsId);
 
 }

@@ -708,15 +708,16 @@ public class ReceiptServiceImpl implements ReceiptService {
                         httpHeader.add("Content-Type", "application/json");
                         httpHeader.setBearerAuth(token);
 
-                        ResponseEntity<String> activityResponse = new RestTemplate().exchange(
+                        ResponseEntity<Object> activityResponse = new RestTemplate().exchange(
                                 url + "activity-logs",
                                 HttpMethod.POST,
                                 new HttpEntity<>(receiptServiceDtoRequest.getActivityData(), httpHeader),
-                                String.class
+                                Object.class
                         );
-
-                        collectionActivityId = Long.parseLong(Objects.requireNonNull(activityResponse.getBody()));
-
+                        log.info("here^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                        BaseDTOResponse<Long> baseResponse = objectMapper.convertValue(activityResponse.getBody(), BaseDTOResponse.class);
+                        collectionActivityId = baseResponse.getData();
+                        log.info("**********************************************reached");
 
                         collectionReceiptEntity = new CollectionReceiptEntity();
                         collectionReceiptEntity.setReceiptId(res.getData().getServiceRequestId());
