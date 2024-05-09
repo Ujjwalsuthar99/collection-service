@@ -249,6 +249,6 @@ public class ReceiptController {
     @PostMapping("create-collection-receipt")
     public ResponseEntity<Object> createCollectionReceipt(@RequestBody Map<String, Object> requestBody, @RequestHeader("Authorization") String token) throws Exception {
         Object result = receiptService.createCollectionReceipt(requestBody, token);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(new BaseDTOResponse<>(result), HttpStatus.OK);
     }
 }

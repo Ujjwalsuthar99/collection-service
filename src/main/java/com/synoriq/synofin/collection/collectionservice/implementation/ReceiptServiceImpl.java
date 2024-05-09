@@ -719,12 +719,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                         collectionActivityId = Long.parseLong(baseResponse.get("data").toString());
                         log.info("**********************************************reached");
 
-                        collectionReceiptEntity = new CollectionReceiptEntity();
-                        collectionReceiptEntity.setReceiptId(res.getData().getServiceRequestId());
-                        collectionReceiptEntity.setCreatedBy(receiptServiceDtoRequest.getActivityData().getUserId());
-                        collectionReceiptEntity.setReceiptHolderUserId(receiptServiceDtoRequest.getActivityData().getUserId());
-                        collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityId);
-
                         Map<String, Object> hashMap = new HashMap<>();
                         hashMap.put("service_request_id", multiReceiptResponse.getData().getServiceRequestId());
                         hashMap.put("user_id", receiptServiceDtoRequest.getActivityData().getUserId());
