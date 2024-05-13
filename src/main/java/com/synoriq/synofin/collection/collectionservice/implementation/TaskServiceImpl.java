@@ -77,29 +77,37 @@ public class TaskServiceImpl implements TaskService {
             StringBuilder whereCondition = new StringBuilder();
             whereCondition.append(" and la2.allocated_to_user_id = ").append(userId).append(" ");
 
-
+            boolean breakOccurred = false;
             if (taskFilterRequestDTO.getDpd() != null && !taskFilterRequestDTO.getDpd().isEmpty()) {
 
-                Optional<Integer> maxValue = taskFilterRequestDTO.getDpd().stream()
-                        .map(s -> {
-                            String[] parts = s.split("-");
-                            return Integer.parseInt(parts[1]);
-                        })
-                        .max(Integer::compareTo);
+                for (String s: taskFilterRequestDTO.getDpd()) {
+                    if (s.equals("180++")) {
+                        whereCondition.append(" and la.days_past_due > ").append("180");
+                        breakOccurred = true;
+                        break;
+                    }
+                }
+                if (!breakOccurred) {
+                    Optional<Integer> maxValue = taskFilterRequestDTO.getDpd().stream()
+                            .map(s -> {
+                                String[] parts = s.split("-");
+                                return Integer.parseInt(parts[1]);
+                            })
+                            .max(Integer::compareTo);
 
-                Optional<Integer> minValue = taskFilterRequestDTO.getDpd().stream()
-                        .map(s -> {
-                            String[] parts = s.split("-");
-                            return Integer.parseInt(parts[0]);
-                        })
-                        .min(Integer::compareTo);
+                    Optional<Integer> minValue = taskFilterRequestDTO.getDpd().stream()
+                            .map(s -> {
+                                String[] parts = s.split("-");
+                                return Integer.parseInt(parts[0]);
+                            })
+                            .min(Integer::compareTo);
 
-                Integer max = maxValue.orElse(null);
-                Integer min = minValue.orElse(null);
+                    Integer max = maxValue.orElse(null);
+                    Integer min = minValue.orElse(null);
 
 
-                whereCondition.append(" and la.days_past_due between ").append(min).append(" and ").append(max);
-
+                    whereCondition.append(" and la.days_past_due between ").append(min).append(" and ").append(max);
+                }
             }
 
             if (!taskFilterRequestDTO.getSearchKey().isEmpty()) {

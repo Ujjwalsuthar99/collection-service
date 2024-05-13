@@ -48,6 +48,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityEvent.*;
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.*;
@@ -540,19 +541,23 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 JsonNode approvalLocationDataNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("approval_location_data")));
                 JsonNode imagesNode = objectMapper.readTree(String.valueOf(receiptTransferData.get("receipt_image")));
                 if (String.valueOf(receiptTransferData.get("transfer_type")).equals("bank")) {
-                    ReceiptTransferCustomDataResponseDTO bankTransferDTO = new ReceiptTransferCustomDataResponseDTO();
-                    bankTransferDTO.setReceiptTransferId(Long.parseLong(String.valueOf(receiptTransferData.get("receipt_transfer_id"))));
-                    bankTransferDTO.setCreatedDate(String.valueOf(receiptTransferData.get("created_date")));
-                    bankTransferDTO.setTransferByName(String.valueOf(receiptTransferData.get("transfer_by_name")));
-                    bankTransferDTO.setTransferToName(String.valueOf(receiptTransferData.get("transfer_to_name")));
-                    bankTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
-                    bankTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
-                    bankTransferDTO.setBankName(String.valueOf(receiptTransferData.get("bank_name")));
-                    bankTransferDTO.setAccountNumber(String.valueOf(receiptTransferData.get("account_number")));
-                    bankTransferDTO.setTransferLocationData(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
-                    bankTransferDTO.setApprovalLocationData(new Gson().fromJson("{}", Object.class));
-                    bankTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
-                    bankTransferArr.add(bankTransferDTO);
+                    boolean exists = bankTransferArr.stream()
+                            .anyMatch(dto -> dto.getReceiptTransferId() > Long.parseLong(String.valueOf(receiptTransferData.get("receipt_transfer_id"))));
+                    if (!exists) {
+                        ReceiptTransferCustomDataResponseDTO bankTransferDTO = new ReceiptTransferCustomDataResponseDTO();
+                        bankTransferDTO.setReceiptTransferId(Long.parseLong(String.valueOf(receiptTransferData.get("receipt_transfer_id"))));
+                        bankTransferDTO.setCreatedDate(String.valueOf(receiptTransferData.get("created_date")));
+                        bankTransferDTO.setTransferByName(String.valueOf(receiptTransferData.get("transfer_by_name")));
+                        bankTransferDTO.setTransferToName(String.valueOf(receiptTransferData.get("transfer_to_name")));
+                        bankTransferDTO.setTransferType(String.valueOf(receiptTransferData.get("transfer_type")));
+                        bankTransferDTO.setDepositAmount(Double.parseDouble(String.valueOf(receiptTransferData.get("deposit_amount"))));
+                        bankTransferDTO.setBankName(String.valueOf(receiptTransferData.get("bank_name")));
+                        bankTransferDTO.setAccountNumber(String.valueOf(receiptTransferData.get("account_number")));
+                        bankTransferDTO.setTransferLocationData(new Gson().fromJson(String.valueOf(geoLocationDataNode), Object.class));
+                        bankTransferDTO.setApprovalLocationData(new Gson().fromJson("{}", Object.class));
+                        bankTransferDTO.setReceiptTransferProofs(new Gson().fromJson(String.valueOf(imagesNode), Object.class));
+                        bankTransferArr.add(bankTransferDTO);
+                    }
                 } else {
                     ReceiptTransferCustomDataResponseDTO userTransferDTO = new ReceiptTransferCustomDataResponseDTO();
                     userTransferDTO.setReceiptTransferId(Long.parseLong(String.valueOf(receiptTransferData.get("receipt_transfer_id"))));

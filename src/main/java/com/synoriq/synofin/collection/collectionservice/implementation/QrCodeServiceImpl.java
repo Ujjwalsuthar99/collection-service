@@ -274,7 +274,7 @@ public class QrCodeServiceImpl implements QrCodeService {
             log.info("hurray! callback received for QR");
             DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByMerchantTranId(merchantTransId);
             if (digitalPaymentTransactionsEntity != null) {
-                if (Objects.equals(requestBody.getStatus(), QR_CALLBACK_SUCCESS)) {
+                if (Objects.equals(requestBody.getStatus(), QR_CALLBACK_SUCCESS) && !digitalPaymentTransactionsEntity.getReceiptGenerated()) {
                     digitalPaymentTransactionsEntity.setStatus(SUCCESS);
                     digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getOriginalBankRRN());
                     // calling create receipt function for call back
