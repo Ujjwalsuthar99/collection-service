@@ -28,7 +28,8 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    la.loan_application_number,\n" +
             "    la2.task_purpose,\n" +
             "    (case\n" +
-            "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
+            "\t   when la.days_past_due = 0 then 'Current'\n" +
+            "       when la.days_past_due between 1 and 30 then '1-30 DPD'\n" +
             "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
             "       when la.days_past_due between 61 and 90 then '61-90 DPD'\n" +
             "       when la.days_past_due between 91 and 120 then '91-120 DPD'\n" +
@@ -37,7 +38,8 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "       else '180+ DPD' end) as days_past_due_bucket,\n" +
             "   la.days_past_due,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#61B2FF'\n" +
+            "\t    when la.days_past_due = 0 then '#a2e890'\n" +
+            "        when la.days_past_due between 1 and 30 then '#61B2FF'\n" +
             "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
             "        when la.days_past_due between 61 and 90 then '#FDAAAA'\n" +
             "        when la.days_past_due between 91 and 120 then '#F2994A'\n" +
@@ -46,7 +48,8 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        else '#722F37'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#323232'\n" +
+            "\t    when la.days_past_due = 0 then '#000000'\n" +
+            "        when la.days_past_due between 1 and 30 then '#323232'\n" +
             "        when la.days_past_due between 31 and 60 then '#ffffff'\n" +
             "        when la.days_past_due between 61 and 90 then '#323232'\n" +
             "        when la.days_past_due between 91 and 120 then '#323232'\n" +
@@ -79,7 +82,8 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "    p.product_name as product,\n" +
             "    la.loan_application_number,\n" +
             "    (case\n" +
-            "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
+            "\t   when la.days_past_due = 0 then 'Current'\t    \n" +
+            "       when la.days_past_due between 1 and 30 then '1-30 DPD'\n" +
             "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
             "       when la.days_past_due between 61 and 90 then '61-90 DPD'\n" +
             "       when la.days_past_due between 91 and 120 then '91-120 DPD'\n" +
@@ -88,7 +92,8 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "       else '180+ DPD' end) as days_past_due_bucket,\n" +
             "   la.days_past_due,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#61B2FF'\n" +
+            "\t    when la.days_past_due = 0 then '#a2e890'\n" +
+            "        when la.days_past_due between 1 and 30 then '#61B2FF'\n" +
             "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
             "        when la.days_past_due between 61 and 90 then '#FDAAAA'\n" +
             "        when la.days_past_due between 91 and 120 then '#F2994A'\n" +
@@ -97,7 +102,8 @@ public interface TaskRepository extends JpaRepository<LoanAllocationEntity, Long
             "        else '#722F37'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#323232'\n" +
+            "\t    when la.days_past_due = 0 then '#000000'\n" +
+            "        when la.days_past_due between 1 and 30 then '#323232'\n" +
             "        when la.days_past_due between 31 and 60 then '#ffffff'\n" +
             "        when la.days_past_due between 61 and 90 then '#323232'\n" +
             "        when la.days_past_due between 91 and 120 then '#323232'\n" +

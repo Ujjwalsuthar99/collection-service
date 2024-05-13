@@ -33,7 +33,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "f.remarks as remarks,\n" +
             "la.days_past_due as dpd,\n" +
             "    (case\n" +
-            "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
+            "       when la.days_past_due = 0 then 'Current'\n" +
+            "       when la.days_past_due between 1 and 30 then '1-30 DPD'\n" +
             "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
             "       when la.days_past_due between 61 and 90 then '61-90 DPD'\n" +
             "       when la.days_past_due between 91 and 120 then '91-120 DPD'\n" +
@@ -41,7 +42,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "       when la.days_past_due between 151 and 180 then '151-180 DPD'\n" +
             "       else '180+ DPD' end) as days_past_due_bucket,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#61B2FF'\n" +
+            "\t    when la.days_past_due = 0 then '#a2e890'\n" +
+            "        when la.days_past_due between 1 and 30 then '#61B2FF'\n" +
             "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
             "        when la.days_past_due between 61 and 90 then '#E1D153'\n" +
             "        when la.days_past_due between 91 and 120 then '#F2994A'\n" +
@@ -50,7 +52,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#722F37'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#323232'\n" +
+            "\t    when la.days_past_due = 0 then '#000000'\n" +
+            "        when la.days_past_due between 1 and 30 then '#323232'\n" +
             "        when la.days_past_due between 31 and 60 then '#ffffff'\n" +
             "        when la.days_past_due between 61 and 90 then '#323232'\n" +
             "        when la.days_past_due between 91 and 120 then '#323232'\n" +
@@ -88,7 +91,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "f.remarks as remarks,\n" +
             "la.days_past_due as dpd,\n" +
             "    (case\n" +
-            "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
+            "\t   when la.days_past_due = 0 then 'Current' \n" +
+            "       when la.days_past_due between 1 and 30 then '1-30 DPD'\n" +
             "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
             "       when la.days_past_due between 61 and 90 then '61-90 DPD'\n" +
             "       when la.days_past_due between 91 and 120 then '91-120 DPD'\n" +
@@ -96,7 +100,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "       when la.days_past_due between 151 and 180 then '151-180 DPD'\n" +
             "       else '180+ DPD' end) as days_past_due_bucket,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#61B2FF'\n" +
+            "\t    when la.days_past_due = 0 then '#a2e890'\n" +
+            "        when la.days_past_due between 1 and 30 then '#61B2FF'\n" +
             "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
             "        when la.days_past_due between 61 and 90 then '#E1D153'\n" +
             "        when la.days_past_due between 91 and 120 then '#F2994A'\n" +
@@ -105,7 +110,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#722F37'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#323232'\n" +
+            "\t    when la.days_past_due = 0 then '#000000'\n" +
+            "        when la.days_past_due between 1 and 30 then '#323232'\n" +
             "        when la.days_past_due between 31 and 60 then '#ffffff'\n" +
             "        when la.days_past_due between 61 and 90 then '#323232'\n" +
             "        when la.days_past_due between 91 and 120 then '#323232'\n" +
@@ -144,7 +150,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "la.days_past_due as dpd,\n" +
             "la.loan_application_number as loan_application_number,\n" +
             "    (case\n" +
-            "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
+            "\t   when la.days_past_due = 0 then 'Current'\n" +
+            "       when la.days_past_due between 1 and 30 then '1-30 DPD'\n" +
             "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
             "       when la.days_past_due between 61 and 90 then '61-90 DPD'\n" +
             "       when la.days_past_due between 91 and 120 then '91-120 DPD'\n" +
@@ -152,7 +159,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "       when la.days_past_due between 151 and 180 then '151-180 DPD'\n" +
             "       else '180+ DPD' end) as days_past_due_bucket,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#61B2FF'\n" +
+            "\t    when la.days_past_due = 0 then '#a2e890'\n" +
+            "        when la.days_past_due between 1 and 30 then '#61B2FF'\n" +
             "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
             "        when la.days_past_due between 61 and 90 then '#E1D153'\n" +
             "        when la.days_past_due between 91 and 120 then '#F2994A'\n" +
@@ -161,7 +169,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "        else '#722F37'\n" +
             "    end) as dpd_bg_color_key,\n" +
             "    (case\n" +
-            "        when la.days_past_due between 0 and 30 then '#323232'\n" +
+            "\t    when la.days_past_due = 0 then '#000000'\n" +
+            "        when la.days_past_due between 1 and 30 then '#323232'\n" +
             "        when la.days_past_due between 31 and 60 then '#ffffff'\n" +
             "        when la.days_past_due between 61 and 90 then '#323232'\n" +
             "        when la.days_past_due between 91 and 120 then '#323232'\n" +
