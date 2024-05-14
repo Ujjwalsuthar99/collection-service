@@ -30,7 +30,11 @@ public interface UtilityService {
 
     public static HttpHeaders createHeaders(String token) {
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(AUTHORIZATION, token);
+        if (token.contains("Bearer")) {
+            httpHeaders.add(AUTHORIZATION, token);
+        } else {
+            httpHeaders.setBearerAuth(token);
+        }
         httpHeaders.add(CONTENTTYPE, "application/json");
         return httpHeaders;
     }
