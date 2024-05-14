@@ -697,7 +697,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                         ServiceRequestSaveResponse multiReceiptResponse = multiReceiptAfterReceipt(receiptServiceDtoRequest, token);
 
                         updatedRemarks = CREATE_RECEIPT;
-                        updatedRemarks = updatedRemarks.replace("{receipt_number}", res.getData().getServiceRequestId().toString());
+                        updatedRemarks = updatedRemarks.replace("{receipt_number}", multiReceiptResponse.getData().getServiceRequestId().toString());
                         updatedRemarks = updatedRemarks.replace("{loan_number}", receiptServiceDtoRequest.getRequestData().getLoanId());
                         receiptServiceDtoRequest.getActivityData().setRemarks(updatedRemarks);
 
