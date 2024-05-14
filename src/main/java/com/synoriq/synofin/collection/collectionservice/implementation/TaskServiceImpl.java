@@ -262,10 +262,14 @@ public class TaskServiceImpl implements TaskService {
             String dpdBgColor;
             String dpdBucket;
 
-            if (dpd >= 0 && dpd <= 30) {
+            if (dpd == 0) {
+                dpdTextColor = "#000000";
+                dpdBgColor = "#a2e890";
+                dpdBucket = "Current";
+            } else if (dpd > 0 && dpd <= 30) {
                 dpdTextColor = "#323232";
                 dpdBgColor = "#61B2FF";
-                dpdBucket = "0-30 DPD";
+                dpdBucket = "1-30 DPD";
             } else if (dpd >= 31 && dpd <= 60) {
                 dpdTextColor = "#ffffff";
                 dpdBgColor = "#2F80ED";
@@ -474,7 +478,8 @@ public class TaskServiceImpl implements TaskService {
                 "    la2.task_purpose,\n" +
                 "    count(la.loan_application_id) over () as total_count,\n" +
                 "    (case\n" +
-                "       when la.days_past_due between 0 and 30 then '0-30 DPD'\n" +
+                "\t   when la.days_past_due = 0 then 'Current'\n" +
+                "       when la.days_past_due between 1 and 30 then '1-30 DPD'\n" +
                 "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
                 "       when la.days_past_due between 61 and 90 then '61-90 DPD'\n" +
                 "       when la.days_past_due between 91 and 120 then '91-120 DPD'\n" +
@@ -483,7 +488,8 @@ public class TaskServiceImpl implements TaskService {
                 "       else '180+ DPD' end) as days_past_due_bucket,\n" +
                 "   la.days_past_due,\n" +
                 "    (case\n" +
-                "        when la.days_past_due between 0 and 30 then '#61B2FF'\n" +
+                "\t    when la.days_past_due = 0 then '#a2e890'\n" +
+                "        when la.days_past_due between 1 and 30 then '#61B2FF'\n" +
                 "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
                 "        when la.days_past_due between 61 and 90 then '#FDAAAA'\n" +
                 "        when la.days_past_due between 91 and 120 then '#F2994A'\n" +
@@ -492,7 +498,8 @@ public class TaskServiceImpl implements TaskService {
                 "        else '#722F37'\n" +
                 "    end) as dpd_bg_color_key,\n" +
                 "    (case\n" +
-                "        when la.days_past_due between 0 and 30 then '#323232'\n" +
+                "\t    when la.days_past_due = 0 then '#000000'\n" +
+                "        when la.days_past_due between 1 and 30 then '#323232'\n" +
                 "        when la.days_past_due between 31 and 60 then '#ffffff'\n" +
                 "        when la.days_past_due between 61 and 90 then '#323232'\n" +
                 "        when la.days_past_due between 91 and 120 then '#323232'\n" +

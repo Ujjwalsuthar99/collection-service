@@ -109,10 +109,15 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
         taskListDTOReturnResponse.setMobile(loanDataDTO.getCustomerDetails().getPhoneNumber());
 
         int dpd = loanDataDTO.getDpd();
-        if (dpd >= 0 && dpd <= 30) {
+        if (dpd == 0) {
+            taskListDTOReturnResponse.setDpdTextColorKey("#000000");
+            taskListDTOReturnResponse.setDpdBgColorKey("#a2e890");
+            taskListDTOReturnResponse.setDaysPastDueBucket("Current");
+        }
+        else if (dpd > 0 && dpd <= 30) {
             taskListDTOReturnResponse.setDpdTextColorKey("#323232");
             taskListDTOReturnResponse.setDpdBgColorKey("#61B2FF");
-            taskListDTOReturnResponse.setDaysPastDueBucket("0-30 DPD");
+            taskListDTOReturnResponse.setDaysPastDueBucket("1-30 DPD");
         } else if (dpd >= 31 && dpd <= 60) {
             taskListDTOReturnResponse.setDpdTextColorKey("#ffffff");
             taskListDTOReturnResponse.setDpdBgColorKey("#2F80ED");

@@ -292,8 +292,10 @@ public class RepossessionServiceImpl implements RepossessionService {
 
                     int dpd = loanDetailRes.getData().getDpd();
                     String dpdBucket;
-                    if (dpd >= 0 && dpd <= 30) {
-                        dpdBucket = "0-30 DPD";
+                    if (dpd == 0) {
+                        dpdBucket = "Current";
+                    }else if (dpd >= 1 && dpd <= 30) {
+                        dpdBucket = "1-30 DPD";
                     } else if (dpd >= 31 && dpd <= 60) {
                         dpdBucket = "31-60 DPD";
                     } else if (dpd >= 61 && dpd <= 90) {
