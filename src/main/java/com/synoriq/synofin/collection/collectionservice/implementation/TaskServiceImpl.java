@@ -76,40 +76,52 @@ public class TaskServiceImpl implements TaskService {
             Boolean piiPermission = true;
             StringBuilder whereCondition = new StringBuilder();
             whereCondition.append(" and la2.allocated_to_user_id = ").append(userId).append(" ");
-
+            StringBuilder dpdWhereCondition = new StringBuilder();
             boolean breakOccurred = false;
             if (taskFilterRequestDTO.getDpd() != null && !taskFilterRequestDTO.getDpd().isEmpty()) {
 
-                for (String s: taskFilterRequestDTO.getDpd()) {
-                    if (s.equals("180++")) {
-                        whereCondition.append(" and la.days_past_due > ").append("180");
+                Iterator<String> iterator = taskFilterRequestDTO.getDpd().iterator();
+                while (iterator.hasNext()) {
+                    String s = iterator.next();
+                    if (s.equals("Current")) {
+                        dpdWhereCondition.append(breakOccurred ? " or" : " and").append(" la.days_past_due = ").append("0");
                         breakOccurred = true;
+                        iterator.remove();
+                        continue;
+                    }
+                    if (s.equals("180+")) {
+                        dpdWhereCondition.append(breakOccurred ? " or" : " and").append(" la.days_past_due > ").append("180");
+                        breakOccurred = true;
+                        iterator.remove();
                         break;
                     }
                 }
-                if (!breakOccurred) {
-                    Optional<Integer> maxValue = taskFilterRequestDTO.getDpd().stream()
-                            .map(s -> {
-                                String[] parts = s.split("-");
-                                return Integer.parseInt(parts[1]);
-                            })
-                            .max(Integer::compareTo);
+                Optional<Integer> maxValue = taskFilterRequestDTO.getDpd().stream()
+                        .map(s -> {
+                            String[] parts = s.split("-");
+                            return Integer.parseInt(parts[1]);
+                        })
+                        .max(Integer::compareTo);
 
-                    Optional<Integer> minValue = taskFilterRequestDTO.getDpd().stream()
-                            .map(s -> {
-                                String[] parts = s.split("-");
-                                return Integer.parseInt(parts[0]);
-                            })
-                            .min(Integer::compareTo);
+                Optional<Integer> minValue = taskFilterRequestDTO.getDpd().stream()
+                        .map(s -> {
+                            String[] parts = s.split("-");
+                            return Integer.parseInt(parts[0]);
+                        })
+                        .min(Integer::compareTo);
 
-                    Integer max = maxValue.orElse(null);
-                    Integer min = minValue.orElse(null);
+                Integer max = maxValue.orElse(null);
+                Integer min = minValue.orElse(null);
 
 
-                    whereCondition.append(" and la.days_past_due between ").append(min).append(" and ").append(max);
-                }
+                dpdWhereCondition.append(breakOccurred ? " or" : " and").append(" la.days_past_due between ").append(min).append(" and ").append(max);
+                String str = dpdWhereCondition.toString().split(" ")[1];
+                dpdWhereCondition.insert(str.length() + 1, "(");
+                dpdWhereCondition.insert(dpdWhereCondition.length(), ")");
+
+
             }
-
+            whereCondition.append(dpdWhereCondition);
             if (!taskFilterRequestDTO.getSearchKey().isEmpty()) {
                 whereCondition.append(" and (LOWER(concat_ws(' ', c.first_name, c.last_name)) like LOWER(concat('%', '")
                         .append(taskFilterRequestDTO.getSearchKey())

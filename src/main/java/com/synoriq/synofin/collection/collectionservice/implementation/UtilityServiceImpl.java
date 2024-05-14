@@ -291,7 +291,7 @@ public class UtilityServiceImpl implements UtilityService {
         }
         String queryString = httpServletRequest.getQueryString();
 //        httpServletRequest.getRequestURI() = "/collection-service/v1/getMasterType";
-        log.info("queryString {}", queryString);
+//        log.info("queryString {}", queryString);
         if (queryString != null) {
             return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI() + "?" + queryString;
         }
