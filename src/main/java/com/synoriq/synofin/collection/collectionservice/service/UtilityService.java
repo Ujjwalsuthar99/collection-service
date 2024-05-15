@@ -2,9 +2,9 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +30,11 @@ public interface UtilityService {
 
     public static HttpHeaders createHeaders(String token) {
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(AUTHORIZATION, token);
+        if (token.contains("Bearer")) {
+            httpHeaders.add(AUTHORIZATION, token);
+        } else {
+            httpHeaders.setBearerAuth(token);
+        }
         httpHeaders.add(CONTENTTYPE, "application/json");
         return httpHeaders;
     }
@@ -46,6 +50,7 @@ public interface UtilityService {
     public BaseDTOResponse<Object> getDocuments(String token, String loanId) throws Exception;
     public String convertToJSON(String input);
     public String splitCodeName(String input);
+    public String getTokenByApiKeySecret(Map<String, Object> map) throws Exception;
     public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws Exception;
     public BaseDTOResponse<Object> getCollaterals(Long loanIdNumber, String token) throws Exception;
     public BaseDTOResponse<Object> employeeMobileNumberValidator(String token, String mobileNumber) throws Exception;

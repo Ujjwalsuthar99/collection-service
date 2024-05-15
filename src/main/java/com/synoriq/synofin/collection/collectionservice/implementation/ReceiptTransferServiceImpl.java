@@ -9,6 +9,8 @@ import com.synoriq.synofin.collection.collectionservice.common.exception.CustomE
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
+import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferAirtelDepositStatusRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferForAirtelRequestDTO;
@@ -27,10 +29,8 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTra
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDataReturnResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
-import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
-import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
-import com.synoriq.synofin.collection.collectionservice.service.ReceiptTransferService;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
@@ -43,6 +43,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -95,6 +96,9 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     @Autowired
     private ActivityLogService activityLogService;
 
+    @Autowired
+    private IntegrationConnectorService integrationConnectorService;
+
     @Override
     @Transactional
     public BaseDTOResponse<Object> createReceiptTransfer(@RequestBody ReceiptTransferDtoRequest receiptTransferDtoRequest, String token) throws Exception {
@@ -107,6 +111,136 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
 
             for (Long receiptId : receiptTransferDtoRequest.getReceipts()) {
                 ReceiptTransferHistoryEntity receiptTransferIdCheck = receiptTransferHistoryRepository.findByCollectionReceiptsIdAndDeleted(receiptId, false);
+                if (receiptTransferIdCheck != null) {
+                    ErrorCode errorCode = ErrorCode.getErrorCode(1016050, "Receipt " + receiptId + " already has been transferred");
+                    throw new CustomException(errorCode);
+                }
+            }
+
+            Double utilizedAmount;
+            Double totalLimitValue;
+            Double transferredAmount = receiptTransferDtoRequest.getAmount();
+            Long transferredToID = receiptTransferDtoRequest.getTransferredToUserId();
+            String transferMode = receiptTransferDtoRequest.getTransferMode();
+            if (transferMode.equals("cash")) {
+                limitConf = CASH_COLLECTION_DEFAULT_LIMIT;
+            } else {
+                limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
+            }
+            if (transferredToID != null) {
+                CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(transferredToID, transferMode);
+                if (collectionLimitUserWiseEntity == null) {
+                    utilizedAmount = 0.00;
+                    totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
+                } else {
+                    utilizedAmount = collectionLimitUserWiseEntity.getUtilizedLimitValue();
+                    totalLimitValue = collectionLimitUserWiseEntity.getTotalLimitValue();
+                }
+            } else {
+                utilizedAmount = 0.00;
+                totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
+            }
+            if (!Objects.equals(receiptTransferDtoRequest.getTransferType(), "bank")) {
+                if ((utilizedAmount + transferredAmount) < totalLimitValue) {
+                    Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
+
+                    ReceiptTransferEntity receiptTransferEntity = saveReceiptTransferData(receiptTransferDtoRequest, collectionActivityId, token);
+                    CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
+                    String remarks = receiptTransferDtoRequest.getActivityData().getRemarks();
+                    String lastWord = remarks.substring(remarks.lastIndexOf(" ") + 1);
+                    updatedRemarks = CREATE_TRANSFER;
+                    updatedRemarks = updatedRemarks.replace("{transfer_request}", receiptTransferEntity.getReceiptTransferId().toString());
+                    updatedRemarks = (updatedRemarks + lastWord);
+                    collectionActivityLogsEntity1.setRemarks(updatedRemarks);
+                    collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
+                    if (receiptTransferTableId == null) {
+                        for (Long receiptTransferId : receiptTransferDtoRequest.getReceipts()) {
+
+                            ReceiptTransferHistoryEntity receiptTransferHistoryEntity = new ReceiptTransferHistoryEntity();
+
+                            receiptTransferHistoryEntity.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
+                            receiptTransferHistoryEntity.setCollectionReceiptsId(receiptTransferId);
+                            receiptTransferHistoryEntity.setDeleted(false);
+                            receiptTransferHistoryRepository.save(receiptTransferHistoryEntity);
+                        }
+                    } else {
+                        List<ReceiptTransferHistoryEntity> receiptTransferHistoryEntityList;
+                        receiptTransferHistoryEntityList = receiptTransferHistoryRepository.getReceiptTransferHistoryDataByReceiptTransferId(receiptTransferTableId);
+                        for (ReceiptTransferHistoryEntity receiptTransferHistoryEntity : receiptTransferHistoryEntityList) {
+
+                            ReceiptTransferHistoryEntity receiptTransferHistoryEntityToBeSaved = new ReceiptTransferHistoryEntity();
+                            receiptTransferHistoryEntityToBeSaved.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
+                            receiptTransferHistoryEntityToBeSaved.setDeleted(false);
+                            receiptTransferHistoryEntityToBeSaved.setCollectionReceiptsId(receiptTransferHistoryEntity.getCollectionReceiptsId());
+                            receiptTransferHistoryRepository.save(receiptTransferHistoryEntityToBeSaved);
+                        }
+                    }
+                    baseResponse = new BaseDTOResponse<>(receiptTransferEntity);
+
+                } else {
+                    throw new Exception("1016031");
+                }
+            } else {
+                Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
+
+
+                ReceiptTransferEntity receiptTransferEntity = saveReceiptTransferData(receiptTransferDtoRequest, collectionActivityId, token);
+
+                CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
+                String remarks = receiptTransferDtoRequest.getActivityData().getRemarks();
+                String lastWord = remarks.substring(remarks.lastIndexOf(" ") + 1);
+                updatedRemarks = CREATE_TRANSFER;
+                updatedRemarks = updatedRemarks.replace("{transfer_request}", receiptTransferEntity.getReceiptTransferId().toString());
+                updatedRemarks = (updatedRemarks + lastWord);
+                collectionActivityLogsEntity1.setRemarks(updatedRemarks);
+                collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
+                for (Long receiptTransferId : receiptTransferDtoRequest.getReceipts()) {
+
+                    ReceiptTransferHistoryEntity receiptTransferHistoryEntity = new ReceiptTransferHistoryEntity();
+
+                    receiptTransferHistoryEntity.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
+                    receiptTransferHistoryEntity.setCollectionReceiptsId(receiptTransferId);
+                    receiptTransferHistoryEntity.setDeleted(false);
+                    receiptTransferHistoryRepository.save(receiptTransferHistoryEntity);
+                }
+                baseResponse = new BaseDTOResponse<>(receiptTransferEntity);
+            }
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getCode());
+        } catch (Exception ee) {
+            log.error("RestControllers error occurred for vanWebHookDetails {}", ee.getMessage());
+            throw new Exception(ee.getMessage());
+        }
+        return baseResponse;
+    }
+
+    @Override
+    @Transactional
+    public BaseDTOResponse<Object> createReceiptTransferNew(Object object, MultipartFile transferProof, String token) throws Exception {
+
+        BaseDTOResponse<Object> baseResponse;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(String.valueOf(object));
+            ReceiptTransferDtoRequest receiptTransferDtoRequest = objectMapper.convertValue(jsonNode, ReceiptTransferDtoRequest.class);
+            Long receiptTransferTableId = receiptTransferDtoRequest.getReceiptTransferId();
+
+            GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptTransferDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
+            UploadImageOnS3ResponseDTO transferProofUploaded = integrationConnectorService.uploadImageOnS3(token, transferProof, "receipt_transfer", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), "");
+            String filePath = "";
+            if (transferProofUploaded.getData() != null) {
+                filePath = transferProofUploaded.getData().getUserRefNo() + "/" + transferProofUploaded.getData().getFileName();
+            }
+            // creating images Object
+            Map<String, Object> imageMap = new HashMap<>();
+            imageMap.put("transfer1", filePath);
+            receiptTransferDtoRequest.setReceiptImage(imageMap);
+
+            String limitConf;
+            String updatedRemarks;
+
+            for (Long receiptId : receiptTransferDtoRequest.getReceipts()) {
+                ReceiptTransferHistoryEntity receiptTransferIdCheck = receiptTransferHistoryRepository.findByCollectionReceiptsId(receiptId);
                 if (receiptTransferIdCheck != null) {
                     ErrorCode errorCode = ErrorCode.getErrorCode(1016050, "Receipt " + receiptId + " already has been transferred");
                     throw new CustomException(errorCode);

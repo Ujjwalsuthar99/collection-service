@@ -1,5 +1,9 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferLmsFilterDTO;
@@ -7,16 +11,19 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
+import java.util.Map;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_NUMBER;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_SIZE;
@@ -131,6 +138,43 @@ public class ReceiptController {
 
     }
 
+    @RequestMapping(value = "/create-receipt-new", method = RequestMethod.POST)
+    public ResponseEntity<Object> createReceiptNew(@RequestHeader("Authorization") String bearerToken,
+                                                   @RequestParam("paymentReferenceImage") MultipartFile paymentReferenceImage,
+                                                   @RequestParam("selfieImage") MultipartFile selfieImage,
+                                                   @RequestParam("data") Object object) {
+
+        BaseDTOResponse<Object> baseResponse;
+        ResponseEntity<Object> response = null;
+        ServiceRequestSaveResponse createReceiptResponse;
+
+        try {
+
+            createReceiptResponse = receiptService.createReceiptNew(object, paymentReferenceImage, selfieImage, bearerToken, false);
+            if (createReceiptResponse.getData() == null && createReceiptResponse.getError() == null) {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
+            } else if (createReceiptResponse.getData() == null) {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
+            } else if (createReceiptResponse.getData().getServiceRequestId() == null && createReceiptResponse.getError() != null) {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.BAD_REQUEST);
+            } else  {
+                response = new ResponseEntity<>(createReceiptResponse, HttpStatus.OK);
+            }
+
+        } catch (Exception e) {
+            log.info("Exception", e);
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_SAVE_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        return response;
+
+    }
+
 
     @RequestMapping(value = "/get-receipt-date", method = RequestMethod.GET)
     public ResponseEntity<Object> getReceiptDate(@RequestHeader("Authorization") String bearerToken) {
@@ -200,5 +244,11 @@ public class ReceiptController {
             response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
         }
         return response;
+    }
+
+    @PostMapping("create-collection-receipt")
+    public ResponseEntity<Object> createCollectionReceipt(@RequestBody Map<String, Object> requestBody, @RequestHeader("Authorization") String token) throws Exception {
+        Object result = receiptService.createCollectionReceipt(requestBody, token);
+        return new ResponseEntity<>(new BaseDTOResponse<>(result), HttpStatus.OK);
     }
 }

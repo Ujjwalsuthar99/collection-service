@@ -93,8 +93,10 @@ public interface ReceiptTransferHistoryRepository extends JpaRepository<ReceiptT
             "limit 1")
     Long getReceiptTransferIdUsingReceiptId(@Param("receiptId") Long receiptId);
 
-    public ReceiptTransferHistoryEntity findByCollectionReceiptsIdAndDeleted(Long receiptId, boolean deleted);
 
-    public List<ReceiptTransferHistoryEntity> findByDeletedAndCollectionReceiptsIdIn(boolean deleted, Set<Long> collectionReceiptsId);
+    ReceiptTransferHistoryEntity findByCollectionReceiptsIdAndDeleted(Long receiptId, boolean deleted);
+
+    ReceiptTransferHistoryEntity findByCollectionReceiptsId(Long receiptId);
+    List<ReceiptTransferHistoryEntity> findByDeletedAndCollectionReceiptsIdIn(boolean deleted, Set<Long> collectionReceiptsId);
 
 }

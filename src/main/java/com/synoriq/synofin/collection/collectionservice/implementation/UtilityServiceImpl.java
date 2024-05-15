@@ -6,12 +6,13 @@ import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
+import com.synoriq.synofin.collection.collectionservice.rest.commondto.AuthorizationResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.*;
-import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.UploadImageOnS3DataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.UploadImageOnS3RequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
@@ -19,7 +20,6 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOR
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrlDTOs.ShortenUrlResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
@@ -27,6 +27,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetail
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.BankNameIFSCResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ContactResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ThermalPrintDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.*;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -867,6 +869,34 @@ public class UtilityServiceImpl implements UtilityService {
             return matchedSubstring;
         }
         return codeName;
+    }
+
+    public String getTokenByApiKeySecret(Map<String, Object> map) throws Exception {
+        String gateWayUrl ="https://api-" + (Objects.equals(springProfile, "pre-prod") ? "preprod" : Objects.equals(springProfile, "prod") ? "prod2" : springProfile) + ".synofin.tech/";
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Source", String.valueOf(map.get("client")));
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.setBasicAuth(String.valueOf(map.get("api_key")), String.valueOf(map.get("api_secret")));
+        // deccantest credentials
+//        httpHeaders.setBasicAuth("81c3d006fb5e4b64a0c3f2f595180081", "9fb0db7a-ac1c-4d7d-93fe-5b29a741c0af");
+
+        String url = gateWayUrl + "oauth/authorization";
+        MasterDTOResponse response = null;
+        log.info("httpHeaders - {}", httpHeaders);
+        log.info("url - {}", url);
+        try {
+            response = HTTPRequestService.<Object, MasterDTOResponse>builder()
+                    .httpMethod(HttpMethod.POST).httpHeaders(httpHeaders)
+                    .url(url)
+                    .typeResponseType(MasterDTOResponse.class)
+                    .build().call();
+        } catch (Exception e) {
+            log.error("error in generate token api", e);
+            e.printStackTrace();
+        }
+        log.info("response - {}", response);
+        AuthorizationResponse authorizationResponse = new ObjectMapper().convertValue(response.getData(), AuthorizationResponse.class);
+        return authorizationResponse.getAuthData().getAccessToken();
     }
 
     @Override
