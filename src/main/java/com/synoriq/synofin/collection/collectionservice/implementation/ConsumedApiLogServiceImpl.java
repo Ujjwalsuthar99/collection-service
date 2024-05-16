@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Propagation;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -25,19 +26,14 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
     private ConsumedApiLogRepository consumedApiLogRepository;
 
     @Autowired
-    private HttpServletRequest httpServletRequest;
-
-    @Autowired
     private UtilityService utilityService;
 
     @Override
     @org.springframework.transaction.annotation.Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void createConsumedApiLog(EnumSQLConstants.LogNames logName, Long userId, Object requestBody, Object responseBody, String responseStatus, Long loanId) {
+    public void createConsumedApiLog(EnumSQLConstants.LogNames logName, Long userId, Object requestBody, Object responseBody, String responseStatus, Long loanId, String apiType, String endPoint) {
 
         log.info("create consumed log start");
 
-        String apiType = logName.name().equals("kafka_activity") ? "KAFKA" : httpServletRequest.getMethod();
-        String endPoint = logName.name().equals("kafka_activity") ? utilityService.getApiUrl("kafka") : utilityService.getApiUrl();
 
         if (userId == null) {
             userId = 0L;

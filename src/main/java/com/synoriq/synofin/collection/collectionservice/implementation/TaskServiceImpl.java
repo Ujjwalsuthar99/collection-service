@@ -199,7 +199,7 @@ public class TaskServiceImpl implements TaskService {
 
             log.info("loan details jhadsuhbsduh {}", loanRes);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, "success", Long.parseLong(loanId));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, "success", Long.parseLong(loanId), HttpMethod.POST.name(), "getDataForLoanActions");
 
             loanDetailRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
@@ -210,7 +210,7 @@ public class TaskServiceImpl implements TaskService {
 
             log.info("getBasicLoanDetails {}", loanDetailRes);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", Long.parseLong(loanId));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", Long.parseLong(loanId), HttpMethod.GET.name(), "getBasicLoanDetails?loanId=" + loanIdNumber);
 
             customerRes = HTTPRequestService.<Object, CustomerDetailDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
@@ -221,7 +221,7 @@ public class TaskServiceImpl implements TaskService {
 
 //            log.info("customer details {}", customerRes.getData());
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", Long.parseLong(loanId));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", Long.parseLong(loanId), HttpMethod.GET.name(), "getCustomerDetails?loanId=" + loanIdNumber);
 
             LoanSummaryResponseDTO loanSummaryResponse = HTTPRequestService.<Object, LoanSummaryResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
@@ -231,7 +231,7 @@ public class TaskServiceImpl implements TaskService {
                     .build().call();
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, customerRes, "success", Long.parseLong(loanId));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, customerRes, "success", Long.parseLong(loanId), HttpMethod.POST.name(), "getLoanSummaryForLoan");
 
             if (Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", "vehicle")) {
                 collateralRes = utilityService.getCollaterals(loanIdNumber, token);
@@ -413,7 +413,7 @@ public class TaskServiceImpl implements TaskService {
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, modifiedErrorMessage, "failure", Long.parseLong(loanId));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, modifiedErrorMessage, "failure", Long.parseLong(loanId), HttpMethod.POST.name(), "taskSummary" + loanIdNumber);
             throw new Exception("1016040");
         }
         return baseDTOResponse;

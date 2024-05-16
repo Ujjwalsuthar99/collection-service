@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.common.exception.DataLockException;
-import com.synoriq.synofin.collection.collectionservice.config.DatabaseContextHolder;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
@@ -36,6 +35,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,11 +45,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -374,7 +381,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             log.info("response create receipt {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, res, "success", createReceiptBody.getActivityData().getLoanId());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, res, "success", createReceiptBody.getActivityData().getLoanId(), HttpMethod.POST.name(), "createReceipt");
             if (res.getData() != null) {
                 if (res.getData().getServiceRequestId() == null) {
                     return res;
@@ -438,7 +445,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, modifiedErrorMessage, "failure", createReceiptBody.getActivityData().getLoanId());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, createReceiptBody.getActivityData().getUserId(), createReceiptBody, modifiedErrorMessage, "failure", createReceiptBody.getActivityData().getLoanId(), HttpMethod.POST.name(), "createReceipt");
             throw new Exception(ee.getMessage());
         } finally {
             // Release the lock
@@ -463,13 +470,6 @@ public class ReceiptServiceImpl implements ReceiptService {
         ReceiptServiceRequestDataDTO receiptServiceRequestDataDTO = new ReceiptServiceRequestDataDTO();
 
         GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
-        if (!receiptFromQR) {  // create receipt hitting from  callback
-            UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(bearerToken, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), "");
-            UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(bearerToken, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), "");
-
-            Map<String, Object> imageMap = getStringObjectMap(paymentReference, selfie);
-            receiptServiceDtoRequest.getActivityData().setImages(imageMap);
-        }
 
         boolean lockAcquired = false;
         // Acquire a lock for the customer record
@@ -485,16 +485,31 @@ public class ReceiptServiceImpl implements ReceiptService {
             lock.lock();
             lockAcquired = true;
         }
-
+        log.info("Start time : {}", new Date().getTime());
         try {
+            // multithreading
+            List<MultipartFile> allImages = new LinkedList<>();
+            allImages.add(paymentReferenceImage);
+            allImages.add(selfieImage);
+            ExecutorService executor = Executors.newFixedThreadPool(2);
+            executor = new DelegatingSecurityContextExecutorService(executor, SecurityContextHolder.getContext());
+            List<Future<UploadImageOnS3ResponseDTO>> allResults = new LinkedList<>();
 
-//            String employeeMobileNumberValidation = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(EMPLOYEE_MOBILE_NUMBER_VALIDATION);
-//            if(!employeeMobileNumberValidation.equals("true")) {
-//                String employeeMobileNumber = registeredDeviceInfoRepository.getEmployeeMobileNumber(receiptServiceDtoRequest.getCollectedFromNumber());
-//                if(employeeMobileNumber != null) {
-//                    throw new Exception("1016047");
-//                }
-//            }
+            if (!receiptFromQR) {  // create receipt hitting from  callback
+                for (MultipartFile image : allImages) {
+                    allResults.add(executor.submit(() -> integrationConnectorService.uploadImageOnS3(bearerToken, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
+                }
+                executor.shutdownNow();
+                executor = null;
+
+                // Wait for both image uploads to complete
+                UploadImageOnS3ResponseDTO paymentReference = allResults.get(0).get();
+                UploadImageOnS3ResponseDTO selfie = allResults.get(1).get();
+
+                Map<String, Object> imageMap = getStringObjectMap(paymentReference, selfie);
+                receiptServiceDtoRequest.getActivityData().setImages(imageMap);
+            }
+            log.info("End time : {}", new Date().getTime());
 
             // always in minutes
             long validationTime = Long.parseLong(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(RECEIPT_TIME_VALIDATE));
@@ -539,13 +554,12 @@ public class ReceiptServiceImpl implements ReceiptService {
             }
 
 
-            Double totalLimitValue;
-            double currentReceiptAmountAllowed;
             double receiptAmount = Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
             CollectionLimitUserWiseEntity collectionLimitUser = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest.getRequestData().getRequestData().paymentMode);
 
+            double currentReceiptAmountAllowed;
             if (collectionLimitUser != null) {
-                totalLimitValue = collectionLimitUser.getTotalLimitValue();
+                Double totalLimitValue = collectionLimitUser.getTotalLimitValue();
                 currentReceiptAmountAllowed = totalLimitValue - collectionLimitUser.getUtilizedLimitValue();
                 log.info("Utilized limit {}", collectionLimitUser.getUtilizedLimitValue());
             } else {
@@ -558,9 +572,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                 double perDayCashLimitLoan = Double.parseDouble(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("per_day_cash_collection_customer_limit"));
                 double receiptCollectedAmountTillToday = receiptRepository.getCollectedAmountToday(Long.valueOf(receiptServiceDtoRequest.getRequestData().getLoanId()));
 
-//                log.info("perDayCashLimitLoan {}", perDayCashLimitLoan);
-//                log.info("receiptCollectedAmountTillToday {}", receiptCollectedAmountTillToday);
-//                log.info("receiptAmount {}", receiptAmount);
                 if (receiptCollectedAmountTillToday + receiptAmount > perDayCashLimitLoan) {
                     throw new Exception("1017005");
                 }
@@ -586,7 +597,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                     setTimeToEndofDay(calendar);
                     end = calendar.getTime();
                 }
-//                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
                 log.info("begining {}", beginning);
                 log.info(" end {}", end);
@@ -600,9 +610,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                     throw new Exception("1016043");
                 }
             }
-//            log.info("Total Limit Value {}", totalLimitValue);
-//            log.info("Receipt amount can be collected by a user at current situation {}", currentReceiptAmountAllowed);
-//            log.info("Receipt amount {}", receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount());
 
             if (currentReceiptAmountAllowed < Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount())) {
                 throw new Exception("1017003");
@@ -614,16 +621,8 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 
             String bDate = receiptServiceDtoRequest.getRequestData().getRequestData().getDateOfReceipt();
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-            Date date = simpleDateFormat.parse(bDate);
 
-            SimpleDateFormat newDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String newFormattedBusinessDate = newDateFormat.format(date);
-            log.info("Formatted Date {}", newFormattedBusinessDate);
-
-            receiptServiceRequestDataDTO.setDateOfReceipt(newFormattedBusinessDate);
-
-//            log.info("create receipt LMS body {}", createReceiptBody);
+            receiptServiceRequestDataDTO.setDateOfReceipt(formatDate(bDate));
 
 
             res = HTTPRequestService.<Object, ServiceRequestSaveResponse>builder()
@@ -636,7 +635,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             log.info("response create receipt {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest, res, "success", receiptServiceDtoRequest.getActivityData().getLoanId());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest, res, "success", receiptServiceDtoRequest.getActivityData().getLoanId(), HttpMethod.POST.name(), "createReceipt");
             if (res.getData() != null) {
                 if (res.getData().getServiceRequestId() == null) {
                     log.info("Receipt Error {}", res.getError().getText());
@@ -649,49 +648,41 @@ public class ReceiptServiceImpl implements ReceiptService {
                 receiptServiceDtoRequest.getActivityData().setRemarks(updatedRemarks);
                 collectionActivityId = activityLogService.createActivityLogs(receiptServiceDtoRequest.getActivityData(), bearerToken);
 
-                CollectionReceiptEntity collectionReceiptEntity = new CollectionReceiptEntity();
-                collectionReceiptEntity.setReceiptId(res.getData().getServiceRequestId());
-                collectionReceiptEntity.setCreatedBy(receiptServiceDtoRequest.getActivityData().getUserId());
-                collectionReceiptEntity.setReceiptHolderUserId(receiptServiceDtoRequest.getActivityData().getUserId());
-                collectionReceiptEntity.setCollectionActivityLogsId(collectionActivityId);
+                Map<String, Object> collectionReceiptMap = new HashMap<>();
+                collectionReceiptMap.put("service_request_id", res.getData().getServiceRequestId());
+                collectionReceiptMap.put("activity_id", collectionActivityId);
+                collectionReceiptMap.put("user_id", receiptServiceDtoRequest.getActivityData().getUserId());
 
-                collectionReceiptRepository.save(collectionReceiptEntity);
-
-
-                CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = setCollectionLimitUserWiseEntity(collectionLimitUser, receiptServiceDtoRequest, currentReceiptAmountAllowed);
-                collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+                createCollectionReceipt(collectionReceiptMap, bearerToken);
+                if (executor == null)
+                    executor = Executors.newFixedThreadPool(2);
 
 
+                // setting collection limit userwise and create collection receipt
+                Future<CollectionLimitUserWiseEntity> collectionLimitUserWiseEntityFuture = executor.submit(() -> setCollectionLimitUserWiseEntity(collectionLimitUser, receiptServiceDtoRequest, currentReceiptAmountAllowed));
+                Future<String> createCollectionReceiptFuture = executor.submit(() -> createCollectionReceipt(collectionReceiptMap, bearerToken));
+
+                collectionLimitUserWiseEntityFuture.get();
+                createCollectionReceiptFuture.get();
 
                 // multi receipt for particular clients
                 String multiReceiptClientCredentials = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MULTI_RECEIPT_CLIENT_CREDENTIALS);
                 if (!multiReceiptClientCredentials.equals("false")) {
-
-                    ArrayList<Map<String, Object>> list = new ObjectMapper().readValue(
-                            multiReceiptClientCredentials, new TypeReference<ArrayList<Map<String, Object>>>() { }
-                    );
-
+                    ArrayList<Map<String, Object>> list = new ObjectMapper().readValue(multiReceiptClientCredentials, new TypeReference<ArrayList<Map<String, Object>>>() { });
                     for (Map<String, Object> map : list) {
                         String token = utilityService.getTokenByApiKeySecret(map);
 
 
-                        UploadImageOnS3ResponseDTO paymentReferenceMulti = integrationConnectorService.uploadImageOnS3(token, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
-                        UploadImageOnS3ResponseDTO selfieMulti = integrationConnectorService.uploadImageOnS3(token, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
-
-
-                        String var0 = paymentReferenceMulti.getData() != null ? paymentReferenceMulti.getData().getFileName() : null;
-                        String var1 = selfieMulti.getData() != null ? selfieMulti.getData().getFileName() : null;
-
-                        // creating images Object
-                        Map<String, Object> imageMapMulti = new HashMap<>();
-                        int j = 1;
-                        if (var0 != null) {
-                            imageMapMulti.put("url" + j, var0);
-                            j++;
+                        for (MultipartFile image : allImages) {
+                            allResults.add(executor.submit(() -> integrationConnectorService.uploadImageOnS3(bearerToken, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
                         }
-                        if (var1 != null) {
-                            imageMapMulti.put("url" + j, var1);
-                        }
+                        executor.shutdown();
+
+                        // Wait for both image uploads to complete
+                        UploadImageOnS3ResponseDTO paymentReference = allResults.get(0).get();
+                        UploadImageOnS3ResponseDTO selfie = allResults.get(1).get();
+
+                        Map<String, Object> imageMapMulti = getStringObjectMap(paymentReference, selfie);
                         receiptServiceDtoRequest.getActivityData().setImages(imageMapMulti);
                         ServiceRequestSaveResponse multiReceiptResponse = multiReceiptAfterReceipt(receiptServiceDtoRequest, token);
 
@@ -742,7 +733,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest, modifiedErrorMessage, "failure", receiptServiceDtoRequest.getActivityData().getLoanId());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest, modifiedErrorMessage, "failure", receiptServiceDtoRequest.getActivityData().getLoanId(), HttpMethod.POST.name(), "createReceipt");
             throw new Exception(ee.getMessage());
         } finally {
             // Release the lock
@@ -755,9 +746,14 @@ public class ReceiptServiceImpl implements ReceiptService {
         log.info("createReceiptNew End");
         return res;
     }
+    private static String formatDate(String date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        Date formattedDate = sdf.parse(date);
+        return new SimpleDateFormat("yyyy-MM-dd").format(formattedDate);
+    }
 
     @NotNull
-    private static CollectionLimitUserWiseEntity setCollectionLimitUserWiseEntity(CollectionLimitUserWiseEntity collectionLimitUser, ReceiptServiceDtoRequest receiptServiceDtoRequest, double currentReceiptAmountAllowed) {
+    private CollectionLimitUserWiseEntity setCollectionLimitUserWiseEntity(CollectionLimitUserWiseEntity collectionLimitUser, ReceiptServiceDtoRequest receiptServiceDtoRequest, double currentReceiptAmountAllowed) {
         CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
         if (collectionLimitUser != null) {
             collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
@@ -778,6 +774,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             collectionLimitUserWiseEntity.setTotalLimitValue(currentReceiptAmountAllowed);
             collectionLimitUserWiseEntity.setUtilizedLimitValue(Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
         }
+        collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
         return collectionLimitUserWiseEntity;
     }
 
@@ -819,7 +816,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         log.info("End multiReceiptAfterReceipt");
 
         // creating consumed log api
-        consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.multi_create_receipt, receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest, res, "success", receiptServiceDtoRequest.getActivityData().getLoanId());
+        consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.multi_create_receipt, receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest, res, "success", receiptServiceDtoRequest.getActivityData().getLoanId(), HttpMethod.POST.name(), "createReceipt");
         return res;
     }
 
@@ -846,7 +843,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .typeResponseType(ReceiptServiceSystemPropertiesResponse.class)
                     .build().call();
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_receipt_date, null, null, lmsBusinessDate, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_receipt_date, null, null, lmsBusinessDate, "success", null, HttpMethod.POST.name(), "getReceiptDate");
 
             if (businessDateConf.equals("true")) {
                 String bDate = lmsBusinessDate.data.businessDate;
@@ -881,7 +878,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_receipt_date, null, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_receipt_date, null, null, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "getReceiptDate");
             throw new Exception(ee);
         }
         return baseResponse;

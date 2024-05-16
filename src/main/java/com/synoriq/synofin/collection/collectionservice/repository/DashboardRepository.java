@@ -15,7 +15,7 @@ public interface DashboardRepository extends JpaRepository<FollowUpEntity, Long>
     @Query(nativeQuery = true, value = "select count(f.*) as total_count , 0 as action_count\n" +
             "from collection.followups f join (select loan_application_id ,days_past_due,product,sanctioned_amount from lms.loan_application) as la on la.loan_application_id = f.loan_id\n" +
             "where f.created_by = :userId \n" +
-            "and f.created_date between :fromDate and :toDate")
+            "and f.next_followup_datetime between :fromDate and :toDate")
     Map<String,Object> getFollowupCountByUserIdByDuration(@Param("userId") Long userId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate);
 

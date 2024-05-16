@@ -172,7 +172,7 @@ public class KafkaListnerService {
                     response.put("restApprovedReceipts", restApprovedReceipts);
                     response.put("totalReceiptCountFromReceiptTransfer", totalReceiptCountFromReceiptTransfer);
                     log.info("response {}", response);
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.kafka_activity, userId, messageObject, response, "success", loanId);
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.kafka_activity, userId, messageObject, response, "success", loanId, "POST", "");
 
                     log.info("end consumedApiLog");
                 } else {

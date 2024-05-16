@@ -37,12 +37,12 @@ public class ProfileServiceImpl implements ProfileService {
                     .build().call();
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, res, "success", null, HttpMethod.GET.name(), "getProfileDetails?username=" + username);
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getProfileDetails?username=" + username);
             throw new Exception("1017002");
         }
 

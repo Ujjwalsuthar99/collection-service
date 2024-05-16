@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.DeleteImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDataDTO;
@@ -58,7 +59,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
 
 
     @Override
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, String latitude, String longitude, String userName) throws IOException {
+    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, GeoLocationDTO geoLocationDTO, String userName) throws IOException {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
 
@@ -70,7 +71,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
 
         String fileType = detectFileType(base64);
         if (base64.isEmpty()) {
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, null, res, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, null, res, "failure", null, HttpMethod.POST.name(), "");
             IntegrationServiceErrorResponseDTO integrationServiceErrorResponseDTO = new IntegrationServiceErrorResponseDTO();
             integrationServiceErrorResponseDTO.setMessage("image base64 is empty");
             integrationServiceErrorResponseDTO.setCode("00000");
@@ -129,7 +130,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
             String geoTaggingEnabled = collectionConfigurationsRepository.findConfigurationValueByConfigurationName("geo_tagging_enabled_on_photos");
 
             if (geoTaggingEnabled.equals("true")) {
-                if ((latitude != null) && (longitude != null)) {
+                if ((geoLocationDTO.getLatitude() != null) && (geoLocationDTO.getLongitude() != null)) {
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                     String date = simpleDateFormat.format(new Date());
 
@@ -141,7 +142,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
 
                     // Set the font and color for the watermark
                     Font font = new Font("Arial", Font.BOLD, 42);
-                    String latLongWatermarkText = "lat: " + latitude + ", long: " + longitude;
+                    String latLongWatermarkText = "lat: " + geoLocationDTO.getLatitude() + ", long: " + geoLocationDTO.getLongitude();
                     String dateTimeWatermarkText = "Datetime: " + date;
 
                     // Define margins and padding
@@ -202,11 +203,11 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
             // creating api logs
             uploadImageOnS3DataRequestDTO.setFile("base64 string");
             uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, res, "success", null, HttpMethod.POST.name(), "uploadImageOnS3");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "uploadImageOnS3");
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -259,7 +260,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
 
             String modifiedResponse = "response: " + res.getResponse() + " requestId: " + res.getRequestId() + " error: " + res.getError();
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, utilityService.convertToJSON(modifiedResponse), "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, utilityService.convertToJSON(modifiedResponse), "success", null, HttpMethod.GET.name(), "s3Download");
             // again calling the download api for aadharfin usernames
             if ((res.getData().isEmpty() || res.getData().contains("File or bucket not")) && Objects.equals(currentUserInfo.getClientId(), "aadharfin")) {
                 log.info("Again calling the download API for Aadharfin Client");
@@ -278,7 +279,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "s3Download");
             log.error("juuju{}", ee.getMessage());
             res.setResponse(false);
             res.setData(null);
@@ -310,12 +311,12 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
                     .build().call();
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_delete, null, deleteImageOnS3RequestDTO, result, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_delete, null, deleteImageOnS3RequestDTO, result, "success", null, HttpMethod.POST.name(), "deleteImageOnS3");
 
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_delete, null, deleteImageOnS3RequestDTO, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_delete, null, deleteImageOnS3RequestDTO, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "deleteImageOnS3");
             log.error("{}", e.getMessage());
         }
         return result;
@@ -348,11 +349,11 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
                     .build().call();
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_otp, null, sendOtpRequestDTO, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_otp, null, sendOtpRequestDTO, res, "success", null, HttpMethod.POST.name(), "send_otp");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_otp, null, sendOtpRequestDTO, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_otp, null, sendOtpRequestDTO, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "send_otp");
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -379,11 +380,11 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
                     .build().call();
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.verify_otp, null, verifyOtpRequestDTO, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.verify_otp, null, verifyOtpRequestDTO, res, "success", null, HttpMethod.POST.name(), "verifyOtp");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.verify_otp, null, verifyOtpRequestDTO, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.verify_otp, null, verifyOtpRequestDTO, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "verifyOtp");
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -410,11 +411,11 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
                     .build().call();
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.resend_otp, null, resendOtpRequestDTO, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.resend_otp, null, resendOtpRequestDTO, res, "success", null, HttpMethod.POST.name(), "resendOtp");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.resend_otp, null, resendOtpRequestDTO, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.resend_otp, null, resendOtpRequestDTO, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "resendOtp");
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -446,11 +447,11 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
             ocrCheckRequestDataDTO.setImgBaseUrl("base64 string");
             requestBody.setData(ocrCheckRequestDataDTO);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, res, "success", null, HttpMethod.POST.name(), "ocrCheck");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.cheque_ocr, null, requestBody, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "ocrCheck");
             log.error("{}", ee.getMessage());
         }
 

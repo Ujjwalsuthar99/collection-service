@@ -40,7 +40,6 @@ public interface UtilityService {
     }
 
     public String getApiUrl();
-    public String getApiUrl(String type);
     public boolean isInteger(String str);
     public Object getBankNameByIFSC(String keyword) throws Exception;
     public UserDetailByTokenDTOResponse getUserDetailsByToken(String token);

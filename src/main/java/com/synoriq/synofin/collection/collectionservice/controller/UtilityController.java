@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeCallBackRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeStatusCheckRequestDTO;
@@ -141,7 +142,8 @@ public class UtilityController {
         UploadImageOnS3ResponseDTO result;
 
         try {
-            result = integrationConnectorService.uploadImageOnS3(token, imageData, module, latitude, longitude, "");
+            GeoLocationDTO geoLocationDT = GeoLocationDTO.builder().longitude(longitude).latitude(latitude).build();
+            result = integrationConnectorService.uploadImageOnS3(token, imageData, module, geoLocationDT, "");
             response = new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {

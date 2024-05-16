@@ -176,11 +176,11 @@ public class QrCodeServiceImpl implements QrCodeService {
 
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, res, "success", requestBody.getLoanId());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, res, "success", requestBody.getLoanId(), HttpMethod.POST.name(), "sendQrCode");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage() + res;
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, modifiedErrorMessage + res, "failure", requestBody.getLoanId());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, modifiedErrorMessage + res, "failure", requestBody.getLoanId(), HttpMethod.POST.name(), "sendQrCode");
             log.error("{}", ee.getMessage());
             throw new Exception(ee.getMessage());
         }
@@ -226,8 +226,8 @@ public class QrCodeServiceImpl implements QrCodeService {
             ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(requestBody.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
 
             GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
-            UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(token, paymentReferenceImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), "");
-            UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(token, selfieImage, "create_receipt", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), "");
+            UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(token, paymentReferenceImage, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
+            UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(token, selfieImage, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
 
             Map<String, Object> imageMap = getStringObjectMap(paymentReference, selfie);
             receiptServiceDtoRequest.getActivityData().setImages(imageMap);
@@ -300,11 +300,11 @@ public class QrCodeServiceImpl implements QrCodeService {
 
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, res, "success", null, HttpMethod.POST.name(), "sendQrCode");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "sendQrCode");
             log.error("{}", ee.getMessage());
             throw new Exception(ee.getMessage());
         }
@@ -393,11 +393,11 @@ public class QrCodeServiceImpl implements QrCodeService {
 
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, res, "success", null, HttpMethod.POST.name(), "qrCodeTransactionStatus");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "qrCodeTransactionStatus");
             log.error("QR Transaction Status Exception {}", ee.getMessage());
         }
         log.info("Ending QR Transaction Status");
@@ -445,12 +445,12 @@ public class QrCodeServiceImpl implements QrCodeService {
 
             }
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.qr_callback, null, requestBody, mainResponse, SUCCESS, loanId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.qr_callback, null, requestBody, mainResponse, SUCCESS, loanId, HttpMethod.POST.name(), "qr_callback");
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             log.error("callback Exception errorMessage {}", errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.qr_callback, null, requestBody, errorMessage, FAILURE, loanId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.qr_callback, null, requestBody, errorMessage, FAILURE, loanId, HttpMethod.POST.name(), "qr_callback");
             throw new Exception();
         }
         log.info("Ending QR callback");

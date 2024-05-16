@@ -73,7 +73,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
 
 //            log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.global_search, null, searchBody, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.global_search, null, searchBody, res, "success", null, HttpMethod.POST.name(), "getLoanDataBySearch");
             if (res.getData() != null && res.getData().getLoanDetails() != null) {
                 for (LMSLoanDataDTO loanDataDTO : res.getData().getLoanDetails()) {
                     TaskListDTOReturnResponse taskListDTOReturnResponse = getTaskListDTOReturnResponse(loanDataDTO);
@@ -88,7 +88,7 @@ public class GlobalSearchServiceImpl implements GlobalSearchService {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.global_search, null, searchBody, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.global_search, null, searchBody, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "getLoanDataBySearch");
             log.error("{}", ee.getMessage());
             throw new Exception(ee.getMessage());
         }

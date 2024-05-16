@@ -125,11 +125,11 @@ public class UtilityServiceImpl implements UtilityService {
 
 //            log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, masterBody, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, masterBody, res, "success", null, HttpMethod.POST.name(), "getMasterType");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, requestBody, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, requestBody, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "getMasterType");
             log.error("{}", ee.getMessage());
         }
 
@@ -155,7 +155,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             String modifiedResponse = "response: " + res.getResponse() + " error: " + res.getError();
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, convertToJSON(modifiedResponse), "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, convertToJSON(modifiedResponse), "success", null, HttpMethod.GET.name(), "getAllUserData");
             List<UsersDataDTO> userData = res.getData();
             for (int i = 0; i < userData.toArray().length; i++) {
                 userData.get(i).setTransferTo(userData.get(i).getName() + " - " + userData.get(i).getEmployeeCode());
@@ -194,7 +194,7 @@ public class UtilityServiceImpl implements UtilityService {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getAllUserData");
 
             log.error("{}", ee.getMessage());
         }
@@ -220,11 +220,11 @@ public class UtilityServiceImpl implements UtilityService {
 
 //            log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, res, "success", null, HttpMethod.GET.name(), "getContactSupport?keyword=" + keyword + "&model=" + model);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getContactSupport?keyword=" + keyword + "&model=" + model);
             log.error("{}", ee.getMessage());
         }
 
@@ -300,15 +300,6 @@ public class UtilityServiceImpl implements UtilityService {
         return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI();
     }
 
-    @Override
-    public String getApiUrl(String type) {
-        if (Objects.equals(springProfile, "pre-prod")) {
-            springProfile = "preprod";
-        }
-        String queryString = "kafka";
-        log.info("queryString {}", queryString);
-        return "https://api-" + springProfile + ".synofin.tech" + queryString;
-    }
 
     @Override
     public boolean isInteger(String str) {
@@ -332,11 +323,11 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, res, "success", null, HttpMethod.GET.name(), "getBankNameByIFSC?keyword=" + keyword);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getBankNameByIFSC?keyword=" + keyword);
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -360,11 +351,11 @@ public class UtilityServiceImpl implements UtilityService {
 
 //            log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, res, "success", null, HttpMethod.GET.name(), "getUserDetailsByToken");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getUserDetailsByToken");
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -425,7 +416,7 @@ public class UtilityServiceImpl implements UtilityService {
             // creating api logs
             uploadImageOnS3DataRequestDTO.setFile("base64 string");
             uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, Long.parseLong(userId), uploadImageOnS3RequestDTO, res, "success", Long.parseLong(loanId[0]));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, Long.parseLong(userId), uploadImageOnS3RequestDTO, res, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "uploadImageOnS3");
 
 
             ShortenUrlResponseDTO shortenUrlResponseDTO;
@@ -455,7 +446,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .build().call();
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.shorten_url, Long.parseLong(userId), shortenUrlRequestDTO, shortenUrlResponseDTO, "success", Long.parseLong(loanId[0]));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.shorten_url, Long.parseLong(userId), shortenUrlRequestDTO, shortenUrlResponseDTO, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), shortenUrl);
 
             log.info("clientId {}", clientId);
             if (clientId.equals("finova")) {
@@ -484,7 +475,7 @@ public class UtilityServiceImpl implements UtilityService {
                     saveSendSMSActivityData(loanId, res, userId);
 //                    log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
                     // creating api logs
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]));
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
 
                 } else {
                     finovaSmsRequest.setSender("FINOVA");
@@ -517,7 +508,7 @@ public class UtilityServiceImpl implements UtilityService {
 //                    log.info("sms service for collected from finova {}", finovaMsgDTOResponse);
                     saveSendSMSActivityData(loanId, res, userId);
                     // creating api logs
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]));
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
                 }
 
             }
@@ -544,7 +535,7 @@ public class UtilityServiceImpl implements UtilityService {
                 String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON((postField + postData)), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON((postField + postData)), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
             }
 
             if (clientId.equals("spfc")) {
@@ -588,7 +579,7 @@ public class UtilityServiceImpl implements UtilityService {
                 SpfcMsgDTOResponse spfcMsgDTOResponse = spfcSmsService.sendSmsSpfc(spfcSmsRequestDTO, token, springProfile);
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), spfcSmsRequestDTO, spfcMsgDTOResponse, "success", Long.parseLong(loanId[0]));
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), spfcSmsRequestDTO, spfcMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
             }
 
             if (clientId.equals("paisabuddy")) {
@@ -610,7 +601,7 @@ public class UtilityServiceImpl implements UtilityService {
                 saveSendSMSActivityData(loanId, res, userId);
 //                    log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), paisabuddySmsRequest, paisabuddyMsgDTOResponse, "success", Long.parseLong(loanId[0]));
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), paisabuddySmsRequest, paisabuddyMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
             }
 
             if (clientId.equals("cfl")) {
@@ -662,7 +653,7 @@ public class UtilityServiceImpl implements UtilityService {
                 log.info("cflMsgDTOResponse {}", cflMsgDTOResponse);
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), cflSmsRequest, cflMsgDTOResponse, "success", Long.parseLong(loanId[0]));
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), cflSmsRequest, cflMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
             }
 
             if (clientId.equals("lifc")) {
@@ -714,7 +705,7 @@ public class UtilityServiceImpl implements UtilityService {
                 log.info("cflMsgDTOResponse {}", lifcMsgDTOResponse);
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), lifcSmsRequest, lifcMsgDTOResponse, "success", Long.parseLong(loanId[0]));
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), lifcSmsRequest, lifcMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
             }
 
 //            if(clientId.equals("deccan")) {
@@ -746,7 +737,7 @@ public class UtilityServiceImpl implements UtilityService {
             log.info("ee messages", ee);
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), null, modifiedErrorMessage, "failure", Long.parseLong(loanId[0]));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), null, modifiedErrorMessage, "failure", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "sendPdfOnCustomer");
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -790,11 +781,11 @@ public class UtilityServiceImpl implements UtilityService {
 
 //            log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, res, "success", null, HttpMethod.GET.name(), "getUserDetailsByUserId?userId=" + userId);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getUserDetailsByUserId?userId=" + userId);
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -940,11 +931,11 @@ public class UtilityServiceImpl implements UtilityService {
             }
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_documents, null, null, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_documents, null, null, res, "success", null, HttpMethod.GET.name(), "getDocuments?loanId=" + loanId);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_documents, null, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_documents, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getDocuments?loanId=" + loanId);
             log.error("{}", ee.getMessage());
         }
 
@@ -987,11 +978,11 @@ public class UtilityServiceImpl implements UtilityService {
                     .typeResponseType(CollateralDetailsResponseDTO.class)
                     .build().call();
 
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, "success", loanIdNumber);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, "success", loanIdNumber, HttpMethod.GET.name(), "getCollaterals?loanId=" + loanIdNumber);
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, modifiedErrorMessage, "failure", loanIdNumber);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, modifiedErrorMessage, "failure", loanIdNumber, HttpMethod.GET.name(), "getCollaterals?loanId=" + loanIdNumber);
             log.error("{}", e.getMessage());
         }
         return new BaseDTOResponse<>(collateralResponse);

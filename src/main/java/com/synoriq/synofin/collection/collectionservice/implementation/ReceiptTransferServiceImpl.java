@@ -226,7 +226,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             Long receiptTransferTableId = receiptTransferDtoRequest.getReceiptTransferId();
 
             GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptTransferDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
-            UploadImageOnS3ResponseDTO transferProofUploaded = integrationConnectorService.uploadImageOnS3(token, transferProof, "receipt_transfer", geoLocationDTO.getLatitude(), geoLocationDTO.getLongitude(), "");
+            UploadImageOnS3ResponseDTO transferProofUploaded = integrationConnectorService.uploadImageOnS3(token, transferProof, "receipt_transfer", geoLocationDTO, "");
             String filePath = "";
             if (transferProofUploaded.getData() != null) {
                 filePath = transferProofUploaded.getData().getUserRefNo() + "/" + transferProofUploaded.getData().getFileName();
@@ -918,11 +918,11 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
 
             depositInvoiceResponseDataDTO.setSuccessfulRequestCount(successCount);
             depositInvoiceResponseDataDTO.setFailedRequestCount(failedCount);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.deposit_challan, null, depositInvoiceWrapperBody, res, "success", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.deposit_challan, null, depositInvoiceWrapperBody, res, "success", null, HttpMethod.POST.name(), "depositChallanBulkAction");
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.deposit_challan, null, null, modifiedErrorMessage, "failure", null);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.deposit_challan, null, null, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "depositChallanBulkAction");
             throw new Exception("1016042");
         }
         return depositInvoiceResponseDataDTO;

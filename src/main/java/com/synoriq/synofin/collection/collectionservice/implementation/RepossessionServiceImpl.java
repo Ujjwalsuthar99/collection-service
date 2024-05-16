@@ -272,7 +272,7 @@ public class RepossessionServiceImpl implements RepossessionService {
                         .build().call();
 
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", loanId);
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", loanId, HttpMethod.GET.name(), "getBasicLoanDetails" + loanId);
                 if(loanDetailRes.getData() != null) {
                     String mobileNumber = repossessionRepository.getMobileNumber(loanDetailRes.getData().getCustomerId());
 
@@ -283,7 +283,7 @@ public class RepossessionServiceImpl implements RepossessionService {
                             .typeResponseType(CollateralDetailsResponseDTO.class)
                             .build().call();
 
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, "success", loanId);
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, "success", loanId, HttpMethod.GET.name(), "getCollaterals?loanId=" + loanId);
 
                     collateralResponse.getData().forEach((key, value) -> {
                         vehicleType[0] = String.valueOf(value.get("vehicle_type"));
@@ -359,12 +359,12 @@ public class RepossessionServiceImpl implements RepossessionService {
                     .typeResponseType(ServiceRequestSaveResponse.class)
                     .build().call();
             receiptNumber = res.getData() != null ? res.getData().getServiceRequestId() : null;
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.lms_repossession, null, null, res, "failure", Long.parseLong(requestDto.getLoanId()));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.lms_repossession, null, null, res, "success", Long.parseLong(requestDto.getLoanId()), HttpMethod.POST.name(), "lms_repossession");
 
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.lms_repossession, null, null, modifiedErrorMessage, "failure", Long.parseLong(requestDto.getLoanId()));
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.lms_repossession, null, null, modifiedErrorMessage, "failure", Long.parseLong(requestDto.getLoanId()), HttpMethod.POST.name(), "lms_repossession");
             log.error("{}", e.getMessage());
             throw new Exception(e.getMessage());
         }
