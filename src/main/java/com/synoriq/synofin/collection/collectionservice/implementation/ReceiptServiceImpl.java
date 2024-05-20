@@ -659,11 +659,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
 
                 // setting collection limit userwise and create collection receipt
-                Future<CollectionLimitUserWiseEntity> collectionLimitUserWiseEntityFuture = executor.submit(() -> setCollectionLimitUserWiseEntity(collectionLimitUser, receiptServiceDtoRequest, currentReceiptAmountAllowed));
-                Future<String> createCollectionReceiptFuture = executor.submit(() -> createCollectionReceipt(collectionReceiptMap, bearerToken));
+                createCollectionReceipt(collectionReceiptMap, bearerToken);
+                setCollectionLimitUserWiseEntity(collectionLimitUser, receiptServiceDtoRequest, currentReceiptAmountAllowed);
 
-                collectionLimitUserWiseEntityFuture.get();
-                createCollectionReceiptFuture.get();
 
                 // multi receipt for particular clients
                 String multiReceiptClientCredentials = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MULTI_RECEIPT_CLIENT_CREDENTIALS);
