@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.rest.request.followUpDTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,5 +28,11 @@ public class FollowUpDtoRequest {
     String otherFollowupReason;
     String remarks;
     CollectionActivityLogDTO activityLog;
+
+    @JsonProperty("isReschedule")
+    private Boolean isReschedule;
+
+    @JsonProperty("toBeRescheduledId")
+    private Long toBeRescheduledId;
 
 }

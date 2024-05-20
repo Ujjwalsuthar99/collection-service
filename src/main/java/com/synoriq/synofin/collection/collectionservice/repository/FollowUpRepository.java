@@ -4,9 +4,11 @@ import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -188,6 +190,11 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "           join (select collection_activity_logs_id, geo_location_data, images from collection.collection_activity_logs) as cal on cal.collection_activity_logs_id  = f.collection_activity_logs_id\n" +
             "           where f.followups_id = :followupId")
     Map<String, Object> getFollowupDetailsById(@Param("followupId") Long followupId, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission);
+
+    @Modifying()
+    @Transactional
+    @Query(value = "update collection.followups set followup_status = 'reschedule' where followups_id = :followUpId", nativeQuery = true)
+    void updateStatus(@Param("followUpId") Long followUpId);
 
     List<FollowUpEntity> findDataByServiceRequestId(Long serviceRequestId);
 }

@@ -244,12 +244,12 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
     public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder, boolean isCustomerPhotos) throws Exception {
         DownloadBase64FromS3ResponseDTO res = new DownloadBase64FromS3ResponseDTO();
         CurrentUserInfo currentUserInfo = new CurrentUserInfo();
+        String systemId = COLLECTION;
+        if (isCustomerPhotos) {
+            systemId = "collection_lms";
+        }
+        String requestBody = "getBase64ByFileName?fileName=" + fileName + "&userRefNo=" + userRefNo + "&isNativeFolder=" + isNativeFolder + "&systemId=" + systemId;
         try {
-
-            String systemId = COLLECTION;
-            if (isCustomerPhotos) {
-                systemId = "collection_lms";
-            }
 
             res = HTTPRequestService.<Object, DownloadBase64FromS3ResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
@@ -260,7 +260,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
 
             String modifiedResponse = "response: " + res.getResponse() + " requestId: " + res.getRequestId() + " error: " + res.getError();
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, utilityService.convertToJSON(modifiedResponse), "success", null, HttpMethod.GET.name(), "s3Download");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, utilityService.convertToJSON(modifiedResponse), "success", null, HttpMethod.GET.name(), "getBase64ByFileName?fileName=" + fileName + "&userRefNo=" + userRefNo + "&isNativeFolder=" + isNativeFolder + "&systemId=" + systemId);
             // again calling the download api for aadharfin usernames
             if ((res.getData().isEmpty() || res.getData().contains("File or bucket not")) && Objects.equals(currentUserInfo.getClientId(), "aadharfin")) {
                 log.info("Again calling the download API for Aadharfin Client");
@@ -279,7 +279,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "s3Download");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_download, null, requestBody, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "s3Download");
             log.error("juuju{}", ee.getMessage());
             res.setResponse(false);
             res.setData(null);
