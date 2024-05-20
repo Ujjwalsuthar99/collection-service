@@ -35,6 +35,7 @@ import com.synoriq.synofin.collection.collectionservice.service.utilityservice.H
 import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -239,14 +240,15 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             String limitConf;
             String updatedRemarks;
 
-            for (Long receiptId : receiptTransferDtoRequest.getReceipts()) {
-                ReceiptTransferHistoryEntity receiptTransferIdCheck = receiptTransferHistoryRepository.findByCollectionReceiptsId(receiptId);
-                if (receiptTransferIdCheck != null) {
-                    ErrorCode errorCode = ErrorCode.getErrorCode(1016050, "Receipt " + receiptId + " already has been transferred");
-                    throw new CustomException(errorCode);
-                }
-            }
-
+            // this check need an update because in transfer type it will not work, right now I am commenting it
+//            for (Long receiptId : receiptTransferDtoRequest.getReceipts()) {
+//                ReceiptTransferHistoryEntity receiptTransferIdCheck = receiptTransferHistoryRepository.findByCollectionReceiptsId(receiptId);
+//                if (receiptTransferIdCheck != null) {
+//                    ErrorCode errorCode = ErrorCode.getErrorCode(1016050, "Receipt " + receiptId + " already has been transferred");
+//                    throw new CustomException(errorCode);
+//                }
+//            }
+            String airtelDepositTransferMode = String.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("airtel_deposit_transfer_mode"));
             Double utilizedAmount;
             Double totalLimitValue;
             Double transferredAmount = receiptTransferDtoRequest.getAmount();
@@ -270,19 +272,20 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 utilizedAmount = 0.00;
                 totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
             }
-            if (!Objects.equals(receiptTransferDtoRequest.getTransferType(), "bank")) {
-                if ((utilizedAmount + transferredAmount) < totalLimitValue) {
-                    Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
 
-                    ReceiptTransferEntity receiptTransferEntity = saveReceiptTransferData(receiptTransferDtoRequest, collectionActivityId, token);
-                    CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
-                    String remarks = receiptTransferDtoRequest.getActivityData().getRemarks();
-                    String lastWord = remarks.substring(remarks.lastIndexOf(" ") + 1);
-                    updatedRemarks = CREATE_TRANSFER;
-                    updatedRemarks = updatedRemarks.replace("{transfer_request}", receiptTransferEntity.getReceiptTransferId().toString());
-                    updatedRemarks = (updatedRemarks + lastWord);
-                    collectionActivityLogsEntity1.setRemarks(updatedRemarks);
-                    collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
+            Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
+
+            ReceiptTransferEntity receiptTransferEntity = saveReceiptTransferData(receiptTransferDtoRequest, collectionActivityId, token);
+            CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
+            String remarks = receiptTransferDtoRequest.getActivityData().getRemarks();
+            String lastWord = remarks.substring(remarks.lastIndexOf(" ") + 1);
+            updatedRemarks = CREATE_TRANSFER;
+            updatedRemarks = updatedRemarks.replace("{transfer_request}", receiptTransferEntity.getReceiptTransferId().toString());
+            updatedRemarks = (updatedRemarks + lastWord);
+            collectionActivityLogsEntity1.setRemarks(updatedRemarks);
+            collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
+            if (Objects.equals(receiptTransferDtoRequest.getTransferType(), "transfer")) {
+                if ((utilizedAmount + transferredAmount) < totalLimitValue) {
                     if (receiptTransferTableId == null) {
                         for (Long receiptTransferId : receiptTransferDtoRequest.getReceipts()) {
 
@@ -311,19 +314,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     throw new Exception("1016031");
                 }
             } else {
-                Long collectionActivityId = activityLogService.createActivityLogs(receiptTransferDtoRequest.getActivityData(), token);
 
-
-                ReceiptTransferEntity receiptTransferEntity = saveReceiptTransferData(receiptTransferDtoRequest, collectionActivityId, token);
-
-                CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
-                String remarks = receiptTransferDtoRequest.getActivityData().getRemarks();
-                String lastWord = remarks.substring(remarks.lastIndexOf(" ") + 1);
-                updatedRemarks = CREATE_TRANSFER;
-                updatedRemarks = updatedRemarks.replace("{transfer_request}", receiptTransferEntity.getReceiptTransferId().toString());
-                updatedRemarks = (updatedRemarks + lastWord);
-                collectionActivityLogsEntity1.setRemarks(updatedRemarks);
-                collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
                 for (Long receiptTransferId : receiptTransferDtoRequest.getReceipts()) {
 
                     ReceiptTransferHistoryEntity receiptTransferHistoryEntity = new ReceiptTransferHistoryEntity();
@@ -334,6 +325,11 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     receiptTransferHistoryRepository.save(receiptTransferHistoryEntity);
                 }
                 baseResponse = new BaseDTOResponse<>(receiptTransferEntity);
+
+                if(airtelDepositTransferMode.equals("true")) {
+                    DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = getDigitalPaymentTransactionsEntity(receiptTransferDtoRequest);
+                    digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+                }
             }
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getCode());
@@ -502,8 +498,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         return receiptTransferEntity;
     }
 
-    @Override
-    public void saveReceiptTransferData(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, ReceiptTransferEntity receiptTransferEntity, Long collectionActivityLogsId)
+    private void saveReceiptTransferData(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, ReceiptTransferEntity receiptTransferEntity, Long collectionActivityLogsId)
             throws Exception {
         receiptTransferEntity.setStatus(receiptTransferStatusUpdateDtoRequest.getStatus());
         receiptTransferEntity.setActionDatetime(new Date());
@@ -515,8 +510,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         receiptTransferRepository.save(receiptTransferEntity);
     }
 
-    @Override
-    public void setRemarks(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, Long collectionActivityId) {
+    private void setRemarks(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, Long collectionActivityId) {
         CollectionActivityLogsEntity collectionActivityLogsEntity1 = collectionActivityLogsRepository.findByCollectionActivityLogsId(collectionActivityId);
         String remarks = receiptTransferStatusUpdateDtoRequest.getActivityLog().getRemarks();
         String lastWord = remarks.substring(remarks.lastIndexOf(" ") + 1);
@@ -526,6 +520,30 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         updatedRemarks = (updatedRemarks + lastWord);
         collectionActivityLogsEntity1.setRemarks(updatedRemarks);
         collectionActivityLogsRepository.save(collectionActivityLogsEntity1);
+    }
+
+    @NotNull
+    private static DigitalPaymentTransactionsEntity getDigitalPaymentTransactionsEntity(ReceiptTransferDtoRequest receiptTransferDtoRequest) {
+        DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
+        digitalPaymentTransactionsEntity.setCreatedDate(new Date());
+        digitalPaymentTransactionsEntity.setCreatedBy(receiptTransferDtoRequest.getActionBy());
+        digitalPaymentTransactionsEntity.setModifiedDate(null);
+        digitalPaymentTransactionsEntity.setModifiedBy(null);
+        digitalPaymentTransactionsEntity.setLoanId(5044565L);
+        digitalPaymentTransactionsEntity.setPaymentServiceName("airtel_deposition");
+        digitalPaymentTransactionsEntity.setStatus(receiptTransferDtoRequest.getStatus());
+        digitalPaymentTransactionsEntity.setMerchantTranId(String.valueOf(receiptTransferDtoRequest.getReceiptTransferId()));
+        digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(String.valueOf(receiptTransferDtoRequest.getAmount())));
+        digitalPaymentTransactionsEntity.setUtrNumber(null);
+        digitalPaymentTransactionsEntity.setReceiptRequestBody(receiptTransferDtoRequest);
+        digitalPaymentTransactionsEntity.setPaymentLink(null);
+        digitalPaymentTransactionsEntity.setMobileNo(null);
+        digitalPaymentTransactionsEntity.setVendor("airtel");
+        digitalPaymentTransactionsEntity.setReceiptGenerated(false);
+        digitalPaymentTransactionsEntity.setCollectionActivityLogsId(null);
+        digitalPaymentTransactionsEntity.setActionActivityLogsId(null);
+        digitalPaymentTransactionsEntity.setOtherResponseData(receiptTransferDtoRequest);
+        return digitalPaymentTransactionsEntity;
     }
 
     @Override
@@ -982,7 +1000,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         Long receiptTransferId = requestBody.getReceiptTransferId();
         try {
             DigitalPaymentTransactionsEntity utrNumberData = digitalPaymentTransactionsRepository.checkUtrNumberValidation(requestBody.getUtrNumber());
-            if(requestBody.getUtrNumber() != null) {
+            if(!requestBody.getUtrNumber().isEmpty()) {
                 if(utrNumberData != null) {
                     throw new Exception("1016044");
                 }
@@ -1006,35 +1024,13 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             receiptTransferRepository.save(receiptTransferEntity);
 
 
-
-            if(utrNumberData != null) {
-                utrNumberData.setUtrNumber(requestBody.getUtrNumber());
-                digitalPaymentTransactionsRepository.save(utrNumberData);
-            } else {
-                // Here we are storing the logs of digital payment transaction table
-                // adding vendor static as csl
-                DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
-                digitalPaymentTransactionsEntity.setCreatedDate(new Date());
-                digitalPaymentTransactionsEntity.setCreatedBy(receiptTransferEntity.getTransferredBy());
-                digitalPaymentTransactionsEntity.setModifiedDate(null);
-                digitalPaymentTransactionsEntity.setModifiedBy(null);
-                digitalPaymentTransactionsEntity.setLoanId(5044565L);
-                digitalPaymentTransactionsEntity.setPaymentServiceName("airtel_deposition");
-                digitalPaymentTransactionsEntity.setStatus(requestBody.getStatus());
-                digitalPaymentTransactionsEntity.setMerchantTranId(String.valueOf(receiptTransferId));
-                digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(String.valueOf(receiptTransferEntity.getAmount())));
-                digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getUtrNumber());
-                digitalPaymentTransactionsEntity.setReceiptRequestBody(requestBody);
-                digitalPaymentTransactionsEntity.setPaymentLink(null);
-                digitalPaymentTransactionsEntity.setMobileNo(null);
-                digitalPaymentTransactionsEntity.setVendor("airtel");
-                digitalPaymentTransactionsEntity.setReceiptGenerated(false);
-                digitalPaymentTransactionsEntity.setCollectionActivityLogsId(null);
-                digitalPaymentTransactionsEntity.setActionActivityLogsId(null);
-                digitalPaymentTransactionsEntity.setOtherResponseData(requestBody);
-                digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+            Optional<DigitalPaymentTransactionsEntity> digitalPaymentTransactions = Optional.ofNullable(digitalPaymentTransactionsRepository.findByMerchantTranId(receiptTransferId.toString()));
+            if(digitalPaymentTransactions.isPresent()) {
+                digitalPaymentTransactions.get().setUtrNumber(requestBody.getUtrNumber());
+                digitalPaymentTransactions.get().setCallBackRequestBody(requestBody);
+                digitalPaymentTransactionsRepository.save(digitalPaymentTransactions.get());
             }
-
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.deposit_challan, null, requestBody, "Data saved successfully", "success", null, HttpMethod.POST.name(), "receipt-transfer/airtel-deposition/status-update");
             return new BaseDTOResponse<>("data saved successfully");
 
         } catch (Exception ee) {

@@ -25,8 +25,7 @@ public interface ReceiptTransferService {
     public List<ReceiptTransferDTO> getReceiptTransferSummary(Long transferredByUserId);
     @Transactional
     public ReceiptTransferEntity statusUpdate(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, String token) throws Exception;
-    public void saveReceiptTransferData(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, ReceiptTransferEntity receiptTransferEntity, Long collectionActivityLogsId) throws Exception;
-    public void setRemarks(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, Long collectionActivityId);
+
     public BaseDTOResponse<Object> getReceiptTransferById(String token , Long receiptTransferId, Long userId) throws Exception;
     public BaseDTOResponse<Object> getReceiptTransferForAirtel(String token , ReceiptTransferForAirtelRequestDTO receiptTransferForAirtelRequestDTO) throws Exception;
     public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date endDate, String status, Integer pageNo, Integer pageSize) throws Exception;
