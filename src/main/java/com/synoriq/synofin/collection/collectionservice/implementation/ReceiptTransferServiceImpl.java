@@ -526,7 +526,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     private static DigitalPaymentTransactionsEntity getDigitalPaymentTransactionsEntity(ReceiptTransferDtoRequest receiptTransferDtoRequest) {
         DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
         digitalPaymentTransactionsEntity.setCreatedDate(new Date());
-        digitalPaymentTransactionsEntity.setCreatedBy(receiptTransferDtoRequest.getActionBy());
+        digitalPaymentTransactionsEntity.setCreatedBy(receiptTransferDtoRequest.getActivityData().getUserId());
         digitalPaymentTransactionsEntity.setModifiedDate(null);
         digitalPaymentTransactionsEntity.setModifiedBy(null);
         digitalPaymentTransactionsEntity.setLoanId(5044565L);
