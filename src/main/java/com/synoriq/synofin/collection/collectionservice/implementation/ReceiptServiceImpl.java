@@ -671,7 +671,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
                         executor2 = new DelegatingSecurityContextExecutorService(executor2, SecurityContextHolder.getContext());
                         for (MultipartFile image : allImages) {
-                            allResults.add(executor2.submit(() -> integrationConnectorService.uploadImageOnS3(bearerToken, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
+                            allResults.add(executor2.submit(() -> integrationConnectorService.uploadImageOnS3(token, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
                         }
                         executor2.shutdown();
                         if (!executor2.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
