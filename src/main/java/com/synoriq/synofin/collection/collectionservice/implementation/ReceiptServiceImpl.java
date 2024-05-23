@@ -670,7 +670,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     for (Map<String, Object> map : list) {
                         String token = utilityService.getTokenByApiKeySecret(map);
 
-
+                        executor = new DelegatingSecurityContextExecutorService(executor, SecurityContextHolder.getContext());
                         for (MultipartFile image : allImages) {
                             allResults.add(executor.submit(() -> integrationConnectorService.uploadImageOnS3(bearerToken, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
                         }
