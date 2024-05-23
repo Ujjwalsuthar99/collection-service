@@ -427,7 +427,7 @@ public class QrCodeServiceImpl implements QrCodeService {
                 digitalPaymentTransactionsEntity.setCallBackRequestBody(requestBody);
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
 
-
+                log.info("digitalPaymentTransactionsEntity {}", digitalPaymentTransactionsEntity);
                 String activityRemarks = "The payment status for transaction id " + digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId() + " and loan id " + loanId + " has been updated as success";
                 String activityName = "dynamic_qr_code_payment_" + requestBody.getStatus().toLowerCase();
                 CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntity.getCreatedBy(), loanId, activityRemarks, "{}");

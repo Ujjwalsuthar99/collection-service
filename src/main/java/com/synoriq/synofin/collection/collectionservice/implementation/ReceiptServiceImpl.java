@@ -652,8 +652,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                 collectionReceiptMap.put("user_id", receiptServiceDtoRequest.getActivityData().getUserId());
 
                 createCollectionReceipt(collectionReceiptMap, bearerToken);
-                if (executor == null)
-                    executor = Executors.newFixedThreadPool(2);
 
 
                 // setting collection limit userwise and create collection receipt
@@ -670,6 +668,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                         String token = utilityService.getTokenByApiKeySecret(map);
 
                         executor2 = new DelegatingSecurityContextExecutorService(executor2, SecurityContextHolder.getContext());
+                        allResults = new LinkedList<>();
                         for (MultipartFile image : allImages) {
                             allResults.add(executor2.submit(() -> integrationConnectorService.uploadImageOnS3(token, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
                         }
