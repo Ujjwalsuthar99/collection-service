@@ -52,10 +52,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -499,9 +496,10 @@ public class ReceiptServiceImpl implements ReceiptService {
                 for (MultipartFile image : allImages) {
                     allResults.add(executor.submit(() -> integrationConnectorService.uploadImageOnS3(bearerToken, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
                 }
-                executor.shutdownNow();
-                executor = null;
-
+                executor.shutdown();
+                if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                    throw new Exception("ExecutorService did not terminate in the specified time.");
+                }
                 // Wait for both image uploads to complete
                 UploadImageOnS3ResponseDTO paymentReference = allResults.get(0).get();
                 UploadImageOnS3ResponseDTO selfie = allResults.get(1).get();
@@ -667,14 +665,18 @@ public class ReceiptServiceImpl implements ReceiptService {
                 String multiReceiptClientCredentials = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MULTI_RECEIPT_CLIENT_CREDENTIALS);
                 if (!multiReceiptClientCredentials.equals("false")) {
                     ArrayList<Map<String, Object>> list = new ObjectMapper().readValue(multiReceiptClientCredentials, new TypeReference<ArrayList<Map<String, Object>>>() { });
+                    ExecutorService executor2 = Executors.newFixedThreadPool(2);
                     for (Map<String, Object> map : list) {
                         String token = utilityService.getTokenByApiKeySecret(map);
 
-                        executor = new DelegatingSecurityContextExecutorService(executor, SecurityContextHolder.getContext());
+                        executor2 = new DelegatingSecurityContextExecutorService(executor2, SecurityContextHolder.getContext());
                         for (MultipartFile image : allImages) {
-                            allResults.add(executor.submit(() -> integrationConnectorService.uploadImageOnS3(bearerToken, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
+                            allResults.add(executor2.submit(() -> integrationConnectorService.uploadImageOnS3(bearerToken, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
                         }
-                        executor.shutdown();
+                        executor2.shutdown();
+                        if (!executor2.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                            throw new Exception("ExecutorService did not terminate in the specified time.");
+                        }
 
                         // Wait for both image uploads to complete
                         UploadImageOnS3ResponseDTO paymentReference = allResults.get(0).get();
