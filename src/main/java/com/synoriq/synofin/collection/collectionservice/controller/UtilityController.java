@@ -552,4 +552,15 @@ public class UtilityController {
         }
         return response;
     }
+
+//    @PostMapping("send-payment-link")
+//    public ResponseEntity<Object> sendPaymentLink(@RequestHeader("Authorization") String token,
+//                                                  @RequestParam("paymentReferenceImage") MultipartFile paymentReferenceImage,
+//                                                  @RequestParam("selfieImage") MultipartFile selfieImage,
+//                                                  @RequestParam("data") Object data) {
+//
+//        Object result = integrationConnectorService.sendOtp(token, data);
+//        BaseDTOResponse<Object> resp = new BaseDTOResponse<>(result);
+//        return new ResponseEntity<>(resp, HttpStatus.OK);
+//    }
 }

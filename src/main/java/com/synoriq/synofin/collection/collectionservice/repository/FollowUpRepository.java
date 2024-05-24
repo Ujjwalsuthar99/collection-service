@@ -73,7 +73,7 @@ public interface FollowUpRepository extends JpaRepository<FollowUpEntity, Long> 
             "           join (select customer_id,address1_json, first_name, last_name from lms.customer) as c on c.customer_id = clm.customer_id\n" +
             "           join collection.collection_activity_logs cal on cal.collection_activity_logs_id = f.collection_activity_logs_id\n" +
             " where f.loan_id = :loanId and clm.customer_type = 'applicant' \n" +
-            "            and f.next_followup_datetime between :fromDate and :toDate")
+            "            and f.created_date between :fromDate and :toDate")
     List<Map<String,Object>> getFollowupsLoanWiseByDuration(@Param("loanId") Long loanId, @Param("fromDate") Date fromDate
             , @Param("toDate") Date toDate, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, Pageable pageable);
 

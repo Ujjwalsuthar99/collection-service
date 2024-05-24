@@ -460,9 +460,14 @@ public class ReceiptServiceImpl implements ReceiptService {
         log.info("createReceiptNew Begin");
         ServiceRequestSaveResponse res;
         Long collectionActivityId;
+        ReceiptServiceDtoRequest receiptServiceDtoRequest;
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(String.valueOf(object));
-        ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(jsonNode, ReceiptServiceDtoRequest.class);
+        if (object instanceof ReceiptServiceDtoRequest) {
+            receiptServiceDtoRequest = (ReceiptServiceDtoRequest) object;
+        } else {
+            JsonNode jsonNode = objectMapper.readTree(String.valueOf(object));
+            receiptServiceDtoRequest = objectMapper.convertValue(jsonNode, ReceiptServiceDtoRequest.class);
+        }
 
         ReceiptServiceRequestDataDTO receiptServiceRequestDataDTO = new ReceiptServiceRequestDataDTO();
 

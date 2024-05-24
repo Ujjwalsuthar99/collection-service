@@ -105,9 +105,9 @@ public class FollowUpServiceImpl implements FollowUpService {
     @Override
     public BaseDTOResponse<Object> getFollowupLoanWiseWithDuration(Integer page, Integer size, Long loanId, Date fromDate, Date toDate) throws Exception {
 
-        if(fromDate.compareTo(toDate) == 0){
-            toDate = checkToDate(toDate);
-        }
+//        if(fromDate.compareTo(toDate) == 0){
+        toDate = checkToDate(toDate);
+//        }
         ObjectMapper objectMapper = new ObjectMapper();
         List<FollowUpCustomDataResponseDTO> followUpArr = new ArrayList<>();
         Pageable pageable = PageRequest.of(page,size);
