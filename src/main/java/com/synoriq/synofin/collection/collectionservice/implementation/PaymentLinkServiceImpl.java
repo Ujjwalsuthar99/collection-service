@@ -75,6 +75,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
         }
 
         ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(paymentLinkCollectionRequestDTO.getReceiptBody(), ReceiptServiceDtoRequest.class);
+        receiptServiceDtoRequest.getRequestData().getRequestData().setPaymentMode("upi");
         long loanId = Long.parseLong(receiptServiceDtoRequest.getRequestData().getLoanId());
         PaymentLinkDataRequestDTO paymentLinkDataRequestDTO = new PaymentLinkDataRequestDTO(
                 "true",

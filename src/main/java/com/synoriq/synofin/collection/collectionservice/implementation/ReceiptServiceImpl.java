@@ -493,6 +493,8 @@ public class ReceiptServiceImpl implements ReceiptService {
             List<MultipartFile> allImages = new LinkedList<>();
             allImages.add(paymentReferenceImage);
             allImages.add(selfieImage);
+            log.info("paymentReferenceImage {}", paymentReferenceImage.getSize());
+            log.info("selfieImage {}", selfieImage.getSize());
             ExecutorService executor = Executors.newFixedThreadPool(2);
             executor = new DelegatingSecurityContextExecutorService(executor, SecurityContextHolder.getContext());
             List<Future<UploadImageOnS3ResponseDTO>> allResults = new LinkedList<>();
