@@ -139,9 +139,9 @@ public class TaskServiceImpl implements TaskService {
 
             if (taskFilterRequestDTO.getOrder() != null) {
                 if (taskFilterRequestDTO.getOrder().equals("ASC")) {
-                    whereCondition.append(" order by la.days_past_due asc");
+                    whereCondition.append(" order by la.days_past_due asc, order by la.loan_application_id ASC");
                 } else {
-                    whereCondition.append(" order by la.days_past_due desc");
+                    whereCondition.append(" order by la.days_past_due desc, order by la.loan_application_id ASC");
                 }
             } else {
                 whereCondition.append(" order by la.loan_application_id asc");
