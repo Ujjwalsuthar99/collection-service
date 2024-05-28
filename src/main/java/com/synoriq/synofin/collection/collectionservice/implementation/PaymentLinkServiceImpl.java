@@ -75,9 +75,10 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
         }
 
         ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(paymentLinkCollectionRequestDTO.getReceiptBody(), ReceiptServiceDtoRequest.class);
+        long loanId = Long.parseLong(receiptServiceDtoRequest.getRequestData().getLoanId());
         PaymentLinkDataRequestDTO paymentLinkDataRequestDTO = new PaymentLinkDataRequestDTO(
                 "true",
-                loanAllocationRepository.getProductType(paymentLinkCollectionRequestDTO.getLoanId()),
+                loanAllocationRepository.getProductType(loanId),
                 Integer.parseInt(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()),
                 "INR",
                 false,
@@ -108,21 +109,21 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
 
             Assert.notNull(res.getBody().getData(), res.getBody().getError().getMessage());
             
-            String activityRemarks = "Payment link sent against loan id " + paymentLinkCollectionRequestDTO.getLoanId() + " of payment Rs. " + receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount();
-            CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("send_payment_link", receiptServiceDtoRequest.getActivityData().getUserId(), paymentLinkCollectionRequestDTO.getLoanId(), activityRemarks, paymentLinkCollectionRequestDTO.getGetLocation());
+            String activityRemarks = "Payment link sent against loan id " + loanId + " of payment Rs. " + receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount();
+            CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("send_payment_link", receiptServiceDtoRequest.getActivityData().getUserId(), loanId, activityRemarks, receiptServiceDtoRequest.getActivityData().getGeolocationData());
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
-            String merchantTranId = paymentLinkCollectionRequestDTO.getLoanId() + "_" + System.currentTimeMillis();
+            String merchantTranId = loanId + "_" + System.currentTimeMillis();
             createDigitalPaymentLinkTransaction(receiptServiceDtoRequest, paymentLinkDataRequestDTO.getCustomerPhoneNo(), merchantTranId, collectionActivityLogsEntity.getCollectionActivityLogsId(), paymentLinkCollectionRequestDTO.getVendor(), res.getBody());
 
 
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, null, paymentLinkRequestDTO, res, "success", paymentLinkCollectionRequestDTO.getLoanId(), HttpMethod.POST.name(), "sendPaymentLink");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, null, paymentLinkRequestDTO, res, "success", loanId, HttpMethod.POST.name(), "sendPaymentLink");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, null, paymentLinkRequestDTO, modifiedErrorMessage, "failure", paymentLinkCollectionRequestDTO.getLoanId(), HttpMethod.POST.name(), "sendPaymentLink");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, null, paymentLinkRequestDTO, modifiedErrorMessage, "failure", loanId, HttpMethod.POST.name(), "sendPaymentLink");
             log.error("{}", ee.getMessage());
             throw new Exception(ee.getMessage());
         }

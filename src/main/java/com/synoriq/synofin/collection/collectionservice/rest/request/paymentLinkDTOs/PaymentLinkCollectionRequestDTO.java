@@ -11,10 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PaymentLinkCollectionRequestDTO {
 
-    private float amount;
-    private Long loanId;
     private String vendor;
     private ReceiptServiceDtoRequest receiptBody;
-    private GeoLocationDTO getLocation;
 
 }
