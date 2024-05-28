@@ -138,7 +138,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
         digitalPaymentTransactionsEntity.setModifiedDate(null);
         digitalPaymentTransactionsEntity.setModifiedBy(null);
         digitalPaymentTransactionsEntity.setLoanId(Long.parseLong(receiptServiceDtoRequest.getRequestData().getLoanId()));
-        digitalPaymentTransactionsEntity.setPaymentServiceName(DYNAMIC_QR_CODE);
+        digitalPaymentTransactionsEntity.setPaymentServiceName(PAYMENT_LINK);
         digitalPaymentTransactionsEntity.setStatus(PENDING);
         digitalPaymentTransactionsEntity.setMerchantTranId(merchantTransId);
         digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
