@@ -85,8 +85,8 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
                 100,
                 DateUtils.addMinutes(new Date(), 15).getTime(),
                 receiptServiceDtoRequest.getRequestData().getRequestData().getRemarks(),
-                receiptServiceDtoRequest.getCustomerName(),
-                receiptServiceDtoRequest.getCollectedFromNumber().isBlank() ? receiptServiceDtoRequest.getApplicantMobileNumber() : receiptServiceDtoRequest.getCollectedFromNumber(),
+                paymentLinkCollectionRequestDTO.getCustomerName(),
+                paymentLinkCollectionRequestDTO.getMobileNumber(),
                 "",
                 "https://example-callback-url.com/",
                 "get");
@@ -114,7 +114,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
             String merchantTranId = loanId + "_" + System.currentTimeMillis();
-            createDigitalPaymentLinkTransaction(receiptServiceDtoRequest, paymentLinkDataRequestDTO.getCustomerPhoneNo(), merchantTranId, collectionActivityLogsEntity.getCollectionActivityLogsId(), paymentLinkCollectionRequestDTO.getVendor(), res.getBody());
+            createDigitalPaymentLinkTransaction(receiptServiceDtoRequest, paymentLinkCollectionRequestDTO.getMobileNumber(), merchantTranId, collectionActivityLogsEntity.getCollectionActivityLogsId(), paymentLinkCollectionRequestDTO.getVendor(), res.getBody());
 
 
             log.info("res {}", res);

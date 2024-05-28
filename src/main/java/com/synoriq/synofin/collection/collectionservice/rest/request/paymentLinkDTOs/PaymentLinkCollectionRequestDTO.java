@@ -13,5 +13,7 @@ public class PaymentLinkCollectionRequestDTO {
 
     private String vendor;
     private ReceiptServiceDtoRequest receiptBody;
+    private String mobileNumber;
+    private String customerName;
 
 }
