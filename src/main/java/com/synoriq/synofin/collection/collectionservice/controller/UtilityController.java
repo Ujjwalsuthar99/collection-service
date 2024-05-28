@@ -16,6 +16,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOR
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.IntegrationConnectorService;
+import com.synoriq.synofin.collection.collectionservice.service.PaymentLinkService;
 import com.synoriq.synofin.collection.collectionservice.service.QrCodeService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.performancemonitoringservice.annotation.TimedAlert;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,6 +38,7 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @RequestMapping("/v1")
 @EnableTransactionManagement
 @Slf4j
+@Validated
 public class UtilityController {
 
     @Autowired
@@ -43,6 +46,9 @@ public class UtilityController {
 
     @Autowired
     IntegrationConnectorService integrationConnectorService;
+
+    @Autowired
+    PaymentLinkService paymentLinkService;
 
     @Autowired
     QrCodeService qrCodeService;
@@ -553,14 +559,14 @@ public class UtilityController {
         return response;
     }
 
-//    @PostMapping("send-payment-link")
-//    public ResponseEntity<Object> sendPaymentLink(@RequestHeader("Authorization") String token,
-//                                                  @RequestParam("paymentReferenceImage") MultipartFile paymentReferenceImage,
-//                                                  @RequestParam("selfieImage") MultipartFile selfieImage,
-//                                                  @RequestParam("data") Object data) {
-//
-//        Object result = integrationConnectorService.sendOtp(token, data);
-//        BaseDTOResponse<Object> resp = new BaseDTOResponse<>(result);
-//        return new ResponseEntity<>(resp, HttpStatus.OK);
-//    }
+    @PostMapping("send-payment-link")
+    public ResponseEntity<Object> sendPaymentLink(@RequestHeader("Authorization") String token,
+                                                  @RequestParam("paymentReferenceImage") MultipartFile paymentReferenceImage,
+                                                  @RequestParam("selfieImage") MultipartFile selfieImage,
+                                                  @RequestParam("data") Object data) throws Exception {
+
+        Object result = paymentLinkService.sendPaymentLink(token, data, paymentReferenceImage, selfieImage);
+        BaseDTOResponse<Object> resp = new BaseDTOResponse<>(result);
+        return new ResponseEntity<>(resp, HttpStatus.OK);
+    }
 }

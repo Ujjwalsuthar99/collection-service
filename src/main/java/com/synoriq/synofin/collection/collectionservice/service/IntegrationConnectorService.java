@@ -13,12 +13,12 @@ import java.io.IOException;
 
 public interface IntegrationConnectorService {
 
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, GeoLocationDTO geoLocationDTO, String userName) throws IOException;
-    public DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder, boolean isCustomerPhotos) throws Exception;
-    public DeleteImageOnS3ResponseDTO deleteImageOnS3(String token, String userRefNo, String fileName) throws Exception;
-    public MasterDTOResponse sendOtp(String token, String mobileNumber) throws Exception;
-    public MasterDTOResponse verifyOtp(String token, String mobileNumber, String otp) throws Exception;
-    public MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception;
-    public OcrCheckResponseDTO ocrCheck(String token, OcrCheckRequestDTO requestBody) throws Exception;
+    UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, GeoLocationDTO geoLocationDTO, String userName) throws IOException;
+    DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder, boolean isCustomerPhotos) throws Exception;
+    DeleteImageOnS3ResponseDTO deleteImageOnS3(String token, String userRefNo, String fileName) throws Exception;
+    MasterDTOResponse sendOtp(String token, String mobileNumber) throws Exception;
+    MasterDTOResponse verifyOtp(String token, String mobileNumber, String otp) throws Exception;
+    MasterDTOResponse resendOtp(String token, String mobileNumber) throws Exception;
+    OcrCheckResponseDTO ocrCheck(String token, OcrCheckRequestDTO requestBody) throws Exception;
 
 }

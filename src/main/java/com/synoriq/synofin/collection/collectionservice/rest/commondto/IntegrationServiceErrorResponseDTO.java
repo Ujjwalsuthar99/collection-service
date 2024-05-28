@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs;
+package com.synoriq.synofin.collection.collectionservice.rest.commondto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,7 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.IntegrationServiceErrorResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.commondto.IntegrationServiceErrorResponseDTO;
 import lombok.Data;
 
 @Data

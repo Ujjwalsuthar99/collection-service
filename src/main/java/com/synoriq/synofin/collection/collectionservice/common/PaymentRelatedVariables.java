@@ -1,6 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.common;
 
-public class QRCodeVariables {
+public class PaymentRelatedVariables {
 
     public static final String SEND_QR_CODE_GENERATE_API = "http://localhost:1102/v1/sendQrCode";
     public static final String SEND_QR_CODE_TRANSACTION_STATUS_API = "http://localhost:1102/v1/getQrCodeTransactionStatus";
@@ -18,5 +18,6 @@ public class QRCodeVariables {
     public static final String CONNECTOR_RESPONSE = "connector_response";
     public static final String AUTHORIZATION = "Authorization";
     public static final String CONTENTTYPE = "Content-Type";
+    public static final String SEND_PAYMENT_LINK = "http://localhost:1102/v1/sendPaymentLink";
 
 }

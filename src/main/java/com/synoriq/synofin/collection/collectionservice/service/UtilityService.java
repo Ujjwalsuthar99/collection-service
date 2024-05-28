@@ -14,8 +14,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static com.synoriq.synofin.collection.collectionservice.common.QRCodeVariables.AUTHORIZATION;
-import static com.synoriq.synofin.collection.collectionservice.common.QRCodeVariables.CONTENTTYPE;
+import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.AUTHORIZATION;
+import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.CONTENTTYPE;
 
 
 public interface UtilityService {

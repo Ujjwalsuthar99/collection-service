@@ -2,9 +2,13 @@ package com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQr
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeDataRequestDTO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DynamicQrCodeDataResponseDTO {
 
     @JsonProperty("merchantTranId")

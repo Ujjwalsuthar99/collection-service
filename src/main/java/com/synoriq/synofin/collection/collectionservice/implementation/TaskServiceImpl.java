@@ -473,7 +473,7 @@ public class TaskServiceImpl implements TaskService {
                 "    concat(lms.decrypt_data(c.first_name, '" + encryptionKey + "', '" + password + "', true), ' ', lms.decrypt_data(c.middle_name, '" + encryptionKey + "', '" + password + "', true), ' ', lms.decrypt_data(c.last_name, '" + encryptionKey + "', '" + password + "', true)) as customer_name,\n" +
                 "    c.phone1_json->>'mobile' as mobile,\n" +
                 "    c.address1_json->>'address' as address,\n" +
-                "    p.product_name as product,\n" +
+                "    la.product as product,\n" +
                 "    la.loan_application_number,\n" +
                 "    la2.task_purpose,\n" +
                 "    count(la.loan_application_id) over () as total_count,\n" +
@@ -512,7 +512,6 @@ public class TaskServiceImpl implements TaskService {
                 "    join lms.customer_loan_mapping clm on la.loan_application_id = clm.loan_id\n" +
                 "    join lms.customer c on clm.customer_id = c.customer_id\n" +
                 "    join collection.loan_allocation la2 on la2.loan_id = la.loan_application_id \n" +
-                "    left join (select product_code, product_name from master.product) as p on p.product_code = la.product\n" +
                 "    left join (select branch_name, branch_id from master.branch) as branch on branch.branch_id = la.branch_id \n" +
                 "    left join (select loan_id, vehicle_registration_no from lms.collateral_vehicle) as vehicle on vehicle.loan_id = la.loan_application_id \n" +
                 "where\n" +

@@ -43,7 +43,7 @@ import java.io.InputStream;
 import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
-import static com.synoriq.synofin.collection.collectionservice.common.QRCodeVariables.*;
+import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.*;
 
 @Slf4j
 @Service
@@ -577,7 +577,7 @@ public class QrCodeServiceImpl implements QrCodeService {
 
 
     @NotNull
-    private static CollectionActivityLogsEntity getCollectionActivityLogsEntity(String activityName, Long userId, Long loanId, String remarks, Object geoLocation) {
+    public static CollectionActivityLogsEntity getCollectionActivityLogsEntity(String activityName, Long userId, Long loanId, String remarks, Object geoLocation) {
         CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
         collectionActivityLogsEntity.setActivityName(activityName);
         collectionActivityLogsEntity.setActivityDate(new Date());

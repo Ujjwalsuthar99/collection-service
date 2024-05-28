@@ -36,7 +36,8 @@ public class EnumSQLConstants {
         qr_callback,
         kafka_activity,
         s3_delete,
-        multi_create_receipt;
+        multi_create_receipt,
+        send_payment_link;
 
 
         private LogNames() {

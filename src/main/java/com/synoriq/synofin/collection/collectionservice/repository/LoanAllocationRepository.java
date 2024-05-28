@@ -4,6 +4,7 @@ import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEnt
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -36,6 +37,7 @@ public interface LoanAllocationRepository extends JpaRepository<LoanAllocationEn
     @Modifying
     void deleteByCreatedDateBetween(Date fromDate, Date toDate);
 
-
+    @Query(nativeQuery = true, value = "select product from lms.loan_application where loan_application_id = :loanId")
+    String getProductType(@Param("loanId") Long loanId);
 
 }
