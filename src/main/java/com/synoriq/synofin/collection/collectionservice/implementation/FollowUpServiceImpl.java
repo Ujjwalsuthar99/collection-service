@@ -196,7 +196,7 @@ public class FollowUpServiceImpl implements FollowUpService {
             if (Objects.equals(collectionConfigurationsRepository.findConfigurationValueByConfigurationName("show_close_reschedule_followup_button"), "true")) {
                 if (followUpDtoRequest.getIsReschedule())
                     followUpRepository.updateStatus(followUpDtoRequest.getToBeRescheduledId());
-                List<FollowUpEntity> followUpEntities = followUpRepository.findByLoanIdAndFollowUpStatus(followUpDtoRequest.getLoanId(), "pending");
+                List<FollowUpEntity> followUpEntities = followUpRepository.findByLoanIdAndCreatedByAndFollowUpStatus(followUpDtoRequest.getLoanId(), followUpDtoRequest.getCreatedBy(), "pending");
                 if (!followUpEntities.isEmpty())
                     throw new Exception("1016054");
             }
