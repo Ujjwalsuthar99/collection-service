@@ -25,7 +25,7 @@ public class PaymentLinkDataRequestDTO implements Serializable {
     public long expireBy;
     @JsonProperty("description")
     public String description;
-    @JsonProperty("customerName")
+    @JsonProperty("customer_name")
     public String customerName;
     @JsonProperty("customer_phone_no")
     public String customerPhoneNo;
