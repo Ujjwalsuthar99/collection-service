@@ -666,7 +666,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         List<Map<String, Object>> receiptTransferDataList;
         Map<String, Object> receiptData;
         List<ReceiptTransferCustomDataResponseDTO> userTransferArr = new ArrayList<>();
-        List<ReceiptTransferCustomDataResponseDTO> bankTransferArr = new ArrayList<>();
+        List<ReceiptTransferCustomDataResponseDTO> bankTransferArr = new ArrayList<>(1);
         ReceiptTransferDataByReceiptIdResponseDTO receiptTransferDataByReceiptIdResponseDTO = new ReceiptTransferDataByReceiptIdResponseDTO();
         ReceiptTransferReceiptDataResponseDTO receiptTransferReceiptDataResponseDTO = new ReceiptTransferReceiptDataResponseDTO();
         try {
@@ -696,6 +696,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     boolean exists = bankTransferArr.stream()
                             .anyMatch(dto -> dto.getReceiptTransferId() > Long.parseLong(String.valueOf(receiptTransferData.get("receipt_transfer_id"))));
                     if (!exists) {
+                        bankTransferArr.clear();
                         ReceiptTransferCustomDataResponseDTO bankTransferDTO = new ReceiptTransferCustomDataResponseDTO();
                         bankTransferDTO.setReceiptTransferId(Long.parseLong(String.valueOf(receiptTransferData.get("receipt_transfer_id"))));
                         bankTransferDTO.setCreatedDate(String.valueOf(receiptTransferData.get("created_date")));

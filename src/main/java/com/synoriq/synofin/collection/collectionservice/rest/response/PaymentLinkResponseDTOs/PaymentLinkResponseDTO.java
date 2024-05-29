@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.IntegrationServiceErrorResponseDTO;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentLinkResponseDTO {
 
     @JsonProperty("response")
@@ -16,6 +18,9 @@ public class PaymentLinkResponseDTO {
 
     @JsonProperty("data")
     private PaymentLinkDataResponseDTO data;
+
+    @JsonProperty("request_id")
+    private String requestId;
 
     @JsonProperty("error")
     private IntegrationServiceErrorResponseDTO error = null;
