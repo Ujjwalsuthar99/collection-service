@@ -474,7 +474,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
 
         boolean lockAcquired = false;
-        // Acquire a lock for the customer record
+        // Acquire a lock for the loan wise
         ReentrantLock lock = null;
         String lockId = null;
         if (receiptServiceDtoRequest.getLoanApplicationNumber() != null) {

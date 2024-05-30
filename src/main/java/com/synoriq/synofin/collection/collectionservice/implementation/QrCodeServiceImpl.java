@@ -390,7 +390,7 @@ public class QrCodeServiceImpl implements QrCodeService {
             digitalPaymentTransactionsEntityData.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
 
             digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
-
+            res.getData().setStatus(res.getData().getStatus().toLowerCase());
             log.info("res {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, res, "success", null, HttpMethod.POST.name(), "qrCodeTransactionStatus");
