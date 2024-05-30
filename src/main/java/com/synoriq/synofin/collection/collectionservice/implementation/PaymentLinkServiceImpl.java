@@ -9,6 +9,7 @@ import com.synoriq.synofin.collection.collectionservice.common.exception.Connect
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.DigitalPaymentTransactionsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.LoanAllocationRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
@@ -32,9 +33,12 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Objects;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.PAYMENT_LINK_EXPIRATION_CONF;
 import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.*;
 import static com.synoriq.synofin.collection.collectionservice.implementation.QrCodeServiceImpl.getCollectionActivityLogsEntity;
 
@@ -59,6 +63,9 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
     ConsumedApiLogService consumedApiLogService;
 
     @Autowired
+    CollectionConfigurationsRepository collectionConfigurationsRepository;
+
+    @Autowired
     UtilityService utilityService;
 
     @Override
@@ -77,6 +84,9 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
         ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(paymentLinkCollectionRequestDTO.getReceiptBody(), ReceiptServiceDtoRequest.class);
         receiptServiceDtoRequest.getRequestData().getRequestData().setPaymentMode("upi");
         long loanId = Long.parseLong(receiptServiceDtoRequest.getRequestData().getLoanId());
+
+        int minutes = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(PAYMENT_LINK_EXPIRATION_CONF));
+
         PaymentLinkDataRequestDTO paymentLinkDataRequestDTO = new PaymentLinkDataRequestDTO(
                 "true",
                 loanAllocationRepository.getProductType(loanId),
@@ -84,7 +94,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
                 "INR",
                 false,
                 100,
-                DateUtils.addMinutes(new Date(), 15).getTime(),
+                Instant.now().plus(minutes, ChronoUnit.MINUTES).getEpochSecond(),
                 receiptServiceDtoRequest.getRequestData().getRequestData().getRemarks(),
                 paymentLinkCollectionRequestDTO.getCustomerName(),
                 paymentLinkCollectionRequestDTO.getMobileNumber(),
