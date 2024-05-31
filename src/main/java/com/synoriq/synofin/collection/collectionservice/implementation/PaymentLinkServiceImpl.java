@@ -143,7 +143,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             throw new ConnectorException(ow.writeValueAsString(res.getError()));
         }
-        return new BaseDTOResponse<>(res);
+        return new BaseDTOResponse<>(res.getData());
     }
 
     @NotNull

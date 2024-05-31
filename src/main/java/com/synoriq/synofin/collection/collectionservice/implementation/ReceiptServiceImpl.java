@@ -658,7 +658,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                 collectionReceiptMap.put("activity_id", collectionActivityId);
                 collectionReceiptMap.put("user_id", receiptServiceDtoRequest.getActivityData().getUserId());
 
-                createCollectionReceipt(collectionReceiptMap, bearerToken);
+//                createCollectionReceipt(collectionReceiptMap, bearerToken);
 
 
                 // setting collection limit userwise and create collection receipt

@@ -566,7 +566,6 @@ public class UtilityController {
                                                   @RequestParam("data") Object data) throws Exception {
 
         Object result = paymentLinkService.sendPaymentLink(token, data, paymentReferenceImage, selfieImage);
-        BaseDTOResponse<Object> resp = new BaseDTOResponse<>(result);
-        return new ResponseEntity<>(resp, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
