@@ -1172,8 +1172,8 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 for (Map<String, Object> map : list) {
                     String token = utilityService.getTokenByApiKeySecret(map);
                     String env = springProfile.equals("pre-prod") ? "preprod" : springProfile.equals("prod") ? "prod2" : springProfile;
-                    String url = "https://api-" + env + ".synofin.tech/collection-service/v1/receipt-transfer/generate-new";
-//                    String url = "http://localhost:1101/collection-service/v1/receipt-transfer/generate-new";
+//                    String url = "https://api-" + env + ".synofin.tech/collection-service/v1/receipt-transfer/generate-new";
+                    String url = "http://localhost:1101/v1/receipt-transfer/generate-new";
                     HttpHeaders httpHeader = new HttpHeaders();
                     httpHeader.setBearerAuth(token);
                     HttpEntity<byte[]> fileEntity = utilityService.prepareMultipartFile(transferProof);
