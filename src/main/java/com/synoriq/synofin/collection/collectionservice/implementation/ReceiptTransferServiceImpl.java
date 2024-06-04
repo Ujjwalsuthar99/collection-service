@@ -972,8 +972,10 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     private ReceiptTransferEntity saveReceiptTransferData(ReceiptTransferDtoRequest receiptTransferDtoRequest, Long collectionActivityId, String token) {
         ReceiptTransferEntity receiptTransferEntity = new ReceiptTransferEntity();
         UserDetailByTokenDTOResponse res = utilityService.getUserDetailsByToken(token);
+        log.info("token res {} -> userId {}", res, res.getData().getUserData().getUserId());
         receiptTransferEntity.setCreatedDate(new Date());
-        receiptTransferEntity.setTransferredBy(res.getData().getUserData().getUserId());
+        // for lifpl to lifc secret key auth token userId data not present
+        receiptTransferEntity.setTransferredBy(res.getData().getUserData().getUserId() == null ? 1L : res.getData().getUserData().getUserId());
         receiptTransferEntity.setDeleted(false);
         receiptTransferEntity.setTransferType(receiptTransferDtoRequest.getTransferType());
         receiptTransferEntity.setTransferMode(receiptTransferDtoRequest.getTransferMode());
