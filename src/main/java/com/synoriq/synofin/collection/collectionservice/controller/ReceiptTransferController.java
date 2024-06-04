@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
@@ -65,7 +66,7 @@ public class ReceiptTransferController {
 
     }
 
-    @RequestMapping(value = "/receipt-transfer/generate-new", method = RequestMethod.POST)
+    @RequestMapping(value = "/receipt-transfer/generate-new", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> createReceiptTransferNew(@RequestHeader("Authorization") String bearerToken,
                                                            @RequestParam("transfer_proof") MultipartFile transferProof,
                                                            @RequestParam("data") Object object) {

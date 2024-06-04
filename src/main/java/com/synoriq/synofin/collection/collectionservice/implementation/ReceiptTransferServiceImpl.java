@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -21,6 +22,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvo
 import com.synoriq.synofin.collection.collectionservice.rest.request.depositInvoiceDTOs.DepositInvoiceWrapperRequestListDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTransferDTOs.ReceiptTransferLmsFilterDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceResponseDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DepositInvoiceResponseDTOs.DepositInvoiceWrapperResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ReceiptTransferDTOs.*;
@@ -34,26 +36,39 @@ import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import com.synoriq.synofin.lms.commondto.dto.collection.ReceiptTransferDTO;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityEvent.*;
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.*;
+import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.CREATE_RECEIPT;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
 @Service
@@ -64,6 +79,9 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
     private ReceiptRepository receiptRepository;
     @Autowired
     private EntityManager entityManager;
+
+    @Value("${spring.profiles.active}")
+    private String springProfile;
 
     @Autowired
     private CurrentUserInfo currentUserInfo;
@@ -331,6 +349,9 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
                 }
             }
+            // duplicate receipt transfer for LIFC requirement
+            duplicateReceiptTransfer(receiptTransferDtoRequest, transferProof);
+
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getCode());
         } catch (Exception ee) {
@@ -1137,6 +1158,37 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             }
         } catch (Exception e) {
             throw new Exception("1017000");
+        }
+    }
+
+    private void duplicateReceiptTransfer(ReceiptTransferDtoRequest receiptTransferDtoRequest, MultipartFile transferProof) throws Exception {
+
+        try {
+            String multiReceiptClientCredentials = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MULTI_RECEIPT_CLIENT_CREDENTIALS);
+            if (!multiReceiptClientCredentials.equals("false")) {
+                ArrayList<Map<String, Object>> list = new ObjectMapper().readValue(multiReceiptClientCredentials, new TypeReference<ArrayList<Map<String, Object>>>() {
+                });
+                for (Map<String, Object> map : list) {
+                    String token = utilityService.getTokenByApiKeySecret(map);
+                    String env = springProfile.equals("pre-prod") ? "preprod" : springProfile.equals("prod") ? "prod2" : springProfile;
+//                    String url = "https://api-" + env + ".synofin.tech/collection-service/v1/receipt-transfer/generate-new";
+                    String url = "http://localhost:1101/collection-service/v1/receipt-transfer/generate-new";
+                    HttpHeaders httpHeader = new HttpHeaders();
+                    httpHeader.setBearerAuth(token);
+                    HttpEntity<byte[]> fileEntity = utilityService.prepareMultipartFile(transferProof);
+                    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+                    body.add("transfer_proof", fileEntity);
+                    body.add("data", receiptTransferDtoRequest);
+                    ResponseEntity<Object> receiptTransferResponse = new RestTemplate().exchange(
+                            url,
+                            HttpMethod.POST,
+                            new HttpEntity<>(body, httpHeader),
+                            Object.class
+                    );
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
         }
     }
 }
