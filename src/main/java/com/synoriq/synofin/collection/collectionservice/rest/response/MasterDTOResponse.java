@@ -16,6 +16,6 @@ public class MasterDTOResponse {
     public Object data;
 
     @JsonProperty("error")
-    public String error;
+    public Object error;
 }
 
