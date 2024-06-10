@@ -1,23 +1,28 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
+import com.synoriq.synofin.collection.collectionservice.common.exception.ConnectorException;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CustomerDetailDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanBasicDetailsDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanSummaryForLoanDTOs.LoanSummaryResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.TaskDetailDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.Tuple;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.AUTHORIZATION;
 import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.CONTENTTYPE;
@@ -70,5 +75,26 @@ public interface UtilityService {
         fileMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString());
         return new HttpEntity<>(documentFile.getBytes(), fileMap);
     }
-    public Object getBankAccountDetails(Long bankAccountId);
+    @NotNull
+    static HashMap<String, Object> getStringObjectMapCopy(UploadImageOnS3ResponseDTO uploadedImage) throws ConnectorException {
+        if (uploadedImage.getData() == null)
+            throw new ConnectorException(uploadedImage.getError(), HttpStatus.FAILED_DEPENDENCY, uploadedImage.getRequestId());
+
+        // creating images Object
+        HashMap<String, Object> imageMap = new HashMap<>();
+        int i = 1;
+        if (uploadedImage.getData().getFileName() != null) {
+            imageMap.put("url" + i, uploadedImage.getData().getFileName());
+        }
+        return imageMap;
+    }
+    Object getBankAccountDetails(Long bankAccountId);
+
+    TaskDetailDTOResponse getChargesForLoan(String token, TaskDetailRequestDTO loanDataBody) throws Exception;
+
+    LoanBasicDetailsDTOResponse getBasicLoanDetails(String token, Long loanId) throws Exception;
+
+    CustomerDetailDTOResponse getCustomerDetails(String token, Long loanId) throws Exception;
+
+    LoanSummaryResponseDTO getLoanSummary(String token, Long loanId) throws Exception;
 }

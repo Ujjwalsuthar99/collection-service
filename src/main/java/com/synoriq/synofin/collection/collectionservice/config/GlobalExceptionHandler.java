@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> dataNotFoundException(Exception e) throws Exception {
+    public ResponseEntity<Object> dataNotFoundException(Exception e) {
         BaseDTOResponse<Object> errResponse;
         if (e.getMessage().matches("\\d+") && ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
             errResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
@@ -45,10 +46,22 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConnectorException.class)
-    public ResponseEntity<Object> connectorException(ConnectorException e) throws Exception {
+    public ResponseEntity<Object> connectorException(ConnectorException e) {
         log.info("connector error : {}", e.getMessage());
-        IntegrationServiceErrorResponseDTO r = new ObjectMapper().readValue(e.getMessage(), IntegrationServiceErrorResponseDTO.class);
-        return new ResponseEntity<>(new BaseDTOResponse<>(false, null, r), HttpStatus.BAD_REQUEST);
+        IntegrationServiceErrorResponseDTO integrationServiceErrorResponseDTO = IntegrationServiceErrorResponseDTO.builder().code(String.valueOf(e.getCode())).message(e.getMessage()).build();
+        return new ResponseEntity<>(new BaseDTOResponse<>(false, null, integrationServiceErrorResponseDTO), e.getHttpStatus());
+    }
 
+    @ExceptionHandler(CustomException.class)
+    protected ResponseEntity<Object> customException(CustomException ex) {
+        log.error("Custom Error : {} ", ex);
+//        BaseResponse<Object> errResponse = new BaseResponse<>(ErrorCode.getErrorCode(ex.getCode()));
+        BaseDTOResponse<Object> errResponse = null;
+        if (ex.getCode() != null && ErrorCode.getErrorCode(ex.getCode()) != null) {
+            errResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(ex.getCode()));
+        } else {
+            errResponse = new BaseDTOResponse<>(ex.getMessage(), ex.getCode());
+        }
+        return new ResponseEntity<>(errResponse, ex.getHttpStatus());
     }
 }

@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.implementation;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
@@ -27,6 +28,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -34,6 +37,7 @@ import javax.persistence.Query;
 import javax.persistence.Tuple;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
@@ -169,69 +173,47 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Object getTaskDetailByLoanId(String token, TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
         BaseDTOResponse<Object> collateralRes;
-        TaskDetailDTOResponse loanRes;
+
         LoanDetailsResponseDTO loanDetailsResponseDTO = new LoanDetailsResponseDTO();
-        CustomerDetailDTOResponse customerRes;
-        LoanBasicDetailsDTOResponse loanDetailRes;
 
         TaskDetailRequestDTO loanDataBody = new ObjectMapper().convertValue(taskDetailRequestDTO, TaskDetailRequestDTO.class);
         TaskDetailReturnResponseDTO response = new TaskDetailReturnResponseDTO();
         BaseDTOResponse<Object> baseDTOResponse = null;
         String loanId = taskDetailRequestDTO.getRequestData().getLoanId();
         Long loanIdNumber = Long.parseLong(loanId);
+        String multiReceiptClientCredentials = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MULTI_RECEIPT_CLIENT_CREDENTIALS);
+        if (!multiReceiptClientCredentials.equals("false")) {
+            ArrayList<Map<String, Object>> list = new ObjectMapper().readValue(multiReceiptClientCredentials, new TypeReference<ArrayList<Map<String, Object>>>() {});
+            String generatedToken = utilityService.getTokenByApiKeySecret(list.get(0));
+            token = "Bearer "+ generatedToken;
+        }
+        String finalToken = token;
         try {
-
-
-//            log.info("request dto details {}", taskDetailRequestDTO);
-            HttpHeaders httpHeaders = new HttpHeaders();
-            log.info("token {}", token);
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
-
             // lms/loan-modification/v1/service-request/getDataForLoanActions
-            loanRes = HTTPRequestService.<Object, TaskDetailDTOResponse>builder()
-                    .httpMethod(HttpMethod.POST)
-                    .url("http://localhost:1102/v1/getDataForLoanActions")
-                    .httpHeaders(httpHeaders)
-                    .body(loanDataBody)
-                    .typeResponseType(TaskDetailDTOResponse.class)
-                    .build().call();
+//            TaskDetailDTOResponse loanRes = utilityService.getChargesForLoan(token, loanDataBody);
+//            LoanBasicDetailsDTOResponse loanDetailRes = utilityService.getBasicLoanDetails(token, loanIdNumber);
+//            CustomerDetailDTOResponse customerRes = utilityService.getCustomerDetails(token, loanIdNumber);
+//            LoanSummaryResponseDTO loanSummaryResponse = utilityService.getLoanSummary(token, loanIdNumber);
 
-            log.info("loan details jhadsuhbsduh {}", loanRes);
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, "success", Long.parseLong(loanId), HttpMethod.POST.name(), "getDataForLoanActions");
 
-            loanDetailRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
-                    .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getBasicLoanDetails?loanId=" + loanIdNumber)
-                    .httpHeaders(httpHeaders)
-                    .typeResponseType(LoanBasicDetailsDTOResponse.class)
-                    .build().call();
+            ExecutorService executorService = Executors.newFixedThreadPool(4);
+            executorService = new DelegatingSecurityContextExecutorService(executorService, SecurityContextHolder.getContext());
+            Callable<TaskDetailDTOResponse> taskDetailCallable = () -> utilityService.getChargesForLoan(finalToken, loanDataBody);
+            Callable<LoanBasicDetailsDTOResponse> loanDetailCallable = () -> utilityService.getBasicLoanDetails(finalToken, loanIdNumber);
+            Callable<CustomerDetailDTOResponse> customerDetailCallable = () -> utilityService.getCustomerDetails(finalToken, loanIdNumber);
+            Callable<LoanSummaryResponseDTO> loanSummaryCallable = () -> utilityService.getLoanSummary(finalToken, loanIdNumber);
 
-            log.info("getBasicLoanDetails {}", loanDetailRes);
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanDetailRes, "success", Long.parseLong(loanId), HttpMethod.GET.name(), "getBasicLoanDetails?loanId=" + loanIdNumber);
+            Future<TaskDetailDTOResponse> taskDetailFuture = executorService.submit(taskDetailCallable);
+            Future<LoanBasicDetailsDTOResponse> loanDetailFuture = executorService.submit(loanDetailCallable);
+            Future<CustomerDetailDTOResponse> customerDetailFuture = executorService.submit(customerDetailCallable);
+            Future<LoanSummaryResponseDTO> loanSummaryFuture = executorService.submit(loanSummaryCallable);
 
-            customerRes = HTTPRequestService.<Object, CustomerDetailDTOResponse>builder()
-                    .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getCustomerDetails?loanId=" + loanIdNumber)
-                    .httpHeaders(httpHeaders)
-                    .typeResponseType(CustomerDetailDTOResponse.class)
-                    .build().call();
+            TaskDetailDTOResponse loanRes = taskDetailFuture.get(30, TimeUnit.SECONDS);
+            LoanBasicDetailsDTOResponse loanDetailRes = loanDetailFuture.get(30, TimeUnit.SECONDS);
+            CustomerDetailDTOResponse customerRes = customerDetailFuture.get(30, TimeUnit.SECONDS);
+            LoanSummaryResponseDTO loanSummaryResponse = loanSummaryFuture.get(30, TimeUnit.SECONDS);
 
-//            log.info("customer details {}", customerRes.getData());
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", Long.parseLong(loanId), HttpMethod.GET.name(), "getCustomerDetails?loanId=" + loanIdNumber);
-
-            LoanSummaryResponseDTO loanSummaryResponse = HTTPRequestService.<Object, LoanSummaryResponseDTO>builder()
-                    .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getLoanSummaryForLoan/" + loanIdNumber)
-                    .httpHeaders(httpHeaders)
-                    .typeResponseType(LoanSummaryResponseDTO.class)
-                    .build().call();
-
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, customerRes, "success", Long.parseLong(loanId), HttpMethod.POST.name(), "getLoanSummaryForLoan");
+            executorService.shutdown();
 
             if (Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", "vehicle")) {
                 collateralRes = utilityService.getCollaterals(loanIdNumber, token);
@@ -317,7 +299,7 @@ public class TaskServiceImpl implements TaskService {
             List<CustomerDetailsReturnResponseDTO> customerList = new ArrayList<>();
 
 
-            if (!(customerRes.getData() == null)) {
+            if (!customerRes.getData().isEmpty()) {
                 for (CustomerDataResponseDTO customerData : customerRes.getData()) {
                     if (customerData.getBasicInfo() != null) {
                         CustomerDetailsReturnResponseDTO customerDetails = new CustomerDetailsReturnResponseDTO();
@@ -331,21 +313,10 @@ public class TaskServiceImpl implements TaskService {
                         basicInfoApplicant.setMiddleName(customerData.getBasicInfo().getMiddleName());
                         basicInfoApplicant.setLastName(customerData.getBasicInfo().getLastName());
                         basicInfoApplicant.setDob(customerData.getBasicInfo().getDob());
-                        basicInfoApplicant.setDpd(dpd);
-                        basicInfoApplicant.setDpdBucket(dpdBucket);
-                        basicInfoApplicant.setDpdBgColor(dpdBgColor);
-                        basicInfoApplicant.setDpdTextColor(dpdTextColor);
-                        if (loanDetailRes.getData() != null) {
-                            basicInfoApplicant.setPos(loanDetailRes.getData().getPrincipalOutstanding());
-                            basicInfoApplicant.setLoanAmount(loanDetailRes.getData().getLoanAmount());
-                            basicInfoApplicant.setEmiAmount(loanDetailRes.getData().getEmiAmount());
-                            basicInfoApplicant.setLoanTenure(loanDetailRes.getData().getLoanTenure());
-                            basicInfoApplicant.setAssetClassification(loanDetailRes.getData().getAssetClassification());
-                        }
-                        basicInfoApplicant.setEmiDate("Pending LMS");
+
                         if (customerData.getCommunication() != null) {
                             for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
-                                if (!(communicationData.getAddressType() == null)) {
+                                if (!communicationData.getAddressType().isEmpty()) {
                                     address.put(communicationData.getAddressType(), communicationData.getFullAddress());
                                     if (!Objects.equals(communicationData.getPrimaryNumber(), "") && communicationData.getPrimaryNumber() != null) {
                                         numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getPrimaryNumber()));
@@ -364,7 +335,6 @@ public class TaskServiceImpl implements TaskService {
                         customerDetails.setAddress(address);
                         customerDetails.setNumbers(numbersReturnResponseDTO);
                         customerList.add(customerDetails);
-
                     }
                 }
             }
@@ -407,6 +377,18 @@ public class TaskServiceImpl implements TaskService {
             loanDetailsResponseDTO.setRepoStatus(repoStatus);
             loanDetailsResponseDTO.setRepoId(repoId);
             loanDetailsResponseDTO.setRepoCardShow(repoCardShow);
+            loanDetailsResponseDTO.setDpd(dpd);
+            loanDetailsResponseDTO.setDpdBucket(dpdBucket);
+            loanDetailsResponseDTO.setDpdBgColor(dpdBgColor);
+            loanDetailsResponseDTO.setDpdTextColor(dpdTextColor);
+            if (loanDetailRes.getData() != null) {
+                loanDetailsResponseDTO.setPos(loanDetailRes.getData().getPrincipalOutstanding());
+                loanDetailsResponseDTO.setLoanAmount(loanDetailRes.getData().getLoanAmount());
+                loanDetailsResponseDTO.setEmiAmount(loanDetailRes.getData().getEmiAmount());
+                loanDetailsResponseDTO.setLoanTenure(loanDetailRes.getData().getLoanTenure());
+                loanDetailsResponseDTO.setAssetClassification(loanDetailRes.getData().getAssetClassification());
+            }
+            loanDetailsResponseDTO.setEmiDate("Pending LMS");
             response.setCustomerDetails(customerList);
             response.setLoanDetails(loanDetailsResponseDTO);
             baseDTOResponse = new BaseDTOResponse<>(response);

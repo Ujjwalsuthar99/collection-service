@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
@@ -35,10 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -59,7 +57,7 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
 
 
     @Override
-    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, GeoLocationDTO geoLocationDTO, String userName) throws IOException {
+    public UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, GeoLocationDTO geoLocationDTO, String userName) throws Exception {
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
 
@@ -79,6 +77,11 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
             res.setData(null);
             return res;
         }
+
+        if (fileType.equals("unknown")) {
+            throw new CustomException("1016056");
+        }
+
         fileType = fileType.split("image/")[1];
         CurrentUserInfo currentUserInfo = new CurrentUserInfo();
         int randomNumber = (int) (100000 + Math.random() * 900000);
@@ -185,7 +188,15 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
                 }
             }
 
-
+            if (base64.isEmpty()) {
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, null, res, "failure", null, HttpMethod.POST.name(), "");
+                IntegrationServiceErrorResponseDTO integrationServiceErrorResponseDTO = new IntegrationServiceErrorResponseDTO();
+                integrationServiceErrorResponseDTO.setMessage("image base64 is empty");
+                integrationServiceErrorResponseDTO.setCode("00000");
+                res.setError(integrationServiceErrorResponseDTO);
+                res.setData(null);
+                return res;
+            }
             uploadImageOnS3DataRequestDTO.setFile(base64);
 
             res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
@@ -198,17 +209,19 @@ public class IntegrationConnectorServiceImpl implements IntegrationConnectorServ
 
             log.info("upload result {}", res);
             // setting userRefNo here
-            res.getData().setUserRefNo(userRefNo);
+            if (res.getData() != null) {
+                res.getData().setUserRefNo(userRefNo);
+            }
 
             // creating api logs
             uploadImageOnS3DataRequestDTO.setFile("base64 string");
             uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, res, "success", null, HttpMethod.POST.name(), "uploadImageOnS3");
         } catch (Exception ee) {
-            String errorMessage = ee.getMessage();
-            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "uploadImageOnS3");
             log.error("{}", ee.getMessage());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, null, uploadImageOnS3RequestDTO, utilityService.convertToJSON(ee.getMessage()), "failure", null, HttpMethod.POST.name(), "uploadImageOnS3");
+            res.setData(null);
+            throw new Exception(ee.getMessage());
         }
         return res;
     }

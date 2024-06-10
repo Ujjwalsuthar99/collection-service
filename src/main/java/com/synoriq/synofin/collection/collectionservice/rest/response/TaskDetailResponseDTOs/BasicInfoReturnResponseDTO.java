@@ -30,37 +30,7 @@ public class BasicInfoReturnResponseDTO {
     @JsonProperty("dob")
     public String dob;
 
-    @JsonProperty("loan_amount")
-    public Double loanAmount;
-
-    @JsonProperty("dpd")
-    public Integer dpd;
-
-    @JsonProperty("dpd_bucket")
-    public String dpdBucket;
-
-    @JsonProperty("dpd_bg_color")
-    public String dpdBgColor;
-
-    @JsonProperty("dpd_text_color")
-    public String dpdTextColor;
-
-    @JsonProperty("pos")
-    public Double pos;
-
-    @JsonProperty("asset_classification")
-    public String assetClassification;
-
-    @JsonProperty("loan_tenure")
-    public Integer loanTenure;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    @JsonProperty("emi_date")
-    public String emiDate;
-
-    @JsonProperty("emi_amount")
-    public Double emiAmount;
-
     @JsonProperty("address")
     public String address;
+
 }

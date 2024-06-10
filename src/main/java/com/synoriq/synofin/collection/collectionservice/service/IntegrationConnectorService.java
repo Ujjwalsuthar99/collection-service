@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DeleteImageOnS3ResponseDTO;
@@ -13,7 +14,7 @@ import java.io.IOException;
 
 public interface IntegrationConnectorService {
 
-    UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, GeoLocationDTO geoLocationDTO, String userName) throws IOException;
+    UploadImageOnS3ResponseDTO uploadImageOnS3(String token, MultipartFile imageData, String module, GeoLocationDTO geoLocationDTO, String userName) throws Exception;
     DownloadBase64FromS3ResponseDTO downloadBase64FromS3(String token, String userRefNo, String fileName, boolean isNativeFolder, boolean isCustomerPhotos) throws Exception;
     DeleteImageOnS3ResponseDTO deleteImageOnS3(String token, String userRefNo, String fileName) throws Exception;
     MasterDTOResponse sendOtp(String token, String mobileNumber) throws Exception;

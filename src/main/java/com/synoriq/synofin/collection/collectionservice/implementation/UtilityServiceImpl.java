@@ -13,6 +13,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs
 import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.UploadImageOnS3RequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
@@ -20,6 +21,10 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOR
 import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrlDTOs.ShortenUrlResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CustomerDetailDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanBasicDetailsDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanSummaryForLoanDTOs.LoanSummaryResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.TaskDetailDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.UsersDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
@@ -1021,6 +1026,99 @@ public class UtilityServiceImpl implements UtilityService {
             log.error("{}", e.getMessage());
         }
         return new BaseDTOResponse<Object>("UTR number not found");
+    }
+
+    @Override
+    public TaskDetailDTOResponse getChargesForLoan(String token, TaskDetailRequestDTO loanDataBody) throws Exception {
+        TaskDetailDTOResponse loanRes = new TaskDetailDTOResponse();
+        try {
+            loanRes = HTTPRequestService.<Object, TaskDetailDTOResponse>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url("http://localhost:1102/v1/getDataForLoanActions")
+                    .httpHeaders(UtilityService.createHeaders(token))
+                    .body(loanDataBody)
+                    .typeResponseType(TaskDetailDTOResponse.class)
+                    .build().call();
+
+            log.info("loan details jhadsuhbsduh {}", loanRes);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()), HttpMethod.POST.name(), "getDataForLoanActions");
+        } catch (Exception e) {
+            String errorMessage = e.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, modifiedErrorMessage, "failure", Long.parseLong(loanDataBody.getRequestData().getLoanId()), HttpMethod.GET.name(), "getDataForLoanActions");
+            log.error("{}", e.getMessage());
+        }
+        return loanRes;
+    }
+
+    @Override
+    public LoanBasicDetailsDTOResponse getBasicLoanDetails(String token, Long loanId) throws Exception {
+        LoanBasicDetailsDTOResponse loanRes = new LoanBasicDetailsDTOResponse();
+        try {
+            loanRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getBasicLoanDetails?loanId=" + loanId)
+                    .httpHeaders(UtilityService.createHeaders(token))
+                    .typeResponseType(LoanBasicDetailsDTOResponse.class)
+                    .build().call();
+
+            log.info("loan details jhadsuhbsduh {}", loanRes);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanRes, "success", loanId, HttpMethod.GET.name(), "getBasicLoanDetails?loanId=" + loanId);
+        } catch (Exception e) {
+            String errorMessage = e.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, modifiedErrorMessage, "success", loanId, HttpMethod.GET.name(), "getBasicLoanDetails?loanId=" + loanId);
+            log.error("{}", e.getMessage());
+        }
+        return loanRes;
+    }
+
+    @Override
+    public CustomerDetailDTOResponse getCustomerDetails(String token, Long loanId) throws Exception {
+        CustomerDetailDTOResponse customerRes = new CustomerDetailDTOResponse();
+        try {
+            customerRes = HTTPRequestService.<Object, CustomerDetailDTOResponse>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getCustomerDetails?loanId=" + loanId)
+                    .httpHeaders(UtilityService.createHeaders(token))
+                    .typeResponseType(CustomerDetailDTOResponse.class)
+                    .build().call();
+
+            log.info("customerRes details {}", customerRes);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", loanId, HttpMethod.GET.name(), "getCustomerDetails?loanId=" + loanId);
+        } catch (Exception e) {
+            String errorMessage = e.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, modifiedErrorMessage, "success", loanId, HttpMethod.GET.name(), "getCustomerDetails?loanId=" + loanId);
+            log.error("{}", e.getMessage());
+        }
+        return customerRes;
+    }
+
+    @Override
+    public LoanSummaryResponseDTO getLoanSummary(String token, Long loanId) throws Exception {
+        LoanSummaryResponseDTO summaryRes = new LoanSummaryResponseDTO();
+        try {
+            summaryRes = HTTPRequestService.<Object, LoanSummaryResponseDTO>builder()
+                    .httpMethod(HttpMethod.GET)
+                    .url("http://localhost:1102/v1/getLoanSummaryForLoan/" + loanId)
+                    .httpHeaders(UtilityService.createHeaders(token))
+                    .typeResponseType(LoanSummaryResponseDTO.class)
+                    .build().call();
+
+            log.info("summaryRes {}", summaryRes);
+            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, summaryRes, "success", loanId, HttpMethod.GET.name(), "getLoanSummaryForLoan?loanId=" + loanId);
+        } catch (Exception e) {
+            String errorMessage = e.getMessage();
+            String modifiedErrorMessage = convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, modifiedErrorMessage, "success", loanId, HttpMethod.GET.name(), "getLoanSummaryForLoan?loanId=" + loanId);
+            log.error("{}", e.getMessage());
+        }
+        return summaryRes;
     }
 
 }

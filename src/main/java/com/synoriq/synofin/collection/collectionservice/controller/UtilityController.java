@@ -142,7 +142,7 @@ public class UtilityController {
     public ResponseEntity<Object> uploadImageOnS3(@RequestHeader("Authorization") String token, @RequestParam("image") MultipartFile imageData,
                                                   @RequestParam("module") String module,
                                                   @RequestParam("latitude") String latitude,
-                                                  @RequestParam("longitude") String longitude) throws SQLException {
+                                                  @RequestParam("longitude") String longitude) throws Exception {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         UploadImageOnS3ResponseDTO result;
@@ -310,7 +310,7 @@ public class UtilityController {
     }
 
     @RequestMapping(value = "send-qr-code", method = RequestMethod.POST)
-    public ResponseEntity<Object> sendQrCode(@RequestHeader("Authorization") String token, @RequestBody DynamicQrCodeRequestDTO reqBody) {
+    public ResponseEntity<Object> sendQrCode(@RequestHeader("Authorization") String token, @RequestBody DynamicQrCodeRequestDTO reqBody) throws Exception {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         DynamicQrCodeResponseDTO result;
@@ -337,27 +337,10 @@ public class UtilityController {
     public ResponseEntity<Object> sendQrCodeNew(@RequestHeader("Authorization") String token,
                                                 @RequestParam("paymentReferenceImage") MultipartFile paymentReferenceImage,
                                                 @RequestParam("selfieImage") MultipartFile selfieImage,
-                                                @RequestParam("data") Object data) {
-        BaseDTOResponse<Object> baseResponse;
-        ResponseEntity<Object> response = null;
-        DynamicQrCodeResponseDTO result;
+                                                @RequestParam("data") Object data) throws Exception {
 
-        try {
-            result = qrCodeService.sendQrCodeNew(token, data, paymentReferenceImage, selfieImage);
-            if (result.getData() == null && result.getError() != null) {
-                response = new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
-            } else {
-                response = new ResponseEntity<>(result, HttpStatus.OK);
-            }
-        } catch (Exception e) {
-            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
-                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
-            } else {
-                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
-            }
-            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
-        }
-        return response;
+        DynamicQrCodeResponseDTO result = qrCodeService.sendQrCodeNew(token, data, paymentReferenceImage, selfieImage);
+        return new ResponseEntity<>(new BaseDTOResponse<>(result.getData()), HttpStatus.OK);
     }
 
     @RequestMapping(value = "get-qr-code-transaction-status", method = RequestMethod.POST)

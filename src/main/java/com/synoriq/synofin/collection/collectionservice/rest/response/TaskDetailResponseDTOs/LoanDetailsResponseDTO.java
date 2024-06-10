@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import software.amazon.ion.Decimal;
@@ -49,5 +50,37 @@ public class LoanDetailsResponseDTO {
 
     @JsonProperty("repo_card_show")
     private Boolean repoCardShow;
+
+    @JsonProperty("loan_amount")
+    public Double loanAmount;
+
+    @JsonProperty("dpd")
+    public Integer dpd;
+
+    @JsonProperty("dpd_bucket")
+    public String dpdBucket;
+
+    @JsonProperty("dpd_bg_color")
+    public String dpdBgColor;
+
+    @JsonProperty("dpd_text_color")
+    public String dpdTextColor;
+
+    @JsonProperty("pos")
+    public Double pos;
+
+    @JsonProperty("asset_classification")
+    public String assetClassification;
+
+    @JsonProperty("loan_tenure")
+    public Integer loanTenure;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonProperty("emi_date")
+    public String emiDate;
+
+    @JsonProperty("emi_amount")
+    public Double emiAmount;
+
 
 }

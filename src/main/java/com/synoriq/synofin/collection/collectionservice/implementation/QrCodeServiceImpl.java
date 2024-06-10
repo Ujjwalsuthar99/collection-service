@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.ConnectorException;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
@@ -26,11 +28,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +42,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
 import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.*;
@@ -189,8 +194,8 @@ public class QrCodeServiceImpl implements QrCodeService {
     }
 
     @Override
-    @Transactional(rollbackOn = Exception.class)
-    public DynamicQrCodeResponseDTO sendQrCodeNew(String token, Object data, MultipartFile paymentReferenceImage, MultipartFile selfieImage) throws Exception {
+    @Transactional(rollbackOn = RuntimeException.class)
+    public DynamicQrCodeResponseDTO sendQrCodeNew(String token, Object data, MultipartFile paymentReferenceImage, MultipartFile selfieImage) throws ConnectorException, Exception {
         log.info("Begin QR Generate");
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(String.valueOf(data));
@@ -226,10 +231,36 @@ public class QrCodeServiceImpl implements QrCodeService {
             ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(requestBody.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
 
             GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
-            UploadImageOnS3ResponseDTO paymentReference = integrationConnectorService.uploadImageOnS3(token, paymentReferenceImage, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
-            UploadImageOnS3ResponseDTO selfie = integrationConnectorService.uploadImageOnS3(token, selfieImage, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy());
 
-            Map<String, Object> imageMap = getStringObjectMap(paymentReference, selfie);
+            List<MultipartFile> allImages = new LinkedList<>();
+            if (paymentReferenceImage.getSize() > 0) {
+                allImages.add(paymentReferenceImage);
+            }
+            if (selfieImage.getSize() > 0) {
+                allImages.add(selfieImage);
+            }
+            log.info("paymentReferenceImage {}", paymentReferenceImage.getSize());
+            log.info("selfieImage {}", selfieImage.getSize());
+            ExecutorService executor = Executors.newFixedThreadPool(2);
+            executor = new DelegatingSecurityContextExecutorService(executor, SecurityContextHolder.getContext());
+            List<Future<UploadImageOnS3ResponseDTO>> allResults = new LinkedList<>();
+            for (MultipartFile image : allImages) {
+                allResults.add(executor.submit(() -> integrationConnectorService.uploadImageOnS3(token, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
+            }
+            executor.shutdown();
+            if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                throw new Exception("ExecutorService did not terminate in the specified time.");
+            }
+            // Wait for both image uploads to complete
+            Map<String, Object> imageMap = new HashMap<>();
+            int i = 1;
+            for (Future<UploadImageOnS3ResponseDTO> response : allResults) {
+                Map<String, Object> currentMap = UtilityService.getStringObjectMapCopy(response.get());
+                for (Map.Entry<String, Object> entry : currentMap.entrySet()) {
+                    imageMap.put("url" + i, entry.getValue());
+                    i++;
+                }
+            }
             receiptServiceDtoRequest.getActivityData().setImages(imageMap);
 
             // Checking UserLimit as it is exceeded or not with this amount
@@ -300,34 +331,21 @@ public class QrCodeServiceImpl implements QrCodeService {
 
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, res, "success", null, HttpMethod.POST.name(), "sendQrCode");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, res, "success", requestBody.getLoanId(), HttpMethod.POST.name(), "sendQrCode");
+        } catch (ConnectorException ee) {
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, modifiedErrorMessage, "failure", requestBody.getLoanId(), HttpMethod.POST.name(), "sendQrCode");
+            throw new ConnectorException(ErrorCode.S3_UPLOAD_DATA_ERROR, ee.getText(), HttpStatus.FAILED_DEPENDENCY, ee.getRequestId());
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, null, integrationRequestBody, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "sendQrCode");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, modifiedErrorMessage, "failure", requestBody.getLoanId(), HttpMethod.POST.name(), "sendQrCode");
             log.error("{}", ee.getMessage());
             throw new Exception(ee.getMessage());
         }
         log.info("Ending QR Generate");
         return res;
-    }
-
-    @NotNull
-    private static Map<String, Object> getStringObjectMap(UploadImageOnS3ResponseDTO paymentReference, UploadImageOnS3ResponseDTO selfie) {
-        String url1 = paymentReference.getData() != null ? paymentReference.getData().getFileName() : null;
-        String url2 = selfie.getData() != null ? selfie.getData().getFileName() : null;
-
-        // creating images Object
-        Map<String, Object> imageMap = new HashMap<>();
-        int i = 1;
-        if (url1 != null) {
-            imageMap.put("url" + i, url1);
-            i++;
-        }
-        if (url2 != null) {
-            imageMap.put("url" + i, url2);
-        }
-        return imageMap;
     }
 
 

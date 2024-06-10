@@ -5,6 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.ConnectorException;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.common.exception.DataLockException;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
@@ -30,10 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -491,8 +491,12 @@ public class ReceiptServiceImpl implements ReceiptService {
         try {
             // multithreading
             List<MultipartFile> allImages = new LinkedList<>();
-            allImages.add(paymentReferenceImage);
-            allImages.add(selfieImage);
+            if (paymentReferenceImage.getSize() > 0) {
+                allImages.add(paymentReferenceImage);
+            }
+            if (selfieImage.getSize() > 0) {
+                allImages.add(selfieImage);
+            }
             log.info("paymentReferenceImage {}", paymentReferenceImage.getSize());
             log.info("selfieImage {}", selfieImage.getSize());
             ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -508,10 +512,15 @@ public class ReceiptServiceImpl implements ReceiptService {
                     throw new Exception("ExecutorService did not terminate in the specified time.");
                 }
                 // Wait for both image uploads to complete
-                UploadImageOnS3ResponseDTO paymentReference = allResults.get(0).get();
-                UploadImageOnS3ResponseDTO selfie = allResults.get(1).get();
-
-                Map<String, Object> imageMap = getStringObjectMap(paymentReference, selfie);
+                Map<String, Object> imageMap = new HashMap<>();
+                int i = 1;
+                for (Future<UploadImageOnS3ResponseDTO> response : allResults) {
+                    Map<String, Object> currentMap = UtilityService.getStringObjectMapCopy(response.get());
+                    for (Map.Entry<String, Object> entry : currentMap.entrySet()) {
+                        imageMap.put("url" + i, entry.getValue());
+                        i++;
+                    }
+                }
                 receiptServiceDtoRequest.getActivityData().setImages(imageMap);
             }
             log.info("End time : {}", new Date().getTime());
@@ -665,81 +674,23 @@ public class ReceiptServiceImpl implements ReceiptService {
                 createCollectionReceipt(collectionReceiptMap, bearerToken);
                 setCollectionLimitUserWiseEntity(collectionLimitUser, receiptServiceDtoRequest, currentReceiptAmountAllowed);
 
-
-                // multi receipt for particular clients
-                String multiReceiptClientCredentials = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MULTI_RECEIPT_CLIENT_CREDENTIALS);
-                if (!multiReceiptClientCredentials.equals("false")) {
-                    ArrayList<Map<String, Object>> list = new ObjectMapper().readValue(multiReceiptClientCredentials, new TypeReference<ArrayList<Map<String, Object>>>() { });
-                    ExecutorService executor2 = Executors.newFixedThreadPool(2);
-                    for (Map<String, Object> map : list) {
-                        String token = utilityService.getTokenByApiKeySecret(map);
-
-                        executor2 = new DelegatingSecurityContextExecutorService(executor2, SecurityContextHolder.getContext());
-                        allResults = new LinkedList<>();
-                        for (MultipartFile image : allImages) {
-                            allResults.add(executor2.submit(() -> integrationConnectorService.uploadImageOnS3(token, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
-                        }
-                        executor2.shutdown();
-                        if (!executor2.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
-                            throw new Exception("ExecutorService did not terminate in the specified time.");
-                        }
-
-                        // Wait for both image uploads to complete
-                        UploadImageOnS3ResponseDTO paymentReference = allResults.get(0).get();
-                        UploadImageOnS3ResponseDTO selfie = allResults.get(1).get();
-
-                        Map<String, Object> imageMapMulti = getStringObjectMap(paymentReference, selfie);
-                        receiptServiceDtoRequest.getActivityData().setImages(imageMapMulti);
-                        ServiceRequestSaveResponse multiReceiptResponse = multiReceiptAfterReceipt(receiptServiceDtoRequest, token);
-
-                        updatedRemarks = CREATE_RECEIPT;
-                        updatedRemarks = updatedRemarks.replace("{receipt_number}", multiReceiptResponse.getData().getServiceRequestId().toString());
-                        updatedRemarks = updatedRemarks.replace("{loan_number}", receiptServiceDtoRequest.getRequestData().getLoanId());
-                        receiptServiceDtoRequest.getActivityData().setRemarks(updatedRemarks);
-
-                        // calling activity logs API for lifpl client
-                        String url = "http://localhost:1101/v1/";
-
-                        HttpHeaders httpHeader = new HttpHeaders();
-                        httpHeader.add("Content-Type", "application/json");
-                        httpHeader.setBearerAuth(token);
-
-                        ResponseEntity<Object> activityResponse = new RestTemplate().exchange(
-                                url + "activity-logs",
-                                HttpMethod.POST,
-                                new HttpEntity<>(receiptServiceDtoRequest.getActivityData(), httpHeader),
-                                Object.class
-                        );
-                        log.info("here^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-                        Map<String, Object> baseResponse = objectMapper.convertValue(activityResponse.getBody(), Map.class);
-                        collectionActivityId = Long.parseLong(baseResponse.get("data").toString());
-                        log.info("**********************************************reached");
-
-                        Map<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("service_request_id", multiReceiptResponse.getData().getServiceRequestId());
-                        hashMap.put("user_id", receiptServiceDtoRequest.getActivityData().getUserId());
-                        hashMap.put("activity_id", collectionActivityId);
-                        log.info("hashMap {}", hashMap);
-                        new RestTemplate().exchange(
-                                url + "create-collection-receipt",
-                                HttpMethod.POST,
-                                new HttpEntity<>(hashMap, httpHeader),
-                                Object.class
-                        );
-                    }
-                }
             } else {
                 return res;
             }
 
-
+        } catch (ConnectorException ee) {
+            String modifiedErrorMessage = utilityService.convertToJSON(ee.getMessage());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest, modifiedErrorMessage, "failure", receiptServiceDtoRequest.getActivityData().getLoanId(), HttpMethod.POST.name(), "createReceipt");
+            throw new ConnectorException(ErrorCode.S3_UPLOAD_DATA_ERROR, ee.getText(), HttpStatus.FAILED_DEPENDENCY, ee.getRequestId());
         } catch (Exception ee) {
-            log.error("error occurred", ee);
-            log.error("error message {}", ee.getMessage());
-            String errorMessage = ee.getMessage();
-            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            log.error("error occurred {} -> message -> {}", ee, ee.getMessage());
+            String modifiedErrorMessage = utilityService.convertToJSON(ee.getMessage());
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.create_receipt, receiptServiceDtoRequest.getActivityData().getUserId(), receiptServiceDtoRequest, modifiedErrorMessage, "failure", receiptServiceDtoRequest.getActivityData().getLoanId(), HttpMethod.POST.name(), "createReceipt");
+            if (ee.getMessage().contains("Custom")) {
+                CustomException customException = (CustomException) ee.getCause();
+                throw new Exception(customException.getText());
+            }
             throw new Exception(ee.getMessage());
         } finally {
             // Release the lock
@@ -784,23 +735,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         return collectionLimitUserWiseEntity;
     }
 
-    @NotNull
-    private static Map<String, Object> getStringObjectMap(UploadImageOnS3ResponseDTO paymentReference, UploadImageOnS3ResponseDTO selfie) {
-        String url1 = paymentReference.getData() != null ? paymentReference.getData().getFileName() : null;
-        String url2 = selfie.getData() != null ? selfie.getData().getFileName() : null;
 
-        // creating images Object
-        Map<String, Object> imageMap = new HashMap<>();
-        int i = 1;
-        if (url1 != null) {
-            imageMap.put("url" + i, url1);
-            i++;
-        }
-        if (url2 != null) {
-            imageMap.put("url" + i, url2);
-        }
-        return imageMap;
-    }
 
     private ServiceRequestSaveResponse multiReceiptAfterReceipt(ReceiptServiceDtoRequest receiptServiceDtoRequest, String token) throws Exception {
         log.info("Begin multiReceiptAfterReceipt");

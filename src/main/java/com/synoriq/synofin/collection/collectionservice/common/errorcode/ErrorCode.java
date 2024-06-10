@@ -206,7 +206,9 @@ public enum ErrorCode {
     FOLLOWUP_CLOSED_RECEIPT_ID(1016051, "FollowUp was already closed using this Receipt Id"),
     QR_CODE_DATA_NULL(1016052, "Getting Error from bank side while generating QR Code"),
     RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT_QR_CODE(1016053, "Yo do not have such limit to generate the QR code, contact with IT team"),
-    UNABLE_TO_CREATE_FOLLOW(1016054, "Follow up already exists on this loan in pending stage");
+    UNABLE_TO_CREATE_FOLLOW(1016054, "Follow up already exists on this loan in pending stage"),
+    S3_UPLOAD_DATA_ERROR(1016055, "Image isn't uploaded on S3, Kindly contact to admin team"),
+    IMAGE_TYPE_UNSUPPORTED(1016056, "Image format not supported, Allowed format: jpeg, png, jpg");
     private Integer codeValue;
     private String responseMessage;
 

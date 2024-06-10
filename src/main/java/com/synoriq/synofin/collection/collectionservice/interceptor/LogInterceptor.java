@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.controller;
+package com.synoriq.synofin.collection.collectionservice.interceptor;
 
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import org.apache.commons.lang3.StringUtils;
