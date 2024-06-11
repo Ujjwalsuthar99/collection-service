@@ -173,7 +173,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Object getTaskDetailByLoanId(String token, TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
         BaseDTOResponse<Object> collateralRes;
-
+        log.info("before token {}", token);
         LoanDetailsResponseDTO loanDetailsResponseDTO = new LoanDetailsResponseDTO();
 
         TaskDetailRequestDTO loanDataBody = new ObjectMapper().convertValue(taskDetailRequestDTO, TaskDetailRequestDTO.class);
@@ -187,6 +187,7 @@ public class TaskServiceImpl implements TaskService {
             String generatedToken = utilityService.getTokenByApiKeySecret(list.get(0));
             token = "Bearer "+ generatedToken;
         }
+        log.info("after token {}", token);
         String finalToken = token;
         try {
             // lms/loan-modification/v1/service-request/getDataForLoanActions
@@ -195,6 +196,7 @@ public class TaskServiceImpl implements TaskService {
 //            CustomerDetailDTOResponse customerRes = utilityService.getCustomerDetails(token, loanIdNumber);
 //            LoanSummaryResponseDTO loanSummaryResponse = utilityService.getLoanSummary(token, loanIdNumber);
 
+            log.info("final token {}", finalToken);
 
             ExecutorService executorService = Executors.newFixedThreadPool(4);
             executorService = new DelegatingSecurityContextExecutorService(executorService, SecurityContextHolder.getContext());
@@ -214,6 +216,8 @@ public class TaskServiceImpl implements TaskService {
             LoanSummaryResponseDTO loanSummaryResponse = loanSummaryFuture.get(30, TimeUnit.SECONDS);
 
             executorService.shutdown();
+
+            log.info("loan charges {}", loanRes);
 
             if (Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", "vehicle")) {
                 collateralRes = utilityService.getCollaterals(loanIdNumber, token);
