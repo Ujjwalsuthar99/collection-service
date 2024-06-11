@@ -350,8 +350,6 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
                 }
             }
-            // duplicate receipt transfer for LIFC requirement
-            duplicateReceiptTransfer(receiptTransferDtoRequest, transferProof);
 
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getCode());
@@ -1164,34 +1162,4 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
         }
     }
 
-    private void duplicateReceiptTransfer(ReceiptTransferDtoRequest receiptTransferDtoRequest, MultipartFile transferProof) throws Exception {
-
-        try {
-            String multiReceiptClientCredentials = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MULTI_RECEIPT_CLIENT_CREDENTIALS);
-            if (!multiReceiptClientCredentials.equals("false")) {
-                ArrayList<Map<String, Object>> list = new ObjectMapper().readValue(multiReceiptClientCredentials, new TypeReference<ArrayList<Map<String, Object>>>() {
-                });
-                for (Map<String, Object> map : list) {
-                    String token = utilityService.getTokenByApiKeySecret(map);
-                    String env = springProfile.equals("pre-prod") ? "preprod" : springProfile.equals("prod") ? "prod2" : springProfile;
-//                    String url = "https://api-" + env + ".synofin.tech/collection-service/v1/receipt-transfer/generate-new";
-                    String url = "http://localhost:1101/v1/receipt-transfer/generate-new";
-                    HttpHeaders httpHeader = new HttpHeaders();
-                    httpHeader.setBearerAuth(token);
-                    HttpEntity<byte[]> fileEntity = utilityService.prepareMultipartFile(transferProof);
-                    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-                    body.add("transfer_proof", fileEntity);
-                    body.add("data", receiptTransferDtoRequest);
-                    ResponseEntity<Object> receiptTransferResponse = new RestTemplate().exchange(
-                            url,
-                            HttpMethod.POST,
-                            new HttpEntity<>(body, httpHeader),
-                            Object.class
-                    );
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-    }
 }

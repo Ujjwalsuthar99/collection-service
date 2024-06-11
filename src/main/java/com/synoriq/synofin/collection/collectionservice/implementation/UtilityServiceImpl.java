@@ -1032,10 +1032,13 @@ public class UtilityServiceImpl implements UtilityService {
     public TaskDetailDTOResponse getChargesForLoan(String token, TaskDetailRequestDTO loanDataBody) throws Exception {
         TaskDetailDTOResponse loanRes = new TaskDetailDTOResponse();
         try {
+            HttpHeaders httpHeaders = UtilityService.createHeaders(token);
+            log.info("httpHeaders {}", httpHeaders);
+
             loanRes = HTTPRequestService.<Object, TaskDetailDTOResponse>builder()
                     .httpMethod(HttpMethod.POST)
                     .url("http://localhost:1102/v1/getDataForLoanActions")
-                    .httpHeaders(UtilityService.createHeaders(token))
+                    .httpHeaders(httpHeaders)
                     .body(loanDataBody)
                     .typeResponseType(TaskDetailDTOResponse.class)
                     .build().call();
