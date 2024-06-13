@@ -674,6 +674,74 @@ public class ReceiptServiceImpl implements ReceiptService {
                 createCollectionReceipt(collectionReceiptMap, bearerToken);
                 setCollectionLimitUserWiseEntity(collectionLimitUser, receiptServiceDtoRequest, currentReceiptAmountAllowed);
 
+
+                // multi receipt for particular clients
+                String multiReceiptClientCredentials = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MULTI_RECEIPT_CLIENT_CREDENTIALS);
+                if (!multiReceiptClientCredentials.equals("false")) {
+                    ArrayList<Map<String, Object>> list = new ObjectMapper().readValue(multiReceiptClientCredentials, new TypeReference<ArrayList<Map<String, Object>>>() { });
+                    ExecutorService executor2 = Executors.newFixedThreadPool(2);
+                    for (Map<String, Object> map : list) {
+                        String token = utilityService.getTokenByApiKeySecret(map);
+
+                        executor2 = new DelegatingSecurityContextExecutorService(executor2, SecurityContextHolder.getContext());
+                        for (MultipartFile image : allImages) {
+                            allResults.add(executor2.submit(() -> integrationConnectorService.uploadImageOnS3(bearerToken, image, "create_receipt", geoLocationDTO, receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy())));
+                        }
+                        executor2.shutdown();
+                        if (!executor2.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                            throw new Exception("ExecutorService did not terminate in the specified time.");
+                        }
+
+                        // Wait for both image uploads to complete
+                        Map<String, Object> imageMap = new HashMap<>();
+                        int i = 1;
+                        for (Future<UploadImageOnS3ResponseDTO> response : allResults) {
+                            Map<String, Object> currentMap = UtilityService.getStringObjectMapCopy(response.get());
+                            for (Map.Entry<String, Object> entry : currentMap.entrySet()) {
+                                imageMap.put("url" + i, entry.getValue());
+                                i++;
+                            }
+                        }
+                        receiptServiceDtoRequest.getActivityData().setImages(imageMap);
+                        ServiceRequestSaveResponse multiReceiptResponse = multiReceiptAfterReceipt(receiptServiceDtoRequest, token);
+
+                        updatedRemarks = CREATE_RECEIPT;
+                        updatedRemarks = updatedRemarks.replace("{receipt_number}", multiReceiptResponse.getData().getServiceRequestId().toString());
+                        updatedRemarks = updatedRemarks.replace("{loan_number}", receiptServiceDtoRequest.getRequestData().getLoanId());
+                        receiptServiceDtoRequest.getActivityData().setRemarks(updatedRemarks);
+
+                        // calling activity logs API for lifpl client
+                        String url = "http://localhost:1101/v1/";
+
+                        HttpHeaders httpHeader = new HttpHeaders();
+                        httpHeader.add("Content-Type", "application/json");
+                        httpHeader.setBearerAuth(token);
+
+                        ResponseEntity<Object> activityResponse = new RestTemplate().exchange(
+                                url + "activity-logs",
+                                HttpMethod.POST,
+                                new HttpEntity<>(receiptServiceDtoRequest.getActivityData(), httpHeader),
+                                Object.class
+                        );
+                        log.info("here^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                        Map<String, Object> baseResponse = objectMapper.convertValue(activityResponse.getBody(), Map.class);
+                        collectionActivityId = Long.parseLong(baseResponse.get("data").toString());
+                        log.info("**********************************************reached");
+
+                        Map<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("service_request_id", multiReceiptResponse.getData().getServiceRequestId());
+                        hashMap.put("user_id", receiptServiceDtoRequest.getActivityData().getUserId());
+                        hashMap.put("activity_id", collectionActivityId);
+                        log.info("hashMap {}", hashMap);
+                        new RestTemplate().exchange(
+                                url + "create-collection-receipt",
+                                HttpMethod.POST,
+                                new HttpEntity<>(hashMap, httpHeader),
+                                Object.class
+                        );
+                    }
+                }
+
             } else {
                 return res;
             }
