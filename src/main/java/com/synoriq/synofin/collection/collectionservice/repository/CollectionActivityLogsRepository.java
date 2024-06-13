@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogResponseDTO;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -16,12 +17,27 @@ public interface CollectionActivityLogsRepository extends PagingAndSortingReposi
 
     CollectionActivityLogsEntity findByCollectionActivityLogsId(Long activityLogId);
 
-    @Query(nativeQuery = true,value = "select * from collection.collection_activity_logs where activity_by = :userId " +
-            "and activity_date between :fromDate and :toDate order by activity_date desc")
-    List<CollectionActivityLogsEntity> getActivityLogsUserWIseByDuration(@Param("userId") Long userId, @Param("fromDate")Date fromDate
+//    @Query(nativeQuery = true,value = "select * from collection.collection_activity_logs where activity_by = :userId " +
+//            "and activity_date between :fromDate and :toDate order by activity_date desc")
+//    List<CollectionActivityLogsEntity> getActivityLogsUserWIseByDuration(@Param("userId") Long userId, @Param("fromDate")Date fromDate
+//            , @Param("toDate") Date toDate, Pageable pageable);
+
+    @Query(value = "SELECT new com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogResponseDTO(cal.collectionActivityLogsId,\n" +
+            "cal.activityDate,\n" +
+            "cal.activityBy,\n" +
+            "cal.loanId,\n" +
+            "cal.remarks,\n" +
+            "cal.activityName,\n" +
+            "cal.address,\n" +
+            "cal.images,\n" +
+            "cal.geolocation,\n" +
+            "cal.distanceFromUserBranch,\n" +
+            "cal.batteryPercentage)\n" +
+            " FROM CollectionActivityLogsEntity cal WHERE cal.activityBy = :userId and cal.activityDate between :fromDate and :toDate ORDER BY cal.activityDate DESC")
+    List<ActivityLogResponseDTO> getActivityLogsUserWIseByDuration(@Param("userId") Long userId, @Param("fromDate")Date fromDate
             , @Param("toDate") Date toDate, Pageable pageable);
 
-    @Query(nativeQuery = true,value = "select\n" +
+   @Query(nativeQuery = true,value = "select\n" +
             "\tcal.collection_activity_logs_id as collection_activity_logs_id,\n" +
             "\t(select u.username from master.users u where u.user_id = cal.activity_by) as user_name,\n" +
             "\tcal.battery_percentage,\n" +

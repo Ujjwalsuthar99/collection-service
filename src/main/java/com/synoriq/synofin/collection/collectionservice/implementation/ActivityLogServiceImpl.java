@@ -63,44 +63,16 @@ public class ActivityLogServiceImpl implements ActivityLogService {
 
     @Override
     public BaseDTOResponse<Object> getActivityLogsByUserIdWithDuration(Integer page, Integer size, Long userId, Date fromDate, Date endDate) throws Exception {
-
-        Date toDate = checkToDate(endDate);
-
-        BaseDTOResponse<Object> response;
-
-        Pageable pageable = PageRequest.of(page, size);
-        List<CollectionActivityLogsEntity> collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsUserWIseByDuration(userId, fromDate, toDate, pageable);
-        if (page > 0) {
-            if (collectionActivityLogs.size() == 0) {
-                return new BaseDTOResponse<>(collectionActivityLogs);
-            }
-        }
-
-        List<ActivityLogResponseDTO> activityLogResponsDTOS = new LinkedList<>();
-        if (!collectionActivityLogs.isEmpty()) {
-            for (CollectionActivityLogsEntity collectionActivityLogsEntity : collectionActivityLogs) {
-
-                ActivityLogResponseDTO activityLogResponseDTO = new ActivityLogResponseDTO();
-                activityLogResponseDTO.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
-                activityLogResponseDTO.setLoanId(collectionActivityLogsEntity.getLoanId());
-                activityLogResponseDTO.setUserId(collectionActivityLogsEntity.getActivityBy());
-                activityLogResponseDTO.setActivityDate(collectionActivityLogsEntity.getActivityDate());
-                activityLogResponseDTO.setActivityName(collectionActivityLogsEntity.getActivityName());
-                activityLogResponseDTO.setAddress(collectionActivityLogsEntity.getAddress());
-                activityLogResponseDTO.setGeolocation(collectionActivityLogsEntity.getGeolocation());
-                activityLogResponseDTO.setImages(collectionActivityLogsEntity.getImages());
-                activityLogResponseDTO.setRemarks(collectionActivityLogsEntity.getRemarks());
-                activityLogResponseDTO.setBatteryPercentage(collectionActivityLogsEntity.getBatteryPercentage());
-
-                activityLogResponsDTOS.add(activityLogResponseDTO);
-            }
-
-            response = new BaseDTOResponse<>(activityLogResponsDTOS);
-            return response;
-        } else {
-            return new BaseDTOResponse<>(activityLogResponsDTOS);
+        try {
+            Date toDate = checkToDate(endDate);
+            Pageable pageable = PageRequest.of(page, size);
+            List<ActivityLogResponseDTO> collectionActivityLogs = collectionActivityLogsRepository.getActivityLogsUserWIseByDuration(userId, fromDate, toDate, pageable);
+            return new BaseDTOResponse<>(collectionActivityLogs);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
         }
     }
+
 
     @Override
     public ActivityLogBaseResponseDTO getActivityLogsByLoanIdWithDuration(Integer page, Integer size, Long loanId, Date fromDate, Date endDate, String filterBy) throws Exception {
