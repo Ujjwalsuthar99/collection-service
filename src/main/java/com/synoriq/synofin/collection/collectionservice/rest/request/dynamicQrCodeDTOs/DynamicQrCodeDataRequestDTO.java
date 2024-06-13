@@ -27,5 +27,7 @@ public class DynamicQrCodeDataRequestDTO {
     @JsonProperty("lastName")
     private String lastName;
 
+    @JsonProperty("validity_end_date_time")
+    private String validityEndDateTime;
 
 }

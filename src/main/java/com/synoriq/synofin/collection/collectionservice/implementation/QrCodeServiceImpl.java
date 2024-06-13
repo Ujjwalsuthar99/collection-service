@@ -11,6 +11,7 @@ import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivit
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionLimitUserWiseRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.DigitalPaymentTransactionsRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
@@ -41,6 +42,11 @@ import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,6 +54,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.QR_CODE_EXPIRATION_CONF;
 import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.*;
 
 @Slf4j
@@ -55,26 +62,29 @@ import static com.synoriq.synofin.collection.collectionservice.common.PaymentRel
 public class QrCodeServiceImpl implements QrCodeService {
 
 
-    @Autowired
-    CollectionActivityLogsRepository collectionActivityLogsRepository;
+    public QrCodeServiceImpl(CollectionActivityLogsRepository collectionActivityLogsRepository, DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository,
+                             ConsumedApiLogService consumedApiLogService, UtilityService utilityService, ReceiptService receiptService, IntegrationConnectorService integrationConnectorService,
+                             CollectionLimitUserWiseRepository collectionLimitUserWiseRepository, CollectionConfigurationsRepository collectionConfigurationsRepository) {
+        this.utilityService = utilityService;
+        this.consumedApiLogService = consumedApiLogService;
+        this.receiptService = receiptService;
+        this.integrationConnectorService = integrationConnectorService;
+        this.collectionActivityLogsRepository = collectionActivityLogsRepository;
+        this.collectionLimitUserWiseRepository = collectionLimitUserWiseRepository;
+        this.digitalPaymentTransactionsRepository = digitalPaymentTransactionsRepository;
+        this.collectionConfigurationsRepository = collectionConfigurationsRepository;
+    }
 
-    @Autowired
-    DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository;
+    public final CollectionActivityLogsRepository collectionActivityLogsRepository;
+    public final DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository;
+    public final ConsumedApiLogService consumedApiLogService;
+    public final UtilityService utilityService;
+    public final ReceiptService receiptService;
+    public final IntegrationConnectorService integrationConnectorService;
+    public final CollectionLimitUserWiseRepository collectionLimitUserWiseRepository;
+    public final CollectionConfigurationsRepository collectionConfigurationsRepository;
 
-    @Autowired
-    ConsumedApiLogService consumedApiLogService;
 
-    @Autowired
-    UtilityService utilityService;
-
-    @Autowired
-    ReceiptService receiptService;
-
-    @Autowired
-    IntegrationConnectorService integrationConnectorService;
-
-    @Autowired
-    CollectionLimitUserWiseRepository collectionLimitUserWiseRepository;
 
 
     @Override
@@ -200,16 +210,24 @@ public class QrCodeServiceImpl implements QrCodeService {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(String.valueOf(data));
         DynamicQrCodeRequestDTO requestBody = objectMapper.convertValue(jsonNode, DynamicQrCodeRequestDTO.class);
-
+        // always add 1 minute extra in DB
+        int expirationMinutes = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(QR_CODE_EXPIRATION_CONF));
         DynamicQrCodeResponseDTO res;
         DynamicQrCodeDataRequestDTO integrationDataRequestBody = new DynamicQrCodeDataRequestDTO();
         DynamicQrCodeIntegrationDataRequestDTO integrationRequestBody = new DynamicQrCodeIntegrationDataRequestDTO();
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.MINUTE, expirationMinutes);
+        String validityTime = simpleDateFormat.format(cal.getTime());
 
         integrationDataRequestBody.setAmount(String.valueOf(requestBody.getAmount()));
         integrationDataRequestBody.setPayerAccount(requestBody.getPayerAccount());
         integrationDataRequestBody.setPayerIFSC(requestBody.getPayerIFSC());
         integrationDataRequestBody.setFirstName(requestBody.getFirstName());
         integrationDataRequestBody.setLastName(requestBody.getLastName());
+        integrationDataRequestBody.setValidityEndDateTime(validityTime);
         String billNumber;
         String merchantTransId;
         if (requestBody.getVendor().equals(KOTAK_VENDOR)) {
