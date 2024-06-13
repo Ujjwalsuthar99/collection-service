@@ -346,6 +346,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 baseResponse = new BaseDTOResponse<>(receiptTransferEntity);
 
                 if(airtelDepositTransferMode.equals("true")) {
+                    receiptTransferDtoRequest.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
                     DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = getDigitalPaymentTransactionsEntity(receiptTransferDtoRequest);
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
                 }
