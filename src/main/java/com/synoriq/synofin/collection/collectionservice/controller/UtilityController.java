@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.collectionIncentiveDTOs.CollectionIncentiveRequestDTOs;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeCallBackRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeStatusCheckRequestDTO;
@@ -553,13 +554,13 @@ public class UtilityController {
     }
 
     @RequestMapping(value = "getCollectionIncentiveData", method = RequestMethod.POST)
-    public ResponseEntity<Object> getCollectionIncentiveData(@RequestHeader("Authorization") String bearerToken, @RequestParam("start_date") String startDate, @RequestParam("end_date") String endDate) throws SQLException {
+    public ResponseEntity<Object> getCollectionIncentiveData(@RequestHeader("Authorization") String bearerToken, @RequestBody CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) throws SQLException {
         BaseDTOResponse<Object> baseResponse;
         Object dateResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            dateResponse = utilityService.getCollectionIncentiveData(bearerToken, startDate, endDate);
+            dateResponse = utilityService.getCollectionIncentiveData(bearerToken, collectionIncentiveRequestDTOs);
             response = new ResponseEntity<>(dateResponse, HttpStatus.OK);
         } catch (Exception e) {
             if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
