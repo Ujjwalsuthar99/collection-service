@@ -7,6 +7,7 @@ import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUser
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.AuthorizationResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.request.collectionIncentiveDTOs.CollectionIncentiveRequestDTOs;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.UploadImageOnS3DataRequestDTO;
@@ -1136,7 +1137,7 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public Object getCollectionIncentiveData(String token, String startDate, String endDate) throws Exception {
+    public Object getCollectionIncentiveData(String token, CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) throws Exception {
 
         String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
         String password = rsaUtils.getPassword(currentUserInfo.getClientId());
@@ -1145,8 +1146,8 @@ public class UtilityServiceImpl implements UtilityService {
         List<Map<String, Object>> collectionDetails = receiptRepository.getCollectionIncentiveUsers();
 
         String dateWhereClause = " ";
-        if(!startDate.isEmpty()) {
-            dateWhereClause = " and sr.created_date between " + "'" + startDate + "'" + " and " + "'" + endDate + "'";
+        if(collectionIncentiveRequestDTOs.getStartDate() != null) {
+            dateWhereClause = " and sr.created_date between " + "'" + collectionIncentiveRequestDTOs.getStartDate() + "'" + " and " + "'" + collectionIncentiveRequestDTOs.getEndDate() + "'";
         }
         for (Map<String, Object> user : collectionDetails) {
 
@@ -1177,18 +1178,18 @@ public class UtilityServiceImpl implements UtilityService {
                             "\tfrom\n" +
                             "\t\tmaster.users\n" +
                             "\twhere\n" +
-                            "\t\tusername = ?4) " + dateWhereClause
+                            "\t\tusername = ?4) " + dateWhereClause, Tuple.class
             );
 
             query.setParameter(1, encryptionKey);
             query.setParameter(2, password);
             query.setParameter(3, piiPermission);
             query.setParameter(4, String.valueOf(user.get("co_id")));
-            Object userLoanDetails = query.getResultList();
-
+            List<Tuple> userLoanDetails = query.getResultList();
+            ;
 //            List<Map<String, Object>> userLoanDetails = receiptRepository.getLoanDetailsOfUserForIncentive(String.valueOf(user.get("co_id")), encryptionKey, password, piiPermission, dateWhereClause);
             Map<String, Object> newUser = new HashMap<>(user);
-            newUser.put("loan_details", userLoanDetails);
+            newUser.put("loan_details", this.formatDigitalSiteVisitData(userLoanDetails));
             response.add(newUser);
         }
 
