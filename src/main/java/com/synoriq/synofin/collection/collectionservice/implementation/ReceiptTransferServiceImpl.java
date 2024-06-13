@@ -346,6 +346,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                 baseResponse = new BaseDTOResponse<>(receiptTransferEntity);
 
                 if(airtelDepositTransferMode.equals("true")) {
+                    receiptTransferDtoRequest.setReceiptTransferId(receiptTransferEntity.getReceiptTransferId());
                     DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = getDigitalPaymentTransactionsEntity(receiptTransferDtoRequest);
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
                 }
@@ -1050,6 +1051,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             Optional<DigitalPaymentTransactionsEntity> digitalPaymentTransactions = Optional.ofNullable(digitalPaymentTransactionsRepository.findByMerchantTranId(receiptTransferId.toString()));
             if(digitalPaymentTransactions.isPresent()) {
                 digitalPaymentTransactions.get().setUtrNumber(requestBody.getUtrNumber());
+                digitalPaymentTransactions.get().setStatus("success");
                 digitalPaymentTransactions.get().setCallBackRequestBody(requestBody);
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactions.get());
             }

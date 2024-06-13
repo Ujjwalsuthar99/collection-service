@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -309,4 +308,33 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
 
     @Query(nativeQuery = true, value = "select * from master.bank_accounts where bank_account_id = :bankAccountId")
     Map<String, Object> getBankAccountDetails(@Param("bankAccountId") Long bankAccountId);
+
+    @Query(nativeQuery = true, value = "select \n" +
+            "(select username from master.users where user_id = sr.created_by) as co_id, \n" +
+            "(select b.branch_name from master.branch b join master.users u on b.branch_code = u.reporting_branch where u.user_id = sr.created_by) as co_branch\n" +
+            "from lms.service_request sr join collection.collection_receipts cr on sr.service_request_id = cr.receipt_id where (select username from master.users where user_id = sr.created_by) != '' group by  sr.created_by")
+    List<Map<String, Object>> getCollectionIncentiveUsers();
+
+    @Query(nativeQuery = true, value = "select\n" +
+            "\tconcat(lms.decrypt_data(c.first_name, :encryptionKey, :password, :piiPermission), ' ', lms.decrypt_data(c.last_name, :encryptionKey, :password, :piiPermission)) as customer_name,\n" +
+            "\tla.loan_application_number as loan_account_number,\n" +
+            "\tla.disbursal_date,\n" +
+            "\tla.branch,\n" +
+            "\tla.emi_amount,\n" +
+            "\tla.disbursed_amount,\n" +
+            "\tla.installment_plan,\n" +
+            "\tla.installment_frequency\n" +
+            "from\n" +
+            "\tcollection.collection_receipts cr\n" +
+            "join lms.service_request sr on\n" +
+            "\tcr.receipt_id = sr.service_request_id\n" +
+            "join lms.loan_application la on\n" +
+            "\tsr.loan_id = la.loan_application_id\n" +
+            "join lms.customer_loan_mapping clm on\n" +
+            "\tla.loan_application_id = clm.loan_id\n" +
+            "join lms.customer c on\n" +
+            "\tclm.customer_id = c.customer_id\n" +
+            "where\n" +
+            "\tsr.created_by = (select user_id from master.users where username = :userName) :whereClause")
+    List<Map<String, Object>> getLoanDetailsOfUserForIncentive(@Param("userName") String userName, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, @Param("whereClause") String whereClause);
 }

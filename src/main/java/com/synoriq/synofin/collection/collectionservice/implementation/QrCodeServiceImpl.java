@@ -93,8 +93,8 @@ public class QrCodeServiceImpl implements QrCodeService {
         String billNumber;
         String merchantTransId;
         if (requestBody.getVendor().equals(KOTAK_VENDOR)) {
-            billNumber = "." + requestBody.getLoanId() + "." + System.currentTimeMillis();
-            merchantTransId = "." + requestBody.getLoanId() + "." + System.currentTimeMillis();
+            billNumber = requestBody.getLoanId() + "KOTAK" + System.currentTimeMillis();
+            merchantTransId = requestBody.getLoanId() + "KOTAK" + System.currentTimeMillis();
         } else {
             billNumber = requestBody.getLoanId() + "_" + System.currentTimeMillis();
             merchantTransId = requestBody.getLoanId() + "_" + System.currentTimeMillis();
@@ -213,8 +213,8 @@ public class QrCodeServiceImpl implements QrCodeService {
         String billNumber;
         String merchantTransId;
         if (requestBody.getVendor().equals(KOTAK_VENDOR)) {
-            billNumber = "." + requestBody.getLoanId() + "." + System.currentTimeMillis();
-            merchantTransId = "." + requestBody.getLoanId() + "." + System.currentTimeMillis();
+            billNumber = requestBody.getLoanId() + "KOTAK" + System.currentTimeMillis();
+            merchantTransId = requestBody.getLoanId() + "KOTAK" + System.currentTimeMillis();
         } else {
             billNumber = requestBody.getLoanId() + "_" + System.currentTimeMillis();
             merchantTransId = requestBody.getLoanId() + "_" + System.currentTimeMillis();
