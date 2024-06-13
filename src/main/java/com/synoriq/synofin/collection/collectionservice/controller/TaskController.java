@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_NUMBER;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_SIZE;
@@ -20,6 +23,7 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @RequestMapping("/v1")
 @EnableTransactionManagement
 @Slf4j
+@Validated
 public class TaskController {
 
     @Autowired
@@ -27,7 +31,7 @@ public class TaskController {
 
     @RequestMapping(value = "users/{userId}/tasks", method = RequestMethod.POST)
     public ResponseEntity<Object> getTaskDetails(@PathVariable("userId") Long userId, @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
-                                                 @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize, @RequestBody TaskFilterRequestDTO taskFilterRequestDTO) {
+                                                 @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize, @RequestBody @Valid TaskFilterRequestDTO taskFilterRequestDTO) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;

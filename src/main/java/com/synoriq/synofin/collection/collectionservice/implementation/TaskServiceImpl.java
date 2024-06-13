@@ -154,14 +154,18 @@ public class TaskServiceImpl implements TaskService {
             String queryString = taskListViewQuery(encryptionKey, password) + whereCondition;
 
 
-            queryString += " LIMIT " + pageSize + " OFFSET " + (pageNo * pageSize);
+//            queryString += " LIMIT " + pageSize + " OFFSET " + (pageNo * pageSize);
 
 
-            Query queryData = null;
-            queryData = this.entityManager.createNativeQuery(queryString, Tuple.class);
-            List<Tuple> queryRows = queryData.getResultList();
+            int offset = pageNo * pageSize;
+            Query queryData = this.entityManager.createNativeQuery(queryString);
+            queryData.setFirstResult(offset);
+            queryData.setMaxResults(pageSize);
+            List<Object[]> queryRows = queryData.getResultList();
 
-            baseDTOResponse = new BaseDTOResponse<>(utilityService.formatDigitalSiteVisitData(queryRows));
+            List<FilterTaskResponseDTO> data = queryRows.stream()
+                    .map(FilterTaskResponseDTO::new).collect(Collectors.toList());
+            baseDTOResponse = new BaseDTOResponse<>(data);
         } catch (Exception e) {
             throw new Exception("1017002");
         }
@@ -175,8 +179,6 @@ public class TaskServiceImpl implements TaskService {
         BaseDTOResponse<Object> collateralRes;
         log.info("before token {}", token);
         LoanDetailsResponseDTO loanDetailsResponseDTO = new LoanDetailsResponseDTO();
-
-        TaskDetailRequestDTO loanDataBody = new ObjectMapper().convertValue(taskDetailRequestDTO, TaskDetailRequestDTO.class);
         TaskDetailReturnResponseDTO response = new TaskDetailReturnResponseDTO();
         BaseDTOResponse<Object> baseDTOResponse = null;
         String loanId = taskDetailRequestDTO.getRequestData().getLoanId();
@@ -200,7 +202,7 @@ public class TaskServiceImpl implements TaskService {
 
             ExecutorService executorService = Executors.newFixedThreadPool(4);
             executorService = new DelegatingSecurityContextExecutorService(executorService, SecurityContextHolder.getContext());
-            Callable<TaskDetailDTOResponse> taskDetailCallable = () -> utilityService.getChargesForLoan(finalToken, loanDataBody);
+            Callable<TaskDetailDTOResponse> taskDetailCallable = () -> utilityService.getChargesForLoan(finalToken, taskDetailRequestDTO);
             Callable<LoanBasicDetailsDTOResponse> loanDetailCallable = () -> utilityService.getBasicLoanDetails(finalToken, loanIdNumber);
             Callable<CustomerDetailDTOResponse> customerDetailCallable = () -> utilityService.getCustomerDetails(finalToken, loanIdNumber);
             Callable<LoanSummaryResponseDTO> loanSummaryCallable = () -> utilityService.getLoanSummary(finalToken, loanIdNumber);
