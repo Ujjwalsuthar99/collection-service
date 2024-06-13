@@ -551,4 +551,24 @@ public class UtilityController {
         Object result = paymentLinkService.sendPaymentLink(token, data, paymentReferenceImage, selfieImage);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @RequestMapping(value = "getCollectionIncentiveData", method = RequestMethod.POST)
+    public ResponseEntity<Object> getCollectionIncentiveData(@RequestHeader("Authorization") String bearerToken, @RequestParam("start_date") String startDate, @RequestParam("end_date") String endDate) throws SQLException {
+        BaseDTOResponse<Object> baseResponse;
+        Object dateResponse;
+        ResponseEntity<Object> response = null;
+
+        try {
+            dateResponse = utilityService.getCollectionIncentiveData(bearerToken, startDate, endDate);
+            response = new ResponseEntity<>(dateResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
+            } else {
+                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
+            }
+            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+        return response;
+    }
 }

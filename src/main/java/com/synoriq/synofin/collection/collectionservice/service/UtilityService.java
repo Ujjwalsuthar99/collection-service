@@ -97,4 +97,6 @@ public interface UtilityService {
     CustomerDetailDTOResponse getCustomerDetails(String token, Long loanId) throws Exception;
 
     LoanSummaryResponseDTO getLoanSummary(String token, Long loanId) throws Exception;
+
+    public Object getCollectionIncentiveData(String token, String startDate, String endDate) throws Exception;
 }

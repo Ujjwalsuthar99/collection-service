@@ -38,6 +38,7 @@ import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.*;
 import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
+import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +48,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.Tuple;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -108,6 +111,14 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Autowired
     RegisteredDeviceInfoRepository registeredDeviceInfoRepository;
+
+    @Autowired
+    private RSAUtils rsaUtils;
+    @Autowired
+    private CurrentUserInfo currentUserInfo;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Override
     public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception {
@@ -1119,6 +1130,68 @@ public class UtilityServiceImpl implements UtilityService {
             log.error("{}", e.getMessage());
         }
         return summaryRes;
+    }
+
+    @Override
+    public Object getCollectionIncentiveData(String token, String startDate, String endDate) throws Exception {
+
+        String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+        String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+        Boolean piiPermission = true;
+        List<Map<String, Object>> response = new ArrayList<>();
+        List<Map<String, Object>> collectionDetails = receiptRepository.getCollectionIncentiveUsers();
+
+        String dateWhereClause = " ";
+        if(!startDate.isEmpty()) {
+            dateWhereClause = " and sr.created_date between " + "'" + startDate + "'" + " and " + "'" + endDate + "'";
+        }
+        for (Map<String, Object> user : collectionDetails) {
+
+            Query query = entityManager.createNativeQuery(
+                    "select\n" +
+                            "\tconcat(lms.decrypt_data(c.first_name, ?1, ?2, ?3), ' ', lms.decrypt_data(c.last_name, ?1, ?2, ?3)) as customer_name,\n" +
+                            "\tla.loan_application_number as loan_account_number,\n" +
+                            "\tla.disbursal_date,\n" +
+                            "\tla.branch,\n" +
+                            "\tla.emi_amount,\n" +
+                            "\tla.disbursed_amount,\n" +
+                            "\tla.installment_plan,\n" +
+                            "\tla.installment_frequency\n" +
+                            "from\n" +
+                            "\tcollection.collection_receipts cr\n" +
+                            "join lms.service_request sr on\n" +
+                            "\tcr.receipt_id = sr.service_request_id\n" +
+                            "join lms.loan_application la on\n" +
+                            "\tsr.loan_id = la.loan_application_id\n" +
+                            "join lms.customer_loan_mapping clm on\n" +
+                            "\tla.loan_application_id = clm.loan_id\n" +
+                            "join lms.customer c on\n" +
+                            "\tclm.customer_id = c.customer_id\n" +
+                            "where\n" +
+                            "\tsr.created_by = (\n" +
+                            "\tselect\n" +
+                            "\t\tuser_id\n" +
+                            "\tfrom\n" +
+                            "\t\tmaster.users\n" +
+                            "\twhere\n" +
+                            "\t\tusername = ?4) " + dateWhereClause
+            );
+
+            query.setParameter(1, encryptionKey);
+            query.setParameter(2, password);
+            query.setParameter(3, piiPermission);
+            query.setParameter(4, String.valueOf(user.get("co_id")));
+            Object userLoanDetails = query.getResultList();
+
+//            List<Map<String, Object>> userLoanDetails = receiptRepository.getLoanDetailsOfUserForIncentive(String.valueOf(user.get("co_id")), encryptionKey, password, piiPermission, dateWhereClause);
+            Map<String, Object> newUser = new HashMap<>(user);
+            newUser.put("loan_details", userLoanDetails);
+            response.add(newUser);
+        }
+
+        log.info("response {}", response);
+
+        return response;
     }
 
 }
