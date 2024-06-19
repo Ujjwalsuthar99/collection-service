@@ -474,7 +474,6 @@ public class UtilityServiceImpl implements UtilityService {
                 } else if (paymentMode.equals("cheque")) {
                     finovaSmsRequest.setTemplateId(FINOVA_CHEQUE_MSG_FLOW_ID);
                 } else {
-                    finovaSmsRequest.setTemplateId(FINOVA_UPI_MSG_FLOW_ID);
                 }
                 if (customerType.equals("applicant")) {
                     finovaSmsRequest.setSender("FINOVA");
@@ -1158,9 +1157,9 @@ public class UtilityServiceImpl implements UtilityService {
                             "\tla.disbursal_date,\n" +
                             "\tla.branch,\n" +
                             "\tla.emi_amount,\n" +
-                            "\tla.disbursed_amount,\n" +
+                            "\tla.disbursed_amount as loan_amount,\n" +
                             "\tla.installment_plan,\n" +
-                            "\tla.installment_frequency\n" +
+                            "\tla.due_day as emi_period\n" +
                             "from\n" +
                             "\tcollection.collection_receipts cr\n" +
                             "join lms.service_request sr on\n" +
