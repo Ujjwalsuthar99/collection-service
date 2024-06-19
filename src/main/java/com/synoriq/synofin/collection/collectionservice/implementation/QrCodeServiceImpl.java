@@ -84,125 +84,6 @@ public class QrCodeServiceImpl implements QrCodeService {
     public final CollectionLimitUserWiseRepository collectionLimitUserWiseRepository;
     public final CollectionConfigurationsRepository collectionConfigurationsRepository;
 
-
-
-
-    @Override
-    @Transactional(rollbackOn = Exception.class)
-    public DynamicQrCodeResponseDTO sendQrCode(String token, DynamicQrCodeRequestDTO requestBody) throws Exception {
-        log.info("Begin QR Generate");
-        DynamicQrCodeResponseDTO res = null;
-        DynamicQrCodeDataRequestDTO integrationDataRequestBody = new DynamicQrCodeDataRequestDTO();
-        DynamicQrCodeIntegrationDataRequestDTO integrationRequestBody = new DynamicQrCodeIntegrationDataRequestDTO();
-
-        integrationDataRequestBody.setAmount(String.valueOf(requestBody.getAmount()));
-        integrationDataRequestBody.setPayerAccount(requestBody.getPayerAccount());
-        integrationDataRequestBody.setPayerIFSC(requestBody.getPayerIFSC());
-        integrationDataRequestBody.setFirstName(requestBody.getFirstName());
-        integrationDataRequestBody.setLastName(requestBody.getLastName());
-        String billNumber;
-        String merchantTransId;
-        if (requestBody.getVendor().equals(KOTAK_VENDOR)) {
-            billNumber = requestBody.getLoanId() + "KOTAK" + System.currentTimeMillis();
-            merchantTransId = requestBody.getLoanId() + "KOTAK" + System.currentTimeMillis();
-        } else {
-            billNumber = requestBody.getLoanId() + "_" + System.currentTimeMillis();
-            merchantTransId = requestBody.getLoanId() + "_" + System.currentTimeMillis();
-        }
-        integrationDataRequestBody.setBillNumber(billNumber);
-        integrationDataRequestBody.setMerchantTranId(merchantTransId);
-
-        integrationRequestBody.setDynamicQrCodeDataRequestDTO(integrationDataRequestBody);
-        integrationRequestBody.setSystemId(COLLECTION);
-        integrationRequestBody.setUserReferenceNumber(String.valueOf(requestBody.getUserId()));
-        integrationRequestBody.setSpecificPartnerName(requestBody.getVendor());
-
-        try {
-            // Checking UserLimit as it is exceeded or not with this amount
-            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(requestBody.getUserId(), UPI);
-            if(collectionLimitUserWiseEntity != null) {
-                if (collectionLimitUserWiseEntity.getTotalLimitValue() < collectionLimitUserWiseEntity.getUtilizedLimitValue() + Double.parseDouble(requestBody.getAmount()))
-                    throw new Exception("1016053");
-            }
-
-            // Calling Generate QR Code API
-            res = HTTPRequestService.<Object, DynamicQrCodeResponseDTO>builder()
-                    .httpMethod(HttpMethod.POST)
-                    .url(SEND_QR_CODE_GENERATE_API)
-                    .httpHeaders(createHeaders(token))
-                    .body(integrationRequestBody)
-                    .typeResponseType(DynamicQrCodeResponseDTO.class)
-                    .build().call();
-
-            if (res.getData() == null) {
-                log.info("QR Null Response {}", res);
-                throw new Exception("1016052");
-            }
-            DynamicQrCodeDataResponseDTO dynamicQrCodeDataResponseDTO = new DynamicQrCodeDataResponseDTO();
-            dynamicQrCodeDataResponseDTO.setMerchantTranId(merchantTransId);
-            dynamicQrCodeDataResponseDTO.setLink(res.getData().getLink());
-            dynamicQrCodeDataResponseDTO.setStatus(res.getData().getStatus());
-
-            DynamicQrCodeResponseDTO dynamicQrCodeResponseDto = new DynamicQrCodeResponseDTO();
-            dynamicQrCodeResponseDto.setResponse(res.getResponse());
-            dynamicQrCodeResponseDto.setRequestId(res.getRequestId());
-            dynamicQrCodeResponseDto.setData(dynamicQrCodeDataResponseDTO);
-            res = dynamicQrCodeResponseDto;
-
-            // QR code API successFull Response
-            if (res.getResponse().equals(true)) {
-                String activityRemarks = "Generated a QR code against loan id " + requestBody.getLoanId() + " of payment Rs. " + requestBody.getAmount();
-                CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("generated_dynamic_qr_code", requestBody.getUserId(), requestBody.getLoanId(), activityRemarks, requestBody.getGeolocation());
-
-                collectionActivityLogsRepository.save(collectionActivityLogsEntity);
-
-                ObjectMapper objectMapper = new ObjectMapper();
-                ObjectNode resultNode = objectMapper.createObjectNode();
-
-                ObjectNode requestNode = objectMapper.valueToTree(integrationDataRequestBody);
-                ObjectNode responseNode = objectMapper.valueToTree(res);
-                resultNode.set("request", requestNode);
-                resultNode.set("response", responseNode);
-
-
-                DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
-                digitalPaymentTransactionsEntity.setCreatedDate(new Date());
-                digitalPaymentTransactionsEntity.setCreatedBy(requestBody.getUserId());
-                digitalPaymentTransactionsEntity.setModifiedDate(null);
-                digitalPaymentTransactionsEntity.setModifiedBy(null);
-                digitalPaymentTransactionsEntity.setLoanId(requestBody.getLoanId());
-                digitalPaymentTransactionsEntity.setPaymentServiceName(DYNAMIC_QR_CODE);
-                digitalPaymentTransactionsEntity.setStatus(PENDING);
-                digitalPaymentTransactionsEntity.setMerchantTranId(merchantTransId);
-                digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(requestBody.getAmount()));
-                digitalPaymentTransactionsEntity.setUtrNumber(null);
-                digitalPaymentTransactionsEntity.setReceiptRequestBody(requestBody.getReceiptRequestBody());
-                digitalPaymentTransactionsEntity.setPaymentLink(null);
-                digitalPaymentTransactionsEntity.setMobileNo(Long.parseLong(requestBody.getMobileNumber()));
-                digitalPaymentTransactionsEntity.setVendor(requestBody.getVendor());
-                digitalPaymentTransactionsEntity.setReceiptGenerated(false);
-                digitalPaymentTransactionsEntity.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
-                digitalPaymentTransactionsEntity.setActionActivityLogsId(null);
-                digitalPaymentTransactionsEntity.setOtherResponseData(resultNode);
-
-                digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
-                dynamicQrCodeDataResponseDTO.setDigitalPaymentTransactionsId(digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId());
-            }
-
-            log.info("res {}", res);
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, res, "success", requestBody.getLoanId(), HttpMethod.POST.name(), "sendQrCode");
-        } catch (Exception ee) {
-            String errorMessage = ee.getMessage() + res;
-            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, modifiedErrorMessage + res, "failure", requestBody.getLoanId(), HttpMethod.POST.name(), "sendQrCode");
-            log.error("{}", ee.getMessage());
-            throw new Exception(ee.getMessage());
-        }
-        log.info("Ending QR Generate");
-        return res;
-    }
-
     @Override
     @Transactional(rollbackOn = RuntimeException.class)
     public DynamicQrCodeResponseDTO sendQrCodeNew(String token, Object data, MultipartFile paymentReferenceImage, MultipartFile selfieImage) throws ConnectorException, Exception {
@@ -311,7 +192,7 @@ public class QrCodeServiceImpl implements QrCodeService {
             // QR code API successFull Response
             if (res.getResponse().equals(true)) {
                 String activityRemarks = "Generated a QR code against loan id " + requestBody.getLoanId() + " of payment Rs. " + requestBody.getAmount();
-                CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("generated_dynamic_qr_code", requestBody.getUserId(), requestBody.getLoanId(), activityRemarks, requestBody.getGeolocation());
+                CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("generated_dynamic_qr_code", requestBody.getUserId(), requestBody.getLoanId(), activityRemarks, requestBody.getGeolocation(), receiptServiceDtoRequest.getActivityData().getBatteryPercentage());
 
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
@@ -400,7 +281,7 @@ public class QrCodeServiceImpl implements QrCodeService {
 
             String activityRemarks = "The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + digitalPaymentTransactionsEntityData.getLoanId() + " has been updated as " + res.getData().getStatus().toLowerCase() + " by checking the status manually";
             String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
-            CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntityData.getCreatedBy(), digitalPaymentTransactionsEntityData.getLoanId(), activityRemarks, requestBody.getGeolocation());
+            CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntityData.getCreatedBy(), digitalPaymentTransactionsEntityData.getLoanId(), activityRemarks, requestBody.getGeolocation(), requestBody.getBatteryPercentage());
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
@@ -467,7 +348,7 @@ public class QrCodeServiceImpl implements QrCodeService {
                 log.info("digitalPaymentTransactionsEntity {}", digitalPaymentTransactionsEntity);
                 String activityRemarks = "The payment status for transaction id " + digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId() + " and loan id " + loanId + " has been updated as success";
                 String activityName = "dynamic_qr_code_payment_" + requestBody.getStatus().toLowerCase();
-                CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntity.getCreatedBy(), loanId, activityRemarks, "{}");
+                CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntity.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
 
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
                 connectorResponse.put(STATUS, true);
@@ -614,7 +495,7 @@ public class QrCodeServiceImpl implements QrCodeService {
 
 
     @NotNull
-    public static CollectionActivityLogsEntity getCollectionActivityLogsEntity(String activityName, Long userId, Long loanId, String remarks, Object geoLocation) {
+    public static CollectionActivityLogsEntity getCollectionActivityLogsEntity(String activityName, Long userId, Long loanId, String remarks, Object geoLocation, Long batteryPercentage) {
         CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
         collectionActivityLogsEntity.setActivityName(activityName);
         collectionActivityLogsEntity.setActivityDate(new Date());
@@ -626,6 +507,7 @@ public class QrCodeServiceImpl implements QrCodeService {
         collectionActivityLogsEntity.setImages("{}");
         collectionActivityLogsEntity.setLoanId(loanId);
         collectionActivityLogsEntity.setGeolocation(geoLocation);
+        collectionActivityLogsEntity.setBatteryPercentage(batteryPercentage);
         return collectionActivityLogsEntity;
     }
 

@@ -76,7 +76,6 @@ public class TaskServiceImpl implements TaskService {
         try {
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
-//            Boolean piiPermission = rsaUtils.getPiiPermission();
             Boolean piiPermission = true;
             StringBuilder whereCondition = new StringBuilder();
             whereCondition.append(" and la2.allocated_to_user_id = ").append(userId).append(" ");

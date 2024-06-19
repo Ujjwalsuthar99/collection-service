@@ -171,7 +171,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
             }
 //            Assert.notNull(res.getBody().getData(), res.getBody().getError().toString());
             String activityRemarks = "Payment link sent against loan id " + loanId + " of payment Rs. " + receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount();
-            CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("send_payment_link", receiptServiceDtoRequest.getActivityData().getUserId(), loanId, activityRemarks, receiptServiceDtoRequest.getActivityData().getGeolocationData());
+            CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("send_payment_link", receiptServiceDtoRequest.getActivityData().getUserId(), loanId, activityRemarks, receiptServiceDtoRequest.getActivityData().getGeolocationData(), receiptServiceDtoRequest.getActivityData().getBatteryPercentage());
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
             String merchantTranId = loanId + "_" + System.currentTimeMillis();
