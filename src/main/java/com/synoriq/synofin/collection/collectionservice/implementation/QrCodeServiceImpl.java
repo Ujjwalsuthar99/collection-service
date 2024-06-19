@@ -178,19 +178,21 @@ public class QrCodeServiceImpl implements QrCodeService {
                     .typeResponseType(DynamicQrCodeResponseDTO.class)
                     .build().call();
 
-            DynamicQrCodeDataResponseDTO dynamicQrCodeDataResponseDTO = new DynamicQrCodeDataResponseDTO();
-            dynamicQrCodeDataResponseDTO.setMerchantTranId(merchantTransId);
-            dynamicQrCodeDataResponseDTO.setLink(res.getData().getLink());
-            dynamicQrCodeDataResponseDTO.setStatus(res.getData().getStatus());
-
-            DynamicQrCodeResponseDTO dynamicQrCodeResponseDto = new DynamicQrCodeResponseDTO();
-            dynamicQrCodeResponseDto.setResponse(res.getResponse());
-            dynamicQrCodeResponseDto.setRequestId(res.getRequestId());
-            dynamicQrCodeResponseDto.setData(dynamicQrCodeDataResponseDTO);
-            res = dynamicQrCodeResponseDto;
 
             // QR code API successFull Response
             if (res.getResponse().equals(true)) {
+
+                DynamicQrCodeDataResponseDTO dynamicQrCodeDataResponseDTO = new DynamicQrCodeDataResponseDTO();
+                dynamicQrCodeDataResponseDTO.setMerchantTranId(merchantTransId);
+                dynamicQrCodeDataResponseDTO.setLink(res.getData().getLink());
+                dynamicQrCodeDataResponseDTO.setStatus(res.getData().getStatus());
+
+                DynamicQrCodeResponseDTO dynamicQrCodeResponseDto = new DynamicQrCodeResponseDTO();
+                dynamicQrCodeResponseDto.setResponse(res.getResponse());
+                dynamicQrCodeResponseDto.setRequestId(res.getRequestId());
+                dynamicQrCodeResponseDto.setData(dynamicQrCodeDataResponseDTO);
+                res = dynamicQrCodeResponseDto;
+
                 String activityRemarks = "Generated a QR code against loan id " + requestBody.getLoanId() + " of payment Rs. " + requestBody.getAmount();
                 CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("generated_dynamic_qr_code", requestBody.getUserId(), requestBody.getLoanId(), activityRemarks, requestBody.getGeolocation(), receiptServiceDtoRequest.getActivityData().getBatteryPercentage());
 
@@ -226,6 +228,8 @@ public class QrCodeServiceImpl implements QrCodeService {
 
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
                 dynamicQrCodeDataResponseDTO.setDigitalPaymentTransactionsId(digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId());
+            } else {
+                throw new ConnectorException(res.getError(), HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
             }
 
             log.info("res {}", res);
