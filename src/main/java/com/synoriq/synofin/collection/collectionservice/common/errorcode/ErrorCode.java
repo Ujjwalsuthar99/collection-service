@@ -12,7 +12,7 @@ public enum ErrorCode {
     DATA_FETCH_ERROR(1017000, "An Exception occurred in fetching data"),
         DATA_SAVE_ERROR(1017001, "An Exception occurred in saving data"),
     NO_DATA_FOUND(1017002, "No Data Found"),
-    RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT(1017003, "Kindly deposit the amount in hand to continue"),
+    RECEIPT_AMOUNT_IS_GREATER_THAN_LIMIT(1017003, "Your limit has been exhausted, please contact your IT team"),
     PER_DAY_CASH_COLLECTION_ERROR(1017005, "Per day cash collection limit exceeded"),
     INTERNAL_SERVER_ERROR(1017004, "Error while fetching PDF from LMS"),
     CASH_LIMIT_IS_LESS_THAN_UTILIZED_AMOUNT(1017006, "Total limit of cash cannot be less than utilized limit"),
