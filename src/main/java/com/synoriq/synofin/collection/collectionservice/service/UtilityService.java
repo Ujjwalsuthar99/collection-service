@@ -99,5 +99,12 @@ public interface UtilityService {
 
     LoanSummaryResponseDTO getLoanSummary(String token, Long loanId) throws Exception;
 
-    public Object getCollectionIncentiveData(String token, CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) throws Exception;
+    Object getCollectionIncentiveData(String token, CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) throws Exception;
+
+    default boolean isExpired(int minute, Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.MINUTE, minute);
+        return new Date().after(cal.getTime());
+    }
 }

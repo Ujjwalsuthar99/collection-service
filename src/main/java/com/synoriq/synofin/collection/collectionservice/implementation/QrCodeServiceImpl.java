@@ -19,6 +19,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.createRecei
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
@@ -28,7 +29,6 @@ import com.synoriq.synofin.collection.collectionservice.service.utilityservice.H
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
@@ -43,10 +43,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,7 +55,7 @@ import static com.synoriq.synofin.collection.collectionservice.common.PaymentRel
 
 @Slf4j
 @Service
-public class QrCodeServiceImpl implements QrCodeService {
+public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionChecker {
 
 
     public QrCodeServiceImpl(CollectionActivityLogsRepository collectionActivityLogsRepository, DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository,
@@ -263,6 +259,13 @@ public class QrCodeServiceImpl implements QrCodeService {
         DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntityData = new DigitalPaymentTransactionsEntity();
         try {
             digitalPaymentTransactionsEntityData = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
+            int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(QR_CODE_EXPIRATION_CONF));
+            if (utilityService.isExpired(expiration, digitalPaymentTransactionsEntityData.getCreatedDate())) {
+                digitalPaymentTransactionsEntityData.setStatus("expired");
+                digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
+                return settingResponseData(res);
+            }
+
             dynamicQrCodeStatusCheckDataRequestDTO.setMerchantTranId(requestBody.getMerchantTranId());
             dynamicQrCodeStatusCheckDataRequestDTO.setCustomerId("91" + digitalPaymentTransactionsEntityData.getMobileNo().toString());
 
@@ -522,4 +525,18 @@ public class QrCodeServiceImpl implements QrCodeService {
         return httpHeaders;
     }
 
+    @Override
+    public Object digitalTransactionStatusCheck(String token, Object requestBody) throws Exception {
+        return this.getQrCodeTransactionStatus(token, (DynamicQrCodeStatusCheckRequestDTO) requestBody);
+    }
+
+    private DynamicQrCodeCheckStatusResponseDTO settingResponseData(DynamicQrCodeCheckStatusResponseDTO res) {
+        DynamicQrCodeCheckStatusDataResponseDTO dynamicQrCodeCheckStatusDataResponseDTO = DynamicQrCodeCheckStatusDataResponseDTO.builder()
+                .status("expired")
+                .build();
+        res.setResponse(true);
+        res.setData(dynamicQrCodeCheckStatusDataResponseDTO);
+        res.setRequestId("");
+        return res;
+    }
 }

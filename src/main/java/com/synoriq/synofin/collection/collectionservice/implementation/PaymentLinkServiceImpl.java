@@ -16,16 +16,15 @@ import com.synoriq.synofin.collection.collectionservice.repository.LoanAllocatio
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.IntegrationServiceErrorResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.PaymentLinkCollectionRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.PaymentLinkDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.PaymentLinkRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.PaymentLinkResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
-import com.synoriq.synofin.collection.collectionservice.service.IntegrationConnectorService;
-import com.synoriq.synofin.collection.collectionservice.service.PaymentLinkService;
-import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
+import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
@@ -57,7 +56,7 @@ import static com.synoriq.synofin.collection.collectionservice.implementation.Qr
 
 @Service
 @Slf4j
-public class PaymentLinkServiceImpl implements PaymentLinkService {
+public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransactionChecker {
 
     @Autowired
     RestTemplate restTemplate;
@@ -223,4 +222,14 @@ public class PaymentLinkServiceImpl implements PaymentLinkService {
         digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
     }
 
+    @Override
+    @Transactional
+    public Object getPaymentTransactionStatus(String token, Object requestBody) throws Exception {
+        return null;
+    }
+
+    @Override
+    public Object digitalTransactionStatusCheck(String token, Object requestBody) throws Exception {
+        return this.getPaymentTransactionStatus(token, requestBody);
+    }
 }

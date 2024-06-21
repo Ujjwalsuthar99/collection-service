@@ -38,20 +38,36 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
     public Object getCollectionLimitUserWise(String token, String userId) throws Exception {
         try {
             List<CollectionLimitUserWiseEntity> collectionLimitUserWiseEntityList = collectionLimitUserWiseRepository.getAllCollectionLimitUserWiseByUserId(Long.valueOf(userId));
-
-            CollectionLimitUserWiseFetchDataResponseDTO collectionLimitUserWiseFetchDataResponseDTO = new CollectionLimitUserWiseFetchDataResponseDTO();
-            for (CollectionLimitUserWiseEntity collectionLimitUserWiseEntity : collectionLimitUserWiseEntityList) {
-                if (collectionLimitUserWiseEntity.getCollectionLimitStrategiesKey().equals("cash")) {
-                    collectionLimitUserWiseFetchDataResponseDTO.setCashLimit(collectionLimitUserWiseEntity.getTotalLimitValue());
-                } else if (collectionLimitUserWiseEntity.getCollectionLimitStrategiesKey().equals("cheque")) {
-                    collectionLimitUserWiseFetchDataResponseDTO.setChequeLimit(collectionLimitUserWiseEntity.getTotalLimitValue());
-                } else {
-                    collectionLimitUserWiseFetchDataResponseDTO.setUpiLimit(collectionLimitUserWiseEntity.getTotalLimitValue());
-                }
-
-            }
-
-
+            CollectionLimitUserWiseFetchDataResponseDTO collectionLimitUserWiseFetchDataResponseDTO =
+                    collectionLimitUserWiseEntityList.stream().collect(
+                            CollectionLimitUserWiseFetchDataResponseDTO::new,
+                            (dto, entity) -> {
+                                switch (entity.getCollectionLimitStrategiesKey()) {
+                                    case "cash":
+                                        dto.setCashLimit(entity.getTotalLimitValue());
+                                        break;
+                                    case "cheque":
+                                        dto.setChequeLimit(entity.getTotalLimitValue());
+                                        break;
+                                    case "upi":
+                                        dto.setUpiLimit(entity.getTotalLimitValue());
+                                        break;
+                                    case "rtgs":
+                                        dto.setRtgsLimit(entity.getTotalLimitValue());
+                                        break;
+                                    default:
+                                        dto.setNeftLimit(entity.getTotalLimitValue());
+                                        break;
+                                }
+                            },
+                            (dto1, dto2) -> {
+                                dto1.setCashLimit(dto2.getCashLimit());
+                                dto1.setChequeLimit(dto2.getChequeLimit());
+                                dto1.setUpiLimit(dto2.getUpiLimit());
+                                dto1.setNeftLimit(dto2.getNeftLimit());
+                                dto1.setRtgsLimit(dto2.getRtgsLimit());
+                            }
+                    );
             return new BaseDTOResponse<>(collectionLimitUserWiseFetchDataResponseDTO);
         } catch (Exception e) {
             throw new Exception("1017002");

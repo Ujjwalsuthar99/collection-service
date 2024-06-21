@@ -6,6 +6,8 @@ import java.util.Date;
 
 public interface DigitalPaymentTransactionsService {
 
-    public Object getDigitalPaymentTransactionsUserWise(Long userId, Integer page, Integer size, Date fromDate, Date toDate, String searchKey) throws Exception;
+    Object getDigitalPaymentTransactionsUserWise(Long userId, Integer page, Integer size, Date fromDate, Date toDate, String searchKey) throws Exception;
+
+    Object checkDigitalPaymentStatus(String token, Object object) throws Exception;
 
 }
