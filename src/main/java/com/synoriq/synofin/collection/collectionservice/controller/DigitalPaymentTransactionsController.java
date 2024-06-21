@@ -23,9 +23,11 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @Slf4j
 public class DigitalPaymentTransactionsController {
 
-    @Autowired
 
-    DigitalPaymentTransactionsService digitalPaymentTransactionsService;
+    public DigitalPaymentTransactionsController (DigitalPaymentTransactionsService digitalPaymentTransactionsService) {
+        this.digitalPaymentTransactionsService = digitalPaymentTransactionsService;
+    }
+    private final DigitalPaymentTransactionsService digitalPaymentTransactionsService;
 
     @RequestMapping(value = "digital-payment-transactions/transactions/{userId}", method = RequestMethod.GET)
     public ResponseEntity<Object> getDigitalPaymentTransactionsUserWise(@RequestHeader("Authorization") String bearerToken, @PathVariable("userId") Long userId,
@@ -53,6 +55,13 @@ public class DigitalPaymentTransactionsController {
             response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
         }
         return response;
+    }
+
+
+    public ResponseEntity<Object> checkDigitalPaymentStatus(@RequestBody Object object, String token) throws Exception {
+        ResponseEntity<Object> response;
+        Object result = digitalPaymentTransactionsService.checkDigitalPaymentStatus(token, object);
+        return null;
     }
 }
 

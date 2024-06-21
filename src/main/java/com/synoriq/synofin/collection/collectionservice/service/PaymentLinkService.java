@@ -7,4 +7,6 @@ public interface PaymentLinkService {
 
     BaseDTOResponse<Object> sendPaymentLink(String token, Object data, MultipartFile paymentReferenceImage, MultipartFile selfieImage) throws Exception;
 
+    Object getPaymentTransactionStatus(String token, Object requestBody) throws Exception;
+
 }

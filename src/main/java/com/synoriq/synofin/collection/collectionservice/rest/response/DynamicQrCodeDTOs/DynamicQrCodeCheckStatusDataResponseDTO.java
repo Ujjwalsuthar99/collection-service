@@ -1,9 +1,11 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class DynamicQrCodeCheckStatusDataResponseDTO {
 
     @JsonProperty("OriginalBankRRN")

@@ -1,11 +1,13 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.CollectionLimitUserWise;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @NoArgsConstructor
+@Getter
 public class CollectionLimitUserWiseFetchDataResponseDTO {
 
     @JsonProperty("cashLimit")
@@ -16,5 +18,11 @@ public class CollectionLimitUserWiseFetchDataResponseDTO {
 
     @JsonProperty("upiLimit")
     Double upiLimit;
+
+    @JsonProperty("rtgsLimit")
+    Double rtgsLimit;
+
+    @JsonProperty("neftLimit")
+    Double neftLimit;
 
 }
