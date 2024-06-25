@@ -20,5 +20,6 @@ public class PaymentLinkDataResponseDTO {
     private String status;
     @JsonProperty("reference_id")
     private String reference_id;
-
+    @JsonProperty("id")
+    private String id;
 }

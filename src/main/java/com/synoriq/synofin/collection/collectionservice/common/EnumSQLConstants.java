@@ -37,7 +37,9 @@ public class EnumSQLConstants {
         kafka_activity,
         s3_delete,
         multi_create_receipt,
-        send_payment_link;
+        send_payment_link,
+        check_payment_link_status
+        ;
 
 
         private LogNames() {

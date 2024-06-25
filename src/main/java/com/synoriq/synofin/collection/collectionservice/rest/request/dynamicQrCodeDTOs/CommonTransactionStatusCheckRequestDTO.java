@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class DynamicQrCodeStatusCheckRequestDTO {
+public class CommonTransactionStatusCheckRequestDTO {
 
     @JsonProperty("merchant_tran_id")
     private String merchantTranId;

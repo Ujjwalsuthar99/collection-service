@@ -1,6 +1,8 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.synoriq.synofin.collection.collectionservice.common.exception.ConnectorException;
+import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
+import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
 import com.synoriq.synofin.collection.collectionservice.rest.request.collectionIncentiveDTOs.CollectionIncentiveRequestDTOs;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
@@ -107,4 +109,22 @@ public interface UtilityService {
         cal.add(Calendar.MINUTE, minute);
         return new Date().after(cal.getTime());
     }
+
+    @NotNull
+    default CollectionActivityLogsEntity getCollectionActivityLogsEntity(String activityName, Long userId, Long loanId, String remarks, Object geoLocation, Long batteryPercentage) {
+        CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
+        collectionActivityLogsEntity.setActivityName(activityName);
+        collectionActivityLogsEntity.setActivityDate(new Date());
+        collectionActivityLogsEntity.setDeleted(false);
+        collectionActivityLogsEntity.setActivityBy(userId);
+        collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
+        collectionActivityLogsEntity.setAddress("{}");
+        collectionActivityLogsEntity.setRemarks(remarks);
+        collectionActivityLogsEntity.setImages("{}");
+        collectionActivityLogsEntity.setLoanId(loanId);
+        collectionActivityLogsEntity.setGeolocation(geoLocation);
+        collectionActivityLogsEntity.setBatteryPercentage(batteryPercentage);
+        return collectionActivityLogsEntity;
+    }
+    void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response, String utrNumber) throws Exception;
 }

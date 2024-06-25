@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.CommonTransactionStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.DigitalPaymentTransactionsService;
 import lombok.extern.slf4j.Slf4j;
@@ -57,11 +58,10 @@ public class DigitalPaymentTransactionsController {
         return response;
     }
 
-
-    public ResponseEntity<Object> checkDigitalPaymentStatus(@RequestBody Object object, String token) throws Exception {
-        ResponseEntity<Object> response;
-        Object result = digitalPaymentTransactionsService.checkDigitalPaymentStatus(token, object);
-        return null;
+    @RequestMapping(value = "transaction-status-check", method = RequestMethod.POST)
+    public ResponseEntity<Object> checkDigitalPaymentStatus(@RequestHeader("Authorization") String token, @RequestBody CommonTransactionStatusCheckRequestDTO reqBody) throws Exception {
+        Object result = digitalPaymentTransactionsService.checkDigitalPaymentStatus(token, reqBody);
+        return new ResponseEntity<>(new BaseDTOResponse<>(result), HttpStatus.OK);
     }
 }
 

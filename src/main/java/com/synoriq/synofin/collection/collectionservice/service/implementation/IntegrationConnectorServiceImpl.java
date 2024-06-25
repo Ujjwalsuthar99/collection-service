@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.implementation;
+package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;

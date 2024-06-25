@@ -1,13 +1,15 @@
-package com.synoriq.synofin.collection.collectionservice.implementation;
+package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
+import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.AuthorizationResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.request.collectionIncentiveDTOs.CollectionIncentiveRequestDTOs;
+import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.*;
 import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.UploadImageOnS3DataRequestDTO;
@@ -16,6 +18,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.
 import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
@@ -35,25 +38,30 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.
 import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ThermalPrintDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
+import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.*;
 import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -65,6 +73,7 @@ import java.util.stream.Collectors;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.USER_MESSAGE;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
+import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.*;
 
 @Service
 @Slf4j
@@ -120,6 +129,9 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private ReceiptService receiptService;
 
     @Override
     public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception {
@@ -1195,6 +1207,108 @@ public class UtilityServiceImpl implements UtilityService {
         log.info("response {}", response);
 
         return response;
+    }
+
+
+    @Override
+    public void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response, String utrNumber) throws Exception {
+        log.info("Begin callback create receipt function");
+        try {
+            CurrentUserInfo currentUserInfo = new CurrentUserInfo();
+            // implementing create receipt here
+            ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
+            receiptServiceDtoRequest.getRequestData().getRequestData().setTransactionReference(utrNumber);
+            ServiceRequestSaveResponse resp = receiptService.createReceiptNew(receiptServiceDtoRequest, createBlankMultiPartFile(), createBlankMultiPartFile(), token, true);
+            log.info("receipt response {}", resp);
+
+            digitalPaymentTransactionsEntity.setReceiptResponse(resp.getData());
+            if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
+                log.info("in ifff receipt response {}", resp);
+                response.put(RECEIPT_GENERATED, true);
+                response.put(SR_ID, resp.getData().getServiceRequestId());
+                digitalPaymentTransactionsEntity.setReceiptGenerated(true);
+                String url = GET_PDF_API + resp.getData().getServiceRequestId();
+
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.setBearerAuth(token);
+
+                ResponseEntity<byte[]> res;
+
+                RestTemplate restTemplate = new RestTemplate();
+                restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+                res = restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        new HttpEntity<>(httpHeaders),
+                        byte[].class);
+
+//                String encodedString = Base64.getEncoder().encodeToString(res.getBody());
+
+                byte[] byteArray = res.getBody();
+                String filename = "file.jpg";
+
+                DiskFileItem fileItem = new DiskFileItem("file", "application/pdf", true, filename, byteArray.length, new java.io.File(System.getProperty("java.io.tmpdir")));
+                fileItem.getOutputStream().write(byteArray);
+
+                MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
+
+                String updatedFileName = receiptServiceDtoRequest.getRequestData().getLoanId() + "_" + new Date().getTime() + "_receipt_image.pdf";
+                String userRef = "receipt/" + receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy();
+                // hitting send sms to customer
+                this.sendPdfToCustomerUsingS3(token, multipartFile, userRef, currentUserInfo.getClientId(), receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode(), receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount(), updatedFileName,
+                        receiptServiceDtoRequest.getActivityData().getUserId().toString(), receiptServiceDtoRequest.getCustomerType(),
+                        receiptServiceDtoRequest.getCustomerName(), receiptServiceDtoRequest.getApplicantMobileNumber(), receiptServiceDtoRequest.getCollectedFromNumber(), receiptServiceDtoRequest.getLoanApplicationNumber(), resp.getData().getServiceRequestId());
+                log.info("in callback create receipt function ending");
+            }
+        } catch (Exception e) {
+            log.error("Error while create receipt via callback {}", e.getMessage());
+            throw new Exception(e.getMessage());
+        }
+        log.info("Ending callback create receipt function");
+    }
+
+    private static MultipartFile createBlankMultiPartFile() {
+        return new MultipartFile() {
+            @Override
+            public String getName() {
+                return null;
+            }
+
+            @Override
+            public String getOriginalFilename() {
+                return null;
+            }
+
+            @Override
+            public String getContentType() {
+                return null;
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return false;
+            }
+
+            @Override
+            public long getSize() {
+                return 0;
+            }
+
+            @Override
+            public byte[] getBytes() throws IOException {
+                return new byte[0];
+            }
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return null;
+            }
+
+            @Override
+            public void transferTo(File file) throws IOException, IllegalStateException {
+
+            }
+        };
     }
 
 }

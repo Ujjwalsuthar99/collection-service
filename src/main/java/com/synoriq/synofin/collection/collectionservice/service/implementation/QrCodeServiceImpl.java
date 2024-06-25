@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.implementation;
+package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -190,7 +190,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 res = dynamicQrCodeResponseDto;
 
                 String activityRemarks = "Generated a QR code against loan id " + requestBody.getLoanId() + " of payment Rs. " + requestBody.getAmount();
-                CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("generated_dynamic_qr_code", requestBody.getUserId(), requestBody.getLoanId(), activityRemarks, requestBody.getGeolocation(), receiptServiceDtoRequest.getActivityData().getBatteryPercentage());
+                CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity("generated_dynamic_qr_code", requestBody.getUserId(), requestBody.getLoanId(), activityRemarks, requestBody.getGeolocation(), receiptServiceDtoRequest.getActivityData().getBatteryPercentage());
 
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
@@ -250,7 +250,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
 
     @Override
     @Transactional(rollbackOn = Exception.class)
-    public DynamicQrCodeCheckStatusResponseDTO getQrCodeTransactionStatus(String token, DynamicQrCodeStatusCheckRequestDTO requestBody) throws Exception {
+    public Object getQrCodeTransactionStatus(String token, CommonTransactionStatusCheckRequestDTO requestBody) throws Exception {
         log.info("Begin QR Transaction Status");
         DynamicQrCodeCheckStatusResponseDTO res = new DynamicQrCodeCheckStatusResponseDTO();
         Map<String, Object> response = new HashMap<>();
@@ -288,7 +288,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
 
             String activityRemarks = "The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + digitalPaymentTransactionsEntityData.getLoanId() + " has been updated as " + res.getData().getStatus().toLowerCase() + " by checking the status manually";
             String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
-            CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntityData.getCreatedBy(), digitalPaymentTransactionsEntityData.getLoanId(), activityRemarks, requestBody.getGeolocation(), requestBody.getBatteryPercentage());
+            CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntityData.getCreatedBy(), digitalPaymentTransactionsEntityData.getLoanId(), activityRemarks, requestBody.getGeolocation(), requestBody.getBatteryPercentage());
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
@@ -296,7 +296,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 log.info("In ifff for success match {}", res);
                 if (!digitalPaymentTransactionsEntityData.getReceiptGenerated()) {
                     log.info("receipt generate check {}", res);
-                    createReceiptByCallBack(digitalPaymentTransactionsEntityData, token, response, res.getData().getOriginalBankRRN());
+                    utilityService.createReceiptByCallBack(digitalPaymentTransactionsEntityData, token, response, res.getData().getOriginalBankRRN());
                     log.info("create receipt done");
                 } else {
                     Map<String, Object> respMap = new ObjectMapper().convertValue(digitalPaymentTransactionsEntityData.getReceiptResponse(), Map.class);
@@ -326,7 +326,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
             log.error("QR Transaction Status Exception {}", ee.getMessage());
         }
         log.info("Ending QR Transaction Status");
-        return res;
+        return res.getData();
     }
 
     @Override
@@ -346,7 +346,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                     digitalPaymentTransactionsEntity.setStatus(SUCCESS);
                     digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getOriginalBankRRN());
                     // calling create receipt function for call back
-                    createReceiptByCallBack(digitalPaymentTransactionsEntity, token, mainResponse, requestBody.getOriginalBankRRN());
+                    utilityService.createReceiptByCallBack(digitalPaymentTransactionsEntity, token, mainResponse, requestBody.getOriginalBankRRN());
                 }
                 loanId = digitalPaymentTransactionsEntity.getLoanId();
                 digitalPaymentTransactionsEntity.setCallBackRequestBody(requestBody);
@@ -355,7 +355,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 log.info("digitalPaymentTransactionsEntity {}", digitalPaymentTransactionsEntity);
                 String activityRemarks = "The payment status for transaction id " + digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId() + " and loan id " + loanId + " has been updated as success";
                 String activityName = "dynamic_qr_code_payment_" + requestBody.getStatus().toLowerCase();
-                CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntity.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
+                CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntity.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
 
                 collectionActivityLogsRepository.save(collectionActivityLogsEntity);
                 connectorResponse.put(STATUS, true);
@@ -382,107 +382,6 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         return connectorResponse;
     }
 
-    private static MultipartFile createBlankMultiPartFile() {
-        return new MultipartFile() {
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public String getOriginalFilename() {
-                return null;
-            }
-
-            @Override
-            public String getContentType() {
-                return null;
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return false;
-            }
-
-            @Override
-            public long getSize() {
-                return 0;
-            }
-
-            @Override
-            public byte[] getBytes() throws IOException {
-                return new byte[0];
-            }
-
-            @Override
-            public InputStream getInputStream() throws IOException {
-                return null;
-            }
-
-            @Override
-            public void transferTo(File file) throws IOException, IllegalStateException {
-
-            }
-        };
-    }
-
-    private void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response, String utrNumber) throws Exception {
-        log.info("Begin callback create receipt function");
-        try {
-            CurrentUserInfo currentUserInfo = new CurrentUserInfo();
-            // implementing create receipt here
-            ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
-            receiptServiceDtoRequest.getRequestData().getRequestData().setTransactionReference(utrNumber);
-            ServiceRequestSaveResponse resp = receiptService.createReceiptNew(receiptServiceDtoRequest, createBlankMultiPartFile(), createBlankMultiPartFile(), token, true);
-            log.info("receipt response {}", resp);
-
-            digitalPaymentTransactionsEntity.setReceiptResponse(resp.getData());
-            if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
-                log.info("in ifff receipt response {}", resp);
-                response.put(RECEIPT_GENERATED, true);
-                response.put(SR_ID, resp.getData().getServiceRequestId());
-                digitalPaymentTransactionsEntity.setReceiptGenerated(true);
-                String url = GET_PDF_API + resp.getData().getServiceRequestId();
-
-                HttpHeaders httpHeaders = new HttpHeaders();
-                httpHeaders.setBearerAuth(token);
-
-                ResponseEntity<byte[]> res;
-
-                RestTemplate restTemplate = new RestTemplate();
-                restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-                res = restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        new HttpEntity<>(httpHeaders),
-                        byte[].class);
-
-//                String encodedString = Base64.getEncoder().encodeToString(res.getBody());
-
-                byte[] byteArray = res.getBody();
-                String filename = "file.jpg";
-
-                DiskFileItem fileItem = new DiskFileItem("file", "application/pdf", true, filename, byteArray.length, new java.io.File(System.getProperty("java.io.tmpdir")));
-                fileItem.getOutputStream().write(byteArray);
-
-                MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
-
-                String updatedFileName = receiptServiceDtoRequest.getRequestData().getLoanId() + "_" + new Date().getTime() + "_receipt_image.pdf";
-                String userRef = "receipt/" + receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy();
-                // hitting send sms to customer
-                utilityService.sendPdfToCustomerUsingS3(token, multipartFile, userRef, currentUserInfo.getClientId(), receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode(), receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount(), updatedFileName,
-                        receiptServiceDtoRequest.getActivityData().getUserId().toString(), receiptServiceDtoRequest.getCustomerType(),
-                        receiptServiceDtoRequest.getCustomerName(), receiptServiceDtoRequest.getApplicantMobileNumber(), receiptServiceDtoRequest.getCollectedFromNumber(), receiptServiceDtoRequest.getLoanApplicationNumber(), resp.getData().getServiceRequestId());
-                log.info("in callback create receipt function ending");
-            }
-        } catch (Exception e) {
-            log.error("Error while create receipt via callback {}", e.getMessage());
-            throw new Exception(e.getMessage());
-        }
-        log.info("Ending callback create receipt function");
-    }
-
-
     @Override
     public Object qrStatusCheck(String token, String merchantId) throws Exception {
         Map<String, Object> resp = new HashMap<>();
@@ -500,24 +399,6 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         return new BaseDTOResponse<>(resp);
     }
 
-
-    @NotNull
-    public static CollectionActivityLogsEntity getCollectionActivityLogsEntity(String activityName, Long userId, Long loanId, String remarks, Object geoLocation, Long batteryPercentage) {
-        CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
-        collectionActivityLogsEntity.setActivityName(activityName);
-        collectionActivityLogsEntity.setActivityDate(new Date());
-        collectionActivityLogsEntity.setDeleted(false);
-        collectionActivityLogsEntity.setActivityBy(userId);
-        collectionActivityLogsEntity.setDistanceFromUserBranch(0D);
-        collectionActivityLogsEntity.setAddress("{}");
-        collectionActivityLogsEntity.setRemarks(remarks);
-        collectionActivityLogsEntity.setImages("{}");
-        collectionActivityLogsEntity.setLoanId(loanId);
-        collectionActivityLogsEntity.setGeolocation(geoLocation);
-        collectionActivityLogsEntity.setBatteryPercentage(batteryPercentage);
-        return collectionActivityLogsEntity;
-    }
-
     public static HttpHeaders createHeaders(String token) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(AUTHORIZATION, token);
@@ -526,8 +407,8 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
     }
 
     @Override
-    public Object digitalTransactionStatusCheck(String token, Object requestBody) throws Exception {
-        return this.getQrCodeTransactionStatus(token, (DynamicQrCodeStatusCheckRequestDTO) requestBody);
+    public Object digitalTransactionStatusCheck(String token, CommonTransactionStatusCheckRequestDTO requestBody) throws Exception {
+        return this.getQrCodeTransactionStatus(token, requestBody);
     }
 
     private DynamicQrCodeCheckStatusResponseDTO settingResponseData(DynamicQrCodeCheckStatusResponseDTO res) {

@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.implementation;
+package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;

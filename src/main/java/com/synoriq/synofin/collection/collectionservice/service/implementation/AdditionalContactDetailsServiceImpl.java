@@ -1,4 +1,4 @@
-package com.synoriq.synofin.collection.collectionservice.implementation;
+package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
 import com.synoriq.synofin.collection.collectionservice.entity.AdditionalContactDetailsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.AdditionalContactDetailsRepository;

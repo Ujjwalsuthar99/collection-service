@@ -1,6 +1,5 @@
-package com.synoriq.synofin.collection.collectionservice.implementation;
+package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -16,19 +15,19 @@ import com.synoriq.synofin.collection.collectionservice.repository.LoanAllocatio
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.IntegrationServiceErrorResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeStatusCheckRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.CommonTransactionStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.PaymentLinkCollectionRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.PaymentLinkDataRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.PaymentLinkRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.statuscheckdtos.TransactionStatusCheckDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.statuscheckdtos.TransactionStatusCheckDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.PaymentLinkResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.TransactionStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -47,40 +46,41 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.PAYMENT_LINK_EXPIRATION_CONF;
 import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.*;
-import static com.synoriq.synofin.collection.collectionservice.implementation.QrCodeServiceImpl.getCollectionActivityLogsEntity;
 
 
 @Service
 @Slf4j
 public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransactionChecker {
 
-    @Autowired
-    RestTemplate restTemplate;
 
-    @Autowired
-    CollectionActivityLogsRepository collectionActivityLogsRepository;
-
-    @Autowired
-    DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository;
-
-    @Autowired
-    LoanAllocationRepository loanAllocationRepository;
-
-    @Autowired
-    ConsumedApiLogService consumedApiLogService;
-
-    @Autowired
-    IntegrationConnectorService integrationConnectorService;
-
-    @Autowired
-    CollectionConfigurationsRepository collectionConfigurationsRepository;
-
-    @Autowired
-    UtilityService utilityService;
+    public PaymentLinkServiceImpl(RestTemplate restTemplate, CollectionActivityLogsRepository collectionActivityLogsRepository,
+                                  DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository,
+                                  LoanAllocationRepository loanAllocationRepository,
+                                  ConsumedApiLogService consumedApiLogService,
+                                  CollectionConfigurationsRepository collectionConfigurationsRepository,
+                                  UtilityService utilityService,
+                                  IntegrationConnectorService integrationConnectorService) {
+        this.integrationConnectorService = integrationConnectorService;
+        this.collectionConfigurationsRepository = collectionConfigurationsRepository;
+        this.utilityService = utilityService;
+        this.consumedApiLogService = consumedApiLogService;
+        this.digitalPaymentTransactionsRepository = digitalPaymentTransactionsRepository;
+        this.restTemplate = restTemplate;
+        this.collectionActivityLogsRepository = collectionActivityLogsRepository;
+        this.loanAllocationRepository = loanAllocationRepository;
+    }
+    private final RestTemplate restTemplate;
+    private final CollectionActivityLogsRepository collectionActivityLogsRepository;
+    private final DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository;
+    private final LoanAllocationRepository loanAllocationRepository;
+    private final ConsumedApiLogService consumedApiLogService;
+    private final IntegrationConnectorService integrationConnectorService;
+    private final CollectionConfigurationsRepository collectionConfigurationsRepository;
+    private final UtilityService utilityService;
 
     @Override
     @Transactional
@@ -149,9 +149,9 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
 
         PaymentLinkRequestDTO paymentLinkRequestDTO = new PaymentLinkRequestDTO();
         paymentLinkRequestDTO.setPaymentLinkDataRequestDTO(paymentLinkDataRequestDTO);
-        paymentLinkRequestDTO.setSystemId("collection");
+        paymentLinkRequestDTO.setSystemId(COLLECTION);
         paymentLinkRequestDTO.setUserReferenceNumber("");
-        paymentLinkRequestDTO.setSpecificPartnerName("razorpay");
+        paymentLinkRequestDTO.setSpecificPartnerName(RAZORPAY);
 
         try {
 
@@ -170,26 +170,25 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
             }
 //            Assert.notNull(res.getBody().getData(), res.getBody().getError().toString());
             String activityRemarks = "Payment link sent against loan id " + loanId + " of payment Rs. " + receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount();
-            CollectionActivityLogsEntity collectionActivityLogsEntity = getCollectionActivityLogsEntity("send_payment_link", receiptServiceDtoRequest.getActivityData().getUserId(), loanId, activityRemarks, receiptServiceDtoRequest.getActivityData().getGeolocationData(), receiptServiceDtoRequest.getActivityData().getBatteryPercentage());
+            CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity("send_payment_link", receiptServiceDtoRequest.getActivityData().getUserId(), loanId, activityRemarks, receiptServiceDtoRequest.getActivityData().getGeolocationData(), receiptServiceDtoRequest.getActivityData().getBatteryPercentage());
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
-            String merchantTranId = loanId + "_" + System.currentTimeMillis();
             // creating digital payment transaction entry
-            createDigitalPaymentLinkTransaction(receiptServiceDtoRequest, paymentLinkCollectionRequestDTO.getMobileNumber(), merchantTranId, collectionActivityLogsEntity.getCollectionActivityLogsId(), paymentLinkCollectionRequestDTO.getVendor(), res);
+            createDigitalPaymentLinkTransaction(receiptServiceDtoRequest, paymentLinkCollectionRequestDTO.getMobileNumber(), res.getData().getId(), collectionActivityLogsEntity.getCollectionActivityLogsId(), paymentLinkCollectionRequestDTO.getVendor(), res);
 
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getLoanId(), paymentLinkRequestDTO, res, "success", loanId, HttpMethod.POST.name(), "sendPaymentLink");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getUserId(), paymentLinkRequestDTO, res, "success", loanId, HttpMethod.POST.name(), "sendPaymentLink");
         } catch (ConnectorException ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getLoanId(), paymentLinkRequestDTO, modifiedErrorMessage, "failure", loanId, HttpMethod.POST.name(), "sendPaymentLink");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getUserId(), paymentLinkRequestDTO, modifiedErrorMessage, "failure", loanId, HttpMethod.POST.name(), "sendPaymentLink");
             throw new ConnectorException(ErrorCode.S3_UPLOAD_DATA_ERROR, ee.getText(), HttpStatus.FAILED_DEPENDENCY, ee.getRequestId());
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getLoanId(), paymentLinkRequestDTO, modifiedErrorMessage, "failure", loanId, HttpMethod.POST.name(), "sendPaymentLink");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getUserId(), paymentLinkRequestDTO, modifiedErrorMessage, "failure", loanId, HttpMethod.POST.name(), "sendPaymentLink");
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             IntegrationServiceErrorResponseDTO r = new ObjectMapper().readValue(ow.writeValueAsString(res.getError()), IntegrationServiceErrorResponseDTO.class);
             throw new ConnectorException(r, HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
@@ -198,7 +197,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
     }
 
     @NotNull
-    public void createDigitalPaymentLinkTransaction(ReceiptServiceDtoRequest receiptServiceDtoRequest, String mobileNumber, String merchantTransId, Long activityId, String vendor, Object otherResponseData) {
+    public void createDigitalPaymentLinkTransaction(ReceiptServiceDtoRequest receiptServiceDtoRequest, String mobileNumber, String merchantTransId, Long activityId, String vendor, PaymentLinkResponseDTO otherResponseData) {
         DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
         digitalPaymentTransactionsEntity.setCreatedDate(new Date());
         digitalPaymentTransactionsEntity.setCreatedBy(receiptServiceDtoRequest.getActivityData().getUserId());
@@ -211,7 +210,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
         digitalPaymentTransactionsEntity.setAmount(Float.parseFloat(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
         digitalPaymentTransactionsEntity.setUtrNumber(null);
         digitalPaymentTransactionsEntity.setReceiptRequestBody(receiptServiceDtoRequest);
-        digitalPaymentTransactionsEntity.setPaymentLink(null);
+        digitalPaymentTransactionsEntity.setPaymentLink(otherResponseData.getData().getUrl());
         digitalPaymentTransactionsEntity.setMobileNo(Long.parseLong(mobileNumber));
         digitalPaymentTransactionsEntity.setVendor(vendor);
         digitalPaymentTransactionsEntity.setReceiptGenerated(false);
@@ -224,12 +223,74 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
 
     @Override
     @Transactional
-    public Object getPaymentTransactionStatus(String token, Object requestBody) throws Exception {
-        return null;
-    }
+    public Object getPaymentTransactionStatus(String token, CommonTransactionStatusCheckRequestDTO requestBody) throws Exception {
+        Map<String, Object> response = new HashMap<>();
+        TransactionStatusResponseDTO res = new TransactionStatusResponseDTO();
+        DigitalPaymentTransactionsEntity digitalPaymentTransactions = digitalPaymentTransactionsRepository.findByMerchantTranId(requestBody.getMerchantTranId());
+        Long loanId = digitalPaymentTransactions.getLoanId();
+        TransactionStatusCheckDataDTO transactionStatusCheckDataDTO = TransactionStatusCheckDataDTO.builder()
+                .id(requestBody.getMerchantTranId())
+                .productType(loanAllocationRepository.getProductType(digitalPaymentTransactions.getLoanId()))
+                .build();
+        TransactionStatusCheckDTO transactionStatusCheckDTO = TransactionStatusCheckDTO.builder()
+                .transactionStatusCheckDataDTO(transactionStatusCheckDataDTO)
+                .systemId(COLLECTION)
+                .specificPartnerName(RAZORPAY)
+                .userReferenceNumber("")
+                .build();
+        try {
 
+            res = HTTPRequestService.<Object, TransactionStatusResponseDTO>builder()
+                    .httpMethod(HttpMethod.POST)
+                    .url(PAYMENT_LINK_TRANSACTION_CHECK)
+                    .httpHeaders(UtilityService.createHeaders(token))
+                    .body(transactionStatusCheckDTO)
+                    .typeResponseType(TransactionStatusResponseDTO.class)
+                    .build().call();
+
+            if (Objects.requireNonNull(res).getData() == null) {
+                throw new Exception(res.toString());
+            }
+            String activityRemarks = "The payment status for transaction id " + digitalPaymentTransactions.getDigitalPaymentTransactionsId() + " and loan id " + loanId + " has been updated as " + res.getData().getStatus().toLowerCase();
+            String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
+            CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactions.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
+            collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+            if (res.getData().getStatus().equalsIgnoreCase(SUCCESS)) {
+                if (!digitalPaymentTransactions.getReceiptGenerated()) {
+                    log.info("receipt generate check {}", res);
+                    utilityService.createReceiptByCallBack(digitalPaymentTransactions, token, response, res.getData().getOrderId());
+                    log.info("create receipt done");
+                } else {
+                    Map<String, Object> respMap = new ObjectMapper().convertValue(digitalPaymentTransactions.getReceiptResponse(), Map.class);
+                    response.put(STATUS, res.getData().getStatus().toLowerCase());
+                    response.put(RECEIPT_GENERATED, true);
+                    response.put(SR_ID, String.valueOf(respMap.get("service_request_id")));
+                }
+            } else {
+                response.put(STATUS, FAILURE);
+                response.put(RECEIPT_GENERATED, digitalPaymentTransactions.getReceiptGenerated());
+                response.put(SR_ID, null);
+            }
+            digitalPaymentTransactions.setUtrNumber(res.getData().getOrderId());
+            digitalPaymentTransactions.setStatus(res.getData().getStatus().toLowerCase());
+            digitalPaymentTransactions.setActionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
+
+            digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
+            res.getData().setStatus(res.getData().getStatus().toLowerCase());
+
+        } catch (Exception ee) {
+            log.error("{}", ee.getMessage());
+            String errorMessage = ee.getMessage();
+            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, modifiedErrorMessage, "failure", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            IntegrationServiceErrorResponseDTO r = new ObjectMapper().readValue(ow.writeValueAsString(res.getError()), IntegrationServiceErrorResponseDTO.class);
+            throw new ConnectorException(r, HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
+        }
+        return res;
+    }
     @Override
-    public Object digitalTransactionStatusCheck(String token, Object requestBody) throws Exception {
+    public Object digitalTransactionStatusCheck(String token, CommonTransactionStatusCheckRequestDTO requestBody) throws Exception {
         return this.getPaymentTransactionStatus(token, requestBody);
     }
 }

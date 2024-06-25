@@ -20,5 +20,7 @@ public class PaymentRelatedVariables {
     public static final String AUTHORIZATION = "Authorization";
     public static final String CONTENTTYPE = "Content-Type";
     public static final String SEND_PAYMENT_LINK = "http://localhost:1102/v1/sendPaymentLink";
+    public static final String PAYMENT_LINK_TRANSACTION_CHECK = "http://localhost:1102/v1/paymentLinkStatusCheck";
+    public static final String RAZORPAY = "razorpay";
 
 }

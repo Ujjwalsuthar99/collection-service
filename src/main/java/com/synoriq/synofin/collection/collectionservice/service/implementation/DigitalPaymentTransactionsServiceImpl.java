@@ -1,8 +1,9 @@
-package com.synoriq.synofin.collection.collectionservice.implementation;
+package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
 
 import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.DigitalPaymentTransactionsRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.CommonTransactionStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.factory.TransactionStatusCheckerFactory;
@@ -51,11 +52,10 @@ public class DigitalPaymentTransactionsServiceImpl implements DigitalPaymentTran
 
 
     @Override
-    public Object checkDigitalPaymentStatus(String token, Object object) throws Exception {
-
-//        Class<PaymentLinkService> cls =
-        DigitalTransactionChecker checker = transactionStatusCheckerFactory.getChecker(object);
-        return checker.digitalTransactionStatusCheck(token, object);
+    public Object checkDigitalPaymentStatus(String token, CommonTransactionStatusCheckRequestDTO body) throws Exception {
+        DigitalPaymentTransactionsEntity digitalPaymentTransactions = digitalPaymentTransactionsRepository.findByMerchantTranId(body.getMerchantTranId());
+        DigitalTransactionChecker checker = transactionStatusCheckerFactory.getChecker(digitalPaymentTransactions.getPaymentServiceName());
+        return checker.digitalTransactionStatusCheck(token, body);
     }
 
 

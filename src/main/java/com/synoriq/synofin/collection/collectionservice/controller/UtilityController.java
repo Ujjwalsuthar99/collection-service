@@ -3,27 +3,24 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.collectionIncentiveDTOs.CollectionIncentiveRequestDTOs;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.CommonTransactionStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeCallBackRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DeleteImageOnS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DeleteImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.IntegrationConnectorService;
 import com.synoriq.synofin.collection.collectionservice.service.PaymentLinkService;
 import com.synoriq.synofin.collection.collectionservice.service.QrCodeService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.performancemonitoringservice.annotation.TimedAlert;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -33,7 +30,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.SQLException;
 
-import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_NUMBER;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_SIZE;
 
 @RestController
 @RequestMapping("/v1")
@@ -41,18 +39,18 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @Slf4j
 @Validated
 public class UtilityController {
-
-    @Autowired
-    UtilityService utilityService;
-
-    @Autowired
-    IntegrationConnectorService integrationConnectorService;
-
-    @Autowired
-    PaymentLinkService paymentLinkService;
-
-    @Autowired
-    QrCodeService qrCodeService;
+    public UtilityController(UtilityService utilityService,
+                             IntegrationConnectorService integrationConnectorService,
+                             PaymentLinkService paymentLinkService, QrCodeService qrCodeService) {
+        this.utilityService = utilityService;
+        this.paymentLinkService = paymentLinkService;
+        this.integrationConnectorService = integrationConnectorService;
+        this.qrCodeService = qrCodeService;
+    }
+    public final UtilityService utilityService;
+    public final IntegrationConnectorService integrationConnectorService;
+    public final PaymentLinkService paymentLinkService;
+    public final QrCodeService qrCodeService;
 
     @RequestMapping(value = "getMasterType", method = RequestMethod.POST)
     public ResponseEntity<Object> getMasterData(@RequestHeader("Authorization") String bearerToken, @RequestBody MasterDtoRequest masterDtoRequest) throws SQLException {
@@ -321,27 +319,9 @@ public class UtilityController {
     }
 
     @RequestMapping(value = "get-qr-code-transaction-status", method = RequestMethod.POST)
-    public ResponseEntity<Object> getQrCodeTransactionStatus(@RequestHeader("Authorization") String token, @RequestBody DynamicQrCodeStatusCheckRequestDTO reqBody) {
-        BaseDTOResponse<Object> baseResponse;
-        ResponseEntity<Object> response = null;
-        DynamicQrCodeCheckStatusResponseDTO result;
-
-        try {
-            result = qrCodeService.getQrCodeTransactionStatus(token, reqBody);
-            if (result.getData() == null && result.getError() != null) {
-                response = new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
-            } else {
-                response = new ResponseEntity<>(result, HttpStatus.OK);
-            }
-        } catch (Exception e) {
-            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
-                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
-            } else {
-                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
-            }
-            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
-        }
-        return response;
+    public ResponseEntity<Object> getQrCodeTransactionStatus(@RequestHeader("Authorization") String token, @RequestBody CommonTransactionStatusCheckRequestDTO reqBody) throws Exception {
+        Object result = qrCodeService.getQrCodeTransactionStatus(token, reqBody);
+        return new ResponseEntity<>(new BaseDTOResponse<>(result), HttpStatus.OK);
     }
 
     @RequestMapping(value = "qrCodeCallBack", method = RequestMethod.POST)

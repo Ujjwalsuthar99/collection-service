@@ -1,9 +1,9 @@
 package com.synoriq.synofin.collection.collectionservice.service.factory;
 
-import com.synoriq.synofin.collection.collectionservice.implementation.PaymentLinkServiceImpl;
-import com.synoriq.synofin.collection.collectionservice.implementation.QrCodeServiceImpl;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeStatusCheckRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.CommonTransactionStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.service.DigitalTransactionChecker;
+import com.synoriq.synofin.collection.collectionservice.service.implementation.PaymentLinkServiceImpl;
+import com.synoriq.synofin.collection.collectionservice.service.implementation.QrCodeServiceImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,11 +17,10 @@ public class TransactionStatusCheckerFactory {
         this.paymentLinkService = paymentLinkService;
     }
 
-    public DigitalTransactionChecker getChecker(Object requestBody) {
-        if (requestBody instanceof DynamicQrCodeStatusCheckRequestDTO) {
+    public DigitalTransactionChecker getChecker(String serviceName) {
+        if (serviceName.equals("dynamic_qr_code")) {
             return qrCodeService;
-        } else {
-            return paymentLinkService;
         }
+        return paymentLinkService;
     }
 }
