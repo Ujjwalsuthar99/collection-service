@@ -541,11 +541,9 @@ public class ReceiptServiceImpl implements ReceiptService {
                 }
             }
             // check for duplicate transaction reference number
-            if (!receiptFromQR && receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode().equals("upi")) {
-                Map<String, Object> transactionNumberCheck = receiptRepository.transactionNumberCheck(receiptServiceDtoRequest.getRequestData().getRequestData().getTransactionReference());
-                if (!transactionNumberCheck.isEmpty()) {
-                    throw new Exception("1016039");
-                }
+            Map<String, Object> transactionNumberCheck = receiptRepository.transactionNumberCheck(receiptServiceDtoRequest.getRequestData().getRequestData().getTransactionReference());
+            if (!transactionNumberCheck.isEmpty()) {
+                throw new Exception("1016039");
             }
 
             String limitConf = null;
