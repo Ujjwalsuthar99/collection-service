@@ -177,18 +177,6 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
 
             // QR code API successFull Response
             if (res.getResponse().equals(true)) {
-
-                DynamicQrCodeDataResponseDTO dynamicQrCodeDataResponseDTO = new DynamicQrCodeDataResponseDTO();
-                dynamicQrCodeDataResponseDTO.setMerchantTranId(merchantTransId);
-                dynamicQrCodeDataResponseDTO.setLink(res.getData().getLink());
-                dynamicQrCodeDataResponseDTO.setStatus(res.getData().getStatus());
-
-                DynamicQrCodeResponseDTO dynamicQrCodeResponseDto = new DynamicQrCodeResponseDTO();
-                dynamicQrCodeResponseDto.setResponse(res.getResponse());
-                dynamicQrCodeResponseDto.setRequestId(res.getRequestId());
-                dynamicQrCodeResponseDto.setData(dynamicQrCodeDataResponseDTO);
-                res = dynamicQrCodeResponseDto;
-
                 String activityRemarks = "Generated a QR code against loan id " + requestBody.getLoanId() + " of payment Rs. " + requestBody.getAmount();
                 CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity("generated_dynamic_qr_code", requestBody.getUserId(), requestBody.getLoanId(), activityRemarks, requestBody.getGeolocation(), receiptServiceDtoRequest.getActivityData().getBatteryPercentage());
 
@@ -223,7 +211,8 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 digitalPaymentTransactionsEntity.setOtherResponseData(resultNode);
 
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
-                dynamicQrCodeDataResponseDTO.setDigitalPaymentTransactionsId(digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId());
+                res.getData().setDigitalPaymentTransactionsId(digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId());
+                res.getData().setExpiredTime(validityTime);
             } else {
                 throw new ConnectorException(res.getError(), HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
             }

@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeDataRequestDTO;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DynamicQrCodeDataResponseDTO {
 
     @JsonProperty("merchantTranId")
@@ -28,5 +30,8 @@ public class DynamicQrCodeDataResponseDTO {
 
     @JsonProperty("digitalPaymentTransactionsId")
     private Long digitalPaymentTransactionsId;
+
+    @JsonProperty("expiredTime")
+    private String expiredTime;
 
 }
