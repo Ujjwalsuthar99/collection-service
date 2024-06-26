@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.collectionIncentiveDTOs.CollectionIncentiveRequestDTOs;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.CommonTransactionStatusCheckRequestDTO;
@@ -21,6 +22,9 @@ import com.synoriq.synofin.collection.collectionservice.service.QrCodeService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.performancemonitoringservice.annotation.TimedAlert;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -30,8 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.SQLException;
 
-import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_NUMBER;
-import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.DEFAULT_PAGE_SIZE;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
 @RestController
 @RequestMapping("/v1")
@@ -51,6 +54,14 @@ public class UtilityController {
     public final IntegrationConnectorService integrationConnectorService;
     public final PaymentLinkService paymentLinkService;
     public final QrCodeService qrCodeService;
+
+
+
+    @Value("${spring.profiles.active}")
+    private String springProfile;
+
+    @Autowired
+    private CollectionConfigurationsRepository collectionConfigurationsRepository;
 
     @RequestMapping(value = "getMasterType", method = RequestMethod.POST)
     public ResponseEntity<Object> getMasterData(@RequestHeader("Authorization") String bearerToken, @RequestBody MasterDtoRequest masterDtoRequest) throws SQLException {
@@ -528,4 +539,20 @@ public class UtilityController {
         }
         return response;
     }
+
+    @GetMapping("/redirect")
+    public ResponseEntity<Void> redirectToGoogle(@RequestParam("encData") String encData,
+                                                 @RequestParam("logId") String logId,
+                                                 @RequestParam("agCode") String agCode,
+                                                 @RequestParam("agKey") String agKey) {
+
+        String maskedNumberConfiguration = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(E_MITRA_STATIC_TOKEN);
+
+        String googleUrl = "https://api-" + springProfile + ".synofin.tech/emitra?encryptedData=" + encData + "&access_token=" + maskedNumberConfiguration;
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.LOCATION, googleUrl);
+        return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build();
+    }
+
+
 }
