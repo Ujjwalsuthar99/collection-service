@@ -540,7 +540,7 @@ public class UtilityController {
         return response;
     }
 
-    @GetMapping("/redirect")
+    @GetMapping("/emitra-redirect")
     public ResponseEntity<Void> redirectToGoogle(@RequestParam("encData") String encData,
                                                  @RequestParam("logId") String logId,
                                                  @RequestParam("agCode") String agCode,
@@ -548,7 +548,7 @@ public class UtilityController {
 
         String maskedNumberConfiguration = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(E_MITRA_STATIC_TOKEN);
 
-        String googleUrl = "https://api-" + springProfile + ".synofin.tech/emitra?encryptedData=" + encData + "&access_token=" + maskedNumberConfiguration;
+        String googleUrl = "https://collections-" + springProfile + ".synofin.tech/emitra?encryptedData=" + encData + "&access_token=" + maskedNumberConfiguration;
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.LOCATION, googleUrl);
         return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build();
