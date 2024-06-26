@@ -548,6 +548,11 @@ public class UtilityController {
 
         String maskedNumberConfiguration = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(E_MITRA_STATIC_TOKEN);
 
+        log.info("encrypted data emitra {}", encData);
+        log.info("log id emitra {}", logId);
+        log.info("ag code emitra {}", agCode);
+        log.info("ag key emitra {}", agKey);
+
         String googleUrl = "https://collections-" + springProfile + ".synofin.tech/emitra?encryptedData=" + encData + "&access_token=" + maskedNumberConfiguration;
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.LOCATION, googleUrl);
