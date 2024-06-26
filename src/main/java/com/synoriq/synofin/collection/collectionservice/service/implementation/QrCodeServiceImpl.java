@@ -174,7 +174,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                     .typeResponseType(DynamicQrCodeResponseDTO.class)
                     .build().call();
 
-
+            log.info("qr code response -> {}", res);
             // QR code API successFull Response
             if (res.getResponse().equals(true)) {
                 String activityRemarks = "Generated a QR code against loan id " + requestBody.getLoanId() + " of payment Rs. " + requestBody.getAmount();
@@ -216,13 +216,10 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
             } else {
                 throw new ConnectorException(res.getError(), HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
             }
-
-            log.info("res {}", res);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, res, "success", requestBody.getLoanId(), HttpMethod.POST.name(), "sendQrCode");
         } catch (ConnectorException ee) {
-            String errorMessage = ee.getMessage();
-            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
+            String modifiedErrorMessage = utilityService.convertToJSON("Message : " + ee.getMessage() +" RequestId : " +  ee.getRequestId() + "Code : " + ee.getCode());
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_qr_code, requestBody.getUserId(), integrationRequestBody, modifiedErrorMessage, "failure", requestBody.getLoanId(), HttpMethod.POST.name(), "sendQrCode");
             throw new ConnectorException(ErrorCode.S3_UPLOAD_DATA_ERROR, ee.getText(), HttpStatus.FAILED_DEPENDENCY, ee.getRequestId());
         } catch (Exception ee) {
