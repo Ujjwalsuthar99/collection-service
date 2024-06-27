@@ -122,7 +122,6 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
                 }
             }
             CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
-            collectionLimitUserWiseEntity.setCreatedDate(new Date());
             collectionLimitUserWiseEntity.setDeleted(false);
             collectionLimitUserWiseEntity.setName(name);
             collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());

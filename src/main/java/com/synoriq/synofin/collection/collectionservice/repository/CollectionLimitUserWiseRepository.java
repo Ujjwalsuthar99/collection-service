@@ -28,6 +28,9 @@ public interface CollectionLimitUserWiseRepository extends JpaRepository<Collect
     List<CollectionLimitUserWiseEntity> getAllCollectionLimitUserWiseByUserId(@Param("userId") Long userId);
 
     @Query(nativeQuery = true, value = "select cast(u.username as text) as name from master.users u where u.user_id = :userId")
-    public String getUserNameFromUser(@Param("userId") Long userId);
+    String getUserNameFromUser(@Param("userId") Long userId);
+
+    @Query(nativeQuery = true, value = "select cast(u.name as text) as name from master.users u where u.user_id = :userId")
+    String getNameByUserId(@Param("userId") Long userId);
 
 }

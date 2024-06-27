@@ -478,7 +478,6 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
                                     limitConf = CHEQUE_COLLECTION_DEFAULT_LIMIT;
                                 }
                                 Double totalLimitValue = Double.valueOf(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(limitConf));
-                                collectionLimitUserWiseEntity.setCreatedDate(new Date());
                                 collectionLimitUserWiseEntity.setDeleted(false);
                                 collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(receiptTransferEntityTransferMode);
                                 collectionLimitUserWiseEntity.setUserId(requestActionBy);
