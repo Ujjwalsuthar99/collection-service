@@ -1,6 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.config.DatabaseContextHolder;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.collectionIncentiveDTOs.CollectionIncentiveRequestDTOs;
@@ -541,11 +542,13 @@ public class UtilityController {
     }
 
     @PostMapping("/emitra-redirect")
-    public ResponseEntity<Void> redirectToGoogle(@RequestParam("encData") String encData,
+    public ResponseEntity<Void> fromEmitraToSynoRedirection(@RequestParam("encData") String encData,
                                                  @RequestParam("logId") String logId,
                                                  @RequestParam("agCode") String agCode,
                                                  @RequestParam("agKey") String agKey) {
 
+        //We are using this API only for Finova's e-mitra
+        DatabaseContextHolder.set("finova");
         String maskedNumberConfiguration = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(E_MITRA_STATIC_TOKEN);
 
         log.info("encrypted data emitra {}", encData);
@@ -553,9 +556,9 @@ public class UtilityController {
         log.info("ag code emitra {}", agCode);
         log.info("ag key emitra {}", agKey);
 
-        String googleUrl = "https://collections-" + springProfile + ".synofin.tech/emitra?encryptedData=" + encData + "&access_token=" + maskedNumberConfiguration;
+        String synoUrl = "https://collections-" + springProfile + ".synofin.tech/emitra?encryptedData=" + encData + "&access_token=" + maskedNumberConfiguration;
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.LOCATION, googleUrl);
+        headers.add(HttpHeaders.LOCATION, synoUrl);
         return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build();
     }
 
