@@ -540,7 +540,7 @@ public class UtilityController {
         return response;
     }
 
-    @GetMapping("/emitra-redirect")
+    @PostMapping("/emitra-redirect")
     public ResponseEntity<Void> redirectToGoogle(@RequestParam("encData") String encData,
                                                  @RequestParam("logId") String logId,
                                                  @RequestParam("agCode") String agCode,
