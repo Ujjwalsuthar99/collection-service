@@ -1259,6 +1259,9 @@ public class UtilityServiceImpl implements UtilityService {
                         receiptServiceDtoRequest.getActivityData().getUserId().toString(), receiptServiceDtoRequest.getCustomerType(),
                         receiptServiceDtoRequest.getCustomerName(), receiptServiceDtoRequest.getApplicantMobileNumber(), receiptServiceDtoRequest.getCollectedFromNumber(), receiptServiceDtoRequest.getLoanApplicationNumber(), resp.getData().getServiceRequestId());
                 log.info("in callback create receipt function ending");
+            } else {
+                response.put(SR_ID, null);
+                response.put(RECEIPT_GENERATED, false);
             }
         } catch (Exception e) {
             log.error("Error while create receipt via callback {}", e.getMessage());
