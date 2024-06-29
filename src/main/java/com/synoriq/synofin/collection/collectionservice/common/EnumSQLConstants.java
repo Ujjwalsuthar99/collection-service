@@ -38,11 +38,15 @@ public class EnumSQLConstants {
         s3_delete,
         multi_create_receipt,
         send_payment_link,
-        check_payment_link_status
+        check_payment_link_status,
+        emitra_verify_sso_token,
+        emitra_verify_transaction,
+        emitra_get_kiosk_details,
+        emitra_service_transaction,
+        emitra_update_transaction_posting
         ;
 
-
-        private LogNames() {
+        LogNames() {
         }
     }
 }
