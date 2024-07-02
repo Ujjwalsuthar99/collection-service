@@ -328,21 +328,23 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
             DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = digitalPaymentTransactionsRepository.findByMerchantTranId(merchantTransId);
             if (digitalPaymentTransactionsEntity != null) {
                 if (Objects.equals(requestBody.getStatus(), QR_CALLBACK_SUCCESS) && !digitalPaymentTransactionsEntity.getReceiptGenerated()) {
-                    digitalPaymentTransactionsEntity.setStatus(SUCCESS);
-                    digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getOriginalBankRRN());
                     // calling create receipt function for call back
                     utilityService.createReceiptByCallBack(digitalPaymentTransactionsEntity, token, mainResponse, requestBody.getOriginalBankRRN());
                 }
                 loanId = digitalPaymentTransactionsEntity.getLoanId();
-                digitalPaymentTransactionsEntity.setCallBackRequestBody(requestBody);
-                digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
+                if((boolean) mainResponse.get(RECEIPT_GENERATED)) {
+                    digitalPaymentTransactionsEntity.setStatus(SUCCESS);
+                    digitalPaymentTransactionsEntity.setUtrNumber(requestBody.getOriginalBankRRN());
+                    digitalPaymentTransactionsEntity.setCallBackRequestBody(requestBody);
+                    digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
 
-                log.info("digitalPaymentTransactionsEntity {}", digitalPaymentTransactionsEntity);
-                String activityRemarks = "The payment status for transaction id " + digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId() + " and loan id " + loanId + " has been updated as success";
-                String activityName = "dynamic_qr_code_payment_" + requestBody.getStatus().toLowerCase();
-                CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntity.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
+                    log.info("digitalPaymentTransactionsEntity {}", digitalPaymentTransactionsEntity);
+                    String activityRemarks = "The payment status for transaction id " + digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId() + " and loan id " + loanId + " has been updated as success";
+                    String activityName = "dynamic_qr_code_payment_" + requestBody.getStatus().toLowerCase();
+                    CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntity.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
 
-                collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+                    collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+                }
                 connectorResponse.put(STATUS, true);
                 mainResponse.put(STATUS, requestBody.getStatus().toLowerCase());
                 mainResponse.put(CONNECTOR_RESPONSE, connectorResponse);
