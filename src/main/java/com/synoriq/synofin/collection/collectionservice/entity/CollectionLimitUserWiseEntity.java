@@ -29,7 +29,7 @@ public class CollectionLimitUserWiseEntity {
 
     @Column(name = "created_date")
     @CreationTimestamp
-    private LocalDateTime createdDate;
+    private Date createdDate;
 
     @Column(name = "deleted")
     private Boolean deleted;
@@ -54,6 +54,6 @@ public class CollectionLimitUserWiseEntity {
 
     @Column(name = "modified_date")
     @UpdateTimestamp
-    private LocalDateTime modifiedDate;
+    private Date modifiedDate;
 
 }

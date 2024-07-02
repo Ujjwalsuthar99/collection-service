@@ -537,6 +537,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             collectionLimitUserWiseEntity.setUtilizedLimitValue(collectionLimitUser.getUtilizedLimitValue() + Double.parseDouble(receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount()));
 
         } else {
+            collectionLimitUserWiseEntity.setCreatedDate(new Date());
             collectionLimitUserWiseEntity.setDeleted(false);
             collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode());
             collectionLimitUserWiseEntity.setUserId(receiptServiceDtoRequest.getActivityData().getUserId());
