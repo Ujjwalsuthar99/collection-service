@@ -527,6 +527,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     private CollectionLimitUserWiseEntity setCollectionLimitUserWiseEntity(CollectionLimitUserWiseEntity collectionLimitUser, ReceiptServiceDtoRequest receiptServiceDtoRequest, double currentReceiptAmountAllowed) {
         CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
         if (collectionLimitUser != null) {
+            collectionLimitUserWiseEntity.setCreatedDate(new Date());
             collectionLimitUserWiseEntity.setCollectionLimitDefinitionsId(collectionLimitUser.getCollectionLimitDefinitionsId());
             collectionLimitUserWiseEntity.setDeleted(collectionLimitUser.getDeleted());
             collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUser.getCollectionLimitStrategiesKey());
