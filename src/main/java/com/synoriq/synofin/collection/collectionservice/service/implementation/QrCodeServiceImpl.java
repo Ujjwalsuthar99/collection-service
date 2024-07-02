@@ -104,7 +104,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         integrationDataRequestBody.setPayerIFSC(requestBody.getPayerIFSC());
         integrationDataRequestBody.setFirstName(requestBody.getFirstName());
         integrationDataRequestBody.setLastName(requestBody.getLastName());
-        integrationDataRequestBody.setValidityEndDateTime(validityTime);
+//        integrationDataRequestBody.setValidityEndDateTime(validityTime);
         String billNumber;
         String merchantTransId;
         if (requestBody.getVendor().equals(KOTAK_VENDOR)) {

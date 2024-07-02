@@ -704,7 +704,7 @@ public class UtilityServiceImpl implements UtilityService {
                 List<String> strings = new ArrayList<>();
                 strings.add(receiptAmount);
                 strings.add(loanNumber);
-                strings.add(receiptDate);
+                strings.add(receiptId);
                 strings.add(shortenUrlResponseDTO.getData().getResult());
                 SmsListDTO smsListDTO = new SmsListDTO();
                 smsListDTO.setMessageType("english");
