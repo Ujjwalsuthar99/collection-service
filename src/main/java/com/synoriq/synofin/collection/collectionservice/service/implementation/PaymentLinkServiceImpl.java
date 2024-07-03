@@ -255,7 +255,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
             String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
             CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactions.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
-            if (res.getData().getStatus().equalsIgnoreCase(SUCCESS)) {
+            if (res.getData().getStatus().equalsIgnoreCase(PAID)) {
                 if (!digitalPaymentTransactions.getReceiptGenerated()) {
                     log.info("receipt generate check {}", res);
                     utilityService.createReceiptByCallBack(digitalPaymentTransactions, token, response, res.getData().getOrderId());

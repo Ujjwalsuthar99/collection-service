@@ -164,6 +164,7 @@ public class TaskServiceImpl implements TaskService {
 
             List<FilterTaskResponseDTO> data = queryRows.stream()
                     .map(FilterTaskResponseDTO::new).collect(Collectors.toList());
+
             baseDTOResponse = new BaseDTOResponse<>(data);
         } catch (Exception e) {
             throw new Exception("1017002");

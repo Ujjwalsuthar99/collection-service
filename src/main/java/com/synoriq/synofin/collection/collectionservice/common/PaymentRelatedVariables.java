@@ -10,6 +10,7 @@ public class PaymentRelatedVariables {
     public static final String KOTAK_VENDOR = "kotak";
     public static final String PENDING = "pending";
     public static final String SUCCESS = "success";
+    public static final String PAID = "paid";
     public static final String FAILURE = "failure";
     public static final String QR_CALLBACK_SUCCESS = "SUCCESS";
     public static final String UPI = "upi";
