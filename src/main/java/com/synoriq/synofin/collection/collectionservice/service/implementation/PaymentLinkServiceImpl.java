@@ -285,7 +285,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, res, "failure", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
             throw new ConnectorException(r, HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
         }
-        return res;
+        return res.getData();
     }
     @Override
     public Object digitalTransactionStatusCheck(String token, CommonTransactionStatusCheckRequestDTO requestBody) throws Exception {
