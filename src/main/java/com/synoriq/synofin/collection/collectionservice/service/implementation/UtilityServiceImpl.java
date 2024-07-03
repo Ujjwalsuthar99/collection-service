@@ -1221,7 +1221,7 @@ public class UtilityServiceImpl implements UtilityService {
             ServiceRequestSaveResponse resp = receiptService.createReceiptNew(receiptServiceDtoRequest, createBlankMultiPartFile(), createBlankMultiPartFile(), token, true);
             log.info("receipt response {}", resp);
 
-            digitalPaymentTransactionsEntity.setReceiptResponse(resp.getData());
+            digitalPaymentTransactionsEntity.setReceiptResponse(resp);
             if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
                 log.info("in ifff receipt response {}", resp);
                 response.put(RECEIPT_GENERATED, true);
