@@ -270,7 +270,8 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                     .build().call();
 
             log.info("response from qr status check {}", res);
-
+            if (res.getData() == null)
+                throw new Exception("1016057");
             String activityRemarks = "The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + digitalPaymentTransactionsEntityData.getLoanId() + " has been updated as " + res.getData().getStatus().toLowerCase() + " by checking the status manually";
             String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
             CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntityData.getCreatedBy(), digitalPaymentTransactionsEntityData.getLoanId(), activityRemarks, requestBody.getGeolocation(), requestBody.getBatteryPercentage());
@@ -307,7 +308,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, modifiedErrorMessage, "failure", digitalPaymentTransactionsEntityData.getLoanId(), HttpMethod.POST.name(), "qrCodeTransactionStatus");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, res + modifiedErrorMessage, "failure", digitalPaymentTransactionsEntityData.getLoanId(), HttpMethod.POST.name(), "qrCodeTransactionStatus");
             log.error("QR Transaction Status Exception {}", ee.getMessage());
         }
         log.info("Ending QR Transaction Status");

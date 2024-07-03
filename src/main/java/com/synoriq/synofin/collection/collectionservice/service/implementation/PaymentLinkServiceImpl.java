@@ -277,14 +277,12 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
 
             digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
             res.getData().setStatus(res.getData().getStatus().toLowerCase());
-
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, res, "success", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
-            String errorMessage = ee.getMessage();
-            String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, modifiedErrorMessage, "failure", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             IntegrationServiceErrorResponseDTO r = new ObjectMapper().readValue(ow.writeValueAsString(res.getError()), IntegrationServiceErrorResponseDTO.class);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, res, "failure", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
             throw new ConnectorException(r, HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
         }
         return res;
