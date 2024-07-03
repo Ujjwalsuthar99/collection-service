@@ -97,6 +97,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
 
         ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(paymentLinkCollectionRequestDTO.getReceiptBody(), ReceiptServiceDtoRequest.class);
         receiptServiceDtoRequest.getRequestData().getRequestData().setPaymentMode("upi");
+        receiptServiceDtoRequest.getRequestData().setAutoApproved(true);
         GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
         List<MultipartFile> allImages = new LinkedList<>();
         if (paymentReferenceImage.getSize() > 0) {

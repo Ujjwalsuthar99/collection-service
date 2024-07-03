@@ -124,7 +124,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
 
         try {
             ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(requestBody.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
-
+            receiptServiceDtoRequest.getRequestData().setAutoApproved(true);
             GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
 
             List<MultipartFile> allImages = new LinkedList<>();
