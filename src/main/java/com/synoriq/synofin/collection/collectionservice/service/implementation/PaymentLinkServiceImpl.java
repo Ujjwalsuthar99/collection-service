@@ -47,8 +47,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
-import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.PAYMENT_LINK_EXPIRATION_CONF;
+import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.*;
 
 
@@ -175,7 +174,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
             // creating digital payment transaction entry
-            createDigitalPaymentLinkTransaction(receiptServiceDtoRequest, paymentLinkCollectionRequestDTO.getMobileNumber(), res.getData().getId(), collectionActivityLogsEntity.getCollectionActivityLogsId(), paymentLinkCollectionRequestDTO.getVendor(), res);
+            createDigitalPaymentLinkTransaction(receiptServiceDtoRequest, paymentLinkCollectionRequestDTO.getMobileNumber(), res.getData().getId(), collectionActivityLogsEntity.getCollectionActivityLogsId(), collectionConfigurationsRepository.findConfigurationValueByConfigurationName(PAYMENT_LINK_VENDOR), res);
 
             log.info("res {}", res);
             // creating api logs
@@ -256,6 +255,10 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
             String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
             CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactions.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
+            // dummy resppnse here
+            res.getData().setStatus("paid");
+            res.getData().setOrderId("dummy_order_id");
+            // dummy resppinse here
             if (res.getData().getStatus().equalsIgnoreCase(PAID)) {
                 if (!digitalPaymentTransactions.getReceiptGenerated()) {
                     log.info("receipt generate check {}", res);

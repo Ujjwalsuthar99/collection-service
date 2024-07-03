@@ -47,6 +47,7 @@ public class GlobalVariables {
     public static final String DECCAN_TEMPLATE_MESSAGE = "EMI amount received Rs {Var1} via {paymentMode} from loan number {Var2} please download receipt from below link {Var3} Thank you ! Deccan Finance";
     public static final String PAYMENT_LINK_EXPIRATION_CONF = "payment_link_expiration_time";
     public static final String QR_CODE_EXPIRATION_CONF = "qr_code_expiration_time";
+    public static final String PAYMENT_LINK_VENDOR = "payment_link_vendor";
 
     //Pagination Config
     public static final String DEFAULT_PAGE_NUMBER = "0";
