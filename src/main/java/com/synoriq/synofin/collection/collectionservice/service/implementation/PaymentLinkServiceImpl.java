@@ -256,8 +256,8 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
             CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactions.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
             // dummy resppnse here
-            res.getData().setStatus("paid");
-            res.getData().setOrderId("dummy_order_id");
+//            res.getData().setStatus("paid");
+//            res.getData().setOrderId("dummy_order_id");
             // dummy resppinse here
             if (res.getData().getStatus().equalsIgnoreCase(PAID)) {
                 if (!digitalPaymentTransactions.getReceiptGenerated()) {
