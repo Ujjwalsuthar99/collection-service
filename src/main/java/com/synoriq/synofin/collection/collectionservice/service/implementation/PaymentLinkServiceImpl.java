@@ -24,6 +24,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLink
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.PaymentLinkResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.TransactionStatusResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.TransactionStatusResponseDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
@@ -239,6 +240,12 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                 .userReferenceNumber("")
                 .build();
         try {
+            int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(PAYMENT_LINK_EXPIRATION_CONF));
+            if (utilityService.isExpired(expiration, digitalPaymentTransactions.getCreatedDate())) {
+                digitalPaymentTransactions.setStatus("expired");
+                digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
+                return TransactionStatusResponseDataDTO.builder().status("expired").orderId(null).build();
+            }
 
             res = HTTPRequestService.<Object, TransactionStatusResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
@@ -249,15 +256,15 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                     .build().call();
 
             if (Objects.requireNonNull(res).getData() == null) {
-                throw new Exception(res.toString());
+                throw new ConnectorException(res.toString());
             }
             String activityRemarks = "The payment status for transaction id " + digitalPaymentTransactions.getDigitalPaymentTransactionsId() + " and loan id " + loanId + " has been updated as " + res.getData().getStatus().toLowerCase();
             String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
             CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactions.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
             // dummy resppnse here
-//            res.getData().setStatus("paid");
-//            res.getData().setOrderId("dummy_order_id");
+            res.getData().setStatus("paid");
+            res.getData().setOrderId("dummy_order_id" + new Date().getTime());
             // dummy resppinse here
             if (res.getData().getStatus().equalsIgnoreCase(PAID)) {
                 if (!digitalPaymentTransactions.getReceiptGenerated()) {
@@ -282,12 +289,15 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
             digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
             res.getData().setStatus(res.getData().getStatus().toLowerCase());
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, res, "success", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
-        } catch (Exception ee) {
-            log.error("{}", ee.getMessage());
+        } catch (ConnectorException ee) {
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             IntegrationServiceErrorResponseDTO r = new ObjectMapper().readValue(ow.writeValueAsString(res.getError()), IntegrationServiceErrorResponseDTO.class);
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, res, "failure", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
             throw new ConnectorException(r, HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
+        } catch (Exception ee) {
+            log.error("{}", ee.getMessage());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, utilityService.convertToJSON(ee.getMessage()), "failure", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
+            throw new Exception(ee.getMessage());
         }
         return res.getData();
     }
