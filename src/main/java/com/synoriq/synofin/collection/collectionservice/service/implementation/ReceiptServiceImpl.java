@@ -289,9 +289,11 @@ public class ReceiptServiceImpl implements ReceiptService {
                 }
             }
             // check for duplicate transaction reference number
-            Map<String, Object> transactionNumberCheck = receiptRepository.transactionNumberCheck(receiptServiceDtoRequest.getRequestData().getRequestData().getTransactionReference());
-            if (!transactionNumberCheck.isEmpty()) {
-                throw new Exception("1016039");
+            if (!receiptServiceDtoRequest.getRequestData().getRequestData().getTransactionReference().isBlank()) {
+                Map<String, Object> transactionNumberCheck = receiptRepository.transactionNumberCheck(receiptServiceDtoRequest.getRequestData().getRequestData().getTransactionReference());
+                if (!transactionNumberCheck.isEmpty()) {
+                    throw new Exception("1016039");
+                }
             }
 
             String limitConf = null;
