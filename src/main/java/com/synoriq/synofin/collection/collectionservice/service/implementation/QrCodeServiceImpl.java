@@ -312,6 +312,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
             log.error("QR Transaction Status Exception {}", ee.getMessage());
         }
         log.info("Ending QR Transaction Status");
+        res.getData().setStatus(res.getData().getStatus().toLowerCase());
         return res.getData();
     }
 
@@ -327,7 +328,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         }};
         Map<String, Object> connectorResponse = new HashMap<>() {{
             put(STATUS, false);
-        }};;
+        }};
         Long loanId = null;
 
         try {

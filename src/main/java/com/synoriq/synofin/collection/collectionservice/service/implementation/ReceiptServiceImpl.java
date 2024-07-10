@@ -22,6 +22,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.receiptTran
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.GetReceiptDateResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.ReceiptDateResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.SystemPropertiesDTOs.ReceiptServiceSystemPropertiesResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.*;
@@ -591,26 +592,33 @@ public class ReceiptServiceImpl implements ReceiptService {
             String businessDateConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(USE_BUSINESS_DATE_AS_RECEIPT_DATE);
             String transactionDateConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(USE_BUSINESS_DATE_AS_TRANSACTION_DATE);
 
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", bearerToken);
-            httpHeaders.add("Content-Type", "application/json");
+            // commenting third party call for LMS business date
 
-            lmsBusinessDate = HTTPRequestService.<Object, ReceiptServiceSystemPropertiesResponse>builder()
-                    .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getSystemProperties")
-                    .httpHeaders(httpHeaders)
-                    .typeResponseType(ReceiptServiceSystemPropertiesResponse.class)
-                    .build().call();
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_receipt_date, null, null, lmsBusinessDate, "success", null, HttpMethod.POST.name(), "getReceiptDate");
+//            HttpHeaders httpHeaders = new HttpHeaders();
+//            httpHeaders.add("Authorization", bearerToken);
+//            httpHeaders.add("Content-Type", "application/json");
+
+//            lmsBusinessDate = HTTPRequestService.<Object, ReceiptServiceSystemPropertiesResponse>builder()
+//                    .httpMethod(HttpMethod.GET)
+//                    .url("http://localhost:1102/v1/getSystemProperties")
+//                    .httpHeaders(httpHeaders)
+//                    .typeResponseType(ReceiptServiceSystemPropertiesResponse.class)
+//                    .build().call();
+
+
+            String businessDate = receiptRepository.getBusinessDateFromLmsConfiguration();
+            ReceiptDateResponse receiptDateResponse = ReceiptDateResponse.builder().businessDate(businessDate).build();
+
+//            // creating api logs
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_receipt_date, null, null, receiptDateResponse, "success", null, HttpMethod.POST.name(), "getReceiptDate");
 
             if (businessDateConf.equals("true")) {
-                String bDate = lmsBusinessDate.data.businessDate;
-                SimpleDateFormat inputFormatter = new SimpleDateFormat("dd-MM-yyyy");
-                SimpleDateFormat outputFormatter = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = inputFormatter.parse(bDate);
-                String busDate = outputFormatter.format(date);
-                getReceiptDateResponse.setBusinessDate(busDate);
+//                String bDate = lmsBusinessDate.data.businessDate;
+//                SimpleDateFormat inputFormatter = new SimpleDateFormat("dd-MM-yyyy");
+//                SimpleDateFormat outputFormatter = new SimpleDateFormat("yyyy-MM-dd");
+//                Date date = inputFormatter.parse(bDate);
+//                String busDate = outputFormatter.format(date);
+                getReceiptDateResponse.setBusinessDate(businessDate);
             } else {
                 LocalDate dateObj = LocalDate.now();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -619,12 +627,12 @@ public class ReceiptServiceImpl implements ReceiptService {
             }
 
             if (transactionDateConf.equals("true")) {
-                String bDate = lmsBusinessDate.data.businessDate;
-                SimpleDateFormat inputFormatter = new SimpleDateFormat("dd-MM-yyyy");
-                SimpleDateFormat outputFormatter = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = inputFormatter.parse(bDate);
-                String busDate = outputFormatter.format(date);
-                getReceiptDateResponse.setTransactionDate(busDate);
+//                String bDate = lmsBusinessDate.data.businessDate;
+//                SimpleDateFormat inputFormatter = new SimpleDateFormat("dd-MM-yyyy");
+//                SimpleDateFormat outputFormatter = new SimpleDateFormat("yyyy-MM-dd");
+//                Date date = inputFormatter.parse(bDate);
+//                String busDate = outputFormatter.format(date);
+                getReceiptDateResponse.setTransactionDate(businessDate);
             } else {
                 LocalDate dateObj = LocalDate.now();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

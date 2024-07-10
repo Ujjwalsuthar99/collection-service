@@ -337,4 +337,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
             "where\n" +
             "\tsr.created_by = (select user_id from master.users where username = :userName) :whereClause")
     List<Map<String, Object>> getLoanDetailsOfUserForIncentive(@Param("userName") String userName, @Param("encryptionKey") String encryptionKey, @Param("password") String password, @Param("piiPermission") Boolean piiPermission, @Param("whereClause") String whereClause);
+
+    @Query(nativeQuery = true, value = "SELECT value FROM lms.configurations WHERE name = 'business_date'")
+    String getBusinessDateFromLmsConfiguration();
 }

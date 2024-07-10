@@ -26,16 +26,16 @@ public interface ReceiptTransferService {
     @Transactional
     public ReceiptTransferEntity statusUpdate(ReceiptTransferStatusUpdateDtoRequest receiptTransferStatusUpdateDtoRequest, String token) throws Exception;
 
-    public BaseDTOResponse<Object> getReceiptTransferById(String token , Long receiptTransferId, Long userId) throws Exception;
-    public BaseDTOResponse<Object> getReceiptTransferForAirtel(String token , ReceiptTransferForAirtelRequestDTO receiptTransferForAirtelRequestDTO) throws Exception;
-    public List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date endDate, String status, Integer pageNo, Integer pageSize) throws Exception;
-    public Map<String, List<Map<String, Object>>> getReceiptTransferByUserIdWithAllStatus(Long transferredBy, Date fromDate, Date endDate, Integer pageNo, Integer pageSize) throws Exception;
-    public ReceiptTransferDataByReceiptIdResponseDTO getReceiptTransferByReceiptId(String token , Long receiptId) throws Exception;
-    public AllBankTransferResponseDTO getAllBankTransfers(String token, String searchKey, String status, Integer pageNo, Integer pageSize) throws Exception;
-    public Object getReceiptsDataByReceiptTransferId(String token , Long receiptTransferId) throws Exception;
-    public BaseDTOResponse<Object> disableApproveButtonInLms(String token , Long receiptId) throws Exception;
-    public DepositInvoiceResponseDataDTO depositInvoice(String token , DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception;
-    public BaseDTOResponse<Object> airtelDepositStatusUpdate(String token , ReceiptTransferAirtelDepositStatusRequestDTO requestBody) throws Exception;
-    public BaseDTOResponse<Object> getReceiptTransferByFilter(ReceiptTransferLmsFilterDTO requestBody) throws Exception;
+    BaseDTOResponse<Object> getReceiptTransferById(String token , Long receiptTransferId, Long userId) throws Exception;
+    BaseDTOResponse<Object> getReceiptTransferForAirtel(String token , ReceiptTransferForAirtelRequestDTO receiptTransferForAirtelRequestDTO) throws Exception;
+    List<Map<String, Object>> getReceiptTransferByUserId(Long transferredBy, Date fromDate, Date endDate, String status, Integer pageNo, Integer pageSize) throws Exception;
+    Map<String, List<Map<String, Object>>> getReceiptTransferByUserIdWithAllStatus(Long transferredBy, Date fromDate, Date endDate, Integer pageNo, Integer pageSize) throws Exception;
+    ReceiptTransferDataByReceiptIdResponseDTO getReceiptTransferByReceiptId(String token , Long receiptId) throws Exception;
+    AllBankTransferResponseDTO getAllBankTransfers(String token, String searchKey, String status, Integer pageNo, Integer pageSize) throws Exception;
+    Object getReceiptsDataByReceiptTransferId(String token , Long receiptTransferId) throws Exception;
+    BaseDTOResponse<Object> disableApproveButtonInLms(String token , Long receiptId) throws Exception;
+    DepositInvoiceResponseDataDTO depositInvoice(String token , DepositInvoiceRequestDTO depositInvoiceRequestDTO) throws Exception;
+    BaseDTOResponse<Object> airtelDepositStatusUpdate(String token , ReceiptTransferAirtelDepositStatusRequestDTO requestBody) throws Exception;
+    BaseDTOResponse<Object> getReceiptTransferByFilter(ReceiptTransferLmsFilterDTO requestBody) throws Exception;
 
 }
