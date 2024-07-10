@@ -126,5 +126,5 @@ public interface UtilityService {
         collectionActivityLogsEntity.setBatteryPercentage(batteryPercentage);
         return collectionActivityLogsEntity;
     }
-    void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response, String utrNumber) throws Exception;
+    void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> mainResponse, String utrNumber) throws Exception;
 }

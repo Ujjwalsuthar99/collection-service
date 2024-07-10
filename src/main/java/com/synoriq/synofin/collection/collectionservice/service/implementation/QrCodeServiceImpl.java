@@ -320,8 +320,14 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
     public Object qrCodeCallBack(String token, DynamicQrCodeCallBackRequestDTO requestBody) throws Exception {
         log.info("Begin QR callback");
         String merchantTransId = requestBody.getMerchantTranId();
-        Map<String, Object> mainResponse = new HashMap<>();
-        Map<String, Object> connectorResponse = new HashMap<>();
+        Map<String, Object> mainResponse = new HashMap<>() {{
+            put(STATUS, null);
+            put(RECEIPT_GENERATED, false);
+            put(SR_ID, null);
+        }};
+        Map<String, Object> connectorResponse = new HashMap<>() {{
+            put(STATUS, false);
+        }};;
         Long loanId = null;
 
         try {
@@ -346,14 +352,10 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
 
                     collectionActivityLogsRepository.save(collectionActivityLogsEntity);
                 }
-                connectorResponse.put(STATUS, true);
-                mainResponse.put(STATUS, requestBody.getStatus().toLowerCase());
+                connectorResponse.replace(STATUS, true);
+                mainResponse.replace(STATUS, requestBody.getStatus().toLowerCase());
                 mainResponse.put(CONNECTOR_RESPONSE, connectorResponse);
             } else {
-                connectorResponse.put(STATUS, false);
-                mainResponse.put(STATUS, null);
-                mainResponse.put(RECEIPT_GENERATED, null);
-                mainResponse.put(SR_ID, null);
                 mainResponse.put(CONNECTOR_RESPONSE, connectorResponse);
 
             }

@@ -1211,7 +1211,7 @@ public class UtilityServiceImpl implements UtilityService {
 
 
     @Override
-    public void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> response, String utrNumber) throws Exception {
+    public void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> mainResponse, String utrNumber) throws Exception {
         log.info("Begin callback create receipt function");
         try {
             CurrentUserInfo currentUserInfo = new CurrentUserInfo();
@@ -1224,8 +1224,8 @@ public class UtilityServiceImpl implements UtilityService {
             digitalPaymentTransactionsEntity.setReceiptResponse(resp);
             if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
                 log.info("in ifff receipt response {}", resp);
-                response.put(RECEIPT_GENERATED, true);
-                response.put(SR_ID, resp.getData().getServiceRequestId());
+                mainResponse.replace(RECEIPT_GENERATED, true);
+                mainResponse.replace(SR_ID, resp.getData().getServiceRequestId());
                 digitalPaymentTransactionsEntity.setReceiptGenerated(true);
                 String url = GET_PDF_API + resp.getData().getServiceRequestId();
 
@@ -1260,8 +1260,8 @@ public class UtilityServiceImpl implements UtilityService {
                         receiptServiceDtoRequest.getCustomerName(), receiptServiceDtoRequest.getApplicantMobileNumber(), receiptServiceDtoRequest.getCollectedFromNumber(), receiptServiceDtoRequest.getLoanApplicationNumber(), resp.getData().getServiceRequestId());
                 log.info("in callback create receipt function ending");
             } else {
-                response.put(SR_ID, null);
-                response.put(RECEIPT_GENERATED, false);
+                mainResponse.replace(SR_ID, null);
+                mainResponse.replace(RECEIPT_GENERATED, false);
             }
         } catch (Exception e) {
             log.error("Error while create receipt via callback {}", e.getMessage());
