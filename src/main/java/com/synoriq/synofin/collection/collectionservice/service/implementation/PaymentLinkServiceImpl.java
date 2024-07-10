@@ -259,12 +259,12 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                 throw new ConnectorException(res.toString());
             }
             String activityRemarks = "The payment status for transaction id " + digitalPaymentTransactions.getDigitalPaymentTransactionsId() + " and loan id " + loanId + " has been updated as " + res.getData().getStatus().toLowerCase();
-            String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
+            String activityName = "status_of_payment_link_" + res.getData().getStatus().toLowerCase();
             CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactions.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
             // dummy resppnse here
-            res.getData().setStatus("paid");
-            res.getData().setOrderId("dummy_order_id" + new Date().getTime());
+//            res.getData().setStatus("paid");
+//            res.getData().setOrderId("dummy_order_id" + new Date().getTime());
             // dummy resppinse here
             if (res.getData().getStatus().equalsIgnoreCase(PAID)) {
                 if (!digitalPaymentTransactions.getReceiptGenerated()) {

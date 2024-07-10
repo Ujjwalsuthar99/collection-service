@@ -8,6 +8,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.INTEGRATION_MSG_API_URL;
 
 @Slf4j
@@ -20,7 +22,7 @@ public class CflSmsService {
             httpHeaders.add("Authorization", token);
             httpHeaders.add("Content-Type", "application/json");
             String url = INTEGRATION_MSG_API_URL;
-            url = springProfile == "uat" ? url.replace("preprod", springProfile) : (springProfile == "prod" ? url.replace("preprod", "prod2") : url);
+            url = Objects.equals(springProfile, "uat") ? url.replace("preprod", springProfile) : (Objects.equals(springProfile, "prod") ? url.replace("preprod", "prod2") : url);
             log.info("integration url {}", url);
 
             res = HTTPRequestService.<Object, CflMsgDTOResponse>builder()
