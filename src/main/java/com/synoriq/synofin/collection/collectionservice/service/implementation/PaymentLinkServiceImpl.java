@@ -279,7 +279,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                 if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactions.getCreatedDate())) {
                     digitalPaymentTransactions.setStatus("expired");
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
-                    return TransactionStatusResponseDataDTO.builder().status("expired").orderId(null).build();
+                    return TransactionStatusResponseDataDTO.builder().status("payment_link_expired").orderId(null).build();
                 }
             }
             digitalPaymentTransactions.setUtrNumber(res.getData().getOrderId());

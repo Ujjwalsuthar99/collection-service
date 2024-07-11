@@ -404,7 +404,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
 
     private DynamicQrCodeCheckStatusResponseDTO settingResponseData(DynamicQrCodeCheckStatusResponseDTO res) {
         DynamicQrCodeCheckStatusDataResponseDTO dynamicQrCodeCheckStatusDataResponseDTO = DynamicQrCodeCheckStatusDataResponseDTO.builder()
-                .status("expired")
+                .status("qr_expired")
                 .build();
         res.setResponse(true);
         res.setData(dynamicQrCodeCheckStatusDataResponseDTO);
