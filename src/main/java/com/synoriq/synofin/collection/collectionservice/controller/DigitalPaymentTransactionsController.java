@@ -61,6 +61,7 @@ public class DigitalPaymentTransactionsController {
     @RequestMapping(value = "transaction-status-check", method = RequestMethod.POST)
     public ResponseEntity<Object> checkDigitalPaymentStatus(@RequestHeader("Authorization") String token, @RequestBody CommonTransactionStatusCheckRequestDTO reqBody) throws Exception {
         Object result = digitalPaymentTransactionsService.checkDigitalPaymentStatus(token, reqBody);
+        log.info("result printing -> {}", result);
         return new ResponseEntity<>(new BaseDTOResponse<>(result), HttpStatus.OK);
     }
 }

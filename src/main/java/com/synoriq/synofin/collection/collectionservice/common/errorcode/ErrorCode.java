@@ -209,7 +209,8 @@ public enum ErrorCode {
     UNABLE_TO_CREATE_FOLLOW(1016054, "Follow up already exists on this loan in pending stage"),
     S3_UPLOAD_DATA_ERROR(1016055, "Image isn't uploaded on S3, Kindly contact to admin team"),
     IMAGE_TYPE_UNSUPPORTED(1016056, "Image format not supported, Allowed format: jpeg, png, jpg"),
-    TRANSACTION_STATUS_CHECK(1016057, "Transaction Status Failed, Because of Data is Null")
+    TRANSACTION_STATUS_CHECK(1016057, "Transaction Status Failed, Because of Data is Null"),
+    MULTIPLE_HIT_VALIDATION(1016058, "Check status will be available at")
     ;
     private Integer codeValue;
     private String responseMessage;

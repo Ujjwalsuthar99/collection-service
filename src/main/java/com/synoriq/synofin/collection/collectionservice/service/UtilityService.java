@@ -110,6 +110,13 @@ public interface UtilityService {
         return new Date().after(cal.getTime());
     }
 
+    default Date addMinutes(int minute, Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.MINUTE, minute);
+        return cal.getTime();
+    }
+
     @NotNull
     default CollectionActivityLogsEntity getCollectionActivityLogsEntity(String activityName, Long userId, Long loanId, String remarks, Object geoLocation, Long batteryPercentage) {
         CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();

@@ -67,4 +67,8 @@ public class ConsumedApiLogServiceImpl implements ConsumedApiLogService {
         }
         log.info("consumed log created successfully");
     }
+
+    public ConsumedApiLogsEntity getLastDataByLoanIdAndLogName(Long loanId, EnumSQLConstants.LogNames logName) {
+        return consumedApiLogRepository.findFirstByLoanIdAndLogNameAndResponseStatusOrderByConsumedApiLogsIdDesc(loanId, logName, "success");
+    }
 }

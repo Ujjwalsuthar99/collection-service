@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CustomException.class)
-    protected ResponseEntity<Object> customException(CustomException ex) {
+    public ResponseEntity<Object> customException(CustomException ex) {
         log.error("Custom Error : {} ", ex);
 //        BaseResponse<Object> errResponse = new BaseResponse<>(ErrorCode.getErrorCode(ex.getCode()));
         BaseDTOResponse<Object> errResponse = null;
@@ -62,6 +62,7 @@ public class GlobalExceptionHandler {
         } else {
             errResponse = new BaseDTOResponse<>(ex.getMessage(), ex.getCode());
         }
-        return new ResponseEntity<>(errResponse, ex.getHttpStatus());
+        HttpStatus httpStatus = ex.getHttpStatus() != null ? ex.getHttpStatus() : HttpStatus.BAD_REQUEST;
+        return new ResponseEntity<>(errResponse, httpStatus);
     }
 }
