@@ -240,12 +240,6 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                 .userReferenceNumber("")
                 .build();
         try {
-            int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(PAYMENT_LINK_EXPIRATION_CONF));
-            if (utilityService.isExpired(expiration, digitalPaymentTransactions.getCreatedDate())) {
-                digitalPaymentTransactions.setStatus("expired");
-                digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
-                return TransactionStatusResponseDataDTO.builder().status("expired").orderId(null).build();
-            }
 
             res = HTTPRequestService.<Object, TransactionStatusResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
@@ -281,6 +275,12 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                 response.put(STATUS, FAILURE);
                 response.put(RECEIPT_GENERATED, digitalPaymentTransactions.getReceiptGenerated());
                 response.put(SR_ID, null);
+                int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(PAYMENT_LINK_EXPIRATION_CONF));
+                if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactions.getCreatedDate())) {
+                    digitalPaymentTransactions.setStatus("expired");
+                    digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
+                    return TransactionStatusResponseDataDTO.builder().status("expired").orderId(null).build();
+                }
             }
             digitalPaymentTransactions.setUtrNumber(res.getData().getOrderId());
             digitalPaymentTransactions.setStatus(res.getData().getStatus().toLowerCase());

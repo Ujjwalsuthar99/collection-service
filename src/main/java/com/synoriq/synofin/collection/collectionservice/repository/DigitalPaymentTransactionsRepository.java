@@ -36,7 +36,9 @@ public interface DigitalPaymentTransactionsRepository extends JpaRepository<Digi
             "\t(select la.loan_application_number from lms.loan_application la where la.loan_application_id=dpt.loan_id) as loan_number,\n" +
             "\t(select concat(c.first_name, ' ', c.last_name) from lms.customer_loan_mapping clm join lms.customer c on clm.customer_id = c.customer_id  where clm.loan_id = dpt.loan_id and clm.customer_type ='applicant') as customer_name,\n" +
             "\tdpt.payment_service_name,\n" +
-            "\tdpt.status,\n" +
+            "\tcase when dpt.status = 'expired' and dpt.payment_service_name = 'dynamic_qr_code' then 'qr_expired'\n" +
+            "\t\t when dpt.status = 'expired' and dpt.payment_service_name = 'payment_link' then 'payment_link_expired'\n" +
+            "\t\t else dpt.status end as status,\n" +
             "\tdpt.merchant_tran_id,\n" +
             "\tdpt.amount,\n" +
             "\tdpt.utr_number,\n" +

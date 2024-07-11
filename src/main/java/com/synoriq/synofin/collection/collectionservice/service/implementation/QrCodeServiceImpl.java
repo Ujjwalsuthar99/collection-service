@@ -244,12 +244,6 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntityData = new DigitalPaymentTransactionsEntity();
         try {
             digitalPaymentTransactionsEntityData = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
-            int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(QR_CODE_EXPIRATION_CONF));
-            if (utilityService.isExpired(expiration, digitalPaymentTransactionsEntityData.getCreatedDate())) {
-                digitalPaymentTransactionsEntityData.setStatus("expired");
-                digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
-                return settingResponseData(res);
-            }
 
             dynamicQrCodeStatusCheckDataRequestDTO.setMerchantTranId(requestBody.getMerchantTranId());
             dynamicQrCodeStatusCheckDataRequestDTO.setCustomerId("91" + digitalPaymentTransactionsEntityData.getMobileNo().toString());
@@ -294,6 +288,12 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 response.put(STATUS, FAILURE);
                 response.put(RECEIPT_GENERATED, digitalPaymentTransactionsEntityData.getReceiptGenerated());
                 response.put(SR_ID, null);
+                int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(QR_CODE_EXPIRATION_CONF));
+                if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactionsEntityData.getCreatedDate())) {
+                    digitalPaymentTransactionsEntityData.setStatus("expired");
+                    digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
+                    return settingResponseData(res);
+                }
             }
 
             digitalPaymentTransactionsEntityData.setUtrNumber(res.getData().getOriginalBankRRN());
