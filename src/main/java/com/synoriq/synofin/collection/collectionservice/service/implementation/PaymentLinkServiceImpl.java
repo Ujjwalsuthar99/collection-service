@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.common.exception.ConnectorException;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
+import com.synoriq.synofin.collection.collectionservice.entity.ConsumedApiLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionActivityLogsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
@@ -239,6 +241,13 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                 .specificPartnerName(RAZORPAY)
                 .userReferenceNumber("")
                 .build();
+
+        // Adding Validation here //
+        ConsumedApiLogsEntity consumedApiLogsEntity = consumedApiLogService.getLastDataByLoanIdAndLogName(loanId, EnumSQLConstants.LogNames.check_payment_link_status);
+        if (utilityService.isExpired(10, consumedApiLogsEntity.getCreatedDate())) {
+            ErrorCode errorCode = ErrorCode.getErrorCode(1016058, "Check status will be available at " + utilityService.addMinutes(10, consumedApiLogsEntity.getCreatedDate()));
+            throw new CustomException(errorCode);
+        }
         try {
 
             res = HTTPRequestService.<Object, TransactionStatusResponseDTO>builder()
@@ -289,6 +298,8 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
             digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
             res.getData().setStatus(res.getData().getStatus().toLowerCase());
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, res, "success", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
+        } catch (CustomException ee) {
+            throw new CustomException(ee.getMessage(), ee.getCode());
         } catch (ConnectorException ee) {
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             IntegrationServiceErrorResponseDTO r = new ObjectMapper().readValue(ow.writeValueAsString(res.getError()), IntegrationServiceErrorResponseDTO.class);
