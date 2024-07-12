@@ -301,6 +301,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactionsEntityData.getCreatedDate(), true)) {
                     digitalPaymentTransactionsEntityData.setStatus("expired");
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, settingResponseData(), "success", digitalPaymentTransactionsEntityData.getLoanId(), HttpMethod.POST.name(), "qrCodeTransactionStatus");
                     return settingResponseData();
                 }
             }
