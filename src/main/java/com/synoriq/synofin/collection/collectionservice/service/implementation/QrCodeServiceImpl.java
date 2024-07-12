@@ -301,7 +301,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactionsEntityData.getCreatedDate())) {
                     digitalPaymentTransactionsEntityData.setStatus("expired");
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
-                    return settingResponseData(res);
+                    return settingResponseData();
                 }
             }
 
@@ -414,13 +414,9 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         return this.getQrCodeTransactionStatus(token, requestBody);
     }
 
-    private DynamicQrCodeCheckStatusResponseDTO settingResponseData(DynamicQrCodeCheckStatusResponseDTO res) {
-        DynamicQrCodeCheckStatusDataResponseDTO dynamicQrCodeCheckStatusDataResponseDTO = DynamicQrCodeCheckStatusDataResponseDTO.builder()
+    private DynamicQrCodeCheckStatusDataResponseDTO settingResponseData() {
+        return DynamicQrCodeCheckStatusDataResponseDTO.builder()
                 .status("qr_expired")
                 .build();
-        res.setResponse(true);
-        res.setData(dynamicQrCodeCheckStatusDataResponseDTO);
-        res.setRequestId("");
-        return res;
     }
 }
