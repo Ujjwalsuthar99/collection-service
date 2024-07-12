@@ -24,6 +24,7 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLink
 import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.statuscheckdtos.TransactionStatusCheckDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.statuscheckdtos.TransactionStatusCheckDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusDataResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.PaymentLinkResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.TransactionStatusResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.TransactionStatusResponseDataDTO;
@@ -289,7 +290,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                     digitalPaymentTransactions.setStatus("expired");
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
                     consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, TransactionStatusResponseDataDTO.builder().status("payment_link_expired").orderId(null).build(), "success", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
-                    return TransactionStatusResponseDataDTO.builder().status("payment_link_expired").orderId(null).build();
+                    return settingResponseData();
                 }
             }
             digitalPaymentTransactions.setUtrNumber(res.getData().getOrderId());
@@ -316,5 +317,9 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
     @Override
     public Object digitalTransactionStatusCheck(String token, CommonTransactionStatusCheckRequestDTO requestBody) throws Exception {
         return this.getPaymentTransactionStatus(token, requestBody);
+    }
+
+    private TransactionStatusResponseDataDTO settingResponseData() {
+        return TransactionStatusResponseDataDTO.builder().status("payment_link_expired").orderId(null).build();
     }
 }
