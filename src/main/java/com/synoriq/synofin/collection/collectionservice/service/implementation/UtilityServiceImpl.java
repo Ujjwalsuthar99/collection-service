@@ -937,7 +937,7 @@ public class UtilityServiceImpl implements UtilityService {
             log.info("res {}", res);
 //            Map<String, Object> documentsData = new HashMap<>();
 
-            if (res.getData().size() > 0) {
+            if (!res.getData().isEmpty()) {
                 for (GetDocumentsDataResponseDTO getDocumentsDataResponseDTO : res.getData()) {
                     Map<String, Object> documentsData = new HashMap<>();
                     if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "applicant") && Objects.equals(getDocumentsDataResponseDTO.getDocumentType(), "profile_photo")) {
