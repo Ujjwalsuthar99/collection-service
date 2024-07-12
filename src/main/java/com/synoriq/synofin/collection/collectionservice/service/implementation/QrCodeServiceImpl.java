@@ -252,7 +252,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
 
             // Adding Validation here //
             ConsumedApiLogsEntity consumedApiLogsEntity = consumedApiLogService.getLastDataByLoanIdAndLogName(digitalPaymentTransactionsEntityData.getLoanId(), EnumSQLConstants.LogNames.check_qr_payment_status);
-            if (consumedApiLogsEntity != null && utilityService.isExpired(10, consumedApiLogsEntity.getCreatedDate())) {
+            if (consumedApiLogsEntity != null && utilityService.isExpired(10, consumedApiLogsEntity.getCreatedDate(), false)) {
                 ErrorCode errorCode = ErrorCode.getErrorCode(1016058, "Check status will be available at " + utilityService.addMinutes(10, consumedApiLogsEntity.getCreatedDate()));
                 throw new CustomException(errorCode);
             }
@@ -298,7 +298,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 response.put(RECEIPT_GENERATED, digitalPaymentTransactionsEntityData.getReceiptGenerated());
                 response.put(SR_ID, null);
                 int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(QR_CODE_EXPIRATION_CONF));
-                if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactionsEntityData.getCreatedDate())) {
+                if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactionsEntityData.getCreatedDate(), true)) {
                     digitalPaymentTransactionsEntityData.setStatus("expired");
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
                     return settingResponseData();

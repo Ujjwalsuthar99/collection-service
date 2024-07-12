@@ -244,7 +244,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
 
         // Adding Validation here //
         ConsumedApiLogsEntity consumedApiLogsEntity = consumedApiLogService.getLastDataByLoanIdAndLogName(loanId, EnumSQLConstants.LogNames.check_payment_link_status);
-        if (consumedApiLogsEntity != null && utilityService.isExpired(10, consumedApiLogsEntity.getCreatedDate())) {
+        if (consumedApiLogsEntity != null && utilityService.isExpired(10, consumedApiLogsEntity.getCreatedDate(), false)) {
             ErrorCode errorCode = ErrorCode.getErrorCode(1016058, "Check status will be available at " + utilityService.addMinutes(10, consumedApiLogsEntity.getCreatedDate()));
             throw new CustomException(errorCode);
         }
@@ -285,7 +285,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                 response.put(RECEIPT_GENERATED, digitalPaymentTransactions.getReceiptGenerated());
                 response.put(SR_ID, null);
                 int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(PAYMENT_LINK_EXPIRATION_CONF));
-                if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactions.getCreatedDate())) {
+                if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactions.getCreatedDate(), true)) {
                     digitalPaymentTransactions.setStatus("expired");
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
                     return TransactionStatusResponseDataDTO.builder().status("payment_link_expired").orderId(null).build();

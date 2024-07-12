@@ -103,11 +103,14 @@ public interface UtilityService {
 
     Object getCollectionIncentiveData(String token, CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) throws Exception;
 
-    default boolean isExpired(int minute, Date date) {
+    default boolean isExpired(int minute, Date date, boolean afterDate) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.add(Calendar.MINUTE, minute);
-        return new Date().after(cal.getTime());
+        if (afterDate)
+            return new Date().after(cal.getTime());
+        else
+            return new Date().before(cal.getTime());
     }
 
     default Date addMinutes(int minute, Date date) {
