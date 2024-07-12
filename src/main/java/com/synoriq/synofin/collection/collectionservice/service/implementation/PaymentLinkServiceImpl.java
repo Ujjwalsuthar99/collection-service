@@ -244,7 +244,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
 
         // Adding Validation here //
         ConsumedApiLogsEntity consumedApiLogsEntity = consumedApiLogService.getLastDataByLoanIdAndLogName(loanId, EnumSQLConstants.LogNames.check_payment_link_status);
-        if (utilityService.isExpired(10, consumedApiLogsEntity.getCreatedDate())) {
+        if (consumedApiLogsEntity != null && utilityService.isExpired(10, consumedApiLogsEntity.getCreatedDate())) {
             ErrorCode errorCode = ErrorCode.getErrorCode(1016058, "Check status will be available at " + utilityService.addMinutes(10, consumedApiLogsEntity.getCreatedDate()));
             throw new CustomException(errorCode);
         }
