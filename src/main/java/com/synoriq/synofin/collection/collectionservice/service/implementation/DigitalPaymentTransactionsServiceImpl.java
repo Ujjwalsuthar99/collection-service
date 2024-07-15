@@ -55,6 +55,7 @@ public class DigitalPaymentTransactionsServiceImpl implements DigitalPaymentTran
     public Object checkDigitalPaymentStatus(String token, CommonTransactionStatusCheckRequestDTO body) throws Exception {
         DigitalPaymentTransactionsEntity digitalPaymentTransactions = digitalPaymentTransactionsRepository.findByMerchantTranId(body.getMerchantTranId());
         DigitalTransactionChecker checker = transactionStatusCheckerFactory.getChecker(digitalPaymentTransactions.getPaymentServiceName());
+        log.info("checker -> {}", checker);
         return checker.digitalTransactionStatusCheck(token, body);
     }
 

@@ -282,14 +282,17 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                     response.put(SR_ID, String.valueOf(respMap.get("service_request_id")));
                 }
             } else {
+                log.info("in else");
                 response.put(STATUS, FAILURE);
                 response.put(RECEIPT_GENERATED, digitalPaymentTransactions.getReceiptGenerated());
                 response.put(SR_ID, null);
                 int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(PAYMENT_LINK_EXPIRATION_CONF));
                 if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactions.getCreatedDate(), true)) {
+                    log.info("hrere");
                     digitalPaymentTransactions.setStatus("expired");
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
                     consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, TransactionStatusResponseDataDTO.builder().status("payment_link_expired").orderId(null).build(), "success", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
+                    log.info("expired response -> {}", settingResponseData());
                     return settingResponseData();
                 }
             }
