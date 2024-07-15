@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
@@ -17,6 +18,7 @@ import com.synoriq.synofin.collection.collectionservice.repository.CollectionCon
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionLimitUserWiseRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.DigitalPaymentTransactionsRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.commondto.IntegrationServiceErrorResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.*;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
@@ -241,17 +243,18 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         log.info("Begin QR Transaction Status");
         DynamicQrCodeCheckStatusResponseDTO res = new DynamicQrCodeCheckStatusResponseDTO();
         Map<String, Object> response = new HashMap<>();
+        Long loanId = null;
         DynamicQrCodeStatusCheckIntegrationRequestDTO dynamicQrCodeStatusCheckIntegrationRequestDTO = new DynamicQrCodeStatusCheckIntegrationRequestDTO();
         DynamicQrCodeStatusCheckDataRequestDTO dynamicQrCodeStatusCheckDataRequestDTO = new DynamicQrCodeStatusCheckDataRequestDTO();
         DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntityData = new DigitalPaymentTransactionsEntity();
         try {
             digitalPaymentTransactionsEntityData = digitalPaymentTransactionsRepository.findByDigitalPaymentTransactionsId(requestBody.getDigitalPaymentTransactionId());
-
+            loanId = digitalPaymentTransactionsEntityData.getLoanId();
             dynamicQrCodeStatusCheckDataRequestDTO.setMerchantTranId(requestBody.getMerchantTranId());
             dynamicQrCodeStatusCheckDataRequestDTO.setCustomerId("91" + digitalPaymentTransactionsEntityData.getMobileNo().toString());
 
             // Adding Validation here //
-            ConsumedApiLogsEntity consumedApiLogsEntity = consumedApiLogService.getLastDataByLoanIdAndLogName(digitalPaymentTransactionsEntityData.getLoanId(), EnumSQLConstants.LogNames.check_qr_payment_status);
+            ConsumedApiLogsEntity consumedApiLogsEntity = consumedApiLogService.getLastDataByLoanIdAndLogName(loanId, EnumSQLConstants.LogNames.check_qr_payment_status);
             if (consumedApiLogsEntity != null && utilityService.isExpired(10, consumedApiLogsEntity.getCreatedDate(), false)) {
                 ErrorCode errorCode = ErrorCode.getErrorCode(1016058, "Check status will be available at " + utilityService.addMinutes(10, consumedApiLogsEntity.getCreatedDate()));
                 throw new CustomException(errorCode);
@@ -273,11 +276,12 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                     .build().call();
 
             log.info("response from qr status check {}", res);
-            if (res.getData() == null)
-                throw new Exception("1016057");
-            String activityRemarks = "The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + digitalPaymentTransactionsEntityData.getLoanId() + " has been updated as " + res.getData().getStatus().toLowerCase() + " by checking the status manually";
+            if (Objects.requireNonNull(res).getData() == null) {
+                throw new ConnectorException(res.toString());
+            }
+            String activityRemarks = "The payment status for transaction id " + requestBody.getDigitalPaymentTransactionId() + " and loan id " + loanId + " has been updated as " + res.getData().getStatus().toLowerCase() + " by checking the status manually";
             String activityName = "dynamic_qr_code_payment_" + res.getData().getStatus().toLowerCase();
-            CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntityData.getCreatedBy(), digitalPaymentTransactionsEntityData.getLoanId(), activityRemarks, requestBody.getGeolocation(), requestBody.getBatteryPercentage());
+            CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactionsEntityData.getCreatedBy(), loanId, activityRemarks, requestBody.getGeolocation(), requestBody.getBatteryPercentage());
 
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
 
@@ -301,7 +305,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactionsEntityData.getCreatedDate(), true)) {
                     digitalPaymentTransactionsEntityData.setStatus("expired");
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, settingResponseData(), "success", digitalPaymentTransactionsEntityData.getLoanId(), HttpMethod.POST.name(), "qrCodeTransactionStatus");
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, settingResponseData(), "success", loanId, HttpMethod.POST.name(), "qrCodeTransactionStatus");
                     return settingResponseData();
                 }
             }
@@ -314,9 +318,14 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
             res.getData().setStatus(res.getData().getStatus().toLowerCase());
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, res, "success", digitalPaymentTransactionsEntityData.getLoanId(), HttpMethod.POST.name(), "qrCodeTransactionStatus");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, res, "success", loanId, HttpMethod.POST.name(), "qrCodeTransactionStatus");
         } catch (CustomException ee) {
             throw new CustomException(ee.getMessage(), ee.getCode());
+        } catch (ConnectorException ee) {
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            IntegrationServiceErrorResponseDTO r = new ObjectMapper().readValue(ow.writeValueAsString(res.getError()), IntegrationServiceErrorResponseDTO.class);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactionsEntityData.getCreatedBy(), dynamicQrCodeStatusCheckIntegrationRequestDTO, res, "failure", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
+            throw new ConnectorException(r, HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
