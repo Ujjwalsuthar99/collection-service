@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static com.synoriq.synofin.collection.collectionservice.common.ActivityRemarks.KAFKA_RECEIPT_STATUS;
 
@@ -87,6 +88,9 @@ public class KafkaListnerService {
             log.info("3");
             Optional<CollectionLimitUserWiseEntity> collectionLimitUser = Optional.ofNullable(collectionLimitUserWiseRepository.findByUserIdAndCollectionLimitStrategiesKey(userId, paymentMode));
             log.info("collection limit user wise surpassed {}", collectionLimitUser);
+
+            // Adding delay for one second
+            TimeUnit.SECONDS.sleep(1);
 
             // getting some data of receipt id
             Map<String, Object> loanIdByServiceId = receiptRepository.getLoanIdByServiceId(receiptId);
