@@ -89,10 +89,6 @@ public class KafkaListnerService {
             Optional<CollectionLimitUserWiseEntity> collectionLimitUser = Optional.ofNullable(collectionLimitUserWiseRepository.findByUserIdAndCollectionLimitStrategiesKey(userId, paymentMode));
             log.info("collection limit user wise surpassed {}", collectionLimitUser);
 
-            // Adding delay for one second
-            log.info("adding 3 seconds delay here");
-            TimeUnit.SECONDS.sleep(3);
-
             // getting some data of receipt id
             Map<String, Object> loanIdByServiceId = receiptRepository.getLoanIdByServiceId(receiptId);
             log.info("loanIdByServiceId {}", loanIdByServiceId);
