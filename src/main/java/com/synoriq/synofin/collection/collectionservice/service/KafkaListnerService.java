@@ -90,7 +90,8 @@ public class KafkaListnerService {
             log.info("collection limit user wise surpassed {}", collectionLimitUser);
 
             // Adding delay for one second
-            TimeUnit.SECONDS.sleep(1);
+            log.info("adding 3 seconds delay here");
+            TimeUnit.SECONDS.sleep(3);
 
             // getting some data of receipt id
             Map<String, Object> loanIdByServiceId = receiptRepository.getLoanIdByServiceId(receiptId);
