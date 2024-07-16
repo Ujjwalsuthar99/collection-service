@@ -9,6 +9,7 @@ public class PaymentRelatedVariables {
     public static final String PAYMENT_LINK = "payment_link";
     public static final String KOTAK_VENDOR = "kotak";
     public static final String PENDING = "pending";
+    public static final String EXPIRED = "expired";
     public static final String SUCCESS = "success";
     public static final String PAID = "paid";
     public static final String FAILURE = "failure";
