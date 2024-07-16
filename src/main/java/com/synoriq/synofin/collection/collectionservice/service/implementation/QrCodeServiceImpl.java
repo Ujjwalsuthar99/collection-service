@@ -108,7 +108,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         integrationDataRequestBody.setPayerIFSC(requestBody.getPayerIFSC());
         integrationDataRequestBody.setFirstName(requestBody.getFirstName());
         integrationDataRequestBody.setLastName(requestBody.getLastName());
-//        integrationDataRequestBody.setValidityEndDateTime(validityTime);
+        integrationDataRequestBody.setValidityEndDateTime(validityTime);
         String billNumber;
         String merchantTransId;
         if (requestBody.getVendor().equals(KOTAK_VENDOR)) {
@@ -127,6 +127,13 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         integrationRequestBody.setSpecificPartnerName(requestBody.getVendor());
 
         try {
+
+            // Checking UserLimit as it is exceeded or not with this amount
+            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(requestBody.getUserId(), UPI);
+
+            if (collectionLimitUserWiseEntity != null && collectionLimitUserWiseEntity.getTotalLimitValue() < collectionLimitUserWiseEntity.getUtilizedLimitValue() + Double.parseDouble(requestBody.getAmount()))
+                throw new Exception("1017003");
+
             ReceiptServiceDtoRequest receiptServiceDtoRequest = objectMapper.convertValue(requestBody.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
             receiptServiceDtoRequest.getRequestData().setAutoApproved(true);
             GeoLocationDTO geoLocationDTO = objectMapper.convertValue(receiptServiceDtoRequest.getActivityData().getGeolocationData(), GeoLocationDTO.class);
@@ -162,12 +169,6 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
             }
             receiptServiceDtoRequest.getActivityData().setImages(imageMap);
 
-            // Checking UserLimit as it is exceeded or not with this amount
-            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(requestBody.getUserId(), UPI);
-
-            if (collectionLimitUserWiseEntity != null && collectionLimitUserWiseEntity.getTotalLimitValue() < collectionLimitUserWiseEntity.getUtilizedLimitValue() + Double.parseDouble(requestBody.getAmount()))
-                throw new Exception("1017003");
-
             // Calling Generate QR Code API
             res = HTTPRequestService.<Object, DynamicQrCodeResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
@@ -179,7 +180,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
 
             log.info("qr code response -> {}", res);
             // QR code API successFull Response
-            if (res.getResponse().equals(true)) {
+            if (res.getResponse().equals(true) && res.getData().getStatus().equals("true")) {
                 String activityRemarks = "Generated a QR code against loan id " + requestBody.getLoanId() + " of payment Rs. " + requestBody.getAmount();
                 CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity("generated_dynamic_qr_code", requestBody.getUserId(), requestBody.getLoanId(), activityRemarks, requestBody.getGeolocation(), receiptServiceDtoRequest.getActivityData().getBatteryPercentage());
 
@@ -212,7 +213,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 digitalPaymentTransactionsEntity.setCollectionActivityLogsId(collectionActivityLogsEntity.getCollectionActivityLogsId());
                 digitalPaymentTransactionsEntity.setActionActivityLogsId(null);
                 digitalPaymentTransactionsEntity.setOtherResponseData(resultNode);
-
+                log.info("digitalPaymentTransactionsEntity -> {}", digitalPaymentTransactionsEntity);
                 digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntity);
                 res.getData().setDigitalPaymentTransactionsId(digitalPaymentTransactionsEntity.getDigitalPaymentTransactionsId());
                 res.getData().setExpiredTime(validityTime);

@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.Tuple;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.synoriq.synofin.collection.collectionservice.common.PaymentRelatedVariables.AUTHORIZATION;
@@ -113,11 +114,12 @@ public interface UtilityService {
             return new Date().before(cal.getTime());
     }
 
-    default Date addMinutes(int minute, Date date) {
+    default String addMinutes(int minute, Date date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.add(Calendar.MINUTE, minute);
-        return cal.getTime();
+        return simpleDateFormat.format(cal.getTime());
     }
 
     @NotNull
