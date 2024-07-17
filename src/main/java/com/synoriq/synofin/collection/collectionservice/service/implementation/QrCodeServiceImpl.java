@@ -108,7 +108,7 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
         integrationDataRequestBody.setPayerIFSC(requestBody.getPayerIFSC());
         integrationDataRequestBody.setFirstName(requestBody.getFirstName());
         integrationDataRequestBody.setLastName(requestBody.getLastName());
-        integrationDataRequestBody.setValidityEndDateTime(validityTime);
+//        integrationDataRequestBody.setValidityEndDateTime(validityTime);
         String billNumber;
         String merchantTransId;
         if (requestBody.getVendor().equals(KOTAK_VENDOR)) {
@@ -303,12 +303,12 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
                 response.put(RECEIPT_GENERATED, digitalPaymentTransactionsEntityData.getReceiptGenerated());
                 response.put(SR_ID, null);
                 int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(QR_CODE_EXPIRATION_CONF));
-                if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactionsEntityData.getCreatedDate(), true)) {
-                    digitalPaymentTransactionsEntityData.setStatus("expired");
-                    digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, settingResponseData(), "success", loanId, HttpMethod.POST.name(), "qrCodeTransactionStatus");
-                    return settingResponseData();
-                }
+//                if (res.getData().getStatus().equalsIgnoreCase(PENDING) && utilityService.isExpired(expiration, digitalPaymentTransactionsEntityData.getCreatedDate(), true)) {
+//                    digitalPaymentTransactionsEntityData.setStatus("expired");
+//                    digitalPaymentTransactionsRepository.save(digitalPaymentTransactionsEntityData);
+//                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_qr_payment_status, null, dynamicQrCodeStatusCheckIntegrationRequestDTO, settingResponseData(), "success", loanId, HttpMethod.POST.name(), "qrCodeTransactionStatus");
+//                    return settingResponseData();
+//                }
             }
 
             digitalPaymentTransactionsEntityData.setUtrNumber(res.getData().getOriginalBankRRN());
