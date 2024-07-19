@@ -384,12 +384,12 @@ public class QrCodeServiceImpl implements QrCodeService, DigitalTransactionCheck
 
             }
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.qr_callback, null, requestBody, mainResponse, SUCCESS, loanId, HttpMethod.POST.name(), "qr_callback");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.qr_callback, null, requestBody, utilityService.convertToJSON(mainResponse), SUCCESS, loanId, HttpMethod.POST.name(), "qr_callback");
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             log.error("callback Exception errorMessage {}", errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.qr_callback, null, requestBody, errorMessage, FAILURE, loanId, HttpMethod.POST.name(), "qr_callback");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.qr_callback, null, requestBody, utilityService.convertToJSON(errorMessage), FAILURE, loanId, HttpMethod.POST.name(), "qr_callback");
             throw new Exception();
         }
         log.info("Ending QR callback");

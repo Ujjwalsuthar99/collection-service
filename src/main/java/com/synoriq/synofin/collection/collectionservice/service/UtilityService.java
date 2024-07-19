@@ -61,7 +61,7 @@ public interface UtilityService {
     public UserDetailByUserIdDTOResponse getUserDetailsByUserId(String token, Long userId);
     public Object getThermalPrintData(String receiptId) throws Exception;
     public BaseDTOResponse<Object> getDocuments(String token, String loanId) throws Exception;
-    public String convertToJSON(String input);
+    public String convertToJSON(Object input);
     public String splitCodeName(String input);
     public String getTokenByApiKeySecret(Map<String, Object> map) throws Exception;
     public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws Exception;

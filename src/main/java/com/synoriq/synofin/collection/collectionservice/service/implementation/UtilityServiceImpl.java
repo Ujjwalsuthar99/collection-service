@@ -391,7 +391,7 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public String convertToJSON(String input) {
+    public String convertToJSON(Object input) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.writeValueAsString(input);
@@ -476,7 +476,7 @@ public class UtilityServiceImpl implements UtilityService {
 
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.shorten_url, Long.parseLong(userId), shortenUrlRequestDTO, shortenUrlResponseDTO, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), shortenUrl);
-
+            boolean isApplicantMobileNumber = Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null || applicantMobileNumber.contains("*");
             log.info("clientId {}", clientId);
             if (clientId.equals("finova")) {
                 log.info("finova {}", clientId);
@@ -550,7 +550,7 @@ public class UtilityServiceImpl implements UtilityService {
                 message = message.replace("6778990000", shortenUrlResponseDTO.getData().getResult());
                 String receivedMobileNumber;
                 if (isProd) {
-                    if (Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null) {
+                    if (isApplicantMobileNumber) {
                         receivedMobileNumber = collectedFromMobileNumber;
                     } else {
                         receivedMobileNumber = applicantMobileNumber;
@@ -586,7 +586,7 @@ public class UtilityServiceImpl implements UtilityService {
                 smsListDTO.setMessageType("english");
                 String receivedMobileNumber;
                 if (isProd) {
-                    if (Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null) {
+                    if (isApplicantMobileNumber) {
                         receivedMobileNumber = collectedFromMobileNumber;
                     } else {
                         receivedMobileNumber = applicantMobileNumber;
@@ -658,7 +658,7 @@ public class UtilityServiceImpl implements UtilityService {
                 smsListDTO.setMessageType("english");
                 String receivedMobileNumber;
                 if (isProd) {
-                    if (Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null) {
+                    if (isApplicantMobileNumber) {
                         receivedMobileNumber = collectedFromMobileNumber;
                     } else {
                         receivedMobileNumber = applicantMobileNumber;
@@ -710,7 +710,7 @@ public class UtilityServiceImpl implements UtilityService {
                 smsListDTO.setMessageType("english");
                 String receivedMobileNumber;
                 if (isProd) {
-                    if (Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null) {
+                    if (isApplicantMobileNumber) {
                         receivedMobileNumber = collectedFromMobileNumber;
                     } else {
                         receivedMobileNumber = applicantMobileNumber;
