@@ -2,11 +2,8 @@ package com.synoriq.synofin.collection.collectionservice.flyway;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-
-import javax.sql.DataSource;
 
 
 @Data
@@ -23,8 +20,4 @@ public class FlywayProperties {
     private String baseLineVersion;
     private boolean baselineOnMigrate;
     private boolean outOfOrder;
-
-    @Autowired
-    private DataSource dataSource;
-
 }
