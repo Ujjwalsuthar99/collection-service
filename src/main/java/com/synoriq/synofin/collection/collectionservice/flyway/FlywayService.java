@@ -39,7 +39,7 @@ public class FlywayService {
      * Funtion to migrate schema for all the clients with client specific file
      * @throws Exception
      */
-    @PostConstruct
+//    @PostConstruct
     public void migrateAllClient() throws Exception {
         for (Map.Entry<Object, Object> entry : dbInitialization.getDataSourceHashMap().entrySet()) {
             String clientId = (String) entry.getKey();
