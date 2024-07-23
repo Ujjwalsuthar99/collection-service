@@ -1,0 +1,1 @@
+ALTER TYPE collection.consumed_api_logs_log_name ADD VALUE 'get_documents' AFTER 'deposit_challan';

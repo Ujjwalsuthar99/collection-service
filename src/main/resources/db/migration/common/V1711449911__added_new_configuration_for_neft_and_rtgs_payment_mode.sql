@@ -1,0 +1,3 @@
+INSERT INTO collection.collection_configurations (created_date,created_by,deleted,configuration_name,configuration_value,configuration_description,modified_date,modified_by,active,stage) VALUES
+	 ('2024-01-08 17:04:11.345',1,false,'neft_collection_default_limit','600000','By mentioning the limit we can restrict the user to collect the money in neft within the limit.',NULL,NULL,true,NULL),
+	 ('2024-01-08 17:04:11.345',1,false,'rtgs_collection_default_limit','600000','By mentioning the limit we can restrict the user to collect the money in rtgs within the limit.',NULL,NULL,true,NULL);

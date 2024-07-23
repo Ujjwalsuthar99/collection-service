@@ -1,0 +1,1 @@
+ALTER TYPE collection.consumed_api_logs_log_name ADD VALUE 'check_payment_link_status' AFTER 'send_payment_link';

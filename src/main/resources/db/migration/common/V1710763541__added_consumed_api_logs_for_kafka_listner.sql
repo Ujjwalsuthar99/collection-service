@@ -1,0 +1,1 @@
+ALTER TYPE collection.consumed_api_logs_log_name ADD VALUE 'kafka_activity' AFTER 'qr_callback';

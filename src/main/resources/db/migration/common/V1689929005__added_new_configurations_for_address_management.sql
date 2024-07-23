@@ -1,0 +1,3 @@
+INSERT INTO collection.collection_configurations
+(created_date, created_by, deleted, configuration_name, configuration_value, configuration_description, modified_date, modified_by, active, stage)
+VALUES('2023-07-21 13:01:20.000', 1, false, 'address_management', 'all', 'Address management for view all page if all show all addresses else some key Like Current Address, show only this address', '2023-07-21 12:21:28.543', NULL, true, NULL);

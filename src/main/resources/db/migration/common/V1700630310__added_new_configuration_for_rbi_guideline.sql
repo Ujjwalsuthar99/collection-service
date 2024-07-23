@@ -1,0 +1,3 @@
+INSERT INTO collection.collection_configurations
+(created_date, created_by, deleted, configuration_name, configuration_value, configuration_description, modified_date, modified_by, active, stage)
+VALUES('2023-11-22 11:01:20.000', 1, false, 'monthly_x_rupees_cash_collection', 'false', 'If the configuration is false then RBI guideline of rs will not apply for per month validation for cash only otherwise write the amount of validation limit', '2023-04-26 12:21:28.543', NULL, true, NULL);

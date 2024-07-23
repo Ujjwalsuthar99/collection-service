@@ -1,0 +1,45 @@
+server:
+  servlet:
+    context-path: /collection-service
+  port: '9002'
+
+spring:
+  redis:
+    database: '0'
+    password: redis@1234
+    host: 13.232.9.69
+    port: '6380'
+    timeout: '60000'
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    basic:
+    enabled: false
+  management:
+    security:
+      enabled: false
+
+
+datasource:
+  collection:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: shiv.k.1lck.pgsql
+    jdbc-url: jdbc:postgresql://localhost:5432/
+    connection-properties: ?ApplicationName=${spring.application.name}
+
+logging:
+  level:
+    com:
+      zaxxer:
+        hikari: DEBUG
+
+db-connection-management-properties:
+  synomonitor-service:
+    base-url: http://localhost:8800
+    db-config-endpoint: /v1/clients/db-config
+  client-list:
+    - synoriq
+    - finova
+    - csl
+    - choice

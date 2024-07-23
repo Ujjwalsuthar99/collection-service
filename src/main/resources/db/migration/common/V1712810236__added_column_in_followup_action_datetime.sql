@@ -1,0 +1,1 @@
+ALTER TABLE collection.followups ADD column if not exists action_datetime timestamptz DEFAULT NULL;

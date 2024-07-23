@@ -1,0 +1,1 @@
+ALTER TABLE collection.collection_limit_userwise ADD column if not exists name varchar(200) DEFAULT NULL;

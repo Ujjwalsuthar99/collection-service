@@ -1,0 +1,2 @@
+update collection.collection_configurations set configuration_value='1.2.0' where configuration_name='force_app_update_version_android';
+update collection.collection_configurations set configuration_value='1.2.0' where configuration_name='current_app_version_android';

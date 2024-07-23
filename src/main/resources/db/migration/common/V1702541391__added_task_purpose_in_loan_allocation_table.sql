@@ -1,0 +1,1 @@
+ALTER TABLE collection.loan_allocation ADD column if not exists task_purpose varchar(100) DEFAULT NULL;

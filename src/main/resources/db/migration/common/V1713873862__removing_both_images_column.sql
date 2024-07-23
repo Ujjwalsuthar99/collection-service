@@ -1,0 +1,2 @@
+ALTER TABLE collection.digital_payment_transactions DROP payment_proof_image;
+ALTER TABLE collection.digital_payment_transactions DROP selfie_with_cx_image;
