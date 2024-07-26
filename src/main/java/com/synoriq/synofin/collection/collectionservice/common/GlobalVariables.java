@@ -39,7 +39,7 @@ public class GlobalVariables {
     public static final String RECEIPT_TRANSFER_MODE_READ_ONLY = "receipt_transfer_mode_read_only";
     public static final String FINOVA_CASH_MSG_FLOW_ID = "638b914a3ef07b5a0221ed82";
     public static final String FINOVA_CHEQUE_MSG_FLOW_ID = "638b9491907adf51817999c6";
-    public static final String FINOVA_UPI_MSG_FLOW_ID = "638b94373ef07b5a0221ed83";
+    public static final String FINOVA_UPI_MSG_FLOW_ID = "668f7a0dd6fc057e9c4c0f73";
     public static final String MASKED_NUMBER_CONFIGURATION = "mask_all_customer_phone_numbers";
     public static final String E_MITRA_STATIC_TOKEN = "emitra_static_token";
     public static final String PAISABUDDY_SMS_TEMPLATE_ID = "6555db03d6fc052d1f2aa712";

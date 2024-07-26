@@ -485,7 +485,8 @@ public class UtilityServiceImpl implements UtilityService {
                     finovaSmsRequest.setTemplateId(FINOVA_CASH_MSG_FLOW_ID);
                 } else if (paymentMode.equals("cheque")) {
                     finovaSmsRequest.setTemplateId(FINOVA_CHEQUE_MSG_FLOW_ID);
-                } else {
+                } else if (paymentMode.equals("upi")){
+                    finovaSmsRequest.setTemplateId(FINOVA_UPI_MSG_FLOW_ID);
                 }
                 if (customerType.equals("applicant")) {
                     finovaSmsRequest.setSender("FINOVA");
