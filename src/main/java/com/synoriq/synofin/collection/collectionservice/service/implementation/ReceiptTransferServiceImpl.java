@@ -770,7 +770,7 @@ public class ReceiptTransferServiceImpl implements ReceiptTransferService {
             if (Objects.equals(status, "pending")) {
                 statusList = Collections.singletonList("pending");
             } else {
-                statusList = Arrays.asList("approved", "cancelled", "rejected");
+                statusList = Arrays.asList("approved", "cancelled", "rejected", "payment_received");
             }
             receiptTransferDataList = receiptTransferHistoryRepository.getAllBankTransfers(statusList, searchKey, pageable);
             if (!receiptTransferDataList.isEmpty()) {
