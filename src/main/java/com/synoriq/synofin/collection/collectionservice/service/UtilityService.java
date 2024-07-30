@@ -42,7 +42,7 @@ public interface UtilityService {
     public String addSuffix(Integer i);
     public String capitalizeName(String name);
 
-    public static HttpHeaders createHeaders(String token) {
+    static HttpHeaders createHeaders(String token) {
         HttpHeaders httpHeaders = new HttpHeaders();
         if (token.contains("Bearer")) {
             httpHeaders.add(AUTHORIZATION, token);

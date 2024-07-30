@@ -291,7 +291,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                     log.info("hrere");
                     digitalPaymentTransactions.setStatus("expired");
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, TransactionStatusResponseDataDTO.builder().status("payment_link_expired").orderId(null).build(), "success", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, TransactionStatusResponseDataDTO.builder().status("expired").orderId(null).build(), "success", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
                     log.info("expired response -> {}", settingResponseData());
                     return settingResponseData();
                 }
@@ -323,6 +323,6 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
     }
 
     private TransactionStatusResponseDataDTO settingResponseData() {
-        return TransactionStatusResponseDataDTO.builder().status("payment_link_expired").orderId(null).build();
+        return TransactionStatusResponseDataDTO.builder().status("expired").orderId(null).build();
     }
 }
