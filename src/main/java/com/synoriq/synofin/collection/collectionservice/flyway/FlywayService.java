@@ -1,6 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.flyway;
 
-import com.synoriq.synofin.collection.collectionservice.config.db.CustomDBRouting;
+import com.synoriq.db_connection_management.config.db.DBInitialization;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
@@ -20,6 +20,9 @@ public class FlywayService {
     @Autowired
     private FlywayProperties flywayProps;
 
+    @Autowired
+    DBInitialization dbInitialization;
+
     public FluentConfiguration getCommonFlywayConfig() {
         return Flyway.configure()
                 .table(flywayProps.getTable())
@@ -38,9 +41,7 @@ public class FlywayService {
      */
     @PostConstruct
     public void migrateAllClient() throws Exception {
-        for (Map.Entry<Object, DataSource> entry : (
-                ((CustomDBRouting) flywayProps.getDataSource()).getResolvedDataSources().entrySet())
-        ) {
+        for (Map.Entry<Object, Object> entry : dbInitialization.getDataSourceHashMap().entrySet()) {
             String clientId = (String) entry.getKey();
             log.info("Migrate database through flyway for client = " + clientId);
             executeFlyway(clientId, entry, getConfigurations(clientId, false));
@@ -55,7 +56,7 @@ public class FlywayService {
         return configurationList;
     }
 
-    public void executeFlyway(String clientId, Map.Entry<Object, DataSource> entry, List<FluentConfiguration> configurationList) throws Exception{
+    public void executeFlyway(String clientId, Map.Entry<Object, Object> entry, List<FluentConfiguration> configurationList) throws Exception{
         DataSource dataSource = (DataSource) entry.getValue();
         Flyway flyway = null;
         try {
