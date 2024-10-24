@@ -1,7 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.flyway;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,8 +9,11 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class FlywayController {
 
-    @Autowired
-    private FlywayService flywayService;
+    private final FlywayService flywayService;
+
+    public FlywayController(FlywayService flywayService) {
+        this.flywayService = flywayService;
+    }
 
     /**
      * API to migrate the schema for all the clients

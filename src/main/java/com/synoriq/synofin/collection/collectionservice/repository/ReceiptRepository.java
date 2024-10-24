@@ -350,4 +350,7 @@ public interface ReceiptRepository extends JpaRepository<FollowUpEntity, Long> {
 
     @Query(nativeQuery = true, value = "SELECT value FROM lms.configurations WHERE name = 'business_date'")
     String getBusinessDateFromLmsConfiguration();
+
+    @Query(nativeQuery = true, value = "SELECT COUNT(*) FROM lms.service_receipt WHERE service_request_id = :receiptId AND status = 'pending'")
+    int isReceiptApproved(@Param("receiptId") Long receiptId);
 }

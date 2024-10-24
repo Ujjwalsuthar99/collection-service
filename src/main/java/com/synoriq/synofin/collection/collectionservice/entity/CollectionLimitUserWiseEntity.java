@@ -4,13 +4,9 @@ import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import javax.transaction.Transactional;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
@@ -53,7 +49,7 @@ public class CollectionLimitUserWiseEntity {
     private Double utilizedLimitValue;
 
     @Column(name = "modified_date")
-    @UpdateTimestamp
+//    @UpdateTimestamp
     private Date modifiedDate;
 
 }

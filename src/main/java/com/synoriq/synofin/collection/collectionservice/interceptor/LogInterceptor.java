@@ -2,13 +2,12 @@ package com.synoriq.synofin.collection.collectionservice.interceptor;
 
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.MDC;
-
 import java.util.UUID;
 
 
@@ -17,9 +16,11 @@ public class LogInterceptor implements HandlerInterceptor {
     private static final String REQUEST_ID = "requestId";
     private static final String CLIENT_NAME = "clientName";
     private static final String COMMON = "common";
-    @Autowired
-    CurrentUserInfo currentUserInfo;
+    private final CurrentUserInfo currentUserInfo;
 
+    public LogInterceptor(CurrentUserInfo currentUserInfo) {
+        this.currentUserInfo = currentUserInfo;
+    }
     @Override
     public boolean preHandle(
             HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

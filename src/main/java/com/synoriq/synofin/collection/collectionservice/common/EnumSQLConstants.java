@@ -43,7 +43,8 @@ public class EnumSQLConstants {
         emitra_verify_transaction,
         emitra_get_kiosk_details,
         emitra_service_transaction,
-        emitra_update_transaction_posting
+        emitra_update_transaction_posting,
+        emitra_decryption
         ;
 
         LogNames() {

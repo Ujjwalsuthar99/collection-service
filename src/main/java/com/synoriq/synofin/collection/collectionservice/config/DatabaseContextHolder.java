@@ -2,7 +2,11 @@ package com.synoriq.synofin.collection.collectionservice.config;
 
 public class DatabaseContextHolder {
 
-    private static ThreadLocal<String> CONTEXT = new ThreadLocal<>();
+    private DatabaseContextHolder(){
+
+    }
+
+    private static final ThreadLocal<String> CONTEXT = new ThreadLocal<>();
 
     public static void set(String databaseEnvironment) {
         CONTEXT.set(databaseEnvironment);

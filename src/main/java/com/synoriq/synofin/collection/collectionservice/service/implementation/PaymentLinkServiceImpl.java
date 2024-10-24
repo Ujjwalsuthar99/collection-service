@@ -1,5 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -16,19 +17,18 @@ import com.synoriq.synofin.collection.collectionservice.repository.DigitalPaymen
 import com.synoriq.synofin.collection.collectionservice.repository.LoanAllocationRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.IntegrationServiceErrorResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.CommonTransactionStatusCheckRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.PaymentLinkCollectionRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.PaymentLinkDataRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.PaymentLinkRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.statuscheckdtos.TransactionStatusCheckDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.paymentLinkDTOs.statuscheckdtos.TransactionStatusCheckDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.createreceiptdtos.ReceiptServiceDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicqrcodedtos.CommonTransactionStatusCheckRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.paymentlinkdtos.PaymentLinkCollectionRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.paymentlinkdtos.PaymentLinkDataRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.paymentlinkdtos.PaymentLinkRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.paymentlinkdtos.statuscheckdtos.TransactionStatusCheckDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.paymentlinkdtos.statuscheckdtos.TransactionStatusCheckDataDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusDataResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.PaymentLinkResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.TransactionStatusResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.PaymentLinkResponseDTOs.TransactionStatusResponseDataDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.paymentlinkresponsedtos.PaymentLinkResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.paymentlinkresponsedtos.TransactionStatusResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.paymentlinkresponsedtos.TransactionStatusResponseDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3imagedtos.uploadimageresponsedto.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.*;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,10 +42,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -59,24 +59,27 @@ import static com.synoriq.synofin.collection.collectionservice.common.PaymentRel
 @Slf4j
 public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransactionChecker {
 
-
-    public PaymentLinkServiceImpl(RestTemplate restTemplate, CollectionActivityLogsRepository collectionActivityLogsRepository,
+    private static final String STATUS_MESSAGE = "success";
+    private static final String FAILURE_STATUS = "failure";
+    private static final String EXPIRED_STATUS = "expired";
+    public PaymentLinkServiceImpl(CollectionActivityLogsRepository collectionActivityLogsRepository,
                                   DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository,
                                   LoanAllocationRepository loanAllocationRepository,
                                   ConsumedApiLogService consumedApiLogService,
                                   CollectionConfigurationsRepository collectionConfigurationsRepository,
                                   UtilityService utilityService,
-                                  IntegrationConnectorService integrationConnectorService) {
+                                  IntegrationConnectorService integrationConnectorService,
+                                  RestTemplate restTemplate) {
         this.integrationConnectorService = integrationConnectorService;
         this.collectionConfigurationsRepository = collectionConfigurationsRepository;
         this.utilityService = utilityService;
         this.consumedApiLogService = consumedApiLogService;
         this.digitalPaymentTransactionsRepository = digitalPaymentTransactionsRepository;
-        this.restTemplate = restTemplate;
         this.collectionActivityLogsRepository = collectionActivityLogsRepository;
         this.loanAllocationRepository = loanAllocationRepository;
+        this.restTemplate = restTemplate;
+
     }
-    private final RestTemplate restTemplate;
     private final CollectionActivityLogsRepository collectionActivityLogsRepository;
     private final DigitalPaymentTransactionsRepository digitalPaymentTransactionsRepository;
     private final LoanAllocationRepository loanAllocationRepository;
@@ -84,10 +87,11 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
     private final IntegrationConnectorService integrationConnectorService;
     private final CollectionConfigurationsRepository collectionConfigurationsRepository;
     private final UtilityService utilityService;
+    private final RestTemplate restTemplate;
 
     @Override
     @Transactional
-    public BaseDTOResponse<Object> sendPaymentLink(String token, Object data, MultipartFile paymentReferenceImage, MultipartFile selfieImage) throws ConnectorException, Exception {
+    public BaseDTOResponse<Object> sendPaymentLink(String token, Object data, MultipartFile paymentReferenceImage, MultipartFile selfieImage) throws ConnectorException, JsonProcessingException, InterruptedException, ExecutionException {
         PaymentLinkCollectionRequestDTO paymentLinkCollectionRequestDTO;
         ObjectMapper objectMapper = new ObjectMapper();
         PaymentLinkResponseDTO res = new PaymentLinkResponseDTO();
@@ -119,7 +123,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
         }
         executor.shutdown();
         if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
-            throw new Exception("ExecutorService did not terminate in the specified time.");
+            throw new CustomException("ExecutorService did not terminate in the specified time.");
         }
         // Wait for both image uploads to complete
         Map<String, Object> imageMap = new HashMap<>();
@@ -157,6 +161,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
         paymentLinkRequestDTO.setUserReferenceNumber("");
         paymentLinkRequestDTO.setSpecificPartnerName(RAZORPAY);
 
+        String paymentLinkEndPoint = "sendPaymentLink";
         try {
 
             HttpHeaders httpHeaders = UtilityService.createHeaders(token);
@@ -167,12 +172,11 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                     .httpHeaders(httpHeaders)
                     .body(paymentLinkRequestDTO)
                     .typeResponseType(PaymentLinkResponseDTO.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
-            if (Objects.requireNonNull(res).getData() == null) {
-                throw new Exception(res.toString());
+            if (res.getData() == null) {
+                throw new CustomException(res.toString());
             }
-//            Assert.notNull(res.getBody().getData(), res.getBody().getError().toString());
             String activityRemarks = "Payment link sent against loan id " + loanId + " of payment Rs. " + receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount();
             CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity("send_payment_link", receiptServiceDtoRequest.getActivityData().getUserId(), loanId, activityRemarks, receiptServiceDtoRequest.getActivityData().getGeolocationData(), receiptServiceDtoRequest.getActivityData().getBatteryPercentage());
 
@@ -182,17 +186,17 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
 
             log.info("res {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getUserId(), paymentLinkRequestDTO, res, "success", loanId, HttpMethod.POST.name(), "sendPaymentLink");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getUserId(), paymentLinkRequestDTO, res, STATUS_MESSAGE, loanId, HttpMethod.POST.name(), paymentLinkEndPoint);
         } catch (ConnectorException ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getUserId(), paymentLinkRequestDTO, modifiedErrorMessage, "failure", loanId, HttpMethod.POST.name(), "sendPaymentLink");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getUserId(), paymentLinkRequestDTO, modifiedErrorMessage, FAILURE_STATUS, loanId, HttpMethod.POST.name(), paymentLinkEndPoint);
             throw new ConnectorException(ErrorCode.S3_UPLOAD_DATA_ERROR, ee.getText(), HttpStatus.FAILED_DEPENDENCY, ee.getRequestId());
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getUserId(), paymentLinkRequestDTO, modifiedErrorMessage, "failure", loanId, HttpMethod.POST.name(), "sendPaymentLink");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.send_payment_link, receiptServiceDtoRequest.getActivityData().getUserId(), paymentLinkRequestDTO, modifiedErrorMessage, FAILURE_STATUS, loanId, HttpMethod.POST.name(), paymentLinkEndPoint);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             IntegrationServiceErrorResponseDTO r = new ObjectMapper().readValue(ow.writeValueAsString(res.getError()), IntegrationServiceErrorResponseDTO.class);
             throw new ConnectorException(r, HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
@@ -200,7 +204,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
         return new BaseDTOResponse<>("Payment Link has been sent to the customer, Link will be expired in next " + minutes + " minutes");
     }
 
-    @NotNull
+
     public void createDigitalPaymentLinkTransaction(ReceiptServiceDtoRequest receiptServiceDtoRequest, String mobileNumber, String merchantTransId, Long activityId, String vendor, PaymentLinkResponseDTO otherResponseData) {
         DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity = new DigitalPaymentTransactionsEntity();
         digitalPaymentTransactionsEntity.setCreatedDate(new Date());
@@ -227,7 +231,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
 
     @Override
     @Transactional
-    public Object getPaymentTransactionStatus(String token, CommonTransactionStatusCheckRequestDTO requestBody) throws Exception {
+    public Object getPaymentTransactionStatus(String token, CommonTransactionStatusCheckRequestDTO requestBody) throws CustomException, JsonProcessingException, InterruptedException {
         Map<String, Object> response = new HashMap<>();
         TransactionStatusResponseDTO res = new TransactionStatusResponseDTO();
         DigitalPaymentTransactionsEntity digitalPaymentTransactions = digitalPaymentTransactionsRepository.findByMerchantTranId(requestBody.getMerchantTranId());
@@ -249,6 +253,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
             ErrorCode errorCode = ErrorCode.getErrorCode(1016058, "Check status will be available at " + utilityService.addMinutes(10, consumedApiLogsEntity.getCreatedDate()));
             throw new CustomException(errorCode);
         }
+        String statusCheckEndPoint = "paymentLinkTransactionStatusCheck";
         try {
 
             res = HTTPRequestService.<Object, TransactionStatusResponseDTO>builder()
@@ -257,7 +262,7 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                     .httpHeaders(UtilityService.createHeaders(token))
                     .body(transactionStatusCheckDTO)
                     .typeResponseType(TransactionStatusResponseDTO.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             if (Objects.requireNonNull(res).getData() == null) {
                 throw new ConnectorException(res.toString());
@@ -267,11 +272,9 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
             CollectionActivityLogsEntity collectionActivityLogsEntity = utilityService.getCollectionActivityLogsEntity(activityName, digitalPaymentTransactions.getCreatedBy(), loanId, activityRemarks, "{}", 90L);
             collectionActivityLogsRepository.save(collectionActivityLogsEntity);
             // dummy resppnse here
-//            res.getData().setStatus("paid");
-//            res.getData().setOrderId("dummy_order_id" + new Date().getTime());
             // dummy resppinse here
             if (res.getData().getStatus().equalsIgnoreCase(PAID)) {
-                if (!digitalPaymentTransactions.getReceiptGenerated()) {
+                if (Boolean.FALSE.equals(digitalPaymentTransactions.getReceiptGenerated())) {
                     log.info("receipt generate check {}", res);
                     utilityService.createReceiptByCallBack(digitalPaymentTransactions, token, response, res.getData().getOrderId());
                     log.info("create receipt done");
@@ -289,10 +292,10 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
                 int expiration = Integer.parseInt(collectionConfigurationsRepository.findConfigurationValueByConfigurationName(PAYMENT_LINK_EXPIRATION_CONF));
                 if ((res.getData().getStatus().equalsIgnoreCase(PENDING) || res.getData().getStatus().equalsIgnoreCase(EXPIRED)) && utilityService.isExpired(expiration, digitalPaymentTransactions.getCreatedDate(), true)) {
                     log.info("hrere");
-                    digitalPaymentTransactions.setStatus("expired");
+                    digitalPaymentTransactions.setStatus(EXPIRED_STATUS);
                     digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, TransactionStatusResponseDataDTO.builder().status("expired").orderId(null).build(), "success", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
                     log.info("expired response -> {}", settingResponseData());
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, TransactionStatusResponseDataDTO.builder().status(EXPIRED_STATUS).orderId(null).build(), STATUS_MESSAGE, loanId, HttpMethod.POST.name(), statusCheckEndPoint);
                     return settingResponseData();
                 }
             }
@@ -302,27 +305,41 @@ public class PaymentLinkServiceImpl implements PaymentLinkService, DigitalTransa
 
             digitalPaymentTransactionsRepository.save(digitalPaymentTransactions);
             res.getData().setStatus(res.getData().getStatus().toLowerCase());
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, res, "success", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, res, STATUS_MESSAGE, loanId, HttpMethod.POST.name(), statusCheckEndPoint);
         } catch (CustomException ee) {
             throw new CustomException(ee.getMessage(), ee.getCode());
         } catch (ConnectorException ee) {
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             IntegrationServiceErrorResponseDTO r = new ObjectMapper().readValue(ow.writeValueAsString(res.getError()), IntegrationServiceErrorResponseDTO.class);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, res, "failure", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, res, FAILURE_STATUS, loanId, HttpMethod.POST.name(), statusCheckEndPoint);
             throw new ConnectorException(r, HttpStatus.FAILED_DEPENDENCY, res.getRequestId());
+        } catch(InterruptedException ie) {
+            log.error("Interrupted Exception Error {}", ie.getMessage());
+            Thread.currentThread().interrupt();
+            throw new InterruptedException(ie.getMessage());
         } catch (Exception ee) {
             log.error("{}", ee.getMessage());
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, utilityService.convertToJSON(ee.getMessage()), "failure", loanId, HttpMethod.POST.name(), "paymentLinkTransactionStatusCheck");
-            throw new Exception(ee.getMessage());
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.check_payment_link_status, digitalPaymentTransactions.getCreatedBy(), transactionStatusCheckDTO, utilityService.convertToJSON(ee.getMessage()), FAILURE_STATUS, loanId, HttpMethod.POST.name(), statusCheckEndPoint);
+            throw new CustomException(ee.getMessage());
         }
         return res.getData();
     }
     @Override
-    public Object digitalTransactionStatusCheck(String token, CommonTransactionStatusCheckRequestDTO requestBody) throws Exception {
-        return this.getPaymentTransactionStatus(token, requestBody);
+    @Transactional()
+    public Object digitalTransactionStatusCheck(String token, CommonTransactionStatusCheckRequestDTO requestBody) throws CustomException, InterruptedException {
+        try{
+    
+            return this.getPaymentTransactionStatus(token, requestBody);
+        }  catch(InterruptedException ie) {
+            log.error("Interrupted Exception Error {}", ie.getMessage());
+            Thread.currentThread().interrupt();
+            throw new InterruptedException(ie.getMessage());
+        }  catch(Exception ee){
+            throw new CustomException(ee.getMessage());
+        }
     }
 
     private TransactionStatusResponseDataDTO settingResponseData() {
-        return TransactionStatusResponseDataDTO.builder().status("expired").orderId(null).build();
+        return TransactionStatusResponseDataDTO.builder().status(EXPIRED_STATUS).orderId(null).build();
     }
 }

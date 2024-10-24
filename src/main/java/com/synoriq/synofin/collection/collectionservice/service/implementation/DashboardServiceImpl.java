@@ -1,15 +1,18 @@
 package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.DashboardRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.LoanAllocationRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.ReceiptRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DashboardDTOs.*;
+import com.synoriq.synofin.collection.collectionservice.rest.response.dashboarddtos.*;
 import com.synoriq.synofin.collection.collectionservice.service.DashboardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -30,7 +33,9 @@ public class DashboardServiceImpl implements DashboardService {
     @Autowired
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
     @Override
-    public DashboardResponseDTO getDashboardCountByUserId(Long userId, String userName, String startDate, String toDate) throws Exception {
+    public DashboardResponseDTO getDashboardCountByUserId(Long userId, String userName, String startDate, String toDate) throws CollectionException, ParseException {
+        final String totalCount = "total_count";
+        final String totalAmount = "total_amount";
         // adding 1 day in incoming toDate //
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         Calendar c = Calendar.getInstance();
@@ -116,23 +121,23 @@ public class DashboardServiceImpl implements DashboardService {
             }
             // followUp
             followUpDashboardDTO.setActionCount(0D);
-            followUpDashboardDTO.setTotalCount(Double.valueOf(String.valueOf(followupDataCounts.get("total_count"))));
+            followUpDashboardDTO.setTotalCount(Double.valueOf(String.valueOf(followupDataCounts.get(totalCount))));
 
             // receipts data
-            commonCountDashboardDTO.setTotalCount(Double.valueOf(String.valueOf(receiptDataCounts.get("total_count"))));
-            commonCountDashboardDTO.setTotalAmount(Double.valueOf(String.valueOf(receiptDataCounts.get("total_amount"))));
+            commonCountDashboardDTO.setTotalCount(Double.valueOf(String.valueOf(receiptDataCounts.get(totalCount))));
+            commonCountDashboardDTO.setTotalAmount(Double.valueOf(String.valueOf(receiptDataCounts.get(totalAmount))));
             dashboardResponseDTO.setReceipt(commonCountDashboardDTO);
 
             // amount transfer
             CommonCountDashboardDTO amountTransferDataCount = new CommonCountDashboardDTO();
-            amountTransferDataCount.setTotalCount(Double.valueOf(String.valueOf(amountTransferDataCounts.get("total_count"))));
-            amountTransferDataCount.setTotalAmount(Double.valueOf(String.valueOf(amountTransferDataCounts.get("total_amount"))));
+            amountTransferDataCount.setTotalCount(Double.valueOf(String.valueOf(amountTransferDataCounts.get(totalCount))));
+            amountTransferDataCount.setTotalAmount(Double.valueOf(String.valueOf(amountTransferDataCounts.get(totalAmount))));
             dashboardResponseDTO.setAmountTransfer(amountTransferDataCount);
 
             // amount transfer in process
             CommonCountDashboardDTO amountTransferInProcessDataCount = new CommonCountDashboardDTO();
-            amountTransferInProcessDataCount.setTotalCount(Double.valueOf(String.valueOf(amountTransferInProcessDataCounts.get("total_count"))));
-            amountTransferInProcessDataCount.setTotalAmount(Double.valueOf(String.valueOf(amountTransferInProcessDataCounts.get("total_amount"))));
+            amountTransferInProcessDataCount.setTotalCount(Double.valueOf(String.valueOf(amountTransferInProcessDataCounts.get(totalCount))));
+            amountTransferInProcessDataCount.setTotalAmount(Double.valueOf(String.valueOf(amountTransferInProcessDataCounts.get(totalAmount))));
             dashboardResponseDTO.setAmountTransferInProcess(amountTransferInProcessDataCount);
 
             dashboardResponseDTO.setCashInHand(cashInHandDashboardDTO);
@@ -148,7 +153,7 @@ public class DashboardServiceImpl implements DashboardService {
             if (Objects.equals(depositReminder, "hours")) {
                 String depositReminderHours = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(DEPOSIT_REMINDER_HOURS);
                 List<Map<String, Object>> notDepositedReceipts = receiptRepository.depositReminderData(userId, depositReminderHours);
-                if (notDepositedReceipts.size() > 0) {
+                if (!notDepositedReceipts.isEmpty()) {
                     dashboardResponseDTO.setDepositReminder(true);
                 }
             } else if (Objects.equals(depositReminder, "daytime")) {
@@ -170,18 +175,15 @@ public class DashboardServiceImpl implements DashboardService {
 
                     Date finalDate = calendar.getTime();
                     Date currentDate = new Date();
-                    if (finalDate.compareTo(currentDate) < 0) {
-                        dashboardResponseDTO.setDepositReminder(true);
-                    } else {
-                        dashboardResponseDTO.setDepositReminder(false);
-                    }
+                    dashboardResponseDTO.setDepositReminder(finalDate.compareTo(currentDate) < 0);
                 } else {
                     dashboardResponseDTO.setDepositReminder(false);
                 }
             }
         } catch (Exception e) {
             log.info("errorerrorerrorerrorerrorerror message {}", e.getMessage());
-            throw new Exception("1017000");
+            ErrorCode errCode = ErrorCode.getErrorCode(1017000);
+            throw new CollectionException(errCode, 1017000);
         }
         return dashboardResponseDTO;
     }

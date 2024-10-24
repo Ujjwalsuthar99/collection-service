@@ -3,45 +3,49 @@ package com.synoriq.synofin.collection.collectionservice.service.implementation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
+import com.synoriq.synofin.collection.collectionservice.common.exception.DataLockException;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.AuthorizationResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.request.collectionIncentiveDTOs.CollectionIncentiveRequestDTOs;
-import com.synoriq.synofin.collection.collectionservice.rest.request.createReceiptDTOs.ReceiptServiceDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.msgServiceRequestDTO.*;
-import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.UploadImageOnS3DataRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.s3ImageDTOs.UploadImageOnS3RequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlDataRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.shortenUrl.ShortenUrlRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.collectionincentivedtos.CollectionIncentiveRequestDTOs;
+import com.synoriq.synofin.collection.collectionservice.rest.request.createreceiptdtos.ReceiptServiceDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.masterdtos.MasterDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.msgservicerequestdto.*;
+import com.synoriq.synofin.collection.collectionservice.rest.request.s3imagedtos.UploadImageOnS3DataRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.s3imagedtos.UploadImageOnS3RequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.shortenurl.ShortenUrlDataRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.shortenurl.ShortenUrlRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskdetailsdto.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.CreateReceiptLmsDTOs.ServiceRequestSaveResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsDataResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.GetDocumentsResponseDTOs.GetDocumentsResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.createreceiptlmsdtos.ServiceRequestSaveResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.getdocumentsresponsedtos.GetDocumentsDataResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.getdocumentsresponsedtos.GetDocumentsResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.MsgServiceDTOs.*;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ShortenUrlDTOs.ShortenUrlResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CustomerDetailDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanBasicDetailsDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanSummaryForLoanDTOs.LoanSummaryResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.TaskDetailDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.msgservicedtos.*;
+import com.synoriq.synofin.collection.collectionservice.rest.response.shortenurldtos.ShortenUrlResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.collateraldetailsresponsedto.CollateralDetailsResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.CustomerDetailDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.LoanBasicDetailsDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.loansummaryforloandtos.LoanSummaryResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.TaskDetailDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.response.UserDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.UsersDataDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.BankNameIFSCResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ContactResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UtilsDTOs.ThermalPrintDataDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userdatadtos.UsersDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userdetailbytokendtos.UserDetailByTokenDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userdetailsbyuseriddtos.UserDetailByUserIdDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.utilsdtos.BankNameIFSCResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.utilsdtos.ContactResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.utilsdtos.ThermalPrintDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3imagedtos.uploadimageresponsedto.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.ReceiptService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.collection.collectionservice.service.msgservice.*;
-import com.synoriq.synofin.collection.collectionservice.service.printService.PrintServiceImplementation;
+import com.synoriq.synofin.collection.collectionservice.service.printservice.PrintServiceImplementation;
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +69,7 @@ import java.io.InputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -78,6 +83,25 @@ import static com.synoriq.synofin.collection.collectionservice.common.PaymentRel
 @Service
 @Slf4j
 public class UtilityServiceImpl implements UtilityService {
+
+    private static final String SUCCESS_STATUS = "success";
+    private static final String FAILURE_STATUS = "failure";
+    private static final String PRE_PROD = "pre-prod";
+    private static final String PREPROD_STR = "preprod";
+    private static final String MODEL_QUERY_STR = "&model=";
+    private static final String DATE_FORMAT_STR = "dd-MM-yyyy";
+    private static final String LANGUAGE_TYPE = "english";
+    private static final String URL_STR = "https://api-";
+    private static final String AUTHORIZATION_STR = "Authorization";
+    private static final String CONTENT_TYPE_STR = "Content-Type";
+    private static final String CONTENT_TYPE = "application/json";
+    private static final String APPLICANT_STR = "applicant";
+    private static final String SENDER = "FINOVA";
+    private static final String PAYMENT_MODE = "cheque";
+    private static final String PROFILE_PHOTO_STR = "profile_photo";
+    private static final String DOCUMENT_STR = "document";
+    private static final String MOBILE_STR = "917805951252";
+
     @Autowired
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
 
@@ -133,16 +157,19 @@ public class UtilityServiceImpl implements UtilityService {
     @Autowired
     private ReceiptService receiptService;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Override
-    public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception {
+    public Object getMasterData(String token, MasterDtoRequest requestBody) throws CustomException {
 
         Object res = new Object();
         try {
             MasterDtoRequest masterBody = new ObjectMapper().convertValue(requestBody, MasterDtoRequest.class);
 
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
+            httpHeaders.add(AUTHORIZATION_STR, token);
+            httpHeaders.add(CONTENT_TYPE_STR, CONTENT_TYPE);
 
             res = HTTPRequestService.<Object, MasterDTOResponse>builder()
                     .httpMethod(HttpMethod.POST)
@@ -150,15 +177,13 @@ public class UtilityServiceImpl implements UtilityService {
                     .httpHeaders(httpHeaders)
                     .body(masterBody)
                     .typeResponseType(MasterDTOResponse.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
-//            log.info("responseData {}", res);
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, masterBody, res, "success", null, HttpMethod.POST.name(), "getMasterType");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, masterBody, res, SUCCESS_STATUS, null, HttpMethod.POST.name(), "getMasterType");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, requestBody, modifiedErrorMessage, "failure", null, HttpMethod.POST.name(), "getMasterType");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_master_type, null, requestBody, modifiedErrorMessage, FAILURE_STATUS, null, HttpMethod.POST.name(), "getMasterType");
             log.error("{}", ee.getMessage());
         }
 
@@ -166,25 +191,25 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public Object getUserDetail(String token, Integer page, Integer size, String key) throws Exception {
+    public Object getUserDetail(String token, Integer page, Integer size, String key) throws CustomException {
 
         UserDTOResponse res;
         BaseDTOResponse<Object> baseDTOResponse = null;
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
+            httpHeaders.add(AUTHORIZATION_STR, token);
+            httpHeaders.add(CONTENT_TYPE_STR, CONTENT_TYPE);
 
             res = HTTPRequestService.<Object, UserDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getAllUserData")
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UserDTOResponse.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             String modifiedResponse = "response: " + res.getResponse() + " error: " + res.getError();
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, convertToJSON(modifiedResponse), "success", null, HttpMethod.GET.name(), "getAllUserData");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, convertToJSON(modifiedResponse), SUCCESS_STATUS, null, HttpMethod.GET.name(), "getAllUserData");
             List<UsersDataDTO> userData = res.getData();
             for (int i = 0; i < userData.toArray().length; i++) {
                 userData.get(i).setTransferTo(userData.get(i).getName() + " - " + userData.get(i).getEmployeeCode());
@@ -193,7 +218,6 @@ public class UtilityServiceImpl implements UtilityService {
             int pageRequest = (page * size) - 10;
             List<UsersDataDTO> pageableArr = new LinkedList<>();
 
-//            List<UsersDataDTO> filteredList = userData.parallelStream().filter(user -> (user.getUsername().contains(key) || user.getName().contains(key))).collect(Collectors.toList());
             if (key.equals("")) {
                 for (int i = pageRequest; i < (pageRequest + 10); i++) {
                     pageableArr.add(userData.get(i));
@@ -223,7 +247,7 @@ public class UtilityServiceImpl implements UtilityService {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getAllUserData");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.fetch_all_user_data, null, null, modifiedErrorMessage, FAILURE_STATUS, null, HttpMethod.GET.name(), "getAllUserData");
 
             log.error("{}", ee.getMessage());
         }
@@ -232,28 +256,26 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public Object getContactSupport(String token, String keyword, String model) throws Exception {
+    public Object getContactSupport(String token, String keyword, String model) throws CustomException {
 
         Object res = new Object();
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
+            httpHeaders.add(AUTHORIZATION_STR, token);
+            httpHeaders.add(CONTENT_TYPE_STR, CONTENT_TYPE);
 
             res = HTTPRequestService.<Object, ContactResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
-                    .url("http://localhost:1102/v1/getContactSupport?keyword=" + keyword + "&model=" + model)
+                    .url("http://localhost:1102/v1/getContactSupport?keyword=" + keyword + MODEL_QUERY_STR + model)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(ContactResponseDTO.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
-//            log.info("responseData {}", res);
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, res, "success", null, HttpMethod.GET.name(), "getContactSupport?keyword=" + keyword + "&model=" + model);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, res, SUCCESS_STATUS, null, HttpMethod.GET.name(), "getContactSupport?keyword=" + keyword + MODEL_QUERY_STR + model);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getContactSupport?keyword=" + keyword + "&model=" + model);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.contact_support, null, null, modifiedErrorMessage, FAILURE_STATUS, null, HttpMethod.GET.name(), "getContactSupport?keyword=" + keyword + MODEL_QUERY_STR + model);
             log.error("{}", ee.getMessage());
         }
 
@@ -261,24 +283,26 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public Date addOneDay(Date date) throws Exception {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        Calendar c = Calendar.getInstance();
-        String endDate = simpleDateFormat.format(date);
-        c.setTime(simpleDateFormat.parse(endDate));
-        c.add(Calendar.DATE, 1);  // number of days to add
-        String to = simpleDateFormat.format(c.getTime());
-        SimpleDateFormat simpleDateFormats = new SimpleDateFormat("dd-MM-yyyy");
-        return simpleDateFormats.parse(to);
+    public Date addOneDay(Date date) throws CustomException {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT_STR);
+            Calendar c = Calendar.getInstance();
+            String endDate = simpleDateFormat.format(date);
+            c.setTime(simpleDateFormat.parse(endDate));
+            c.add(Calendar.DATE, 1);  // number of days to add
+            String to = simpleDateFormat.format(c.getTime());
+            SimpleDateFormat simpleDateFormats = new SimpleDateFormat(DATE_FORMAT_STR);
+            return simpleDateFormats.parse(to);
+        } catch(Exception e){
+            throw new CustomException(e.getMessage());
+        }
     }
 
     @Override
     public String mobileNumberMasking(String mobile) {
         String maskedNumberConfiguration = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MASKED_NUMBER_CONFIGURATION);
-        if (Objects.equals(maskedNumberConfiguration, "true")) {
-            if (mobile != null && !mobile.equalsIgnoreCase("")) {
+        if (Objects.equals(maskedNumberConfiguration, "true") && (mobile != null && !mobile.equalsIgnoreCase(""))) {
                 return mobile.replaceAll(".(?=.{4})", "*");
-            }
         }
         return mobile;
     }
@@ -305,28 +329,26 @@ public class UtilityServiceImpl implements UtilityService {
     @Override
     public String capitalizeName(String name) {
         String[] strArr = name.split(" ");
-        String newStr = "";
-        for (int i = 0; i < strArr.length; i++) {
-            newStr += strArr[i].substring(0, 1).toUpperCase() + strArr[i].substring(1) + " ";
-
-//            newStr.append(strArr[i].substring(0, 1).toUpperCase()).append(strArr[i].substring(1, strArr[i].length)).append(" ");
+        StringBuilder newStr = new StringBuilder();
+        int i = 0;
+        while (i < strArr.length) {
+            newStr.append(strArr[i].substring(0, 1).toUpperCase()).append(strArr[i].substring(1)).append(" ");
+            i++;
         }
-        return newStr.trim();
+        return newStr.toString().trim();
     }
 
 
     @Override
     public String getApiUrl() {
-        if (Objects.equals(springProfile, "pre-prod")) {
-            springProfile = "preprod";
+        if (Objects.equals(springProfile, PRE_PROD)) {
+            springProfile = PREPROD_STR;
         }
         String queryString = httpServletRequest.getQueryString();
-//        httpServletRequest.getRequestURI() = "/collection-service/v1/getMasterType";
-//        log.info("queryString {}", queryString);
         if (queryString != null) {
-            return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI() + "?" + queryString;
+            return URL_STR + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI() + "?" + queryString;
         }
-        return "https://api-" + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI();
+        return URL_STR + springProfile + ".synofin.tech" + httpServletRequest.getRequestURI();
     }
 
 
@@ -336,27 +358,27 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public Object getBankNameByIFSC(String keyword) throws Exception {
+    public Object getBankNameByIFSC(String keyword) throws CustomException {
 
         Object res = new Object();
 
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Content-Type", "application/json");
+            httpHeaders.add(CONTENT_TYPE_STR, CONTENT_TYPE);
 
             res = HTTPRequestService.<Object, BankNameIFSCResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getBankNameByIFSC?keyword=" + keyword)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(BankNameIFSCResponseDTO.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, res, "success", null, HttpMethod.GET.name(), "getBankNameByIFSC?keyword=" + keyword);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, res, SUCCESS_STATUS, null, HttpMethod.GET.name(), "getBankNameByIFSC?keyword=" + keyword);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getBankNameByIFSC?keyword=" + keyword);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.razor_pay_ifsc, 0L, null, modifiedErrorMessage, FAILURE_STATUS, null, HttpMethod.GET.name(), "getBankNameByIFSC?keyword=" + keyword);
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -368,23 +390,22 @@ public class UtilityServiceImpl implements UtilityService {
 
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
+            httpHeaders.add(AUTHORIZATION_STR, token);
+            httpHeaders.add(CONTENT_TYPE_STR, CONTENT_TYPE);
 
             res = HTTPRequestService.<Object, UserDetailByTokenDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getUserDetailsByToken")
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UserDetailByTokenDTOResponse.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
-//            log.info("responseData {}", res);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, res, "success", null, HttpMethod.GET.name(), "getUserDetailsByToken");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, res, SUCCESS_STATUS, null, HttpMethod.GET.name(), "getUserDetailsByToken");
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getUserDetailsByToken");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_token_details, null, null, modifiedErrorMessage, FAILURE_STATUS, null, HttpMethod.GET.name(), "getUserDetailsByToken");
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -403,8 +424,8 @@ public class UtilityServiceImpl implements UtilityService {
 
     @Override
     public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId, String customerType, String customerName, String applicantMobileNumber, String collectedFromMobileNumber, String loanNumber, Long receiptId) throws IOException {
-        if (Objects.equals(springProfile, "pre-prod")) {
-            springProfile = "preprod";
+        if (Objects.equals(springProfile, PRE_PROD)) {
+            springProfile = PREPROD_STR;
         }
         UploadImageOnS3ResponseDTO res = new UploadImageOnS3ResponseDTO();
 
@@ -431,8 +452,8 @@ public class UtilityServiceImpl implements UtilityService {
 
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
+            httpHeaders.add(AUTHORIZATION_STR, token);
+            httpHeaders.add(CONTENT_TYPE_STR, CONTENT_TYPE);
 
             res = HTTPRequestService.<Object, UploadImageOnS3ResponseDTO>builder()
                     .httpMethod(HttpMethod.POST)
@@ -440,12 +461,12 @@ public class UtilityServiceImpl implements UtilityService {
                     .body(uploadImageOnS3RequestDTO)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UploadImageOnS3ResponseDTO.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             // creating api logs
             uploadImageOnS3DataRequestDTO.setFile("base64 string");
             uploadImageOnS3RequestDTO.setData(uploadImageOnS3DataRequestDTO);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, Long.parseLong(userId), uploadImageOnS3RequestDTO, res, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "uploadImageOnS3");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.s3_upload, Long.parseLong(userId), uploadImageOnS3RequestDTO, res, SUCCESS_STATUS, Long.parseLong(loanId[0]), HttpMethod.POST.name(), "uploadImageOnS3");
 
 
             ShortenUrlResponseDTO shortenUrlResponseDTO;
@@ -458,10 +479,10 @@ public class UtilityServiceImpl implements UtilityService {
             shortenUrlDataRequestDTO.setId(res.getData().getDownloadUrl());
             shortenUrlRequestDTO.setData(shortenUrlDataRequestDTO);
             String shortenUrl = "";
-            if (springProfile.equals("pre-prod")) {
+            if (springProfile.equals(PRE_PROD)) {
                 shortenUrl = SHORTEN_URL_PREPROD;
             } else {
-                shortenUrl = SHORTEN_URL_PREPROD.replace("preprod", springProfile);
+                shortenUrl = SHORTEN_URL_PREPROD.replace(PREPROD_STR, springProfile);
             }
 
             log.info("1stsss {}", shortenUrl);
@@ -472,10 +493,10 @@ public class UtilityServiceImpl implements UtilityService {
                     .body(shortenUrlRequestDTO)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(ShortenUrlResponseDTO.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.shorten_url, Long.parseLong(userId), shortenUrlRequestDTO, shortenUrlResponseDTO, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), shortenUrl);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.shorten_url, Long.parseLong(userId), shortenUrlRequestDTO, shortenUrlResponseDTO, SUCCESS_STATUS, Long.parseLong(loanId[0]), HttpMethod.POST.name(), shortenUrl);
             boolean isApplicantMobileNumber = Objects.equals(applicantMobileNumber, "null") || applicantMobileNumber == null || applicantMobileNumber.contains("*");
             log.info("clientId {}", clientId);
             if (clientId.equals("finova")) {
@@ -483,18 +504,18 @@ public class UtilityServiceImpl implements UtilityService {
                 FinovaSmsRequest finovaSmsRequest = new FinovaSmsRequest();
                 if (paymentMode.equals("cash")) {
                     finovaSmsRequest.setTemplateId(FINOVA_CASH_MSG_FLOW_ID);
-                } else if (paymentMode.equals("cheque")) {
+                } else if (paymentMode.equals(PAYMENT_MODE)) {
                     finovaSmsRequest.setTemplateId(FINOVA_CHEQUE_MSG_FLOW_ID);
                 } else if (paymentMode.equals("upi")){
                     finovaSmsRequest.setTemplateId(FINOVA_UPI_MSG_FLOW_ID);
                 }
-                if (customerType.equals("applicant")) {
-                    finovaSmsRequest.setSender("FINOVA");
-                    finovaSmsRequest.setShortUrl("0");
+                if (customerType.equals(APPLICANT_STR)) {
+                    finovaSmsRequest.setSender(SENDER);
+                    finovaSmsRequest.setShortUrl("1");
                     if (isProd) {
                         finovaSmsRequest.setMobiles("91" + applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
-                        finovaSmsRequest.setMobiles("917805951252");
+                        finovaSmsRequest.setMobiles(MOBILE_STR);
                     }
                     finovaSmsRequest.setAmount(receiptAmount);
                     finovaSmsRequest.setLoanNumber(loanNumber);
@@ -502,42 +523,36 @@ public class UtilityServiceImpl implements UtilityService {
 
                     FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
                     saveSendSMSActivityData(loanId, res, userId);
-//                    log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
                     // creating api logs
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, SUCCESS_STATUS, Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
 
                 } else {
-                    finovaSmsRequest.setSender("FINOVA");
-                    finovaSmsRequest.setShortUrl("0");
+                    finovaSmsRequest.setSender(SENDER);
+                    finovaSmsRequest.setShortUrl("1");
                     if (isProd) {
                         finovaSmsRequest.setMobiles("91" + applicantMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
                     } else {
-                        finovaSmsRequest.setMobiles("917805951252");
+                        finovaSmsRequest.setMobiles(MOBILE_STR);
+                    }
+                    finovaSmsRequest.setAmount(receiptAmount);
+                    finovaSmsRequest.setLoanNumber(loanNumber);
+                    finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
+
+                    finovaSmsRequest.setSender(SENDER);
+                    finovaSmsRequest.setShortUrl("1");
+                    if (isProd) {
+                        finovaSmsRequest.setMobiles("91" + collectedFromMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
+                    } else {
+                        finovaSmsRequest.setMobiles(MOBILE_STR);
                     }
                     finovaSmsRequest.setAmount(receiptAmount);
                     finovaSmsRequest.setLoanNumber(loanNumber);
                     finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
 
                     FinovaMsgDTOResponse finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
-//                    log.info("sms service for applicant & collected from finova {}", finovaMsgDTOResponse);
-
-
-                    finovaSmsRequest.setSender("FINOVA");
-                    finovaSmsRequest.setShortUrl("0");
-                    if (isProd) {
-                        finovaSmsRequest.setMobiles("91" + collectedFromMobileNumber); // uncomment this line and comment above static mobile number line while going live with CSL
-                    } else {
-                        finovaSmsRequest.setMobiles("917805951252");
-                    }
-                    finovaSmsRequest.setAmount(receiptAmount);
-                    finovaSmsRequest.setLoanNumber(loanNumber);
-                    finovaSmsRequest.setUrl(shortenUrlResponseDTO.getData().getResult());
-
-                    finovaMsgDTOResponse = finovaSmsService.sendSmsFinova(finovaSmsRequest);
-//                    log.info("sms service for collected from finova {}", finovaMsgDTOResponse);
                     saveSendSMSActivityData(loanId, res, userId);
                     // creating api logs
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
+                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), finovaSmsRequest, finovaMsgDTOResponse, SUCCESS_STATUS, Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
                 }
 
             }
@@ -564,14 +579,14 @@ public class UtilityServiceImpl implements UtilityService {
                 String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON((postField + postData)), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON((postField + postData)), convertToJSON(smsServiceResponse), SUCCESS_STATUS, Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
             }
 
             if (clientId.equals("spfc")) {
                 RequestDataDTO requestDataDTO = new RequestDataDTO();
                 if (paymentMode.equals("cash")) {
                     requestDataDTO.setTemplateName("template3");
-                } else if (paymentMode.equals("cheque")) {
+                } else if (paymentMode.equals(PAYMENT_MODE)) {
                     requestDataDTO.setTemplateName("template2");
                 } else {
                     requestDataDTO.setTemplateName("template1");
@@ -584,7 +599,7 @@ public class UtilityServiceImpl implements UtilityService {
                 strings.add(loanNumber);
                 strings.add(shortenUrlResponseDTO.getData().getResult());
                 SmsListDTO smsListDTO = new SmsListDTO();
-                smsListDTO.setMessageType("english");
+                smsListDTO.setMessageType(LANGUAGE_TYPE);
                 String receivedMobileNumber;
                 if (isProd) {
                     if (isApplicantMobileNumber) {
@@ -608,7 +623,7 @@ public class UtilityServiceImpl implements UtilityService {
                 SpfcMsgDTOResponse spfcMsgDTOResponse = spfcSmsService.sendSmsSpfc(spfcSmsRequestDTO, token, springProfile);
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), spfcSmsRequestDTO, spfcMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), spfcSmsRequestDTO, spfcMsgDTOResponse, SUCCESS_STATUS, Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
             }
 
             if (clientId.equals("paisabuddy")) {
@@ -628,23 +643,15 @@ public class UtilityServiceImpl implements UtilityService {
 
                 PaisabuddyMsgDTOResponse paisabuddyMsgDTOResponse = paisabuddySmsService.sendSmsPaisabuddy(paisabuddySmsRequest);
                 saveSendSMSActivityData(loanId, res, userId);
-//                    log.info("sms service for applicant finova {}", finovaMsgDTOResponse);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), paisabuddySmsRequest, paisabuddyMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), paisabuddySmsRequest, paisabuddyMsgDTOResponse, SUCCESS_STATUS, Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
             }
 
             if (clientId.equals("cfl")) {
 
                 log.info("in iffff");
                 RequestDataDTO requestDataDTO = new RequestDataDTO();
-//                if (paymentMode.equals("cash")) {
-//                    requestDataDTO.setTemplateName("template3");
-//                } else if (paymentMode.equals("cheque")) {
-//                    requestDataDTO.setTemplateName("template2");
-//                } else {
-//                    requestDataDTO.setTemplateName("template1");
-//                }
-                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+                SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT_STR);
                 String receiptDate = formatter.format(new Date());
                 requestDataDTO.setTemplateName("template5");
 
@@ -656,7 +663,7 @@ public class UtilityServiceImpl implements UtilityService {
                 strings.add(receiptDate);
                 strings.add(shortenUrlResponseDTO.getData().getResult());
                 SmsListDTO smsListDTO = new SmsListDTO();
-                smsListDTO.setMessageType("english");
+                smsListDTO.setMessageType(LANGUAGE_TYPE);
                 String receivedMobileNumber;
                 if (isProd) {
                     if (isApplicantMobileNumber) {
@@ -667,7 +674,6 @@ public class UtilityServiceImpl implements UtilityService {
                     smsListDTO.setMobiles("91" + receivedMobileNumber);
                 } else {
                     smsListDTO.setMobiles("91" + collectedFromMobileNumber);
-//                    smsListDTO.setMobiles("919887432524");
                 }
                 smsListDTOS.add(smsListDTO);
                 requestDataDTO.setTemplateVariable(strings);
@@ -682,22 +688,13 @@ public class UtilityServiceImpl implements UtilityService {
                 log.info("cflMsgDTOResponse {}", cflMsgDTOResponse);
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), cflSmsRequest, cflMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), cflSmsRequest, cflMsgDTOResponse, SUCCESS_STATUS, Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
             }
 
             if (clientId.equals("lifc")) {
 
                 log.info("in iffff");
                 RequestDataDTO requestDataDTO = new RequestDataDTO();
-//                if (paymentMode.equals("cash")) {
-//                    requestDataDTO.setTemplateName("template3");
-//                } else if (paymentMode.equals("cheque")) {
-//                    requestDataDTO.setTemplateName("template2");
-//                } else {
-//                    requestDataDTO.setTemplateName("template1");
-//                }
-                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-                String receiptDate = formatter.format(new Date());
                 requestDataDTO.setTemplateName("template1");
 
                 requestDataDTO.setMessageType("text");
@@ -708,7 +705,7 @@ public class UtilityServiceImpl implements UtilityService {
                 strings.add(String.valueOf(receiptId));
                 strings.add(shortenUrlResponseDTO.getData().getResult());
                 SmsListDTO smsListDTO = new SmsListDTO();
-                smsListDTO.setMessageType("english");
+                smsListDTO.setMessageType(LANGUAGE_TYPE);
                 String receivedMobileNumber;
                 if (isProd) {
                     if (isApplicantMobileNumber) {
@@ -719,7 +716,6 @@ public class UtilityServiceImpl implements UtilityService {
                     smsListDTO.setMobiles("91" + receivedMobileNumber);
                 } else {
                     smsListDTO.setMobiles("91" + collectedFromMobileNumber);
-//                    smsListDTO.setMobiles("919887432524");
                 }
                 smsListDTOS.add(smsListDTO);
                 requestDataDTO.setTemplateVariable(strings);
@@ -734,39 +730,17 @@ public class UtilityServiceImpl implements UtilityService {
                 log.info("cflMsgDTOResponse {}", lifcMsgDTOResponse);
                 saveSendSMSActivityData(loanId, res, userId);
                 // creating api logs
-                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), lifcSmsRequest, lifcMsgDTOResponse, "success", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
+                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), lifcSmsRequest, lifcMsgDTOResponse, SUCCESS_STATUS, Long.parseLong(loanId[0]), HttpMethod.POST.name(), "");
             }
 
-//            if(clientId.equals("deccan")) {
-//                String paymentMode1 = Objects.equals(paymentMode, "cash") ? "Cash" : (Objects.equals(paymentMode, "upi") ? "Online" : "Cheque") ;
-//                String message = DECCAN_TEMPLATE_MESSAGE.replace("{Var1}", receiptAmount);
-//                message = message.replace("{paymentMode}", paymentMode1);
-//                message = message.replace("{Var2}", loanNumber);
-//                message = message.replace("{Var3}", shortenUrlResponseDTO.getData().getResult());
-//                String receivedMobileNumber;
-//                if(isProd) {
-//                    receivedMobileNumber = applicantMobileNumber != null ? applicantMobileNumber : collectedFromMobileNumber; // uncomment this line and comment above static mobile number line while going live with CSL
-//                } else {
-//                    receivedMobileNumber = "9649916989";
-//                }
-//                log.info("message3 {}", message);
-//                String encodedMessageString = URLEncoder.encode(message, StandardCharsets.UTF_8);
-//                log.info("encodedMessageString {}", encodedMessageString);
-//                String postField = "user=CSLFIN&message=" + encodedMessageString + "&key=974130e696XX&mobile=" + receivedMobileNumber + "&senderid=CSLSME&accusage=1&tempid=1707165942499421494&entityid=1701159697926729192&unicode=1";
-//                log.info("postField {}", postField);
-//                String smsServiceResponse = cslSmsService.sendSmsCsl(postField);
-//                log.info("sms service for csl {}", smsServiceResponse);
-//                saveSendSMSActivityData(loanId, res, userId);
-//                // creating api logs
-//                consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), convertToJSON(postField), convertToJSON(smsServiceResponse), "success", Long.parseLong(loanId[0]));
-//            }
+
 
 
         } catch (Exception ee) {
             log.info("ee messages", ee);
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), null, modifiedErrorMessage, "failure", Long.parseLong(loanId[0]), HttpMethod.POST.name(), "sendPdfOnCustomer");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.sms_service, Long.parseLong(userId), null, modifiedErrorMessage, FAILURE_STATUS, Long.parseLong(loanId[0]), HttpMethod.POST.name(), "sendPdfOnCustomer");
             log.error("{}", ee.getMessage());
         }
         return res;
@@ -798,33 +772,30 @@ public class UtilityServiceImpl implements UtilityService {
 
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
+            httpHeaders.add(AUTHORIZATION_STR, token);
+            httpHeaders.add(CONTENT_TYPE_STR, CONTENT_TYPE);
 
             res = HTTPRequestService.<Object, UserDetailByUserIdDTOResponse>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getUserDetailsByUserId?userId=" + userId)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(UserDetailByUserIdDTOResponse.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
-//            log.info("responseData {}", res);
-            // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, res, "success", null, HttpMethod.GET.name(), "getUserDetailsByUserId?userId=" + userId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, res, SUCCESS_STATUS, null, HttpMethod.GET.name(), "getUserDetailsByUserId?userId=" + userId);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getUserDetailsByUserId?userId=" + userId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_user_details_admin, userId, null, modifiedErrorMessage, FAILURE_STATUS, null, HttpMethod.GET.name(), "getUserDetailsByUserId?userId=" + userId);
             log.error("{}", ee.getMessage());
         }
         return res;
     }
 
     @Override
-    public Object getThermalPrintData(String receiptId) throws Exception {
+    public Object getThermalPrintData(String receiptId) throws CollectionException {
 
         ThermalPrintDataDTO thermalPrintDataDTO = new ThermalPrintDataDTO();
-        CurrentUserInfo currentUserInfo = new CurrentUserInfo();
         String base64 = "";
 
         Map<String, Object> serviceRequestData = receiptRepository.getServiceRequestData(Long.parseLong(receiptId));
@@ -835,8 +806,13 @@ public class UtilityServiceImpl implements UtilityService {
             String[] splitDateTime = dateTime.split(" ");
             // date format change
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date date = simpleDateFormat.parse(splitDateTime[0]);
-            SimpleDateFormat newDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            Date date = null;
+            try {
+                date = simpleDateFormat.parse(splitDateTime[0]);
+            } catch (ParseException e) {
+                throw new CustomException(e.getMessage());
+            }
+            SimpleDateFormat newDateFormat = new SimpleDateFormat(DATE_FORMAT_STR);
             String newFormatDate = newDateFormat.format(date);
 
             String newDate = newFormatDate + " " + splitDateTime[1];
@@ -846,7 +822,7 @@ public class UtilityServiceImpl implements UtilityService {
                 paymentMode = "UPI/NEFT";
             } else if (paymentMode.equals("cash")) {
                 paymentMode = "Cash";
-            } else if (paymentMode.equals("cheque")) {
+            } else if (paymentMode.equals(PAYMENT_MODE)) {
                 paymentMode = "Cheque";
             }
 
@@ -870,38 +846,45 @@ public class UtilityServiceImpl implements UtilityService {
             thermalPrintDataDTO.setReceiptAmount(String.valueOf(serviceRequestData.get("receipt_amount")));
             thermalPrintDataDTO.setTotal(String.valueOf(serviceRequestData.get("total")));
 
-            byte[] receiptBytes = printServiceImplementation.printDesign(thermalPrintDataDTO, currentUserInfo.getClientId());
+            byte[] receiptBytes = null;
+            try {
+                receiptBytes = printServiceImplementation.printDesign(thermalPrintDataDTO, currentUserInfo.getClientId());
+            } catch (Exception e) {
+                throw new CustomException(e.getMessage());
+            }
             base64 = Base64.getEncoder().encodeToString(receiptBytes);
         } else {
-            throw new Exception("1017002");
+            ErrorCode errCode = ErrorCode.getErrorCode(1017002);
+            throw new CollectionException(errCode, 1017002);
         }
 
         return new BaseDTOResponse<>(base64);
     }
 
     public String splitCodeName(String codeName) {
+        StringBuilder ans = new StringBuilder();
+        ans.append(codeName);
         String patternString = "\\((.*?)\\)";
         Pattern pattern = Pattern.compile(patternString);
         Matcher matcher = pattern.matcher(codeName);
         while (matcher.find()) {
             String matchedSubstring = matcher.group(1);
-            System.out.println("Matched: " + matchedSubstring);
-            return matchedSubstring;
+            ans.replace(0, ans.length(), matchedSubstring);
         }
-        return codeName;
+        return ans.toString();
     }
 
-    public String getTokenByApiKeySecret(Map<String, Object> map) throws Exception {
-        String gateWayUrl ="https://api-" + (Objects.equals(springProfile, "pre-prod") ? "preprod" : Objects.equals(springProfile, "prod") ? "prod2" : springProfile) + ".synofin.tech/";
+    public String getTokenByApiKeySecret(Map<String, Object> map) throws CustomException {
+        String gateWayUrl2 = Objects.equals(springProfile, "prod") ? "prod2" : springProfile;
+        String gateWayUrl =URL_STR + (Objects.equals(springProfile, PRE_PROD) ? PREPROD_STR : gateWayUrl2) + ".synofin.tech/";
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Source", String.valueOf(map.get("client")));
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         httpHeaders.setBasicAuth(String.valueOf(map.get("api_key")), String.valueOf(map.get("api_secret")));
         // deccantest credentials
-//        httpHeaders.setBasicAuth("81c3d006fb5e4b64a0c3f2f595180081", "9fb0db7a-ac1c-4d7d-93fe-5b29a741c0af");
 
         String url = gateWayUrl + "oauth/authorization";
-        MasterDTOResponse response = null;
+        MasterDTOResponse response = new MasterDTOResponse();
         log.info("httpHeaders - {}", httpHeaders);
         log.info("url - {}", url);
         try {
@@ -909,7 +892,7 @@ public class UtilityServiceImpl implements UtilityService {
                     .httpMethod(HttpMethod.POST).httpHeaders(httpHeaders)
                     .url(url)
                     .typeResponseType(MasterDTOResponse.class)
-                    .build().call();
+                    .build().call(restTemplate);
         } catch (Exception e) {
             log.error("error in generate token api", e);
             e.printStackTrace();
@@ -920,51 +903,50 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public BaseDTOResponse<Object> getDocuments(String token, String loanId) throws Exception {
+    public BaseDTOResponse<Object> getDocuments(String token, String loanId) throws CustomException {
         GetDocumentsResponseDTO res;
         List<Map<String, Object>> documentsDataArr = new ArrayList<>();
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("Authorization", token);
-            httpHeaders.add("Content-Type", "application/json");
+            httpHeaders.add(AUTHORIZATION_STR, token);
+            httpHeaders.add(CONTENT_TYPE_STR, CONTENT_TYPE);
 
             res = HTTPRequestService.<Object, GetDocumentsResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getDocuments?loanId=" + loanId)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(GetDocumentsResponseDTO.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             log.info("res {}", res);
-//            Map<String, Object> documentsData = new HashMap<>();
 
             if (!res.getData().isEmpty()) {
                 for (GetDocumentsDataResponseDTO getDocumentsDataResponseDTO : res.getData()) {
                     Map<String, Object> documentsData = new HashMap<>();
-                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "applicant") && Objects.equals(getDocumentsDataResponseDTO.getDocumentType(), "profile_photo")) {
-                        documentsData.put("type", "applicant");
-                        documentsData.put("document", getDocumentsDataResponseDTO.getDocumentUrl());
+                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), APPLICANT_STR) && Objects.equals(getDocumentsDataResponseDTO.getDocumentType(), PROFILE_PHOTO_STR)) {
+                        documentsData.put("type", APPLICANT_STR);
+                        documentsData.put(DOCUMENT_STR, getDocumentsDataResponseDTO.getDocumentUrl());
                         documentsDataArr.add(documentsData);
                     }
-                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "coapplicant") && Objects.equals(getDocumentsDataResponseDTO.getDocumentType(), "profile_photo")) {
+                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "coapplicant") && Objects.equals(getDocumentsDataResponseDTO.getDocumentType(), PROFILE_PHOTO_STR)) {
                         documentsData.put("type", "coapplicant");
-                        documentsData.put("document", getDocumentsDataResponseDTO.getDocumentUrl());
+                        documentsData.put(DOCUMENT_STR, getDocumentsDataResponseDTO.getDocumentUrl());
                         documentsDataArr.add(documentsData);
                     }
-                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "guarantor") && Objects.equals(getDocumentsDataResponseDTO.getDocumentType(), "profile_photo")) {
+                    if (Objects.equals(getDocumentsDataResponseDTO.getApplicantType(), "guarantor") && Objects.equals(getDocumentsDataResponseDTO.getDocumentType(), PROFILE_PHOTO_STR)) {
                         documentsData.put("type", "guarantor");
-                        documentsData.put("document", getDocumentsDataResponseDTO.getDocumentUrl());
+                        documentsData.put(DOCUMENT_STR, getDocumentsDataResponseDTO.getDocumentUrl());
                         documentsDataArr.add(documentsData);
                     }
                 }
             }
 
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_documents, null, null, res, "success", null, HttpMethod.GET.name(), "getDocuments?loanId=" + loanId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_documents, null, null, res, SUCCESS_STATUS, null, HttpMethod.GET.name(), "getDocuments?loanId=" + loanId);
         } catch (Exception ee) {
             String errorMessage = ee.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_documents, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getDocuments?loanId=" + loanId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_documents, null, null, modifiedErrorMessage, FAILURE_STATUS, null, HttpMethod.GET.name(), "getDocuments?loanId=" + loanId);
             log.error("{}", ee.getMessage());
         }
 
@@ -972,7 +954,7 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws Exception {
+    public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws CustomException {
         final List<Map<String, Object>> formattedRows = new ArrayList<>();
         try {
             data.forEach(row -> {
@@ -988,37 +970,37 @@ public class UtilityServiceImpl implements UtilityService {
             });
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CustomException(e.getMessage());
         }
         return formattedRows;
     }
 
     @Override
-    public BaseDTOResponse<Object> getCollaterals(Long loanIdNumber, String token) throws Exception {
+    public BaseDTOResponse<Object> getCollaterals(Long loanIdNumber, String token) throws CustomException {
         CollateralDetailsResponseDTO collateralResponse = new CollateralDetailsResponseDTO();
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Authorization", token);
-        httpHeaders.add("Content-Type", "application/json");
+        httpHeaders.add(AUTHORIZATION_STR, token);
+        httpHeaders.add(CONTENT_TYPE_STR, CONTENT_TYPE);
         try {
             collateralResponse = HTTPRequestService.<Object, CollateralDetailsResponseDTO>builder()
                     .httpMethod(HttpMethod.GET)
                     .url("http://localhost:1102/v1/getCollaterals?loanId=" + loanIdNumber)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(CollateralDetailsResponseDTO.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, "success", loanIdNumber, HttpMethod.GET.name(), "getCollaterals?loanId=" + loanIdNumber);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, collateralResponse, SUCCESS_STATUS, loanIdNumber, HttpMethod.GET.name(), "getCollaterals?loanId=" + loanIdNumber);
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, modifiedErrorMessage, "failure", loanIdNumber, HttpMethod.GET.name(), "getCollaterals?loanId=" + loanIdNumber);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_collaterals, null, null, modifiedErrorMessage, FAILURE_STATUS, loanIdNumber, HttpMethod.GET.name(), "getCollaterals?loanId=" + loanIdNumber);
             log.error("{}", e.getMessage());
         }
         return new BaseDTOResponse<>(collateralResponse);
     }
 
     @Override
-    public BaseDTOResponse<Object> employeeMobileNumberValidator(String token, String mobileNumber) throws Exception {
+    public BaseDTOResponse<Object> employeeMobileNumberValidator(String token, String mobileNumber) throws CustomException {
         try {
             String mobileNumberValidationConf = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(EMPLOYEE_MOBILE_NUMBER_VALIDATION);
             if(mobileNumberValidationConf.equals("true")) {
@@ -1030,7 +1012,7 @@ public class UtilityServiceImpl implements UtilityService {
         } catch (Exception e) {
             log.error("{}", e.getMessage());
         }
-        return new BaseDTOResponse<Object>("No Match Found");
+        return new BaseDTOResponse<>("No Match Found");
     }
 
     @Override
@@ -1040,20 +1022,20 @@ public class UtilityServiceImpl implements UtilityService {
 
 
     @Override
-    public BaseDTOResponse<Object> checkTransactionReferenceNumber(String token, String transactionReferenceNumber) throws Exception {
+    public BaseDTOResponse<Object> checkTransactionReferenceNumber(String token, String transactionReferenceNumber) throws CustomException {
         try {
             Map<String, Object> transactionNumberCheck = receiptRepository.transactionNumberCheck(transactionReferenceNumber);
             if (!transactionNumberCheck.isEmpty()) {
-                return new BaseDTOResponse<Object>("UTR number already exist");
+                return new BaseDTOResponse<>("UTR number already exist");
             }
         } catch (Exception e) {
             log.error("{}", e.getMessage());
         }
-        return new BaseDTOResponse<Object>("UTR number not found");
+        return new BaseDTOResponse<>("UTR number not found");
     }
 
     @Override
-    public TaskDetailDTOResponse getChargesForLoan(String token, TaskDetailRequestDTO loanDataBody) throws Exception {
+    public TaskDetailDTOResponse getChargesForLoan(String token, TaskDetailRequestDTO loanDataBody) throws CustomException {
         TaskDetailDTOResponse loanRes = new TaskDetailDTOResponse();
         try {
             HttpHeaders httpHeaders = UtilityService.createHeaders(token);
@@ -1065,22 +1047,22 @@ public class UtilityServiceImpl implements UtilityService {
                     .httpHeaders(httpHeaders)
                     .body(loanDataBody)
                     .typeResponseType(TaskDetailDTOResponse.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             log.info("loan details jhadsuhbsduh {}", loanRes);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, "success", Long.parseLong(loanDataBody.getRequestData().getLoanId()), HttpMethod.POST.name(), "getDataForLoanActions");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, loanRes, SUCCESS_STATUS, Long.parseLong(loanDataBody.getRequestData().getLoanId()), HttpMethod.POST.name(), "getDataForLoanActions");
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, modifiedErrorMessage, "failure", Long.parseLong(loanDataBody.getRequestData().getLoanId()), HttpMethod.GET.name(), "getDataForLoanActions");
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_data_for_loan_action, null, loanDataBody, modifiedErrorMessage, FAILURE_STATUS, Long.parseLong(loanDataBody.getRequestData().getLoanId()), HttpMethod.GET.name(), "getDataForLoanActions");
             log.error("{}", e.getMessage());
         }
         return loanRes;
     }
 
     @Override
-    public LoanBasicDetailsDTOResponse getBasicLoanDetails(String token, Long loanId) throws Exception {
+    public LoanBasicDetailsDTOResponse getBasicLoanDetails(String token, Long loanId) throws CustomException {
         LoanBasicDetailsDTOResponse loanRes = new LoanBasicDetailsDTOResponse();
         try {
             loanRes = HTTPRequestService.<Object, LoanBasicDetailsDTOResponse>builder()
@@ -1088,22 +1070,22 @@ public class UtilityServiceImpl implements UtilityService {
                     .url("http://localhost:1102/v1/getBasicLoanDetails?loanId=" + loanId)
                     .httpHeaders(UtilityService.createHeaders(token))
                     .typeResponseType(LoanBasicDetailsDTOResponse.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             log.info("loan details jhadsuhbsduh {}", loanRes);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanRes, "success", loanId, HttpMethod.GET.name(), "getBasicLoanDetails?loanId=" + loanId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, loanRes, SUCCESS_STATUS, loanId, HttpMethod.GET.name(), "getBasicLoanDetails?loanId=" + loanId);
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, modifiedErrorMessage, "success", loanId, HttpMethod.GET.name(), "getBasicLoanDetails?loanId=" + loanId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, modifiedErrorMessage, SUCCESS_STATUS, loanId, HttpMethod.GET.name(), "getBasicLoanDetails?loanId=" + loanId);
             log.error("{}", e.getMessage());
         }
         return loanRes;
     }
 
     @Override
-    public CustomerDetailDTOResponse getCustomerDetails(String token, Long loanId) throws Exception {
+    public CustomerDetailDTOResponse getCustomerDetails(String token, Long loanId) throws CustomException {
         CustomerDetailDTOResponse customerRes = new CustomerDetailDTOResponse();
         try {
             customerRes = HTTPRequestService.<Object, CustomerDetailDTOResponse>builder()
@@ -1111,22 +1093,22 @@ public class UtilityServiceImpl implements UtilityService {
                     .url("http://localhost:1102/v1/getCustomerDetails?loanId=" + loanId)
                     .httpHeaders(UtilityService.createHeaders(token))
                     .typeResponseType(CustomerDetailDTOResponse.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             log.info("customerRes details {}", customerRes);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, "success", loanId, HttpMethod.GET.name(), "getCustomerDetails?loanId=" + loanId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, customerRes, SUCCESS_STATUS, loanId, HttpMethod.GET.name(), "getCustomerDetails?loanId=" + loanId);
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, modifiedErrorMessage, "success", loanId, HttpMethod.GET.name(), "getCustomerDetails?loanId=" + loanId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_customer_details, null, null, modifiedErrorMessage, SUCCESS_STATUS, loanId, HttpMethod.GET.name(), "getCustomerDetails?loanId=" + loanId);
             log.error("{}", e.getMessage());
         }
         return customerRes;
     }
 
     @Override
-    public LoanSummaryResponseDTO getLoanSummary(String token, Long loanId) throws Exception {
+    public LoanSummaryResponseDTO getLoanSummary(String token, Long loanId) throws CustomException {
         LoanSummaryResponseDTO summaryRes = new LoanSummaryResponseDTO();
         try {
             summaryRes = HTTPRequestService.<Object, LoanSummaryResponseDTO>builder()
@@ -1134,95 +1116,106 @@ public class UtilityServiceImpl implements UtilityService {
                     .url("http://localhost:1102/v1/getLoanSummaryForLoan/" + loanId)
                     .httpHeaders(UtilityService.createHeaders(token))
                     .typeResponseType(LoanSummaryResponseDTO.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             log.info("summaryRes {}", summaryRes);
             // creating api logs
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, summaryRes, "success", loanId, HttpMethod.GET.name(), "getLoanSummaryForLoan?loanId=" + loanId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, summaryRes, SUCCESS_STATUS, loanId, HttpMethod.GET.name(), "getLoanSummaryForLoan?loanId=" + loanId);
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = convertToJSON(errorMessage);
-            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, modifiedErrorMessage, "success", loanId, HttpMethod.GET.name(), "getLoanSummaryForLoan?loanId=" + loanId);
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_loan_summary, null, null, modifiedErrorMessage, SUCCESS_STATUS, loanId, HttpMethod.GET.name(), "getLoanSummaryForLoan?loanId=" + loanId);
             log.error("{}", e.getMessage());
         }
         return summaryRes;
     }
 
     @Override
-    public Object getCollectionIncentiveData(String token, CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) throws Exception {
+    public Object getCollectionIncentiveData(String token, CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) throws CustomException {
 
-        String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
-        String password = rsaUtils.getPassword(currentUserInfo.getClientId());
-        Boolean piiPermission = true;
-        List<Map<String, Object>> response = new ArrayList<>();
-        List<Map<String, Object>> collectionDetails = receiptRepository.getCollectionIncentiveUsers();
+        try {
 
-        String dateWhereClause = " ";
-        if(collectionIncentiveRequestDTOs.getStartDate() != null) {
-            dateWhereClause = " and sr.created_date between " + "'" + collectionIncentiveRequestDTOs.getStartDate() + "'" + " and " + "'" + collectionIncentiveRequestDTOs.getEndDate() + "'";
+            String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
+            String password = rsaUtils.getPassword(currentUserInfo.getClientId());
+            Boolean piiPermission = true;
+            List<Map<String, Object>> response = new ArrayList<>();
+            List<Map<String, Object>> collectionDetails = receiptRepository.getCollectionIncentiveUsers();
+
+            String dateWhereClause = " ";
+            if (collectionIncentiveRequestDTOs.getStartDate() != null) {
+                dateWhereClause = " and sr.created_date between " + "'" + collectionIncentiveRequestDTOs.getStartDate() + "'" + " and " + "'" + collectionIncentiveRequestDTOs.getEndDate() + "'";
+            }
+            for (Map<String, Object> user : collectionDetails) {
+
+                Query query = entityManager.createNativeQuery(
+                        "select\n" +
+                                "\tconcat(lms.decrypt_data(c.first_name, ?1, ?2, ?3), ' ', lms.decrypt_data(c.last_name, ?1, ?2, ?3)) as customer_name,\n" +
+                                "\tla.loan_application_number as loan_account_number,\n" +
+                                "\tla.disbursal_date,\n" +
+                                "\tla.branch,\n" +
+                                "\tla.emi_amount,\n" +
+                                "\tla.disbursed_amount as loan_amount,\n" +
+                                "\tla.installment_plan,\n" +
+                                "\tla.due_day as emi_period\n" +
+                                "from\n" +
+                                "\tcollection.collection_receipts cr\n" +
+                                "join lms.service_request sr on\n" +
+                                "\tcr.receipt_id = sr.service_request_id\n" +
+                                "join lms.loan_application la on\n" +
+                                "\tsr.loan_id = la.loan_application_id\n" +
+                                "join lms.customer_loan_mapping clm on\n" +
+                                "\tla.loan_application_id = clm.loan_id\n" +
+                                "join lms.customer c on\n" +
+                                "\tclm.customer_id = c.customer_id\n" +
+                                "where\n" +
+                                "\tsr.created_by = (\n" +
+                                "\tselect\n" +
+                                "\t\tuser_id\n" +
+                                "\tfrom\n" +
+                                "\t\tmaster.users\n" +
+                                "\twhere\n" +
+                                "\t\tusername = ?4) " + dateWhereClause, Tuple.class
+                );
+
+                query.setParameter(1, encryptionKey);
+                query.setParameter(2, password);
+                query.setParameter(3, piiPermission);
+                query.setParameter(4, String.valueOf(user.get("co_id")));
+                List<Tuple> userLoanDetails = query.getResultList();
+                Map<String, Object> newUser = new HashMap<>(user);
+                newUser.put("loan_details", this.formatDigitalSiteVisitData(userLoanDetails));
+                response.add(newUser);
+            }
+
+            log.info("response {}", response);
+
+            return response;
+        } catch(Exception e){
+            throw new CustomException(e.getMessage());
         }
-        for (Map<String, Object> user : collectionDetails) {
-
-            Query query = entityManager.createNativeQuery(
-                    "select\n" +
-                            "\tconcat(lms.decrypt_data(c.first_name, ?1, ?2, ?3), ' ', lms.decrypt_data(c.last_name, ?1, ?2, ?3)) as customer_name,\n" +
-                            "\tla.loan_application_number as loan_account_number,\n" +
-                            "\tla.disbursal_date,\n" +
-                            "\tla.branch,\n" +
-                            "\tla.emi_amount,\n" +
-                            "\tla.disbursed_amount as loan_amount,\n" +
-                            "\tla.installment_plan,\n" +
-                            "\tla.due_day as emi_period\n" +
-                            "from\n" +
-                            "\tcollection.collection_receipts cr\n" +
-                            "join lms.service_request sr on\n" +
-                            "\tcr.receipt_id = sr.service_request_id\n" +
-                            "join lms.loan_application la on\n" +
-                            "\tsr.loan_id = la.loan_application_id\n" +
-                            "join lms.customer_loan_mapping clm on\n" +
-                            "\tla.loan_application_id = clm.loan_id\n" +
-                            "join lms.customer c on\n" +
-                            "\tclm.customer_id = c.customer_id\n" +
-                            "where\n" +
-                            "\tsr.created_by = (\n" +
-                            "\tselect\n" +
-                            "\t\tuser_id\n" +
-                            "\tfrom\n" +
-                            "\t\tmaster.users\n" +
-                            "\twhere\n" +
-                            "\t\tusername = ?4) " + dateWhereClause, Tuple.class
-            );
-
-            query.setParameter(1, encryptionKey);
-            query.setParameter(2, password);
-            query.setParameter(3, piiPermission);
-            query.setParameter(4, String.valueOf(user.get("co_id")));
-            List<Tuple> userLoanDetails = query.getResultList();
-            ;
-//            List<Map<String, Object>> userLoanDetails = receiptRepository.getLoanDetailsOfUserForIncentive(String.valueOf(user.get("co_id")), encryptionKey, password, piiPermission, dateWhereClause);
-            Map<String, Object> newUser = new HashMap<>(user);
-            newUser.put("loan_details", this.formatDigitalSiteVisitData(userLoanDetails));
-            response.add(newUser);
-        }
-
-        log.info("response {}", response);
-
-        return response;
     }
 
 
     @Override
-    public void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> mainResponse, String utrNumber) throws Exception {
+    public void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> mainResponse, String utrNumber) throws CustomException, DataLockException, InterruptedException, IOException {
         log.info("Begin callback create receipt function");
         try {
-            CurrentUserInfo currentUserInfo = new CurrentUserInfo();
+
             // implementing create receipt here
+            String receiptDate = receiptRepository.getBusinessDateFromLmsConfiguration();
             ReceiptServiceDtoRequest receiptServiceDtoRequest = new ObjectMapper().convertValue(digitalPaymentTransactionsEntity.getReceiptRequestBody(), ReceiptServiceDtoRequest.class);
             receiptServiceDtoRequest.getRequestData().getRequestData().setTransactionReference(utrNumber);
-            ServiceRequestSaveResponse resp = receiptService.createReceiptNew(receiptServiceDtoRequest, createBlankMultiPartFile(), createBlankMultiPartFile(), token, true);
+            // explicitly setting date of receipt whenever callback received or status transaction called
+            receiptServiceDtoRequest.getRequestData().getRequestData().setDateOfReceipt(receiptDate);
+            receiptServiceDtoRequest.getRequestData().getRequestData().setTransactionDate(receiptDate);
+            ServiceRequestSaveResponse resp = this.getServiceRequestSaveResponseParent(receiptServiceDtoRequest, token);
+
             log.info("receipt response {}", resp);
 
             digitalPaymentTransactionsEntity.setReceiptResponse(resp);
+            if (Boolean.FALSE.equals(resp.getResponse())) {
+                throw new CustomException(resp.getError().getText(), Integer.parseInt(resp.getError().getCode()));
+            }
             if (resp.getData() != null && resp.getData().getServiceRequestId() != null) {
                 log.info("in ifff receipt response {}", resp);
                 mainResponse.replace(RECEIPT_GENERATED, true);
@@ -1235,7 +1228,6 @@ public class UtilityServiceImpl implements UtilityService {
 
                 ResponseEntity<byte[]> res;
 
-                RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
                 res = restTemplate.exchange(
                         url,
@@ -1243,12 +1235,11 @@ public class UtilityServiceImpl implements UtilityService {
                         new HttpEntity<>(httpHeaders),
                         byte[].class);
 
-//                String encodedString = Base64.getEncoder().encodeToString(res.getBody());
 
                 byte[] byteArray = res.getBody();
                 String filename = "file.jpg";
-
-                DiskFileItem fileItem = new DiskFileItem("file", "application/pdf", true, filename, byteArray.length, new java.io.File(System.getProperty("java.io.tmpdir")));
+                int length = byteArray == null ? 0 : byteArray.length;
+                DiskFileItem fileItem = new DiskFileItem("file", "application/pdf", true, filename, length, new java.io.File(System.getProperty("java.io.tmpdir")));
                 fileItem.getOutputStream().write(byteArray);
 
                 MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
@@ -1257,16 +1248,16 @@ public class UtilityServiceImpl implements UtilityService {
                 String userRef = "receipt/" + receiptServiceDtoRequest.getRequestData().getRequestData().getCreatedBy();
                 // hitting send sms to customer
                 this.sendPdfToCustomerUsingS3(token, multipartFile, userRef, currentUserInfo.getClientId(), receiptServiceDtoRequest.getRequestData().getRequestData().getPaymentMode(), receiptServiceDtoRequest.getRequestData().getRequestData().getReceiptAmount(), updatedFileName,
-                        receiptServiceDtoRequest.getActivityData().getUserId().toString(), receiptServiceDtoRequest.getCustomerType(),
-                        receiptServiceDtoRequest.getCustomerName(), receiptServiceDtoRequest.getApplicantMobileNumber(), receiptServiceDtoRequest.getCollectedFromNumber(), receiptServiceDtoRequest.getLoanApplicationNumber(), resp.getData().getServiceRequestId());
+                            receiptServiceDtoRequest.getActivityData().getUserId().toString(), receiptServiceDtoRequest.getCustomerType(),
+                            receiptServiceDtoRequest.getCustomerName(), receiptServiceDtoRequest.getApplicantMobileNumber(), receiptServiceDtoRequest.getCollectedFromNumber(), receiptServiceDtoRequest.getLoanApplicationNumber(), resp.getData().getServiceRequestId());
+
                 log.info("in callback create receipt function ending");
             } else {
                 mainResponse.replace(SR_ID, null);
                 mainResponse.replace(RECEIPT_GENERATED, false);
             }
-        } catch (Exception e) {
-            log.error("Error while create receipt via callback {}", e.getMessage());
-            throw new Exception(e.getMessage());
+        } catch (CustomException ee) {
+            throw new CustomException(ee.getText(), ee.getCode());
         }
         log.info("Ending callback create receipt function");
     }
@@ -1310,9 +1301,25 @@ public class UtilityServiceImpl implements UtilityService {
 
             @Override
             public void transferTo(File file) throws IOException, IllegalStateException {
-
+                log.info("This method is empty because we are initializing a empty multipart file for business use");
             }
         };
+    }
+
+    private ServiceRequestSaveResponse getServiceRequestSaveResponseParent(ReceiptServiceDtoRequest receiptServiceDtoRequest, String token) throws InterruptedException, DataLockException {
+        ServiceRequestSaveResponse resp = null;
+        resp = this.getServiceRequestSaveResponseChild(receiptServiceDtoRequest, token);
+        return resp;
+    }
+
+    private ServiceRequestSaveResponse getServiceRequestSaveResponseChild(ReceiptServiceDtoRequest receiptServiceDtoRequest, String token) throws InterruptedException, DataLockException {
+        ServiceRequestSaveResponse resp = null;
+            try {
+               resp = receiptService.createReceiptNew(receiptServiceDtoRequest, createBlankMultiPartFile(), createBlankMultiPartFile(), token, true);
+            } catch (JsonProcessingException e) {
+                throw new CustomException(e.getMessage());
+            }
+        return resp;
     }
 
 }

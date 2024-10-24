@@ -19,6 +19,8 @@ import java.util.Objects;
 @Slf4j
 public class RegisteredDeviceInfoServiceImpl implements RegisteredDeviceInfoService {
 
+    private static final String ACTIVE_STATUS =  "active";
+
     @Autowired
     private RegisteredDeviceInfoRepository registeredDeviceInfoRepository;
 
@@ -30,16 +32,15 @@ public class RegisteredDeviceInfoServiceImpl implements RegisteredDeviceInfoServ
     }
 
     @Override
-    public BaseDTOResponse<Object> createRegisteredDeviceInfo(RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, String userId) throws Exception {
+    public BaseDTOResponse<Object> createRegisteredDeviceInfo(RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, String userId) {
         List<RegisteredDeviceInfoEntity> registeredDeviceInfoEntityList = registeredDeviceInfoRepository.findDeviceInfoByUserId(Long.valueOf(userId));
-        BaseDTOResponse<Object> response = null;
         if (!registeredDeviceInfoEntityList.isEmpty()) {
             for (RegisteredDeviceInfoEntity registeredDeviceInfoEntity : registeredDeviceInfoEntityList) {
-                if (Objects.equals(registeredDeviceInfoEntity.getStatus(), "active")) {
+                if (Objects.equals(registeredDeviceInfoEntity.getStatus(), ACTIVE_STATUS)) {
                     return new BaseDTOResponse<>("Active Device Found");
                 }
                 if (Objects.equals(registeredDeviceInfoEntity.getDeviceUniqueId(), registeredDeviceInfoDtoRequest.getDeviceUniqueId())) {
-                    registeredDeviceInfoEntity.setStatus("active");
+                    registeredDeviceInfoEntity.setStatus(ACTIVE_STATUS);
                     registeredDeviceInfoRepository.save(registeredDeviceInfoEntity);
                 }
             }
@@ -57,7 +58,7 @@ public class RegisteredDeviceInfoServiceImpl implements RegisteredDeviceInfoServ
             registeredDeviceInfoEntity.setStatus(registeredDeviceInfoDtoRequest.getStatus());
 
             registeredDeviceInfoRepository.save(registeredDeviceInfoEntity);
-            return new BaseDTOResponse<Object>(registeredDeviceInfoEntity);
+            return new BaseDTOResponse<>(registeredDeviceInfoEntity);
         } else {
             RegisteredDeviceInfoEntity registeredDeviceInfoEntity = new RegisteredDeviceInfoEntity();
             registeredDeviceInfoEntity.setCreatedDate(new Date());
@@ -73,7 +74,7 @@ public class RegisteredDeviceInfoServiceImpl implements RegisteredDeviceInfoServ
             registeredDeviceInfoEntity.setStatus(registeredDeviceInfoDtoRequest.getStatus());
 
             registeredDeviceInfoRepository.save(registeredDeviceInfoEntity);
-            return new BaseDTOResponse<Object>(registeredDeviceInfoEntity);
+            return new BaseDTOResponse<>(registeredDeviceInfoEntity);
         }
     }
 
@@ -82,7 +83,7 @@ public class RegisteredDeviceInfoServiceImpl implements RegisteredDeviceInfoServ
         List<Map<String, Object>> getDeviceDataByUserIdList = findDeviceInfoByUserId(deviceStatusUpdateDTORequest.getUserId());
         RegisteredDeviceInfoEntity registeredDeviceInfoData;
         for (Map<String, Object> data : getDeviceDataByUserIdList) {
-            if (data.get("id") != deviceStatusUpdateDTORequest.getRegisteredDeviceInfoId() && Objects.equals(data.get("status").toString(), "active")) {
+            if (data.get("id") != deviceStatusUpdateDTORequest.getRegisteredDeviceInfoId() && Objects.equals(data.get("status").toString(), ACTIVE_STATUS)) {
                 registeredDeviceInfoData = registeredDeviceInfoRepository.findByRegisteredDeviceInfoId(Long.parseLong(String.valueOf(data.get("id"))));
                 registeredDeviceInfoData.setStatus("inactive");
                 registeredDeviceInfoRepository.save(registeredDeviceInfoData);

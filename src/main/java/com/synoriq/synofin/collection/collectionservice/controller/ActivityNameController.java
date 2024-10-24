@@ -4,25 +4,26 @@ import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCo
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityNameService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.sql.SQLException;
 @RestController
 @RequestMapping("/v1")
 @EnableTransactionManagement
 @Slf4j
 public class ActivityNameController {
-    @Autowired
-    ActivityNameService activityNameService;
+    private final ActivityNameService activityNameService;
 
-    @RequestMapping(value = "/activity-name-masters", method = RequestMethod.GET)
-    public ResponseEntity<Object> getActivityDetails() throws SQLException {
+    public ActivityNameController(ActivityNameService activityNameService) {
+        this.activityNameService = activityNameService;
+
+    }
+
+    @GetMapping(value = "/activity-name-masters")
+    public ResponseEntity<Object> getActivityDetails() {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         Object result;

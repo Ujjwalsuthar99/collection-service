@@ -2,12 +2,10 @@ package com.synoriq.synofin.collection.collectionservice.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.Data;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import javax.transaction.Transactional;
-import java.util.Date;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.COLLECTION;
 

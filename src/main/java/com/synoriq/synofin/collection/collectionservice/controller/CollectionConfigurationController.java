@@ -1,21 +1,17 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionConfigurationDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.CollectionConfigurationService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,11 +20,15 @@ import java.util.Map;
 @Slf4j
 public class CollectionConfigurationController {
 
-    @Autowired
-    CollectionConfigurationService collectionConfigurationService;
+    private final CollectionConfigurationService collectionConfigurationService;
 
-    @RequestMapping(value = "/configurations", method = RequestMethod.GET)
-    public ResponseEntity<Object> getCollectionConfigurations(@RequestHeader("Authorization") String bearerToken) throws SQLException {
+    public CollectionConfigurationController(CollectionConfigurationService collectionConfigurationService) {
+        this.collectionConfigurationService = collectionConfigurationService;
+    }
+
+
+    @GetMapping(value = "/configurations")
+    public ResponseEntity<Object> getCollectionConfigurations(@RequestHeader("Authorization") String bearerToken) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         Map<String, String > result;

@@ -1,23 +1,15 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.rest.request.AdditionalContactDetailsDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DashboardDTOs.DashboardResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.dashboarddtos.DashboardResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.DashboardService;
-import com.synoriq.synofin.collection.collectionservice.service.ReceiptTransferService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/v1")
@@ -25,14 +17,17 @@ import java.util.Map;
 @Slf4j
 public class DashboardController {
 
-    @Autowired
-    DashboardService dashboardService;
+    private final DashboardService dashboardService;
 
-    @RequestMapping(value = "/dashboard-count/{userId}/{userName}", method = RequestMethod.GET)
+    public DashboardController(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
+
+    @GetMapping(value = "/dashboard-count/{userId}/{userName}")
     public ResponseEntity<Object> getDashboardCountByUserId(@PathVariable(value = "userId") Long userId,@PathVariable(value = "userName") String userName,
                                                             @RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String fromDate,
                                                             @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy") String toDate)
-                                                            throws SQLException {
+                                                            {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         DashboardResponseDTO result;

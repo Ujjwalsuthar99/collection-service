@@ -10,23 +10,32 @@ public class ConnectorException extends RuntimeException {
 
     private static final long serialVersionUID = -1307493420921168255L;
     private final Integer code;
-    private String text = "";
-    private HttpStatus httpStatus;
-    private String requestId = "";
+    private final String text;
+    private final HttpStatus httpStatus;
+    private final String requestId;
 
     public ConnectorException(String str, Integer code) {
         super(str);
         this.code = code;
+        this.text = "";
+        this.httpStatus = null;
+        this.requestId = "";
     }
 
     public ConnectorException(String str) {
         super(str);
         this.code = ErrorCode.DEFAULT_ERROR_CODE.getCodeValue();
+        this.text = "";
+        this.httpStatus = null;
+        this.requestId = "";
     }
 
     public ConnectorException(ErrorCode errorCode) {
         super(errorCode.getResponseMessage());
         this.code = errorCode.getCodeValue();
+        this.text = "";
+        this.httpStatus = null;
+        this.requestId = "";
     }
 
     public ConnectorException(IntegrationServiceErrorResponseDTO integrationServiceErrorResponseDTO, HttpStatus httpStatus, String requestId) {

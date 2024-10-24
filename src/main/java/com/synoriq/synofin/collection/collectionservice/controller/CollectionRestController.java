@@ -1,6 +1,5 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
-import com.synoriq.synofin.apipermissionvalidator.annotations.CheckPermission;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.rest.request.AdditionalContactDetailsDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.request.DeviceStatusUpdateDTORequest;
@@ -9,15 +8,12 @@ import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTORes
 import com.synoriq.synofin.collection.collectionservice.service.AdditionalContactDetailsService;
 import com.synoriq.synofin.collection.collectionservice.service.AppService;
 import com.synoriq.synofin.collection.collectionservice.service.RegisteredDeviceInfoService;
-import com.synoriq.synofin.collection.collectionservice.rest.response.RegisteredDeviceInfoDTO;
 import com.synoriq.synofin.lms.commondto.rest.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -27,17 +23,17 @@ import java.util.Map;
 @RequestMapping("/v1")
 public class CollectionRestController {
 
-    @Autowired
-    RegisteredDeviceInfoService registeredDeviceInfoService;
+    private final RegisteredDeviceInfoService registeredDeviceInfoService;
+    private final AppService appService;
+    private final AdditionalContactDetailsService additionalContactDetailsService;
 
-    @Autowired
-    AppService appService;
-
-    @Autowired
-    AdditionalContactDetailsService additionalContactDetailsService;
-
-    @RequestMapping(value = "/check-update", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<Object> checkAppUpdates(@RequestParam("platform") String platform, @RequestParam("version") String version) throws SQLException {
+    public CollectionRestController(RegisteredDeviceInfoService registeredDeviceInfoService, AppService appService, AdditionalContactDetailsService additionalContactDetailsService) {
+        this.registeredDeviceInfoService = registeredDeviceInfoService;
+        this.appService = appService;
+        this.additionalContactDetailsService = additionalContactDetailsService;
+    }
+    @GetMapping(value = "/check-update", produces = "application/json")
+    public ResponseEntity<Object> checkAppUpdates(@RequestParam("platform") String platform, @RequestParam("version") String version) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
@@ -60,8 +56,8 @@ public class CollectionRestController {
     }
 
 
-    @RequestMapping(value = "/users/{userId}/device-info", method = RequestMethod.GET)
-    public ResponseEntity<Object> getDeviceInfoByUserId(@PathVariable("userId") Long userId) throws SQLException {
+    @GetMapping(value = "/users/{userId}/device-info")
+    public ResponseEntity<Object> getDeviceInfoByUserId(@PathVariable("userId") Long userId) {
 
         BaseResponse<Object> baseResponse;
         ResponseEntity<Object> response;
@@ -78,15 +74,14 @@ public class CollectionRestController {
     }
 
 
-    @RequestMapping(value = "/users/{userId}/device-register", method = RequestMethod.POST)
+    @PostMapping(value = "/users/{userId}/device-register")
     public ResponseEntity<Object> createRegisteredDeviceInfo(@RequestBody RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, @PathVariable("userId") String userId) {
-//        log.info("my request body {}", registeredDeviceInfoDtoRequest);
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            BaseDTOResponse result = registeredDeviceInfoService.createRegisteredDeviceInfo(registeredDeviceInfoDtoRequest, userId);
+            BaseDTOResponse<Object>result = registeredDeviceInfoService.createRegisteredDeviceInfo(registeredDeviceInfoDtoRequest, userId);
             baseResponse = new BaseDTOResponse<>(result.getData());
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
@@ -103,7 +98,7 @@ public class CollectionRestController {
 
     }
 
-    @RequestMapping(value = "/device/device-update", method = RequestMethod.POST)
+    @PostMapping(value = "/device/device-update")
     public ResponseEntity<Object> deviceStatusUpdate(@RequestBody DeviceStatusUpdateDTORequest deviceStatusUpdateDTORequest) {
 
         BaseDTOResponse<Object> baseResponse;
@@ -130,7 +125,7 @@ public class CollectionRestController {
 
 
     @GetMapping(value = "/loans/{loanId}/additional-contacts")
-    public ResponseEntity<Object> getAdditionalContactDetailsByLoanId(@PathVariable(value = "loanId") Long loanId) throws SQLException {
+    public ResponseEntity<Object> getAdditionalContactDetailsByLoanId(@PathVariable(value = "loanId") Long loanId) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         List<AdditionalContactDetailsDtoRequest> result;
@@ -150,7 +145,7 @@ public class CollectionRestController {
     }
 
     @GetMapping(value = "/additional-contacts/{id}")
-    public ResponseEntity<Object> getAdditionalContactDetailsById(@PathVariable(value = "id") Long id) throws SQLException {
+    public ResponseEntity<Object> getAdditionalContactDetailsById(@PathVariable(value = "id") Long id) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         AdditionalContactDetailsDtoRequest result;
@@ -170,14 +165,14 @@ public class CollectionRestController {
         return response;
     }
 
-    @RequestMapping(value = "/additional-contact", method = RequestMethod.POST)
+    @PostMapping(value = "/additional-contact")
     public ResponseEntity<Object> createAdditionalContactDetail(@RequestBody AdditionalContactDetailsDtoRequest additionalContactDetailsDtoRequest) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
 
         try {
-            BaseDTOResponse result = additionalContactDetailsService.createAdditionalContactDetail(additionalContactDetailsDtoRequest);
+            BaseDTOResponse<Object>result = additionalContactDetailsService.createAdditionalContactDetail(additionalContactDetailsDtoRequest);
             baseResponse = new BaseDTOResponse<>(result.getData());
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 

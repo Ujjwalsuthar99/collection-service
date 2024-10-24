@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Define colors
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Read commit message from the file
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Define commit message pattern
+COMMIT_FORMAT="^#([0-9]+) (.*)$"
+
+if [[ "$COMMIT_MSG" =~ $COMMIT_FORMAT ]]; then
+ echo -e "${GREEN}Success: Commit message follows the required format.${NC}"
+else
+  echo -e "${RED}Error: Your commit was rejected due to the commit message. Skipping..." 
+  echo -e "${NC} y***********s***********i ${NC}"
+  echo -e "${YELLOW}Info: Please use the following format -${NC}"
+  echo -e "#Ticket Number - Description"
+  echo -e "${GREEN}Example - #4321 bugfix unresponsive button fix ${NC}"
+  echo -e "${NC} y***********s***********i ${NC}"
+  echo "More details on COMMITS.md"
+  exit 1
+fi

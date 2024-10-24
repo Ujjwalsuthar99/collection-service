@@ -1,0 +1,1 @@
+ALTER TYPE collection.consumed_api_logs_log_name ADD VALUE 'emitra_decryption' AFTER 'emitra_update_transaction_posting';

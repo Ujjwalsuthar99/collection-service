@@ -1,7 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.RegisteredDeviceInfoEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,13 +31,13 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "                end) as transfer_mode_bg_color_key, \n" +
             "                (case \n" +
             "                         when rt.status = 'pending' then '#F2994A'\n" +
-            "                         when rt.status = 'approved' then '#229A16'\n" +
+            "                         when rt.status = 'approved' or rt.status = 'payment_received' then '#229A16'\n" +
             "                         when rt.status = 'rejected' then '#EC1C24'\n" +
             "                         else '#B78103'\n" +
             "                end) as status_text_color_key,\n" +
             "                (case \n" +
             "                         when rt.status = 'pending' then '#FFF5D7'\n" +
-            "                         when rt.status = 'approved' then '#E3F8DD'\n" +
+            "                         when rt.status = 'approved' or rt.status = 'payment_received' then '#E3F8DD'\n" +
             "                         when rt.status = 'rejected' then '#FFCECC'\n" +
             "                         else '#FCEBDB'\n" +
             "                end) as status_bg_color_key,\n" +
@@ -159,7 +158,7 @@ public interface ReceiptTransferRepository extends JpaRepository<ReceiptTransfer
             "where\n" +
             "\trth.collection_receipts_id = :receiptId\n" +
             "\tand rt.status = 'pending'\n" +
-            "\tand rt.transfer_type = 'bank'\n" +
+            "\tand rt.transfer_type in ('bank', 'airtel')\n" +
             "\tand rth.deleted = false")
     String getDepositionOfReceipt(@Param("receiptId") Long receiptId);
 

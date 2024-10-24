@@ -1,7 +1,5 @@
 package com.synoriq.synofin.collection.collectionservice.interceptor;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -10,9 +8,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 public class LogInterceptorAppConfig implements WebMvcConfigurer {
 
-    @Autowired
-    LogInterceptor logInterceptor;
+    private final LogInterceptor logInterceptor;
 
+    public LogInterceptorAppConfig(LogInterceptor logInterceptor) {
+        this.logInterceptor = logInterceptor;
+    }
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(logInterceptor);

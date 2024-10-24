@@ -1,7 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.config.oauth;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -19,8 +18,11 @@ import org.springframework.security.oauth2.provider.token.store.redis.RedisToken
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
     private static final String RESOURCE_ID = "common_resource";
 
-    @Autowired
-    private RedisConnectionFactory connectionFactory;
+    private final RedisConnectionFactory connectionFactory;
+
+    public ResourceServerConfiguration(RedisConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
 
     @Bean
     public TokenStore redisTokenStore() {
@@ -34,7 +36,6 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        //http.antMatcher("/**").authorizeRequests().anyRequest().authenticated();
 
         http.csrf().disable()
                 .authorizeRequests()

@@ -1,9 +1,6 @@
 package com.synoriq.synofin.collection.collectionservice.repository;
 
-import com.synoriq.synofin.collection.collectionservice.entity.AdditionalContactDetailsEntity;
-import com.synoriq.synofin.collection.collectionservice.entity.FollowUpEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.RegisteredDeviceInfoEntity;
-import com.synoriq.synofin.collection.collectionservice.rest.request.RegisteredDeviceInfoDtoRequest;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

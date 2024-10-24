@@ -4,7 +4,6 @@ import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.Data;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import software.amazon.ion.Decimal;
 
 import javax.persistence.*;
 import javax.transaction.Transactional;
@@ -90,5 +89,40 @@ public class DigitalPaymentTransactionsEntity {
     @Type(type = "json")
     private Object callBackRequestBody;
 
+    public DigitalPaymentTransactionsEntity(Date createdDate, Long createdBy,
+                                            Date modifiedDate, Long modifiedBy,
+                                            Long loanId, String paymentServiceName,
+                                            String status, String merchantTranId,
+                                            Float amount, String utrNumber,
+                                            Object receiptRequestBody, String paymentLink,
+                                            Long mobileNo, String vendor,
+                                            Boolean receiptGenerated, Object receiptResponse,
+                                            Long collectionActivityLogsId, Long actionActivityLogsId,
+                                            Object otherResponseData, Object callBackRequestBody) {
+        this.createdDate = createdDate;
+        this.createdBy = createdBy;
+        this.modifiedDate = modifiedDate;
+        this.modifiedBy = modifiedBy;
+        this.loanId = loanId;
+        this.paymentServiceName = paymentServiceName;
+        this.status = status;
+        this.merchantTranId = merchantTranId;
+        this.amount = amount;
+        this.utrNumber = utrNumber;
+        this.receiptRequestBody = receiptRequestBody;
+        this.paymentLink = paymentLink;
+        this.mobileNo = mobileNo;
+        this.vendor = vendor;
+        this.receiptGenerated = receiptGenerated;
+        this.receiptResponse = receiptResponse;
+        this.collectionActivityLogsId = collectionActivityLogsId;
+        this.actionActivityLogsId = actionActivityLogsId;
+        this.otherResponseData = otherResponseData;
+        this.callBackRequestBody = callBackRequestBody;
+    }
+
+    public DigitalPaymentTransactionsEntity() {
+
+    }
 
 }

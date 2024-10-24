@@ -1,6 +1,8 @@
 package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
 
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionConfigurationsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.service.CollectionConfigurationService;
@@ -20,7 +22,7 @@ public class CollectionConfigurationServiceImpl implements CollectionConfigurati
     private CollectionConfigurationsRepository collectionConfigurationsRepository;
 
     @Override
-    public Map<String, String> getCollectionConfiguration(String token) throws Exception {
+    public Map<String, String> getCollectionConfiguration(String token) throws CollectionException {
         List<CollectionConfigurationsEntity> collectionConfigurationsEntityList = collectionConfigurationsRepository.findAll();
         try {
             Map<String, String> objectData = new HashMap<>();
@@ -29,7 +31,8 @@ public class CollectionConfigurationServiceImpl implements CollectionConfigurati
             }
             return objectData;
         } catch(Exception e) {
-            throw new Exception("1017002");
+            ErrorCode errCode = ErrorCode.getErrorCode(1017002);
+            throw new CollectionException(errCode, 1017002);
         }
 
     }

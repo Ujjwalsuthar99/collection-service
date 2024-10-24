@@ -1,11 +1,10 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.CommonTransactionStatusCheckRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicqrcodedtos.CommonTransactionStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.DigitalPaymentTransactionsService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +29,7 @@ public class DigitalPaymentTransactionsController {
     }
     private final DigitalPaymentTransactionsService digitalPaymentTransactionsService;
 
-    @RequestMapping(value = "digital-payment-transactions/transactions/{userId}", method = RequestMethod.GET)
+    @GetMapping(value = "digital-payment-transactions/transactions/{userId}")
     public ResponseEntity<Object> getDigitalPaymentTransactionsUserWise(@RequestHeader("Authorization") String bearerToken, @PathVariable("userId") Long userId,
                                                                         @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
                                                                         @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
@@ -58,7 +57,7 @@ public class DigitalPaymentTransactionsController {
         return response;
     }
 
-    @RequestMapping(value = "transaction-status-check", method = RequestMethod.POST)
+    @PostMapping(value = "transaction-status-check")
     public ResponseEntity<Object> checkDigitalPaymentStatus(@RequestHeader("Authorization") String token, @RequestBody CommonTransactionStatusCheckRequestDTO reqBody) throws Exception {
         Object result = digitalPaymentTransactionsService.checkDigitalPaymentStatus(token, reqBody);
         log.info("result printing -> {}", result);

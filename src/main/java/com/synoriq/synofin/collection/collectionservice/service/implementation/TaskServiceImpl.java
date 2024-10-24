@@ -1,8 +1,13 @@
 package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.config.oauth.CurrentUserInfo;
 import com.synoriq.synofin.collection.collectionservice.entity.AdditionalContactDetailsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.RepossessionEntity;
@@ -10,32 +15,29 @@ import com.synoriq.synofin.collection.collectionservice.repository.AdditionalCon
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.RepossessionRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.TaskRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskFilterRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskdetailsdto.TaskDetailRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskdetailsdto.TaskFilterRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.*;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CollateralDetailsResponseDTO.CollateralDetailsReturnResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanSummaryForLoanDTOs.LoanSummaryResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.*;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.collateraldetailsresponsedto.CollateralDetailsResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.collateraldetailsresponsedto.CollateralDetailsReturnResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.loansummaryforloandtos.LoanSummaryResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
-import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import com.synoriq.synofin.collection.collectionservice.service.TaskService;
 import com.synoriq.synofin.dataencryptionservice.service.RSAUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.persistence.Tuple;
-import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -45,6 +47,10 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @Service
 @Slf4j
 public class TaskServiceImpl implements TaskService {
+
+    private static final String EXCEP_CODE = "1017002";
+    private static final String RED_COLOR = "#323232";
+    private static final String CASE_STR = "    (case\n";
 
     @Autowired
     private RSAUtils rsaUtils;
@@ -67,16 +73,21 @@ public class TaskServiceImpl implements TaskService {
     private AdditionalContactDetailsRepository additionalContactDetailsRepository;
     @Autowired
     private CurrentUserInfo currentUserInfo;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
-    public BaseDTOResponse<Object> getTaskDetails(Long userId, Integer pageNo, Integer pageSize, TaskFilterRequestDTO taskFilterRequestDTO) throws Exception {
+    public BaseDTOResponse<Object> getTaskDetails(Long userId, Integer pageNo, Integer pageSize, TaskFilterRequestDTO taskFilterRequestDTO) throws CollectionException {
 
+
+        if (!taskFilterRequestDTO.getSearchKey().isEmpty() && !taskFilterRequestDTO.getSearchKey().matches("^[a-zA-Z0-9]+$")) {
+            throw new IllegalArgumentException("Invalid search key");
+        }
 
         BaseDTOResponse<Object> baseDTOResponse;
         try {
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
-            Boolean piiPermission = true;
             StringBuilder whereCondition = new StringBuilder();
             whereCondition.append(" and la2.allocated_to_user_id = ").append(userId).append(" ");
             StringBuilder dpdWhereCondition = new StringBuilder();
@@ -86,14 +97,15 @@ public class TaskServiceImpl implements TaskService {
                 Iterator<String> iterator = taskFilterRequestDTO.getDpd().iterator();
                 while (iterator.hasNext()) {
                     String s = iterator.next();
+                    boolean conditionMatched = false;
                     if (s.equals("Current")) {
-                        dpdWhereCondition.append(breakOccurred ? " or" : " and").append(" la.days_past_due = ").append("0");
-                        breakOccurred = true;
-                        iterator.remove();
-                        continue;
+                        dpdWhereCondition.append(breakOccurred ? " or" : " and").append(" la.days_past_due = 0");
+                        conditionMatched = true;
+                    } else if (s.equals("180+")) {
+                        dpdWhereCondition.append(breakOccurred ? " or" : " and").append(" la.days_past_due > 180");
+                        conditionMatched = true;
                     }
-                    if (s.equals("180+")) {
-                        dpdWhereCondition.append(breakOccurred ? " or" : " and").append(" la.days_past_due > ").append("180");
+                    if (conditionMatched) {
                         breakOccurred = true;
                         iterator.remove();
                         break;
@@ -153,7 +165,6 @@ public class TaskServiceImpl implements TaskService {
             String queryString = taskListViewQuery(encryptionKey, password) + whereCondition;
 
 
-//            queryString += " LIMIT " + pageSize + " OFFSET " + (pageNo * pageSize);
 
 
             int offset = pageNo * pageSize;
@@ -167,7 +178,8 @@ public class TaskServiceImpl implements TaskService {
 
             baseDTOResponse = new BaseDTOResponse<>(data);
         } catch (Exception e) {
-            throw new Exception("1017002");
+            ErrorCode errCode = ErrorCode.getErrorCode(Integer.valueOf(EXCEP_CODE));
+            throw new CollectionException(errCode, Integer.valueOf(EXCEP_CODE));
         }
 
         return baseDTOResponse;
@@ -175,7 +187,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Object getTaskDetailByLoanId(String token, TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
+    public Object getTaskDetailByLoanId(String token, TaskDetailRequestDTO taskDetailRequestDTO) throws CollectionException {
+        final String vehicle = "vehicle";
+        final String ffffff = "#ffffff";
         BaseDTOResponse<Object> collateralRes;
         log.info("before token {}", token);
         LoanDetailsResponseDTO loanDetailsResponseDTO = new LoanDetailsResponseDTO();
@@ -185,18 +199,24 @@ public class TaskServiceImpl implements TaskService {
         Long loanIdNumber = Long.parseLong(loanId);
         String multiReceiptClientCredentials = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(MULTI_RECEIPT_CLIENT_CREDENTIALS);
         if (!multiReceiptClientCredentials.equals("false")) {
-            ArrayList<Map<String, Object>> list = new ObjectMapper().readValue(multiReceiptClientCredentials, new TypeReference<ArrayList<Map<String, Object>>>() {});
-            String generatedToken = utilityService.getTokenByApiKeySecret(list.get(0));
-            token = "Bearer "+ generatedToken;
+            ArrayList<Map<String, Object>> list = null;
+            try {
+                list = new ObjectMapper().readValue(multiReceiptClientCredentials, new TypeReference<ArrayList<Map<String, Object>>>() {
+                });
+            } catch (JsonProcessingException e) {
+                throw new CustomException(e.getMessage());
+            }
+            String generatedToken = null;
+            try {
+                generatedToken = utilityService.getTokenByApiKeySecret(list.get(0));
+            } catch (Exception e) {
+                throw new CustomException(e.getMessage());
+            }
+            token = "Bearer " + generatedToken;
         }
         log.info("after token {}", token);
         String finalToken = token;
         try {
-            // lms/loan-modification/v1/service-request/getDataForLoanActions
-//            TaskDetailDTOResponse loanRes = utilityService.getChargesForLoan(token, loanDataBody);
-//            LoanBasicDetailsDTOResponse loanDetailRes = utilityService.getBasicLoanDetails(token, loanIdNumber);
-//            CustomerDetailDTOResponse customerRes = utilityService.getCustomerDetails(token, loanIdNumber);
-//            LoanSummaryResponseDTO loanSummaryResponse = utilityService.getLoanSummary(token, loanIdNumber);
 
             log.info("final token {}", finalToken);
 
@@ -221,14 +241,14 @@ public class TaskServiceImpl implements TaskService {
 
             log.info("loan charges {}", loanRes);
 
-            if (Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", "vehicle")) {
+            if (Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", vehicle)) {
                 collateralRes = utilityService.getCollaterals(loanIdNumber, token);
                 CollateralDetailsResponseDTO collateralResponse = new ObjectMapper().convertValue(collateralRes.getData(), CollateralDetailsResponseDTO.class);
 
-                if (collateralResponse.getData() != null) {
+                if (collateralResponse.getData() != null && !collateralResponse.getData().isEmpty()) {
                     CollateralDetailsReturnResponseDTO collateralDetailsReturnResponseDTO = new CollateralDetailsReturnResponseDTO();
                     collateralResponse.getData().forEach((key, value) -> {
-                        if (Objects.equals(value.get("collateral_product").toString(), "vehicle")) {
+                        if (Objects.equals(value.get("collateral_product").toString(), vehicle)) {
                             collateralDetailsReturnResponseDTO.setChasisNumber(String.valueOf(value.get("chasis_no")));
                             collateralDetailsReturnResponseDTO.setVehicleNumber(String.valueOf(value.get("vehicle_registration_no")));
                             collateralDetailsReturnResponseDTO.setVehicleType(String.valueOf(value.get("vehicle_type")));
@@ -255,31 +275,31 @@ public class TaskServiceImpl implements TaskService {
                 dpdBgColor = "#a2e890";
                 dpdBucket = "Current";
             } else if (dpd > 0 && dpd <= 30) {
-                dpdTextColor = "#323232";
+                dpdTextColor = RED_COLOR;
                 dpdBgColor = "#61B2FF";
                 dpdBucket = "1-30 DPD";
             } else if (dpd >= 31 && dpd <= 60) {
-                dpdTextColor = "#ffffff";
+                dpdTextColor = ffffff;
                 dpdBgColor = "#2F80ED";
                 dpdBucket = "31-60 DPD";
             } else if (dpd >= 61 && dpd <= 90) {
-                dpdTextColor = "#323232";
+                dpdTextColor = RED_COLOR;
                 dpdBgColor = "#FDAAAA";
                 dpdBucket = "61-90 DPD";
             } else if (dpd >= 91 && dpd <= 120) {
-                dpdTextColor = "#323232";
+                dpdTextColor = RED_COLOR;
                 dpdBgColor = "#F2994A";
                 dpdBucket = "91-120 DPD";
             } else if (dpd >= 121 && dpd <= 150) {
-                dpdTextColor = "#ffffff";
+                dpdTextColor = ffffff;
                 dpdBgColor = "#FF5359";
                 dpdBucket = "121-150 DPD";
             } else if (dpd >= 151 && dpd <= 180) {
-                dpdTextColor = "#ffffff";
+                dpdTextColor = ffffff;
                 dpdBgColor = "#C83939";
                 dpdBucket = "151-180 DPD";
             } else {
-                dpdTextColor = "#ffffff";
+                dpdTextColor = ffffff;
                 dpdBgColor = "#722F37";
                 dpdBucket = "180+ DPD";
             }
@@ -291,7 +311,7 @@ public class TaskServiceImpl implements TaskService {
             String isRepossessionEnabled = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(IS_REPOSSESSION_ENABLED);
             String showRepossessionAfterXDpd = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(SHOW_REPOSSESSION_AFTER_X_DPD);
             int repoDpd = Integer.parseInt(showRepossessionAfterXDpd);
-            if (Objects.equals(isRepossessionEnabled, "true") && repoDpd < dpd && Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", "vehicle")) {
+            if (Objects.equals(isRepossessionEnabled, "true") && repoDpd < dpd && Objects.equals(loanDetailRes.getData() != null ? loanDetailRes.getData().getProductType() : "", vehicle)) {
                 repossessionEntity = repossessionRepository.findTop1ByLoanIdOrderByCreatedDateDesc(loanIdNumber);
                 if (repossessionEntity != null) {
                     repoId = repossessionEntity.getRepossessionId();
@@ -314,7 +334,7 @@ public class TaskServiceImpl implements TaskService {
                         NumbersReturnResponseDTO numbersReturnResponseDTO = new NumbersReturnResponseDTO();
                         customerDetails.setId(customerData.getId());
                         customerDetails.setCustomerType(customerData.getCustomerType());
-                        basicInfoApplicant.setId(customerData.getBasicInfo().getId());
+                        basicInfoApplicant.setId(customerData.getId());
                         basicInfoApplicant.setFirstName(customerData.getBasicInfo().getFirstName());
                         basicInfoApplicant.setMiddleName(customerData.getBasicInfo().getMiddleName());
                         basicInfoApplicant.setLastName(customerData.getBasicInfo().getLastName());
@@ -324,11 +344,11 @@ public class TaskServiceImpl implements TaskService {
                             for (CommunicationResponseDTO communicationData : customerData.getCommunication()) {
                                 if (!communicationData.getAddressType().isEmpty()) {
                                     address.put(communicationData.getAddressType(), communicationData.getFullAddress());
-                                    if (!Objects.equals(communicationData.getPrimaryNumber(), "") && communicationData.getPrimaryNumber() != null) {
+
+                                    if (communicationData.getPrimaryNumber() != null && (numbersReturnResponseDTO.getMobNo() == null || numbersReturnResponseDTO.getMobNo().isEmpty())) {
                                         numbersReturnResponseDTO.setMobNo(utilityService.mobileNumberMasking(communicationData.getPrimaryNumber()));
-                                    }
-                                    if ((!Objects.equals(numbersReturnResponseDTO.getMobNo(), "")) && !(Objects.equals(numbersReturnResponseDTO.getMobNo(), communicationData.getPrimaryNumber()))) {
-                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getPrimaryNumber()));
+                                    } else {
+                                        numbersReturnResponseDTO.setAlternativeMobile(utilityService.mobileNumberMasking(communicationData.getPrimaryNumber() != null ? communicationData.getPrimaryNumber() : ""));
                                     }
                                 } else {
                                     if (!Objects.equals(communicationData.getPrimaryNumber(), "")) {
@@ -338,7 +358,7 @@ public class TaskServiceImpl implements TaskService {
                             }
                         }
                         customerDetails.setBasicInfo(basicInfoApplicant);
-                        customerDetails.setAddress(address);
+                        customerDetails.setAddress(address.isEmpty() ? null : address);
                         customerDetails.setNumbers(numbersReturnResponseDTO);
                         customerList.add(customerDetails);
                     }
@@ -390,6 +410,7 @@ public class TaskServiceImpl implements TaskService {
             if (loanDetailRes.getData() != null) {
                 loanDetailsResponseDTO.setPos(loanDetailRes.getData().getPrincipalOutstanding());
                 loanDetailsResponseDTO.setLoanAmount(loanDetailRes.getData().getLoanAmount());
+                loanDetailsResponseDTO.setLoanStatus(loanDetailRes.getData().getLoanStatus());
                 loanDetailsResponseDTO.setEmiAmount(loanDetailRes.getData().getEmiAmount());
                 loanDetailsResponseDTO.setLoanTenure(loanDetailRes.getData().getLoanTenure());
                 loanDetailsResponseDTO.setAssetClassification(loanDetailRes.getData().getAssetClassification());
@@ -398,18 +419,22 @@ public class TaskServiceImpl implements TaskService {
             response.setCustomerDetails(customerList);
             response.setLoanDetails(loanDetailsResponseDTO);
             baseDTOResponse = new BaseDTOResponse<>(response);
+        } catch (InterruptedException ee) {
+            log.error("Interrupted Exception Error {}", ee.getMessage());
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_basic_loan_detail, null, null, modifiedErrorMessage, "failure", Long.parseLong(loanId), HttpMethod.POST.name(), "taskSummary" + loanIdNumber);
-            throw new Exception("1016040");
+            ErrorCode errCode = ErrorCode.getErrorCode(1016040);
+            throw new CollectionException(errCode, 1016040);
         }
         return baseDTOResponse;
 
     }
 
     @Override
-    public BaseDTOResponse<Object> getTaskDetailsBySearchKey(Long userId, String searchKey, Integer pageNo, Integer pageSize) throws Exception {
+    public BaseDTOResponse<Object> getTaskDetailsBySearchKey(Long userId, String searchKey, Integer pageNo, Integer pageSize) throws CollectionException {
 
 
         BaseDTOResponse<Object> baseDTOResponse;
@@ -421,17 +446,12 @@ public class TaskServiceImpl implements TaskService {
             pageRequest = PageRequest.of(pageNo, pageSize);
             String encryptionKey = rsaUtils.getEncryptionKey(currentUserInfo.getClientId());
             String password = rsaUtils.getPassword(currentUserInfo.getClientId());
-//            Boolean piiPermission = rsaUtils.getPiiPermission();
             Boolean piiPermission = true;
             List<Map<String, Object>> taskDetailPages = taskRepository.getTaskDetailsBySearchKey(userId, searchKey, encryptionKey, password, piiPermission, pageRequest);
-            if (pageNo > 0) {
-                if (taskDetailPages.size() == 0) {
-                    return new BaseDTOResponse<>(taskDetailPages);
-                }
-            }
             baseDTOResponse = new BaseDTOResponse<>(taskDetailPages);
         } catch (Exception e) {
-            throw new Exception("1017002");
+            ErrorCode errCode = ErrorCode.getErrorCode(Integer.valueOf(EXCEP_CODE));
+            throw new CollectionException(errCode, Integer.valueOf(EXCEP_CODE));
         }
 
         return baseDTOResponse;
@@ -439,7 +459,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public BaseDTOResponse<Object> getLoanIdsByLoanId(Long loanId) throws Exception {
+    public BaseDTOResponse<Object> getLoanIdsByLoanId(Long loanId) throws CollectionException {
 
 
         BaseDTOResponse<Object> baseDTOResponse;
@@ -447,7 +467,8 @@ public class TaskServiceImpl implements TaskService {
             List<Object> loanIds = taskRepository.getLoanIdsByLoanId(loanId);
             baseDTOResponse = new BaseDTOResponse<>(loanIds);
         } catch (Exception e) {
-            throw new Exception("1017002");
+            ErrorCode errCode = ErrorCode.getErrorCode(Integer.valueOf(EXCEP_CODE));
+            throw new CollectionException(errCode, Integer.valueOf(EXCEP_CODE));
         }
 
         return baseDTOResponse;
@@ -465,7 +486,7 @@ public class TaskServiceImpl implements TaskService {
                 "    la.loan_application_number,\n" +
                 "    la2.task_purpose,\n" +
                 "    count(la.loan_application_id) over () as total_count,\n" +
-                "    (case\n" +
+                CASE_STR +
                 "\t   when la.days_past_due = 0 then 'Current'\n" +
                 "       when la.days_past_due between 1 and 30 then '1-30 DPD'\n" +
                 "       when la.days_past_due between 31 and 60 then '31-60 DPD'\n" +
@@ -475,7 +496,7 @@ public class TaskServiceImpl implements TaskService {
                 "       when la.days_past_due between 151 and 180 then '151-180 DPD'\n" +
                 "       else '180+ DPD' end) as days_past_due_bucket,\n" +
                 "   la.days_past_due,\n" +
-                "    (case\n" +
+                CASE_STR +
                 "\t    when la.days_past_due = 0 then '#a2e890'\n" +
                 "        when la.days_past_due between 1 and 30 then '#61B2FF'\n" +
                 "        when la.days_past_due between 31 and 60 then '#2F80ED'\n" +
@@ -485,7 +506,7 @@ public class TaskServiceImpl implements TaskService {
                 "        when la.days_past_due between 151 and 180 then '#C83939'\n" +
                 "        else '#722F37'\n" +
                 "    end) as dpd_bg_color_key,\n" +
-                "    (case\n" +
+                CASE_STR +
                 "\t    when la.days_past_due = 0 then '#000000'\n" +
                 "        when la.days_past_due between 1 and 30 then '#323232'\n" +
                 "        when la.days_past_due between 31 and 60 then '#ffffff'\n" +

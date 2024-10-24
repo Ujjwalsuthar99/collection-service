@@ -9,8 +9,8 @@ import java.util.Map;
 
 public interface RegisteredDeviceInfoService {
 
-    public List<Map<String, Object>> findDeviceInfoByUserId(Long userId);
-    public BaseDTOResponse<Object> createRegisteredDeviceInfo(RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, String userId) throws Exception;
-    public String deviceStatusUpdate(DeviceStatusUpdateDTORequest deviceStatusUpdateDTORequest);
+     List<Map<String, Object>> findDeviceInfoByUserId(Long userId);
+     BaseDTOResponse<Object> createRegisteredDeviceInfo(RegisteredDeviceInfoDtoRequest registeredDeviceInfoDtoRequest, String userId);
+     String deviceStatusUpdate(DeviceStatusUpdateDTORequest deviceStatusUpdateDTORequest);
 
 }

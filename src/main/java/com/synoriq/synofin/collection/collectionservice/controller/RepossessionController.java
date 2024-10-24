@@ -1,11 +1,10 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.rest.request.repossessionDTOs.RepossessionRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.repossessiondtos.RepossessionRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.RepossessionService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -18,12 +17,14 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class RepossessionController {
 
-    @Autowired
-    private RepossessionService repossessionService;
+    private final RepossessionService repossessionService;
+
+    public RepossessionController(RepossessionService repossessionService) {
+        this.repossessionService = repossessionService;
+    }
 
 
-
-    @RequestMapping(value = "repossession/repossession-activity-data", method = RequestMethod.GET)
+    @GetMapping(value = "repossession/repossession-activity-data")
     public ResponseEntity<Object> getRepossession(@RequestHeader("Authorization") String bearerToken, @RequestParam("loan_id") Long loanId) {
 
         BaseDTOResponse<Object> baseResponse;
@@ -45,7 +46,7 @@ public class RepossessionController {
         return response;
     }
 
-    @RequestMapping(value = "repossession/initiate-repossession", method = RequestMethod.POST)
+    @PostMapping(value = "repossession/initiate-repossession")
     public ResponseEntity<Object> initiateRepossession(@RequestHeader("Authorization") String bearerToken, @RequestBody RepossessionRequestDTO requestBody) {
 
         BaseDTOResponse<Object> baseResponse;
@@ -67,7 +68,7 @@ public class RepossessionController {
         return response;
     }
 
-    @RequestMapping(value = "repossession/yard-repossession", method = RequestMethod.POST)
+    @PostMapping(value = "repossession/yard-repossession")
     public ResponseEntity<Object> yardRepossession(@RequestHeader("Authorization") String bearerToken, @RequestBody RepossessionRequestDTO requestBody) {
 
         BaseDTOResponse<Object> baseResponse;
@@ -89,7 +90,7 @@ public class RepossessionController {
         return response;
     }
 
-    @RequestMapping(value = "repossession/all-repossession", method = RequestMethod.GET)
+    @GetMapping(value = "repossession/all-repossession")
     public ResponseEntity<Object> getAllRepossession(@RequestHeader("Authorization") String bearerToken) {
 
         BaseDTOResponse<Object> baseResponse;
@@ -111,7 +112,7 @@ public class RepossessionController {
         return response;
     }
 
-    @RequestMapping(value = "repossession/{repoId}", method = RequestMethod.GET)
+    @GetMapping(value = "repossession/{repoId}")
     public ResponseEntity<Object> getDataByRepoId(@RequestHeader("Authorization") String bearerToken, @PathVariable("repoId") Long repoId) {
 
         BaseDTOResponse<Object> baseResponse;

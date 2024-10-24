@@ -2,19 +2,17 @@ package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
 import com.synoriq.synofin.collection.collectionservice.entity.LoanAllocationEntity;
-import com.synoriq.synofin.collection.collectionservice.rest.request.loanAllocationDTOs.LoanAllocationDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.loanAllocationDTOs.LoanAllocationMultiUsersDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.loanallocationdtos.LoanAllocationDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.loanallocationdtos.LoanAllocationMultiUsersDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.LoanAllocationService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +23,13 @@ import java.util.Map;
 @EnableTransactionManagement
 public class LoanAllocationServiceController {
 
-    @Autowired
-    LoanAllocationService loanAllocationService;
+    private final LoanAllocationService loanAllocationService;
 
+    public LoanAllocationServiceController(LoanAllocationService loanAllocationService) {
+        this.loanAllocationService = loanAllocationService;
+    }
 
-    @RequestMapping(value = "/loan-allocation/create", method = RequestMethod.POST)
+    @PostMapping(value = "/loan-allocation/create")
     public ResponseEntity<Object> createLoanAllocationByAllocatedToUserId(@RequestBody LoanAllocationDtoRequest loanAllocationDtoRequest) {
 
         BaseDTOResponse<Object> baseResponse;
@@ -54,7 +54,7 @@ public class LoanAllocationServiceController {
 
     }
 
-    @RequestMapping(value = "/loan-allocation/multi-users/create", method = RequestMethod.POST)
+    @PostMapping(value = "/loan-allocation/multi-users/create")
     public ResponseEntity<Object> createLoanAllocationToMultipleUserId(@RequestBody LoanAllocationMultiUsersDtoRequest loanAllocationMultiUsersDtoRequest) {
 
         BaseDTOResponse<Object> baseResponse;
@@ -80,8 +80,8 @@ public class LoanAllocationServiceController {
 
 
 
-    @RequestMapping(value = "/users/{allocatedToUserId}/loans", method = RequestMethod.GET)
-    public ResponseEntity<Object> getLoansByAllocatedToUserId(@PathVariable("allocatedToUserId") Long allocatedToUserId) throws SQLException {
+    @GetMapping(value = "/users/{allocatedToUserId}/loans")
+    public ResponseEntity<Object> getLoansByAllocatedToUserId(@PathVariable("allocatedToUserId") Long allocatedToUserId) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
@@ -100,8 +100,8 @@ public class LoanAllocationServiceController {
         }
         return response;
     }
-    @RequestMapping(value = "/loan-allocation/loans/{loanId}", method = RequestMethod.GET)
-    public ResponseEntity<Object> getAllocatedUsersByLoanId(@PathVariable("loanId") Long loanId) throws SQLException {
+    @GetMapping(value = "/loan-allocation/loans/{loanId}")
+    public ResponseEntity<Object> getAllocatedUsersByLoanId(@PathVariable("loanId") Long loanId) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
@@ -121,9 +121,9 @@ public class LoanAllocationServiceController {
         return response;
     }
 
-    @RequestMapping(value = "/loan-allocation/delete", method = RequestMethod.GET)
+    @GetMapping(value = "/loan-allocation/delete")
     public ResponseEntity<Object> deleteAllAllocatedLoans(@RequestParam("fromDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date fromDate,
-                                                          @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate) throws SQLException {
+                                                          @RequestParam("toDate") @DateTimeFormat(pattern = "dd-MM-yyyy")Date toDate) {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;

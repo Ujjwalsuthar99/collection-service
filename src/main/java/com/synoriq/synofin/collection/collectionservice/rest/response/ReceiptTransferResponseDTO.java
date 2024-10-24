@@ -3,7 +3,7 @@ package com.synoriq.synofin.collection.collectionservice.rest.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.synoriq.synofin.collection.collectionservice.entity.ReceiptTransferEntity;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDataReturnResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userdetailsbyuseriddtos.UserDataReturnResponseDTO;
 import lombok.Data;
 
 import java.util.List;

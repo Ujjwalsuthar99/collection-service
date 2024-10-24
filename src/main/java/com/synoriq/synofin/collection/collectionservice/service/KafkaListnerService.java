@@ -2,6 +2,7 @@ package com.synoriq.synofin.collection.collectionservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.config.DatabaseContextHolder;
 import com.synoriq.synofin.collection.collectionservice.entity.*;
 import com.synoriq.synofin.collection.collectionservice.repository.*;
@@ -27,6 +28,8 @@ import static com.synoriq.synofin.collection.collectionservice.common.ActivityRe
 @Slf4j
 public class KafkaListnerService {
 
+    private static final String APPROVE_STAT = "approved";
+
     @Autowired
     private CollectionLimitUserWiseRepository collectionLimitUserWiseRepository;
 
@@ -49,7 +52,7 @@ public class KafkaListnerService {
     private ConsumedApiLogService consumedApiLogService;
 
     @KafkaListener(topics = "${spring.kafka.events.topic}", containerFactory = "kafkaListenerContainerFactory", groupId = "${spring.kafka.groupId}")
-    public void consumerTest(@Payload MessageContainerTemplate message, @Headers MessageHeaders headers, Acknowledgment acknowledgment) {
+    public void consumerTest(@Payload MessageContainerTemplate<String> message, @Headers MessageHeaders headers, Acknowledgment acknowledgment) throws CustomException, InterruptedException {
         try {
 
             log.info("client id in kafka {}", message.getClientId());
@@ -71,6 +74,9 @@ public class KafkaListnerService {
             String userName = "";
             boolean isDepositHit = false;
             Map<String, Object> response = new HashMap<>();
+
+            // Adding delay to provide time to LMS
+            TimeUnit.MILLISECONDS.sleep(500);
 
             // checking this receipt id is already processed or not
             log.info("1");
@@ -103,7 +109,9 @@ public class KafkaListnerService {
 
 
             if (collectionLimitUser.isPresent() && collectionReceiptEntity.isPresent() && checkCollectionActivityLogsEntity == null) {
+                log.info("in if block");
                 if(serviceRequestTypeString.equals("receipt")) {
+                    log.info("in receipt block");
                     log.info("in serviceRequestTypeString");
                     if(collectionLimitUser.get().getUtilizedLimitValue() - loanAmount < 0) {
                         log.info("iff limit check {}", collectionLimitUser.get().getUtilizedLimitValue() - loanAmount);
@@ -112,19 +120,22 @@ public class KafkaListnerService {
                         log.info("else limit check {}", collectionLimitUser.get().getUtilizedLimitValue() - loanAmount);
                         collectionLimitUser.get().setUtilizedLimitValue(collectionLimitUser.get().getUtilizedLimitValue() - loanAmount);
                     }
+                    log.info("checking collectionLimitUser wise updation");
                     collectionLimitUser.get().setUserName(userName);
                     log.info("collectionLimitUserWise entity {}", collectionLimitUser);
                     collectionLimitUserWiseRepository.save(collectionLimitUser.get());
+                    log.info("save method");
                 }
                 // activity creating
                 createActivityLogs(messageObject.getUserId(), status, receiptId, loanId);
-
+                log.info("activity log created");
                 Long restApprovedReceipts = 0L;
                 // find the receipt transfer id in which this current receipt lies
                 Long receiptTransferId = receiptTransferHistoryRepository.getReceiptTransferIdUsingReceiptId(receiptId);
-
                 log.info("receiptTransferId {}", receiptTransferId);
+
                 if (receiptTransferId != null) {
+                    log.info("in if receiptTransferId");
 
                     // find the total number of receipts lies within the receipt transfer id
                     Long totalReceiptCountFromReceiptTransfer = receiptTransferHistoryRepository.getReceiptCountFromReceiptTransfer(receiptTransferId);
@@ -138,13 +149,13 @@ public class KafkaListnerService {
                     log.info("receiptHistoryList {}", receiptHistoryList);
                     for (Map<String, Object> mp : receiptHistoryList) {
                         log.info("map data {}", mp);
-                        if (Objects.equals(Long.parseLong(String.valueOf(mp.get("service_request_id"))), receiptId) && Objects.equals(String.valueOf(mp.get("status")), "pending") && status.equals("approved")) {
+                        if (Objects.equals(Long.parseLong(String.valueOf(mp.get("service_request_id"))), receiptId) && Objects.equals(String.valueOf(mp.get("status")), "pending") && status.equals(APPROVE_STAT)) {
                             pendingCount++;
                             log.info("in pending count {}", pendingCount);
-                        } else if (Objects.equals(Long.parseLong(String.valueOf(mp.get("service_request_id"))), receiptId) && Objects.equals(String.valueOf(mp.get("status")), "approved") && status.equals("approved")) {
+                        } else if (Objects.equals(Long.parseLong(String.valueOf(mp.get("service_request_id"))), receiptId) && Objects.equals(String.valueOf(mp.get("status")), APPROVE_STAT) && status.equals(APPROVE_STAT)) {
                             approvedCount++;
                             log.info("in approve count {}", approvedCount);
-                        } else if (status.equals("approved")) {
+                        } else if (status.equals(APPROVE_STAT)) {
                             restApprovedReceipts++;
                             log.info("restApprovedReceipts {}", restApprovedReceipts);
                             log.info("receiptId and receiptStatus {}", mp);
@@ -161,10 +172,11 @@ public class KafkaListnerService {
                         log.info("in ifffff");
                         isDepositHit = true;
                         ReceiptTransferEntity receiptTransferEntity = receiptTransferRepository.findByReceiptTransferId(receiptTransferId);
-                        receiptTransferEntity.setStatus("approved");
+                        receiptTransferEntity.setStatus(APPROVE_STAT);
                         receiptTransferEntity.setActionBy(messageObject.getUserId());
                         receiptTransferEntity.setActionDatetime(new Date());
                         receiptTransferRepository.save(receiptTransferEntity);
+                        log.info("receiptTransferEntity save method");
                     }
 
                     response.put("isDepositHit", isDepositHit);
@@ -173,20 +185,24 @@ public class KafkaListnerService {
                     response.put("restApprovedReceipts", restApprovedReceipts);
                     response.put("totalReceiptCountFromReceiptTransfer", totalReceiptCountFromReceiptTransfer);
                     log.info("response {}", response);
-                    consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.kafka_activity, userId, messageObject, response, "success", loanId, "POST", "");
+
 
                     log.info("end consumedApiLog");
                 } else {
                     log.info("receipt transfer id not found");
                 }
-
-                log.info(" ---------- Things acknowledged -------------");
+            } else {
+                log.info("in else");
             }
+            consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.kafka_activity, userId, messageObject, response, "success", loanId, "POST", "");
+            log.info(" ---------- Things acknowledgement start ------------- client : {} receiptId : {}", message.getClientId(), receiptId);
             acknowledgment.acknowledge();
+            log.info(" ---------- Things acknowledgement end ------------- client : {} receiptId : {}", message.getClientId(), receiptId);
         } catch (Exception ee) {
             log.error("Kafka having an issue", ee);
         }
         finally {
+            log.info("in finally block receipt Id");
             MDC.clear();
         }
     }

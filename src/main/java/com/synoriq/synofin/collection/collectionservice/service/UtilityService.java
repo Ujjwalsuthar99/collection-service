@@ -1,20 +1,22 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
+import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
 import com.synoriq.synofin.collection.collectionservice.common.exception.ConnectorException;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
+import com.synoriq.synofin.collection.collectionservice.common.exception.DataLockException;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.entity.DigitalPaymentTransactionsEntity;
-import com.synoriq.synofin.collection.collectionservice.rest.request.collectionIncentiveDTOs.CollectionIncentiveRequestDTOs;
-import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.collectionincentivedtos.CollectionIncentiveRequestDTOs;
+import com.synoriq.synofin.collection.collectionservice.rest.request.masterdtos.MasterDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskdetailsdto.TaskDetailRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.CustomerDetailDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanBasicDetailsDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.LoanSummaryForLoanDTOs.LoanSummaryResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.TaskDetailResponseDTOs.TaskDetailDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
-import org.jetbrains.annotations.NotNull;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.CustomerDetailDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.LoanBasicDetailsDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.loansummaryforloandtos.LoanSummaryResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.taskdetailresponsedtos.TaskDetailDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userdetailbytokendtos.UserDetailByTokenDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userdetailsbyuseriddtos.UserDetailByUserIdDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3imagedtos.uploadimageresponsedto.UploadImageOnS3ResponseDTO;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,10 +36,10 @@ import static com.synoriq.synofin.collection.collectionservice.common.PaymentRel
 
 public interface UtilityService {
 
-    public Object getMasterData(String token, MasterDtoRequest requestBody) throws Exception;
-    public Object getUserDetail(String token, Integer page, Integer size, String key) throws Exception;
-    public Object getContactSupport(String token,String keyword, String model) throws Exception;
-    public Date addOneDay(Date date) throws Exception;
+    public Object getMasterData(String token, MasterDtoRequest requestBody) throws CustomException;
+    public Object getUserDetail(String token, Integer page, Integer size, String key) throws CustomException;
+    public Object getContactSupport(String token,String keyword, String model) throws CustomException;
+    public Date addOneDay(Date date) throws CustomException;
     public String mobileNumberMasking(String mobile);
     public String addSuffix(Integer i);
     public String capitalizeName(String name);
@@ -55,21 +57,21 @@ public interface UtilityService {
 
     public String getApiUrl();
     public boolean isInteger(String str);
-    public Object getBankNameByIFSC(String keyword) throws Exception;
+    public Object getBankNameByIFSC(String keyword) throws CustomException;
     public UserDetailByTokenDTOResponse getUserDetailsByToken(String token);
     public UploadImageOnS3ResponseDTO sendPdfToCustomerUsingS3(String token, MultipartFile imageData, String userRefNo, String clientId, String paymentMode, String receiptAmount, String fileName, String userId, String customerType, String customerName, String applicantMobileNumber, String collectedFromMobileNumber, String loanNumber, Long receiptId) throws IOException;
     public UserDetailByUserIdDTOResponse getUserDetailsByUserId(String token, Long userId);
-    public Object getThermalPrintData(String receiptId) throws Exception;
-    public BaseDTOResponse<Object> getDocuments(String token, String loanId) throws Exception;
+    public Object getThermalPrintData(String receiptId) throws CollectionException;
+    public BaseDTOResponse<Object> getDocuments(String token, String loanId) throws CustomException;
     public String convertToJSON(Object input);
     public String splitCodeName(String input);
-    public String getTokenByApiKeySecret(Map<String, Object> map) throws Exception;
-    public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws Exception;
-    public BaseDTOResponse<Object> getCollaterals(Long loanIdNumber, String token) throws Exception;
-    public BaseDTOResponse<Object> employeeMobileNumberValidator(String token, String mobileNumber) throws Exception;
-    public BaseDTOResponse<Object> checkTransactionReferenceNumber(String token, String transactionReferenceNumber) throws Exception;
+    public String getTokenByApiKeySecret(Map<String, Object> map) throws CustomException;
+    public List<Map<String, Object>> formatDigitalSiteVisitData(List<Tuple> data) throws CustomException;
+    public BaseDTOResponse<Object> getCollaterals(Long loanIdNumber, String token) throws CustomException;
+    public BaseDTOResponse<Object> employeeMobileNumberValidator(String token, String mobileNumber) throws CustomException;
+    public BaseDTOResponse<Object> checkTransactionReferenceNumber(String token, String transactionReferenceNumber) throws CustomException;
 
-    default HttpEntity<byte[]> prepareMultipartFile(MultipartFile documentFile) throws Exception {
+    default HttpEntity<byte[]> prepareMultipartFile(MultipartFile documentFile) throws CustomException {
         MultiValueMap<String, String> fileMap = new LinkedMultiValueMap<>();
         ContentDisposition contentDisposition = ContentDisposition
                 .builder("form-data")
@@ -77,9 +79,13 @@ public interface UtilityService {
                 .filename(Objects.requireNonNull(documentFile.getOriginalFilename()))
                 .build();
         fileMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString());
-        return new HttpEntity<>(documentFile.getBytes(), fileMap);
+        try {
+            return new HttpEntity<>(documentFile.getBytes(), fileMap);
+        } catch (IOException e) {
+            throw new CustomException(e.getMessage());
+        }
     }
-    @NotNull
+
     static HashMap<String, Object> getStringObjectMapCopy(UploadImageOnS3ResponseDTO uploadedImage) throws ConnectorException {
         if (uploadedImage.getData() == null)
             throw new ConnectorException(uploadedImage.getError(), HttpStatus.FAILED_DEPENDENCY, uploadedImage.getRequestId());
@@ -94,15 +100,15 @@ public interface UtilityService {
     }
     Object getBankAccountDetails(Long bankAccountId);
 
-    TaskDetailDTOResponse getChargesForLoan(String token, TaskDetailRequestDTO loanDataBody) throws Exception;
+    TaskDetailDTOResponse getChargesForLoan(String token, TaskDetailRequestDTO loanDataBody) throws CustomException;
 
-    LoanBasicDetailsDTOResponse getBasicLoanDetails(String token, Long loanId) throws Exception;
+    LoanBasicDetailsDTOResponse getBasicLoanDetails(String token, Long loanId) throws CustomException;
 
-    CustomerDetailDTOResponse getCustomerDetails(String token, Long loanId) throws Exception;
+    CustomerDetailDTOResponse getCustomerDetails(String token, Long loanId) throws CustomException;
 
-    LoanSummaryResponseDTO getLoanSummary(String token, Long loanId) throws Exception;
+    LoanSummaryResponseDTO getLoanSummary(String token, Long loanId) throws CustomException;
 
-    Object getCollectionIncentiveData(String token, CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) throws Exception;
+    Object getCollectionIncentiveData(String token, CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) throws CustomException;
 
     default boolean isExpired(int minute, Date date, boolean afterDate) {
         Calendar cal = Calendar.getInstance();
@@ -122,7 +128,6 @@ public interface UtilityService {
         return simpleDateFormat.format(cal.getTime());
     }
 
-    @NotNull
     default CollectionActivityLogsEntity getCollectionActivityLogsEntity(String activityName, Long userId, Long loanId, String remarks, Object geoLocation, Long batteryPercentage) {
         CollectionActivityLogsEntity collectionActivityLogsEntity = new CollectionActivityLogsEntity();
         collectionActivityLogsEntity.setActivityName(activityName);
@@ -138,5 +143,5 @@ public interface UtilityService {
         collectionActivityLogsEntity.setBatteryPercentage(batteryPercentage);
         return collectionActivityLogsEntity;
     }
-    void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> mainResponse, String utrNumber) throws Exception;
+    void createReceiptByCallBack(DigitalPaymentTransactionsEntity digitalPaymentTransactionsEntity, String token, Map<String, Object> mainResponse, String utrNumber) throws CustomException, DataLockException, InterruptedException, IOException;
 }

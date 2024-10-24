@@ -1,12 +1,11 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogBaseResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.activitylogdtos.ActivityLogBaseResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ActivityLogService;
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionActivityLogDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +21,13 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @Slf4j
 public class ActivityLogRestController {
 
-    @Autowired
-    ActivityLogService activityLogService;
+    private final ActivityLogService activityLogService;
 
-    @RequestMapping(value = "/activity-logs/{id}", method = RequestMethod.GET)
+    public ActivityLogRestController(ActivityLogService activityLogService) {
+        this.activityLogService = activityLogService;
+    }
+
+    @GetMapping(value = "/activity-logs/{id}")
     public ResponseEntity<Object> getActivityLogsById(@PathVariable("id") Long id) {
 
         BaseDTOResponse<Object> baseResponse;
@@ -48,7 +50,7 @@ public class ActivityLogRestController {
         return response;
     }
 
-    @RequestMapping(value = "/users/{userId}/activity-logs/", method = RequestMethod.GET)
+    @GetMapping(value = "/users/{userId}/activity-logs/")
     public ResponseEntity<Object> getActivityLogsByUserIdWithDuration(@PathVariable("userId") Long userId,
                                                                       @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
                                                                       @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
@@ -74,7 +76,7 @@ public class ActivityLogRestController {
         return response;
     }
 
-    @RequestMapping(value = "/loans/{loanId}/activity-logs", method = RequestMethod.GET)
+    @GetMapping(value = "/loans/{loanId}/activity-logs")
     public ResponseEntity<Object> getActivityLogsByLoanIdWIthDuration(@PathVariable("loanId") Long loanId,
                                                                       @RequestParam(value = "page",defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
                                                                       @RequestParam(value = "size",defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
@@ -87,7 +89,7 @@ public class ActivityLogRestController {
 
         try {
             result = activityLogService.getActivityLogsByLoanIdWithDuration(page, size, loanId, fromDate, toDate, filterBy);
-            baseResponse = new BaseDTOResponse<Object>(result.getData());
+            baseResponse = new BaseDTOResponse<>(result.getData());
             response = new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -101,7 +103,7 @@ public class ActivityLogRestController {
         return response;
     }
 
-    @RequestMapping(value = "/activity-logs", method = RequestMethod.POST)
+    @PostMapping(value = "/activity-logs")
     public ResponseEntity<Object> createActivityLog(@RequestBody CollectionActivityLogDTO collectionActivityLogDTO, @RequestHeader("Authorization") String bearerToken) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;

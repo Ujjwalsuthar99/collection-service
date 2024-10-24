@@ -1,10 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
@@ -17,7 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan("com.synoriq.synofin.collection.collectionservice.service")
 @ComponentScan("com.synoriq.synofin.events.*")
 @ComponentScan("com.synoriq.synofin.dataencryptionservice")
-@ComponentScan("com.synoriq.synofin.apipermissionvalidator")
+//@ComponentScan("com.synoriq.synofin.apipermissionvalidator")
 @ComponentScan("com.synoriq.synofin.performancemonitoringservice")
 public class CollectionServiceApplication {
 

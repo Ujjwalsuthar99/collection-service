@@ -1,10 +1,13 @@
 package com.synoriq.synofin.collection.collectionservice.common.errorcode;
 
 import com.google.common.collect.Maps;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.Map;
 
+@Getter
 public enum ErrorCode {
 
     DEFAULT_ERROR_CODE(1015000),
@@ -210,9 +213,13 @@ public enum ErrorCode {
     S3_UPLOAD_DATA_ERROR(1016055, "Image isn't uploaded on S3, Kindly contact to admin team"),
     IMAGE_TYPE_UNSUPPORTED(1016056, "Image format not supported, Allowed format: jpeg, png, jpg"),
     TRANSACTION_STATUS_CHECK(1016057, "Transaction Status Failed, Because of Data is Null"),
-    MULTIPLE_HIT_VALIDATION(1016058, "Check status will be available at")
+    MULTIPLE_HIT_VALIDATION(1016058, "Check status will be available at"),
+    USER_DETAIL_NULL(1016059, "User details getting null"),
+    EMITRA_CONNECTOR_EXCEPTION(1016060, "Unable to get the correct checksum"),
+    RECEIPT_ALREADY_APPROVED(1016061, "Unable to transfer this Receipt")
     ;
     private Integer codeValue;
+    @Setter
     private String responseMessage;
 
     ErrorCode(int codeValue) {
@@ -225,14 +232,7 @@ public enum ErrorCode {
         this.responseMessage = message;
     }
 
-    public Integer getCodeValue() {
-        return this.codeValue;
-    }
-
-    public String getResponseMessage() {
-        return this.responseMessage;
-    }
-
+    @Override
     public String toString() {
         String var10000 = this.name();
         return var10000 + "(" + this.getCodeValue() + ")";
@@ -258,7 +258,5 @@ public enum ErrorCode {
     public Integer getErrorCodeValue() {
         return this.codeValue;
     }
-
-    public void setResponseMessage(String message) { this.responseMessage = message;}
 
 }

@@ -4,11 +4,16 @@ import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCo
 
 public class CollectionException extends RuntimeException{
 
-    private ErrorCode errorCode;
+    public final ErrorCode errorCode;
 
 
     public CollectionException(ErrorCode errorCode) {
         super(errorCode.toString());
+        this.errorCode = errorCode;
+    }
+
+    public CollectionException(ErrorCode errorCode, Integer errCode){
+        super(errCode.toString());
         this.errorCode = errorCode;
     }
 

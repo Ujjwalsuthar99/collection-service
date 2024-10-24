@@ -3,20 +3,15 @@ package com.synoriq.synofin.collection.collectionservice.service.implementation;
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
 import com.synoriq.synofin.collection.collectionservice.entity.ConsumedApiLogsEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.ConsumedApiLogRepository;
-import com.synoriq.synofin.collection.collectionservice.rest.request.consumedApiLogDTOs.ConsumedApiLogRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailByTokenDTOs.UserDetailByTokenDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.request.consumedapilogdtos.ConsumedApiLogRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
-import java.util.Map;
 
 @Service
 @Slf4j

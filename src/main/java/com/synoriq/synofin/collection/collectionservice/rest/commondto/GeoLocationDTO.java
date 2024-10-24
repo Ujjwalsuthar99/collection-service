@@ -23,11 +23,4 @@ public class GeoLocationDTO {
     @JsonProperty("longitude")
     private String longitude;
 
-//    public GeoLocationDTO(String latitude, String longitude)  {
-//        this.latitude = latitude;
-//        this.longitude = longitude;
-//    }
-//    public GeoLocationDTO()  {
-//    }
-
 }

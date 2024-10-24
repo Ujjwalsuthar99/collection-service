@@ -1,6 +1,5 @@
 package com.synoriq.synofin.collection.collectionservice.service.factory;
 
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.CommonTransactionStatusCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.service.DigitalTransactionChecker;
 import com.synoriq.synofin.collection.collectionservice.service.implementation.PaymentLinkServiceImpl;
 import com.synoriq.synofin.collection.collectionservice.service.implementation.QrCodeServiceImpl;

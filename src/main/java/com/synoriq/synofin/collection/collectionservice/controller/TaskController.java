@@ -1,12 +1,12 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
-import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskDetailRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.taskDetailsDTO.TaskFilterRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskdetailsdto.TaskDetailRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.taskdetailsdto.TaskFilterRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -26,10 +26,12 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 @Validated
 public class TaskController {
 
-    @Autowired
-    TaskService taskService;
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
+    }
+    private final TaskService taskService;
 
-    @RequestMapping(value = "users/{userId}/tasks", method = RequestMethod.POST)
+    @PostMapping(value = "users/{userId}/tasks")
     public ResponseEntity<Object> getTaskDetails(@PathVariable("userId") Long userId, @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
                                                  @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize, @RequestBody @Valid TaskFilterRequestDTO taskFilterRequestDTO) {
 
@@ -54,8 +56,8 @@ public class TaskController {
     }
 
 
-    @RequestMapping(value = "task/detail-summary", method = RequestMethod.POST)
-    public ResponseEntity<Object> getTaskDetailByLoanId(@RequestHeader("Authorization") String bearerToken, @RequestBody TaskDetailRequestDTO taskDetailRequestDTO) throws Exception {
+    @PostMapping(value = "task/detail-summary")
+    public ResponseEntity<Object> getTaskDetailByLoanId(@RequestHeader("Authorization") String bearerToken, @RequestBody TaskDetailRequestDTO taskDetailRequestDTO) throws CollectionException {
 
         Object baseResponse;
         ResponseEntity<Object> response;
@@ -75,10 +77,10 @@ public class TaskController {
         return response;
     }
 
-    @RequestMapping(value = "users/{userId}/tasks/search-tasks", method = RequestMethod.GET)
+    @GetMapping(value = "users/{userId}/tasks/search-tasks")
     public ResponseEntity<Object> getTaskDetailsBySearchKey(@PathVariable("userId") Long userId, @RequestParam(value = "searchKey") String searchKey,
                                                             @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer pageNo,
-                                                            @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws Exception {
+                                                            @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer pageSize) throws CollectionException {
 
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response;
@@ -97,7 +99,7 @@ public class TaskController {
         }
         return response;
     }
-    @RequestMapping(value = "loans", method = RequestMethod.GET)
+    @GetMapping(value = "loans")
     public ResponseEntity<Object> getLoanIdsByLoanId(@RequestParam(value = "loanId") Long loanId) {
 
         BaseDTOResponse<Object> baseResponse;

@@ -1,29 +1,32 @@
 package com.synoriq.synofin.collection.collectionservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.ConnectorException;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.config.DatabaseContextHolder;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
+import com.synoriq.synofin.collection.collectionservice.rest.commondto.AuthorizationResponse;
 import com.synoriq.synofin.collection.collectionservice.rest.commondto.GeoLocationDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.collectionIncentiveDTOs.CollectionIncentiveRequestDTOs;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.CommonTransactionStatusCheckRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicQrCodeDTOs.DynamicQrCodeCallBackRequestDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.request.masterDTOs.MasterDtoRequest;
-import com.synoriq.synofin.collection.collectionservice.rest.request.ocrCheckDTOs.OcrCheckRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.collectionincentivedtos.CollectionIncentiveRequestDTOs;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicqrcodedtos.CommonTransactionStatusCheckRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.dynamicqrcodedtos.DynamicQrCodeCallBackRequestDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.request.masterdtos.MasterDtoRequest;
+import com.synoriq.synofin.collection.collectionservice.rest.request.ocrcheckdtos.OcrCheckRequestDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeCheckStatusResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.DynamicQrCodeDTOs.DynamicQrCodeResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.dynamicqrcodedtos.DynamicQrCodeResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.rest.response.MasterDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.OcrCheckResponseDTOs.OcrCheckResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DeleteImageOnS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.DownloadS3Base64DTOs.DownloadBase64FromS3ResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.s3ImageDTOs.UploadImageResponseDTO.UploadImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.ocrcheckresponsedtos.OcrCheckResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3imagedtos.DeleteImageOnS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3imagedtos.downloads3base64dtos.DownloadBase64FromS3ResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.s3imagedtos.uploadimageresponsedto.UploadImageOnS3ResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.IntegrationConnectorService;
 import com.synoriq.synofin.collection.collectionservice.service.PaymentLinkService;
 import com.synoriq.synofin.collection.collectionservice.service.QrCodeService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
 import com.synoriq.synofin.performancemonitoringservice.annotation.TimedAlert;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,8 +35,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.core.type.TypeReference;
 
-import java.sql.SQLException;
+import javax.validation.Valid;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
 
@@ -45,27 +51,28 @@ import static com.synoriq.synofin.collection.collectionservice.common.GlobalVari
 public class UtilityController {
     public UtilityController(UtilityService utilityService,
                              IntegrationConnectorService integrationConnectorService,
-                             PaymentLinkService paymentLinkService, QrCodeService qrCodeService) {
+                             PaymentLinkService paymentLinkService, QrCodeService qrCodeService,CollectionConfigurationsRepository collectionConfigurationsRepository) {
         this.utilityService = utilityService;
         this.paymentLinkService = paymentLinkService;
         this.integrationConnectorService = integrationConnectorService;
         this.qrCodeService = qrCodeService;
+        this.collectionConfigurationsRepository = collectionConfigurationsRepository;
     }
     public final UtilityService utilityService;
     public final IntegrationConnectorService integrationConnectorService;
     public final PaymentLinkService paymentLinkService;
     public final QrCodeService qrCodeService;
 
+    public final CollectionConfigurationsRepository collectionConfigurationsRepository;
+
+
 
 
     @Value("${spring.profiles.active}")
     private String springProfile;
 
-    @Autowired
-    private CollectionConfigurationsRepository collectionConfigurationsRepository;
-
-    @RequestMapping(value = "getMasterType", method = RequestMethod.POST)
-    public ResponseEntity<Object> getMasterData(@RequestHeader("Authorization") String bearerToken, @RequestBody MasterDtoRequest masterDtoRequest) throws SQLException {
+    @PostMapping(value = "getMasterType")
+    public ResponseEntity<Object> getMasterData(@RequestHeader("Authorization") String bearerToken, @RequestBody MasterDtoRequest masterDtoRequest) {
         BaseDTOResponse<Object> baseResponse;
         Object masterResponse;
         ResponseEntity<Object> response = null;
@@ -84,12 +91,11 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "getAllUserData", method = RequestMethod.GET)
+    @GetMapping(value = "getAllUserData")
     public ResponseEntity<Object> getAllUserDetail(@RequestHeader("Authorization") String bearerToken, @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_NUMBER, required = false) Integer page,
                                                    @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE, required = false) Integer size,
-                                                   @RequestParam(value = "key", defaultValue = "", required = false) String key) throws SQLException {
+                                                   @RequestParam(value = "key", defaultValue = "", required = false) String key) {
         BaseDTOResponse<Object> baseResponse;
-        Object userResponse;
         ResponseEntity<Object> response = null;
         Object result;
 
@@ -107,10 +113,9 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "getContactSupport", method = RequestMethod.GET)
-    public ResponseEntity<Object> getContactSupport(@RequestHeader("Authorization") String bearerToken, @RequestParam(value = "keyword") String keyword, @RequestParam(value = "model") String model) throws SQLException {
+    @GetMapping(value = "getContactSupport")
+    public ResponseEntity<Object> getContactSupport(@RequestHeader("Authorization") String bearerToken, @RequestParam(value = "keyword") String keyword, @RequestParam(value = "model") String model) {
         BaseDTOResponse<Object> baseResponse;
-        Object userResponse;
         ResponseEntity<Object> response = null;
         Object result;
 
@@ -128,8 +133,8 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "getBankNameByIFSC", method = RequestMethod.GET)
-    public ResponseEntity<Object> getBankNameByIFSC(@RequestParam(value = "keyword") String keyword) throws SQLException {
+    @GetMapping(value = "getBankNameByIFSC")
+    public ResponseEntity<Object> getBankNameByIFSC(@RequestParam(value = "keyword") String keyword) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         Object result;
@@ -149,11 +154,11 @@ public class UtilityController {
     }
 
 
-    @RequestMapping(value = "uploadImageOnS3", method = RequestMethod.POST)
+    @PostMapping(value = "uploadImageOnS3")
     public ResponseEntity<Object> uploadImageOnS3(@RequestHeader("Authorization") String token, @RequestParam("image") MultipartFile imageData,
                                                   @RequestParam("module") String module,
                                                   @RequestParam("latitude") String latitude,
-                                                  @RequestParam("longitude") String longitude) throws Exception {
+                                                  @RequestParam("longitude") String longitude) throws CustomException {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         UploadImageOnS3ResponseDTO result;
@@ -174,7 +179,7 @@ public class UtilityController {
     }
 
 
-    @RequestMapping(value = "sendPdfToCustomerUsingS3", method = RequestMethod.POST)
+    @PostMapping(value = "sendPdfToCustomerUsingS3")
     public ResponseEntity<Object> sendPdfToCustomerUsingS3(@RequestHeader("Authorization") String token, @RequestParam("image") MultipartFile imageData,
                                                            @RequestParam("user_ref_no") String userRefNo,
                                                            @RequestParam("client_id") String clientId,
@@ -187,7 +192,7 @@ public class UtilityController {
                                                            @RequestParam("applicant_mobile_number") String applicantMobileNumber,
                                                            @RequestParam("collected_from_number") String collectedFromMobileNumber,
                                                            @RequestParam("loan_number") String loanNumber,
-                                                           @RequestParam("receipt_id") Long receiptId) throws SQLException {
+                                                           @RequestParam("receipt_id") Long receiptId) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         UploadImageOnS3ResponseDTO result;
@@ -206,12 +211,12 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "downloadBase64FromS3", method = RequestMethod.GET)
+    @GetMapping(value = "downloadBase64FromS3")
     public ResponseEntity<Object> downloadBase64FromS3(@RequestHeader("Authorization") String token,
                                                        @RequestParam("file_name") String fileName,
                                                        @RequestParam("user_ref_no") String userRefNo,
                                                        @RequestParam(value = "isNativeFolder", defaultValue = "true", required = false) boolean isNativeFolder,
-                                                       @RequestParam(value = "isCustomerPhotos", defaultValue = "false", required = false) boolean isCustomerPhotos) throws SQLException {
+                                                       @RequestParam(value = "isCustomerPhotos", defaultValue = "false", required = false) boolean isCustomerPhotos) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         DownloadBase64FromS3ResponseDTO result;
@@ -230,10 +235,10 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "deleteImageOnS3", method = RequestMethod.GET)
+    @GetMapping(value = "deleteImageOnS3")
     public ResponseEntity<Object> deleteImageOnS3(@RequestHeader("Authorization") String token,
                                                        @RequestParam("file_name") String fileName,
-                                                       @RequestParam("user_ref_no") String userRefNo) throws SQLException {
+                                                       @RequestParam("user_ref_no") String userRefNo) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         DeleteImageOnS3ResponseDTO result;
@@ -273,7 +278,7 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "ocr-check", method = RequestMethod.POST)
+    @PostMapping(value = "ocr-check")
     public ResponseEntity<Object> ocrCheck(@RequestHeader("Authorization") String token, @RequestBody OcrCheckRequestDTO reqBody) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -297,7 +302,7 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "getDocuments", method = RequestMethod.GET)
+    @GetMapping(value = "getDocuments")
     public ResponseEntity<Object> getDocuments(@RequestHeader("Authorization") String token, @RequestParam("loanId") String loanId) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -320,43 +325,29 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "send-qr-code-new", method = RequestMethod.POST)
+    @PostMapping(value = "send-qr-code-new")
     public ResponseEntity<Object> sendQrCodeNew(@RequestHeader("Authorization") String token,
                                                 @RequestParam("paymentReferenceImage") MultipartFile paymentReferenceImage,
                                                 @RequestParam("selfieImage") MultipartFile selfieImage,
-                                                @RequestParam("data") Object data) throws Exception {
+                                                @RequestParam("data") Object data) throws ConnectorException, JsonProcessingException, InterruptedException {
 
         DynamicQrCodeResponseDTO result = qrCodeService.sendQrCodeNew(token, data, paymentReferenceImage, selfieImage);
         return new ResponseEntity<>(new BaseDTOResponse<>(result.getData()), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "get-qr-code-transaction-status", method = RequestMethod.POST)
-    public ResponseEntity<Object> getQrCodeTransactionStatus(@RequestHeader("Authorization") String token, @RequestBody CommonTransactionStatusCheckRequestDTO reqBody) throws Exception {
+    @PostMapping(value = "get-qr-code-transaction-status")
+    public ResponseEntity<Object> getQrCodeTransactionStatus(@RequestHeader("Authorization") String token, @RequestBody @Valid CommonTransactionStatusCheckRequestDTO reqBody) throws CustomException, ConnectorException, JsonProcessingException, InterruptedException {
         Object result = qrCodeService.getQrCodeTransactionStatus(token, reqBody);
         return new ResponseEntity<>(new BaseDTOResponse<>(result), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "qrCodeCallBack", method = RequestMethod.POST)
-    public ResponseEntity<Object> qrCodeCallBack(@RequestHeader("Authorization") String token, @RequestBody DynamicQrCodeCallBackRequestDTO reqBody) {
-        BaseDTOResponse<Object> baseResponse;
-        ResponseEntity<Object> response = null;
-        Object result;
-
-        try {
-            result = qrCodeService.qrCodeCallBack(token, reqBody);
-            response = new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
-            if (ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())) != null) {
-                baseResponse = new BaseDTOResponse<>(ErrorCode.getErrorCode(Integer.valueOf(e.getMessage())));
-            } else {
-                baseResponse = new BaseDTOResponse<>(ErrorCode.DATA_FETCH_ERROR);
-            }
-            response = new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
-        }
-        return response;
+    @PostMapping(value = "qrCodeCallBack")
+    public ResponseEntity<Object> qrCodeCallBack(@RequestHeader("Authorization") String token, @RequestBody DynamicQrCodeCallBackRequestDTO reqBody) throws CustomException, InterruptedException {
+        Object result = qrCodeService.qrCodeCallBack(token, reqBody);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "qr-status-check", method = RequestMethod.GET)
+    @GetMapping(value = "qr-status-check")
     public ResponseEntity<Object> qrStatusCheck(@RequestHeader("Authorization") String token, @RequestParam("merchant_id") String merchantId) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -377,7 +368,7 @@ public class UtilityController {
     }
 
 
-    @RequestMapping(value = "send-otp", method = RequestMethod.GET)
+    @GetMapping(value = "send-otp")
     public ResponseEntity<Object> sendOtp(@RequestHeader("Authorization") String token, @RequestParam("mobileNumber") String mobileNumber) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -397,7 +388,7 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "verify-otp", method = RequestMethod.GET)
+    @GetMapping(value = "verify-otp")
     public ResponseEntity<Object> verifyOtp(@RequestHeader("Authorization") String token, @RequestParam("mobileNumber") String mobileNumber, @RequestParam("otp") String otp) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -417,7 +408,7 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "resend-otp", method = RequestMethod.GET)
+    @GetMapping(value = "resend-otp")
     public ResponseEntity<Object> resendOtp(@RequestHeader("Authorization") String token, @RequestParam("mobileNumber") String mobileNumber) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -437,7 +428,7 @@ public class UtilityController {
         return response;
     }
 
-    @RequestMapping(value = "get-collaterals", method = RequestMethod.GET)
+    @GetMapping(value = "get-collaterals")
     public ResponseEntity<Object> getCollaterals(@RequestHeader("Authorization") String token, @RequestParam("loanId") Long loanId) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -457,7 +448,7 @@ public class UtilityController {
     }
 
 
-    @RequestMapping(value = "mobile-number-validation", method = RequestMethod.GET)
+    @GetMapping(value = "mobile-number-validation")
     public ResponseEntity<Object> employeeMobileNumberValidator(@RequestHeader("Authorization") String token, @RequestParam("mobileNumber") String mobileNumber) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -492,7 +483,7 @@ public class UtilityController {
     }
 
 
-    @RequestMapping(value = "check-transaction-reference-number", method = RequestMethod.GET)
+    @GetMapping(value = "check-transaction-reference-number")
     public ResponseEntity<Object> checkTransactionReferenceNumber(@RequestHeader("Authorization") String token, @RequestParam("transactionReferenceNumber") String transactionReferenceNumber) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
@@ -515,14 +506,14 @@ public class UtilityController {
     public ResponseEntity<Object> sendPaymentLink(@RequestHeader("Authorization") String token,
                                                   @RequestParam("paymentReferenceImage") MultipartFile paymentReferenceImage,
                                                   @RequestParam("selfieImage") MultipartFile selfieImage,
-                                                  @RequestParam("data") Object data) throws Exception {
+                                                  @RequestParam("data") Object data) throws ConnectorException, JsonProcessingException, InterruptedException, ExecutionException {
 
         Object result = paymentLinkService.sendPaymentLink(token, data, paymentReferenceImage, selfieImage);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "getCollectionIncentiveData", method = RequestMethod.POST)
-    public ResponseEntity<Object> getCollectionIncentiveData(@RequestHeader("Authorization") String bearerToken, @RequestBody CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) throws SQLException {
+    @PostMapping(value = "getCollectionIncentiveData")
+    public ResponseEntity<Object> getCollectionIncentiveData(@RequestHeader("Authorization") String bearerToken, @RequestBody CollectionIncentiveRequestDTOs collectionIncentiveRequestDTOs) {
         BaseDTOResponse<Object> baseResponse;
         Object dateResponse;
         ResponseEntity<Object> response = null;
@@ -545,18 +536,22 @@ public class UtilityController {
     public ResponseEntity<Void> fromEmitraToSynoRedirection(@RequestParam("encData") String encData,
                                                  @RequestParam("logId") String logId,
                                                  @RequestParam("agCode") String agCode,
-                                                 @RequestParam("agKey") String agKey) {
+                                                 @RequestParam("agKey") String agKey) throws Exception {
+
+        DatabaseContextHolder.set("finova");
+        String apiKeySecretForEmitra = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(E_MITRA_STATIC_TOKEN);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> apiKeySecretObject = objectMapper.readValue(apiKeySecretForEmitra, new TypeReference<Map<String, Object>>() {});
+        String token = utilityService.getTokenByApiKeySecret(apiKeySecretObject);
 
         //We are using this API only for Finova's e-mitra
-        DatabaseContextHolder.set("finova");
-        String maskedNumberConfiguration = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(E_MITRA_STATIC_TOKEN);
 
         log.info("encrypted data emitra {}", encData);
         log.info("log id emitra {}", logId);
         log.info("ag code emitra {}", agCode);
         log.info("ag key emitra {}", agKey);
 
-        String synoUrl = "https://collections-" + springProfile + ".synofin.tech/emitra?encryptedData=" + encData + "&access_token=" + maskedNumberConfiguration;
+        String synoUrl = "https://collections-" + springProfile + ".synofin.tech/emitra?encryptedData=" + encData + "&access_token=" + token;
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.LOCATION, synoUrl);
         return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build();

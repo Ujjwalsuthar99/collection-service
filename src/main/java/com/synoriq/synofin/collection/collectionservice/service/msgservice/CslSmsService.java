@@ -2,15 +2,20 @@ package com.synoriq.synofin.collection.collectionservice.service.msgservice;
 
 import com.synoriq.synofin.collection.collectionservice.service.utilityservice.HTTPRequestService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.CSL_MSG_API_URL;
 
 @Slf4j
 @Service
 public class CslSmsService {
+
+    @Autowired
+    private RestTemplate restTemplate;
     public String sendSmsCsl(String postBody) throws Exception {
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -26,7 +31,7 @@ public class CslSmsService {
                 .httpHeaders(httpHeaders)
                 .body(postBody)
                 .typeResponseType(String.class)
-                .build().call();
+                .build().call(restTemplate);
 
         return res;
     }

@@ -9,12 +9,14 @@ public class CustomException extends RuntimeException {
 
     private static final long serialVersionUID = -1307493420921168255L;
     private final Integer code;
-    private String text = "";
-    private HttpStatus httpStatus;
+    private final String text;
+    private final HttpStatus httpStatus;
 
     public CustomException(String str, Integer code) {
         super(str);
         this.code = code;
+        this.text = str;
+        this.httpStatus = HttpStatus.BAD_REQUEST;
     }
 
     public CustomException(String str) {
@@ -27,18 +29,21 @@ public class CustomException extends RuntimeException {
     public CustomException(String str, HttpStatus httpStatus) {
         super(str);
         this.code = 99999;
+        this.text = str;
         this.httpStatus = httpStatus;
     }
 
     public CustomException(ErrorCode errorCode) {
         super(errorCode.getResponseMessage());
         this.code = errorCode.getCodeValue();
+        this.text = errorCode.getResponseMessage();
         this.httpStatus = HttpStatus.BAD_REQUEST;
     }
 
     public CustomException(ErrorCode errorCode, HttpStatus httpStatus) {
         super(errorCode.getResponseMessage());
         this.code = errorCode.getCodeValue();
+        this.text = errorCode.getResponseMessage();
         this.httpStatus = httpStatus;
     }
 

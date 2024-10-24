@@ -1,6 +1,5 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response;
 
-import com.synoriq.synofin.collection.collectionservice.rest.commondto.IntegrationServiceErrorResponseDTO;
 import com.synoriq.synofin.lms.commondto.rest.constants.ErrorCode;
 import com.synoriq.synofin.lms.commondto.rest.response.ErrorPayLoad;
 import lombok.Data;
@@ -47,7 +46,7 @@ public class BaseDTOResponse<T> {
 
     public BaseDTOResponse(ErrorCode errorCode, Boolean response) {
         this.response = response;
-        if (response) {
+        if (Boolean.TRUE.equals(response)) {
             this.data = (T) new ErrorPayLoad(errorCode);
             this.error = null;
         } else {
@@ -59,10 +58,10 @@ public class BaseDTOResponse<T> {
     public BaseDTOResponse(String errorMsg, Integer errorCode) {
         this.response = false;
         this.data = null;
-        Map<String, Object> error = new HashMap<>();
-        error.put("code", errorCode);
-        error.put("text", errorMsg);
-        this.error = error;
+        Map<String, Object> errorMap = new HashMap<>();
+        errorMap.put("code", errorCode);
+        errorMap.put("text", errorMsg);
+        this.error = errorMap;
     }
 
     public BaseDTOResponse(com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode errorCode) {

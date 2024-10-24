@@ -1,7 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.rest.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDataDTOs.UsersDataDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userdatadtos.UsersDataDTO;
 import lombok.Data;
 
 import java.util.List;

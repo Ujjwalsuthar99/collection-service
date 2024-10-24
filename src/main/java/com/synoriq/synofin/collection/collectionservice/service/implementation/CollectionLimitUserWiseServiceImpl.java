@@ -1,14 +1,16 @@
 package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
-
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CustomException;
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionLimitUserWiseEntity;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionConfigurationsRepository;
 import com.synoriq.synofin.collection.collectionservice.repository.CollectionLimitUserWiseRepository;
 import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionLimitUserWiseDtoRequest;
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailsDTOs.ProfileDetailResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.CollectionLimitUserWise.CollectionLimitUserWiseFetchDataResponseDTO;
-import com.synoriq.synofin.collection.collectionservice.rest.response.UserDetailsByUserIdDTOs.UserDetailByUserIdDTOResponse;
+import com.synoriq.synofin.collection.collectionservice.rest.response.profiledetailsdtos.ProfileDetailResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.collectionlimituserwise.CollectionLimitUserWiseFetchDataResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.userdetailsbyuseriddtos.UserDetailByUserIdDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
 import com.synoriq.synofin.collection.collectionservice.service.CollectionLimitUserWiseService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
@@ -16,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 
 import static com.synoriq.synofin.collection.collectionservice.common.GlobalVariables.*;
@@ -35,11 +36,12 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
     private ProfileService profileService;
 
     @Override
-    public Object getCollectionLimitUserWise(String token, String userId) throws Exception {
+    public Object getCollectionLimitUserWise(String token, String userId) throws CollectionException {
         try {
-            List<CollectionLimitUserWiseEntity> collectionLimitUserWiseEntityList = collectionLimitUserWiseRepository.getAllCollectionLimitUserWiseByUserId(Long.valueOf(userId));
-            CollectionLimitUserWiseFetchDataResponseDTO collectionLimitUserWiseFetchDataResponseDTO =
-                    collectionLimitUserWiseEntityList.stream().collect(
+            List<CollectionLimitUserWiseEntity> collectionLimitUserWiseEntityList = collectionLimitUserWiseRepository
+                    .getAllCollectionLimitUserWiseByUserId(Long.valueOf(userId));
+            CollectionLimitUserWiseFetchDataResponseDTO collectionLimitUserWiseFetchDataResponseDTO = collectionLimitUserWiseEntityList
+                    .stream().collect(
                             CollectionLimitUserWiseFetchDataResponseDTO::new,
                             (dto, entity) -> {
                                 switch (entity.getCollectionLimitStrategiesKey()) {
@@ -66,73 +68,89 @@ public class CollectionLimitUserWiseServiceImpl implements CollectionLimitUserWi
                                 dto1.setUpiLimit(dto2.getUpiLimit());
                                 dto1.setNeftLimit(dto2.getNeftLimit());
                                 dto1.setRtgsLimit(dto2.getRtgsLimit());
-                            }
-                    );
+                            });
             return new BaseDTOResponse<>(collectionLimitUserWiseFetchDataResponseDTO);
         } catch (Exception e) {
-            throw new Exception("1017002");
+            ErrorCode errCode = ErrorCode.getErrorCode(1017002);
+            throw new CollectionException(errCode, 1017002);
         }
 
     }
 
     @Override
-    public String createCollectionLimitUserWise(String token, CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws Exception {
+    public String createCollectionLimitUserWise(String token,
+            CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws CustomException {
 
         Long userId;
         String name;
         UserDetailByUserIdDTOResponse userDetailByUserIdDTOResponse;
-        String userName = utilityService.splitCodeName(collectionLimitUserWiseDtoRequest.getUsername());
-        ProfileDetailResponseDTO profileDetailResponseDTO;
-        if (collectionLimitUserWiseDtoRequest.getUserId() != null) { // update
-            userDetailByUserIdDTOResponse = utilityService.getUserDetailsByUserId(token, collectionLimitUserWiseDtoRequest.getUserId());
-            userId = collectionLimitUserWiseDtoRequest.getUserId();
-            name = userDetailByUserIdDTOResponse.getData().getEmployeeName();
-            userName = userDetailByUserIdDTOResponse.getData().getEmployeeUserName();
-            log.info(" if user name {}", userName);
-        } else {
-            profileDetailResponseDTO = profileService.getProfileDetails(token, userName);
-            if (profileDetailResponseDTO.getData() != null) {
-                userId = profileDetailResponseDTO.getData().getUserId();
-                name = profileDetailResponseDTO.getData().getName();
-//                userName = utilityService.splitCodeName(collectionLimitUserWiseDtoRequest.getUsername());
-                log.info(" else user name {}", userName);
+
+        try {
+            String userName = utilityService.splitCodeName(collectionLimitUserWiseDtoRequest.getUsername());
+            ProfileDetailResponseDTO profileDetailResponseDTO;
+            if (collectionLimitUserWiseDtoRequest.getUserId() != null) { // update
+                userDetailByUserIdDTOResponse = utilityService.getUserDetailsByUserId(token,
+                        collectionLimitUserWiseDtoRequest.getUserId());
+                userId = collectionLimitUserWiseDtoRequest.getUserId();
+                name = userDetailByUserIdDTOResponse.getData().getEmployeeName();
+                userName = userDetailByUserIdDTOResponse.getData().getEmployeeUserName();
+                log.info(" if user name {}", userName);
             } else {
-                throw new Exception("1016041");
-            }
-        }
-
-        CollectionLimitUserWiseEntity existingLimit = collectionLimitUserWiseRepository.getCollectionLimitUserWiseByUserId(userId, collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
-
-        if (existingLimit != null) {
-            if (collectionLimitUserWiseDtoRequest.getTotalLimitValue() < existingLimit.getUtilizedLimitValue()) {
-                throw new Exception("1017009");
-            }
-            existingLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getTotalLimitValue());
-            existingLimit.setName(name);
-            collectionLimitUserWiseRepository.save(existingLimit);
-        } else {
-            String defaultLimit = collectionLimitUserWiseDtoRequest.getTotalLimitValue().toString();
-            if (collectionLimitUserWiseDtoRequest.getTotalLimitValue() == null) {
-                if (collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cash")) {
-                    defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
-                } else if (collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cheque")) {
-                    defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT);
+                profileDetailResponseDTO = profileService.getProfileDetails(token, userName);
+                if (profileDetailResponseDTO.getData() != null) {
+                    userId = profileDetailResponseDTO.getData().getUserId();
+                    name = profileDetailResponseDTO.getData().getName();
+                    log.info(" else user name {}", userName);
                 } else {
-                    defaultLimit = collectionConfigurationsRepository.findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT);
+                    ErrorCode errCode = ErrorCode.getErrorCode(1016041);
+                    throw new CollectionException(errCode, 1016041);
                 }
             }
-            CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
-            collectionLimitUserWiseEntity.setDeleted(false);
-            collectionLimitUserWiseEntity.setName(name);
-            collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
-            collectionLimitUserWiseEntity.setUserId(userId);
-            collectionLimitUserWiseEntity.setUserName(userName);
-            collectionLimitUserWiseEntity.setTotalLimitValue(Double.parseDouble(defaultLimit));
-            collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
-            collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
-        }
 
-        return "Data saved successfully";
+            CollectionLimitUserWiseEntity existingLimit = collectionLimitUserWiseRepository
+                    .getCollectionLimitUserWiseByUserId(userId,
+                            collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
+
+            if (existingLimit != null) {
+                if (collectionLimitUserWiseDtoRequest.getTotalLimitValue() < existingLimit.getUtilizedLimitValue()) {
+                    ErrorCode errCode = ErrorCode.getErrorCode(1017009);
+                    throw new CollectionException(errCode, 1017009);
+                }
+                existingLimit.setTotalLimitValue(collectionLimitUserWiseDtoRequest.getTotalLimitValue());
+                existingLimit.setName(name);
+                collectionLimitUserWiseRepository.save(existingLimit);
+            } else {
+                String defaultLimit = collectionLimitUserWiseDtoRequest.getTotalLimitValue().toString();
+                if (collectionLimitUserWiseDtoRequest.getTotalLimitValue() == null) {
+                    if (collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cash")) {
+                        defaultLimit = collectionConfigurationsRepository
+                                .findConfigurationValueByConfigurationName(CASH_COLLECTION_DEFAULT_LIMIT);
+                    } else if (collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey().equals("cheque")) {
+                        defaultLimit = collectionConfigurationsRepository
+                                .findConfigurationValueByConfigurationName(CHEQUE_COLLECTION_DEFAULT_LIMIT);
+                    } else {
+                        defaultLimit = collectionConfigurationsRepository
+                                .findConfigurationValueByConfigurationName(ONLINE_COLLECTION_DEFAULT_LIMIT);
+                    }
+                }
+                CollectionLimitUserWiseEntity collectionLimitUserWiseEntity = new CollectionLimitUserWiseEntity();
+                collectionLimitUserWiseEntity.setDeleted(false);
+                collectionLimitUserWiseEntity.setName(name);
+                collectionLimitUserWiseEntity.setCollectionLimitStrategiesKey(
+                        collectionLimitUserWiseDtoRequest.getCollectionLimitStrategiesKey());
+                collectionLimitUserWiseEntity.setUserId(userId);
+                collectionLimitUserWiseEntity.setUserName(userName);
+                collectionLimitUserWiseEntity.setTotalLimitValue(Double.parseDouble(defaultLimit));
+                collectionLimitUserWiseEntity.setUtilizedLimitValue(0D);
+                collectionLimitUserWiseRepository.save(collectionLimitUserWiseEntity);
+            }
+
+            return "Data saved successfully";
+
+        } catch (Exception ee) {
+            throw new CustomException(ee.getMessage());
+        }
+        
 
     }
 }

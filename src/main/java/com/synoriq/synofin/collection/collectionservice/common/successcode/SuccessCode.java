@@ -12,10 +12,6 @@ public enum SuccessCode {
     private Integer codeValue;
     private String responseMessage;
 
-    SuccessCode(int codeValue) {
-        this.codeValue = codeValue;
-        this.responseMessage = "Something went wrong. Please try again after some time.";
-    }
 
     SuccessCode(int codeValue, String message) {
         this.codeValue = codeValue;
@@ -30,6 +26,7 @@ public enum SuccessCode {
         return this.responseMessage;
     }
 
+    @Override
     public String toString() {
         String var10000 = this.name();
         return var10000 + "(" + this.getCodeValue() + ")";

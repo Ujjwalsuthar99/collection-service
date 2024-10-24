@@ -1,11 +1,12 @@
 package com.synoriq.synofin.collection.collectionservice.service;
 
-import com.synoriq.synofin.collection.collectionservice.rest.response.DashboardDTOs.DashboardResponseDTO;
+import java.text.ParseException;
 
-import java.util.Map;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
+import com.synoriq.synofin.collection.collectionservice.rest.response.dashboarddtos.DashboardResponseDTO;
 
 public interface DashboardService {
 
-    public DashboardResponseDTO getDashboardCountByUserId(Long userId, String userName, String startDate, String toDate) throws Exception;
+     DashboardResponseDTO getDashboardCountByUserId(Long userId, String userName, String startDate, String toDate) throws CollectionException, ParseException;
 
 }

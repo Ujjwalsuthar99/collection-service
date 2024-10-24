@@ -18,6 +18,8 @@ public interface DigitalPaymentTransactionsRepository extends JpaRepository<Digi
 
     DigitalPaymentTransactionsEntity findByMerchantTranId(String merchantTranId);
 
+    DigitalPaymentTransactionsEntity findFirstByLoanIdAndAmount(Long loanId, Float amount);
+
     @Query(nativeQuery = true, value="select\n" +
             "\tdpt.merchant_tran_id as merchantTransId,\n" +
             "\tdpt.status,\n" +

@@ -1,7 +1,7 @@
 package com.synoriq.synofin.collection.collectionservice.repository;
 
 import com.synoriq.synofin.collection.collectionservice.entity.CollectionActivityLogsEntity;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.rest.response.activitylogdtos.ActivityLogResponseDTO;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -17,12 +17,8 @@ public interface CollectionActivityLogsRepository extends PagingAndSortingReposi
 
     CollectionActivityLogsEntity findByCollectionActivityLogsId(Long activityLogId);
 
-//    @Query(nativeQuery = true,value = "select * from collection.collection_activity_logs where activity_by = :userId " +
-//            "and activity_date between :fromDate and :toDate order by activity_date desc")
-//    List<CollectionActivityLogsEntity> getActivityLogsUserWIseByDuration(@Param("userId") Long userId, @Param("fromDate")Date fromDate
-//            , @Param("toDate") Date toDate, Pageable pageable);
 
-    @Query(value = "SELECT new com.synoriq.synofin.collection.collectionservice.rest.response.ActivityLogDTOs.ActivityLogResponseDTO(cal.collectionActivityLogsId,\n" +
+    @Query(value = "SELECT new com.synoriq.synofin.collection.collectionservice.rest.response.activitylogdtos.ActivityLogResponseDTO(cal.collectionActivityLogsId,\n" +
             "cal.activityDate,\n" +
             "cal.activityBy,\n" +
             "cal.loanId,\n" +

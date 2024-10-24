@@ -2,7 +2,9 @@ package com.synoriq.synofin.collection.collectionservice.service.implementation;
 
 
 import com.synoriq.synofin.collection.collectionservice.common.EnumSQLConstants;
-import com.synoriq.synofin.collection.collectionservice.rest.response.ProfileDetailsDTOs.ProfileDetailResponseDTO;
+import com.synoriq.synofin.collection.collectionservice.common.errorcode.ErrorCode;
+import com.synoriq.synofin.collection.collectionservice.common.exception.CollectionException;
+import com.synoriq.synofin.collection.collectionservice.rest.response.profiledetailsdtos.ProfileDetailResponseDTO;
 import com.synoriq.synofin.collection.collectionservice.service.ConsumedApiLogService;
 import com.synoriq.synofin.collection.collectionservice.service.ProfileService;
 import com.synoriq.synofin.collection.collectionservice.service.UtilityService;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
@@ -21,8 +24,12 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Autowired
     private UtilityService utilityService;
+
+
+    @Autowired
+    private RestTemplate restTemplate;
     @Override
-    public ProfileDetailResponseDTO getProfileDetails(String token, String username) throws Exception {
+    public ProfileDetailResponseDTO getProfileDetails(String token, String username) throws CollectionException {
         ProfileDetailResponseDTO res;
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -34,7 +41,7 @@ public class ProfileServiceImpl implements ProfileService {
                     .url("http://localhost:1102/v1/getProfileDetails?username=" + username)
                     .httpHeaders(httpHeaders)
                     .typeResponseType(ProfileDetailResponseDTO.class)
-                    .build().call();
+                    .build().call(restTemplate);
 
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, res, "success", null, HttpMethod.GET.name(), "getProfileDetails?username=" + username);
@@ -43,7 +50,8 @@ public class ProfileServiceImpl implements ProfileService {
             String modifiedErrorMessage = utilityService.convertToJSON(errorMessage);
             // creating api logs
             consumedApiLogService.createConsumedApiLog(EnumSQLConstants.LogNames.get_profile_details, null, null, modifiedErrorMessage, "failure", null, HttpMethod.GET.name(), "getProfileDetails?username=" + username);
-            throw new Exception("1017002");
+            ErrorCode errCode = ErrorCode.getErrorCode(1017002);
+            throw new CollectionException(errCode, 1017002);
         }
 
         return res;

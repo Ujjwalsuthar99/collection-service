@@ -2,11 +2,16 @@ package com.synoriq.synofin.collection.collectionservice.common;
 
 public class PaymentRelatedVariables {
 
+    private PaymentRelatedVariables() {
+
+    }
+
     public static final String SEND_QR_CODE_GENERATE_API = "http://localhost:1102/v1/sendQrCode";
     public static final String SEND_QR_CODE_TRANSACTION_STATUS_API = "http://localhost:1102/v1/getQrCodeTransactionStatus";
     public static final String GET_PDF_API = "http://localhost:1102/v1/getPdf?deliverableType=receipt_details&serviceRequestId=";
     public static final String DYNAMIC_QR_CODE = "dynamic_qr_code";
     public static final String PAYMENT_LINK = "payment_link";
+    public static final String EMITRA = "emitra";
     public static final String KOTAK_VENDOR = "kotak";
     public static final String PENDING = "pending";
     public static final String EXPIRED = "expired";

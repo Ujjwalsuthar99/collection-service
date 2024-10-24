@@ -5,13 +5,10 @@ import com.synoriq.synofin.collection.collectionservice.rest.request.CollectionL
 import com.synoriq.synofin.collection.collectionservice.rest.response.BaseDTOResponse;
 import com.synoriq.synofin.collection.collectionservice.service.CollectionLimitUserWiseService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.SQLException;
 
 @RestController
 @RequestMapping("/v1")
@@ -19,11 +16,13 @@ import java.sql.SQLException;
 @Slf4j
 public class CollectionLimitUserWiseController {
 
-    @Autowired
-    CollectionLimitUserWiseService collectionLimitUserWiseService;
+    private final CollectionLimitUserWiseService collectionLimitUserWiseService;
 
-    @RequestMapping(value = "/getCollectionLimitUserWise", method = RequestMethod.GET)
-    public ResponseEntity<Object> getCollectionLimitUserWise(@RequestHeader("Authorization") String bearerToken, @RequestParam("userId") String userId) throws SQLException {
+    public CollectionLimitUserWiseController(CollectionLimitUserWiseService collectionLimitUserWiseService) {
+        this.collectionLimitUserWiseService = collectionLimitUserWiseService;
+    }
+    @GetMapping(value = "/getCollectionLimitUserWise")
+    public ResponseEntity<Object> getCollectionLimitUserWise(@RequestHeader("Authorization") String bearerToken, @RequestParam("userId") String userId) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         Object result;
@@ -43,8 +42,8 @@ public class CollectionLimitUserWiseController {
     }
 
 
-    @RequestMapping(value = "/createCollectionLimitUserWise", method = RequestMethod.POST)
-    public ResponseEntity<Object> createCollectionLimitUserWise(@RequestHeader("Authorization") String bearerToken, @RequestBody CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) throws SQLException {
+    @PostMapping(value = "/createCollectionLimitUserWise")
+    public ResponseEntity<Object> createCollectionLimitUserWise(@RequestHeader("Authorization") String bearerToken, @RequestBody CollectionLimitUserWiseDtoRequest collectionLimitUserWiseDtoRequest) {
         BaseDTOResponse<Object> baseResponse;
         ResponseEntity<Object> response = null;
         String result;
